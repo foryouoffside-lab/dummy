@@ -33,6 +33,7 @@ const ELITE_SCORE = 18000; // 6000 -> 18000 (3x)
 const TIME_PER_HIT = 0.6; // +0.6s per valid hit
 const TIME_PENALTY = 0.8; // -0.8s on miss / target timeout (opt-in gated)
 const STORAGE_KEY = 'skilldrills_market_doors_v3';
+const TARGET_FILL_COLOR = '#ef4444';
 
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
@@ -77,7 +78,7 @@ type Particle = { x: number; y: number; vx: number; vy: number; color: string; l
 type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 type Door = { x: number; y: number; w: number; h: number };
 
-export default function MarketDoorsPursuitClient() {
+export default function MarketDoorsPursuitClient({ copy }: { copy?: { title?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -389,7 +390,8 @@ export default function MarketDoorsPursuitClient() {
         setUiCombo(e.combo);
         drillAudio.playHit();
 
-        // Particles explosion (Tactical Rose / Red)
+        // Particles explosion (colored to match the target's own rendered body)
+        const hitColor = TARGET_FILL_COLOR;
         for (let i = 0; i < 10; i++) {
           const angle = Math.random() * Math.PI * 2;
           const spd = 2 + Math.random() * 4;
@@ -398,7 +400,7 @@ export default function MarketDoorsPursuitClient() {
             y: e.target.y,
             vx: Math.cos(angle) * spd,
             vy: Math.sin(angle) * spd,
-            color: '#ef4444',
+            color: hitColor,
             life: 1.0
           });
         }
@@ -411,7 +413,7 @@ export default function MarketDoorsPursuitClient() {
           maxR: e.target.radius * 2.6,
           life: 0.28,
           maxLife: 0.28,
-          color: '#ef4444'
+          color: hitColor
         });
 
         e.target.active = false;
@@ -633,9 +635,9 @@ export default function MarketDoorsPursuitClient() {
 
         // Filled red body with subtle glow
         ctx.globalAlpha = 0.88;
-        ctx.shadowColor = '#ef4444';
+        ctx.shadowColor = TARGET_FILL_COLOR;
         ctx.shadowBlur = 14;
-        ctx.fillStyle = '#ef4444';
+        ctx.fillStyle = TARGET_FILL_COLOR;
         ctx.beginPath();
         ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
         ctx.fill();
@@ -755,7 +757,7 @@ export default function MarketDoorsPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Corner Checking Trainer
+              <span data-seo-kw="1">{copy?.title || "Corner Checking Trainer"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               Corner checking is clearing one angle at a time so only one threat can see you at once. Each shift of gaze to a new angle is a saccade lasting 20&ndash;40&nbsp;ms (Rayner, 1998), followed by roughly 200&nbsp;ms to react to whatever it reveals.

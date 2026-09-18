@@ -17,7 +17,7 @@ import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -81,7 +81,7 @@ As your score rises, target hitboxes shrink and decay rates accelerate dynamical
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function PrecisionFlickShotClient() {
+export default function PrecisionFlickShotClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -126,7 +126,7 @@ export default function PrecisionFlickShotClient() {
     spawnTimer: 0,
     score: 0, level: 1, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
     hits: 0, bullseyes: 0, misses: 0, totalClicks: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
 
@@ -311,7 +311,7 @@ export default function PrecisionFlickShotClient() {
       spawnTimer: 0,
       score: 0, level: startLevel, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
       hits: 0, bullseyes: 0, misses: 0, totalClicks: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     setIsFullscreen(true);
@@ -393,7 +393,9 @@ export default function PrecisionFlickShotClient() {
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
             drillAudio.playHit();
-            createExplosion(hitTgt.x, hitTgt.y, isBullseye ? '#eab308' : '#06b6d4');
+            const hitColor = isBullseye ? '#eab308' : '#06b6d4';
+            createExplosion(hitTgt.x, hitTgt.y, hitColor);
+            eRef.hitRings.push(createHitRing(hitTgt.x, hitTgt.y, hitTgt.radius, hitColor));
             createHitMarker(ch.x, ch.y);
             setUiScore(eRef.score);
 
@@ -584,6 +586,8 @@ export default function PrecisionFlickShotClient() {
         }
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -666,7 +670,7 @@ export default function PrecisionFlickShotClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Precision Flick Shot
+              <span data-seo-kw="1">{copy?.title || "Precision Flick Shot"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               A flick shot is a single fast mouse movement that snaps the crosshair onto a target in one motion instead of sliding onto it. A movement that fast is made of two parts &mdash; a ballistic impulse that covers most of the distance, then a slower visually guided correction that closes what is left (Woodworth, 1899; Meyer et al., 1988) &mdash; which is why overshooting a target costs more time than starting the flick slightly slower. Your display bounds the measurement: at 60 Hz a new target can only appear every 16.7 ms, against 6.9 ms at 144 Hz (Woods et al., 2015).

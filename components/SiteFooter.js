@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
-import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsNav';
 import { SITE_CATEGORIES, getCategoryCount } from '@/lib/siteCategories';
 
 // The footer is the last chance to answer "who runs this and can I trust it".

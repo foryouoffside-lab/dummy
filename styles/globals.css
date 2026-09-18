@@ -6,6 +6,11 @@
   body {
     @apply bg-canvas text-ink-1 font-sans antialiased selection:bg-blue-500/20 selection:text-blue-400;
   }
+
+  /* One professional typeface across product UI, including legacy font-mono utilities. */
+  body * {
+    font-family: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif !important;
+  }
 }
 
 @layer components {
@@ -293,6 +298,33 @@
 }
 
 /* Reaction Hitmarker X */
+.ir-prev-hit-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #00ff88;
+  opacity: 0;
+  pointer-events: none;
+  animation: ir-prev-hit-ring-anim 2.2s ease-out infinite;
+}
+@keyframes ir-prev-hit-ring-anim {
+  0%, 27% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  28% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  36% {
+    transform: scale(2.0);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 .ir-prev-hitmarker {
   position: absolute;
   left: 50%;
@@ -452,6 +484,7 @@
   .ir-prev-orb,
   .ir-prev-sheen,
   .ir-prev-core,
+  .ir-prev-hit-ring,
   .ir-prev-hitmarker,
   .ir-prev-spark,
   .ir-prev-reticle {
@@ -525,6 +558,24 @@
   0%, 12% { transform: scale(0.8); opacity: 0.9; }
   25% { transform: scale(1.8); opacity: 0; }
   100% { transform: scale(1.8); opacity: 0; }
+}
+
+.aw180-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+}
+.aw180-tgt-left .aw180-hit-ring { animation: aw180-hit-ring-left 3.2s ease-out infinite; }
+.aw180-tgt-right .aw180-hit-ring { animation: aw180-hit-ring-right 3.2s ease-out infinite; border-color: #5eead4; }
+@keyframes aw180-hit-ring-left {
+  0%, 23% { transform: scale(0.8); opacity: 0; }
+  24% { transform: scale(1.1); opacity: 1; }
+  33% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes aw180-hit-ring-right {
+  0%, 68% { transform: scale(0.8); opacity: 0; }
+  69% { transform: scale(1.1); opacity: 1; }
+  78% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
 }
 
 .aw180-hitmarker {
@@ -666,6 +717,17 @@
   100% { transform: scale(1.7); opacity: 0; }
 }
 
+.ta-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+}
+.ta-tgt-2 .ta-hit-ring { animation: ta-hit-ring-2 3.0s ease-out infinite; }
+@keyframes ta-hit-ring-2 {
+  0%, 34% { transform: scale(0.8); opacity: 0; }
+  35% { transform: scale(1.1); opacity: 1; }
+  44% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+
 .ta-hitmarker {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0;
 }
@@ -797,7 +859,7 @@
 }
 
 .fs-flick-hit-ring {
-  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #ffffff; opacity: 0;
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0;
 }
 .fs-flick-tgt-1 .fs-flick-hit-ring { animation: fs-flick-hit-ring-1 2.8s ease-out infinite; }
 .fs-flick-tgt-2 .fs-flick-hit-ring { animation: fs-flick-hit-ring-2 2.8s ease-out infinite; }
@@ -881,6 +943,30 @@
 
 .mc-sheen { position: absolute; top: 18%; left: 22%; width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); }
 .mc-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+
+.mc-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; opacity: 0; pointer-events: none;
+}
+.mc-anchor .mc-hit-ring {
+  border: 2px solid #5eead4;
+  animation: mc-hit-ring-anchor 2.4s ease-out infinite;
+}
+.mc-micro .mc-hit-ring {
+  border: 2px solid #00ff88;
+  animation: mc-hit-ring-micro 2.4s ease-out infinite;
+}
+@keyframes mc-hit-ring-anchor {
+  0%, 25% { transform: scale(0.8); opacity: 0; }
+  26% { transform: scale(1.1); opacity: 1; }
+  35% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes mc-hit-ring-micro {
+  0%, 55% { transform: scale(0.8); opacity: 0; }
+  56% { transform: scale(1.1); opacity: 1; }
+  65% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
 
 .mc-hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0; }
 .mc-hit-l1, .mc-hit-l2 { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #ffffff; }
@@ -981,6 +1067,18 @@
 .rc-zone-chest {
   width: 44px; height: 42px; border-radius: 8px; border: 2px dashed rgba(239, 68, 68, 0.6);
   background: rgba(239, 68, 68, 0.08); margin-top: 5px;
+}
+
+.rc-hit-ring {
+  position: absolute; left: 50%; top: 20%; transform: translate(-50%, -50%); width: 26px; height: 26px;
+  border-radius: 50%; border: 2px solid #ef4444; opacity: 0; pointer-events: none;
+  animation: rc-hit-ring-anim 2.5s ease-out infinite;
+}
+@keyframes rc-hit-ring-anim {
+  0%, 20% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  22% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  35% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
 }
 
 .rc-hitmarker { position: absolute; left: 50%; top: 20%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0; animation: rc-hit-anim 2.5s ease-out infinite; }
@@ -1102,6 +1200,17 @@
   100% { transform: scale(1.35); opacity: 0; }
 }
 
+.tp-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #ef4444; opacity: 0; pointer-events: none;
+  animation: tp-hit-ring-red 2.8s ease-out infinite;
+}
+@keyframes tp-hit-ring-red {
+  0%, 28% { transform: scale(0.8); opacity: 0; }
+  29% { transform: scale(1.1); opacity: 1; }
+  38% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+
 .tp-hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0; animation: tp-hit-red 2.8s ease-out infinite; }
 .tp-hit-l1, .tp-hit-l2 { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #ffffff; }
 .tp-hit-l1 { transform: rotate(45deg); }
@@ -1151,6 +1260,31 @@
 .tss-tactical { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(6, 182, 212, 0.8); }
 .tss-orb { position: absolute; inset: 4px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 3px rgba(6, 182, 212, 0.8); }
 .tss-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+
+.tss-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #06b6d4; opacity: 0; pointer-events: none;
+}
+.tss-tgt-1 .tss-hit-ring { animation: tss-hit-ring-1 2.7s ease-out infinite; }
+.tss-tgt-2 .tss-hit-ring { animation: tss-hit-ring-2 2.7s ease-out infinite; }
+.tss-tgt-3 .tss-hit-ring { animation: tss-hit-ring-3 2.7s ease-out infinite; }
+@keyframes tss-hit-ring-1 {
+  0%, 20% { transform: scale(0.8); opacity: 0; }
+  22% { transform: scale(1.1); opacity: 1; }
+  31% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes tss-hit-ring-2 {
+  0%, 50% { transform: scale(0.8); opacity: 0; }
+  52% { transform: scale(1.1); opacity: 1; }
+  61% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes tss-hit-ring-3 {
+  0%, 80% { transform: scale(0.8); opacity: 0; }
+  82% { transform: scale(1.1); opacity: 1; }
+  91% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
 
 .tss-hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0; }
 .tss-hit-l1, .tss-hit-l2 { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #ffffff; }
@@ -1222,6 +1356,17 @@
 .ah-tactical { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(0, 255, 136, 0.85); }
 .ah-orb { position: absolute; inset: 4px; border-radius: 50%; background: #10b981; box-shadow: 0 0 3px rgba(16, 185, 129, 0.3); }
 .ah-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+
+.ah-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+  animation: ah-hit-ring-anim 2.6s ease-out infinite;
+}
+@keyframes ah-hit-ring-anim {
+  0%, 43% { transform: scale(0.8); opacity: 0; }
+  44% { transform: scale(1.1); opacity: 1; }
+  53% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
 
 .ah-hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0; animation: ah-hit-anim 2.6s ease-out infinite; }
 .ah-hit-l1, .ah-hit-l2 { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #ffffff; box-shadow: 0 0 6px #fff; }
@@ -1332,6 +1477,17 @@
 .vat-tick-e { right: 0; top: 50%; height: 1.5px; width: 10px; transform: translateY(-50%); }
 .vat-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #ef4444; }
 
+.vat-hit-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+  animation: vat-hit-ring 3.0s ease-out infinite;
+}
+@keyframes vat-hit-ring {
+  0%, 42% { transform: scale(0.8); opacity: 0; }
+  45% { transform: scale(1.1); opacity: 1; }
+  58% { transform: scale(2.0); opacity: 0; }
+  100% { opacity: 0; }
+}
+
 .vat-hitmarker { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; opacity: 0; animation: vat-hit 3.0s ease-out infinite; }
 .vat-hit-l1, .vat-hit-l2 { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: #ffffff; box-shadow: 0 0 6px #fff; }
 .vat-hit-l1 { transform: rotate(45deg); }
@@ -1346,20 +1502,20 @@
 
 /* ── Reduced Motion Override for all FPS Previews ──────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .aw180-pulse, .aw180-hitmarker, .aw180-reticle,
+  .aw180-pulse, .aw180-hit-ring, .aw180-hitmarker, .aw180-reticle,
   .fs-prev-mover, .fs-prev-pulse, .fs-prev-spark,
-  .ta-tgt-2 .ta-orb, .ta-pulse, .ta-tgt-2 .ta-hitmarker, .ta-prev-reticle,
+  .ta-tgt-2 .ta-orb, .ta-pulse, .ta-tgt-2 .ta-hit-ring, .ta-tgt-2 .ta-hitmarker, .ta-prev-reticle,
   .az-prev-mover, .az-hp-bar, .az-pulse,
   .fs-flick-life-ring, .fs-flick-hit-ring, .fs-flick-hitmarker, .fs-flick-reticle,
-  .mc-hitmarker, .mc-reticle,
+  .mc-hit-ring, .mc-hitmarker, .mc-reticle,
   .psp-mover,
-  .rc-hitmarker, .rc-reticle, .rc-muzzle-flash,
+  .rc-hit-ring, .rc-hitmarker, .rc-reticle, .rc-muzzle-flash,
   .st-mover,
-  .tp-timer-ring, .tp-hitmarker, .tp-reticle,
-  .tss-hitmarker, .tss-reticle,
-  .ah-target-wrap, .ah-hitmarker,
+  .tp-timer-ring, .tp-hit-ring, .tp-hitmarker, .tp-reticle,
+  .tss-hit-ring, .tss-hitmarker, .tss-reticle,
+  .ah-target-wrap, .ah-hit-ring, .ah-hitmarker,
   .asj-mover, .asj-hitmarker,
-  .vat-mover, .vat-hitmarker {
+  .vat-mover, .vat-hit-ring, .vat-hitmarker {
     animation: none !important;
   }
 }

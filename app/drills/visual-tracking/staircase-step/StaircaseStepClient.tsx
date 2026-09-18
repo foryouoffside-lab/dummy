@@ -41,7 +41,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function StaircaseStepClient() {
+export default function StaircaseStepClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -418,13 +418,13 @@ export default function StaircaseStepClient() {
         {!isFullscreen && (
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Staircase Step
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Vertical Eye Tracking Exercise
+              <span data-seo-kw="1">{copy?.title || "Staircase Step"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                {copy?.subtitle || "Vertical Eye Tracking Exercise"}
               </span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Staircase step tracking conditions vertical smooth pursuit and elevation gaze stability by guiding observers along a multi-segment vertical zig-zag polyline. By training acute direction reversals and diagonal velocity shifts without head movement, this drill strengthens specialized midbrain ocular motor pathways (Rottach et al., 1996; Ke et al., 2013). Vertical pursuit is measurably worse than horizontal in the same observers (Rottach et al., 1996), and pursuit takes roughly 100 ms to begin after a target starts moving (Lisberger, 2010).
+              {copy?.description || "Staircase step tracking conditions vertical smooth pursuit and elevation gaze stability by guiding observers along a multi-segment vertical zig-zag polyline. By training acute direction reversals and diagonal velocity shifts without head movement, this drill strengthens specialized midbrain ocular motor pathways (Rottach et al., 1996; Ke et al., 2013). Vertical pursuit is measurably worse than horizontal in the same observers (Rottach et al., 1996), and pursuit takes roughly 100 ms to begin after a target starts moving (Lisberger, 2010)."}
             </p>
           </div>
         )}

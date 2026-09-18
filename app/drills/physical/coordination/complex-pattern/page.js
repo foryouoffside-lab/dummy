@@ -1,4 +1,4 @@
-import ComplexPatternClient from './ComplexPatternClient';
+import ComplexPatternClient from './ComplexPatternClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -182,6 +182,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Pattern Memory Game',
+  url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern',
+  description: 'Free pattern memory game. Memorize increasingly complex paths and redraw them to train visuospatial memory and motor coordination.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -190,23 +202,31 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Observe and Encode the Flashed Trajectory',
       text: 'When the round starts, focus on the green vector path. Chunk the sequence of waypoints into visual sub-shapes (triangles, zigzags, or arcs) before it vanishes.',
+      url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern#step-1',
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Initiate Click from the Cyan Start Node',
       text: 'Press and hold your left mouse button on the cyan starting node to activate the trajectory drawing canvas.',
+      url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern#step-2',
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Trace Waypoints in Sequence to the Magenta End Node',
       text: 'Smoothly drag your cursor through each memorized waypoint in correct order, finishing at the magenta termination node and releasing the mouse button.',
+      url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern#step-3',
     },
     {
       '@type': 'HowToStep',
+      position: 4,
       name: 'Accelerate Velocity to Maintain the Combo Multiplier',
       text: 'Complete correct trajectories rapidly to extend your unbroken combo multiplier up to 4x, maximizing total score within the 45-second round.',
+      url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern#step-4',
     },
   ],
 };
@@ -220,52 +240,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
+  benchmarks: {
     title: 'Pattern Memory Game & Spatial Recall Benchmarks',
-    description: 'Empirical standards derived from visuospatial working memory research (Baddeley & Hitch 1974, Cowan 2001) and serial motor sequencing performance (Lashley 1951, Woodworth 1899). Evaluates total score, maximum level reached, path reproduction accuracy, and peak combo over 45 seconds.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Path Accuracy', 'Editorial band'],
+    headers: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Path Accuracy', 'Editorial Band'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Pattern Master',
-        stat: '17,000+ pts',
-        level: 'Level 12–15',
-        accuracy: '> 92% accuracy',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Elite Sequence Tracer',
-        stat: '13,000–16,999 pts',
-        level: 'Level 9–11',
-        accuracy: '85–91% accuracy',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Advanced Spatial Navigator',
-        stat: '9,500–12,999 pts',
-        level: 'Level 6–8',
-        accuracy: '76–84% accuracy',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Intermediate Waypoint Recaller',
-        stat: '6,000–9,499 pts',
-        level: 'Level 3–5',
-        accuracy: '65–75% accuracy',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Trajectory Learner',
-        stat: '< 6,000 pts',
-        level: 'Level 1–2',
-        accuracy: '< 65% accuracy',
-        percentile: 'Starting out',
-      },
+      ['Tier 1', 'Apex Pattern Master', '17,000+ pts', 'Level 12–15', '> 92% accuracy', 'Exceptional (Top 0.5%)'],
+      ['Tier 2', 'Elite Sequence Tracer', '13,000–16,999 pts', 'Level 9–11', '85–91% accuracy', 'Advanced (Top 5%)'],
+      ['Tier 3', 'Advanced Spatial Navigator', '9,500–12,999 pts', 'Level 6–8', '76–84% accuracy', 'Strong (Top 20%)'],
+      ['Tier 4', 'Intermediate Waypoint Recaller', '6,000–9,499 pts', 'Level 3–5', '65–75% accuracy', 'Typical (Top 50%)'],
+      ['Tier 5', 'Novice Trajectory Learner', '< 6,000 pts', 'Level 1–2', '< 65% accuracy', 'Starting Out (Baseline)'],
     ],
+    note: 'Empirical standards derived from visuospatial working memory research (Baddeley & Hitch 1974, Cowan 2001) and serial motor sequencing performance (Lashley 1951, Woodworth 1899).',
   },
   protocols: {
     title: 'How to train pattern recall',
@@ -319,10 +304,15 @@ export default function ComplexPatternPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <ComplexPatternClient />
+      <ComplexPatternClient copy={{ title: 'Pattern Memory Game', subtitle: 'Complex Pattern Tracking & Path Reproduction' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

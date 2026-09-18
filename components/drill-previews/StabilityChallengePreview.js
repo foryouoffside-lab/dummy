@@ -250,36 +250,28 @@ export default function StabilityChallengePreview() {
       ctx.strokeStyle = chColor;
       ctx.fillStyle = chColor;
 
-      // Outer crosshair ring
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(crosshair.x, crosshair.y, 13, 0, Math.PI * 2);
-      if (isLocked) {
-        ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = 8;
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
 
-      // 4 Cardinal tick lines with center gap
+      // Circle
       ctx.lineWidth = 1.6;
-      const gap = 4.5;
-      const r = 13;
       ctx.beginPath();
-      // Top
-      ctx.moveTo(crosshair.x, crosshair.y - r); ctx.lineTo(crosshair.x, crosshair.y - gap);
-      // Bottom
-      ctx.moveTo(crosshair.x, crosshair.y + r); ctx.lineTo(crosshair.x, crosshair.y + gap);
-      // Left
-      ctx.moveTo(crosshair.x - r, crosshair.y); ctx.lineTo(crosshair.x - gap, crosshair.y);
-      // Right
-      ctx.moveTo(crosshair.x + r, crosshair.y); ctx.lineTo(crosshair.x + gap, crosshair.y);
+      ctx.arc(crosshair.x, crosshair.y, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Center laser dot
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(crosshair.x, crosshair.y - tickLen); ctx.lineTo(crosshair.x, crosshair.y - gap);
+      ctx.moveTo(crosshair.x, crosshair.y + tickLen); ctx.lineTo(crosshair.x, crosshair.y + gap);
+      ctx.moveTo(crosshair.x - tickLen, crosshair.y); ctx.lineTo(crosshair.x - gap, crosshair.y);
+      ctx.moveTo(crosshair.x + tickLen, crosshair.y); ctx.lineTo(crosshair.x + gap, crosshair.y);
+      ctx.stroke();
+
+      // Center pip
       ctx.beginPath();
       ctx.arc(crosshair.x, crosshair.y, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
       ctx.fill();
 
       ctx.restore();

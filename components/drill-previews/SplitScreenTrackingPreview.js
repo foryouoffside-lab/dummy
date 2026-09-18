@@ -296,30 +296,36 @@ export default function SplitScreenTrackingPreview() {
       drawTarget(leftTargetX, leftTargetY);
       drawTarget(rightTargetX, rightTargetY);
 
-      // 7. Dual Smooth Pursuit Reticles
-      const drawReticle = (cx, cy) => {
+      // 7. Tactical Crosshair Reticles (matching FPS drill exact crosshair geometry)
+      const drawReticle = (chX, chY) => {
+        const chColor = '#38bdf8';
         ctx.save();
-        const reticleR = targetRadius + 8;
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.75)';
-        ctx.lineWidth = 1.4;
-        ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 6;
+        ctx.strokeStyle = chColor;
+        ctx.fillStyle = chColor;
 
+        const chRadius = 11;
+        const gap = 4;
+        const tickLen = 11;
+
+        // Circle
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(cx, cy, reticleR, 0, Math.PI * 2);
+        ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
         ctx.stroke();
 
-        const tickLen = 5;
+        // 4 Cross lines with gap
+        ctx.lineWidth = 1.3;
         ctx.beginPath();
-        ctx.moveTo(cx, cy - reticleR);
-        ctx.lineTo(cx, cy - reticleR - tickLen);
-        ctx.moveTo(cx, cy + reticleR);
-        ctx.lineTo(cx, cy + reticleR + tickLen);
-        ctx.moveTo(cx - reticleR, cy);
-        ctx.lineTo(cx - reticleR - tickLen, cy);
-        ctx.moveTo(cx + reticleR, cy);
-        ctx.lineTo(cx + reticleR + tickLen, cy);
+        ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+        ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+        ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+        ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
         ctx.stroke();
+
+        // Center pip
+        ctx.beginPath();
+        ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       };
 

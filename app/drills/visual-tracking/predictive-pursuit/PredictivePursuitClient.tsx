@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function PredictivePursuitClient() {
+export default function PredictivePursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -406,13 +406,13 @@ export default function PredictivePursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Predictive Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Predictive Eye Tracking Drill
+              <span data-seo-kw="1">{copy?.title || "Predictive Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Predictive Eye Tracking Drill"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Predictive eye tracking drills condition internal cognitive forward models to drive smooth pursuit ahead of physiological retinal slip latencies (Barnes, 2008; Robinson, 1965). Extrapolating target velocity vectors and anticipating landing coordinates enables continuous gaze synchronization without lagging behind moving objects (Bennett & Barnes, 2003; Kowler, 1989). Pursuit tracks accurately to roughly 30&deg;/s once locked on (Krauzlis, 2004), but it starts late, so prediction is what covers the gap before the eye is up to speed.
+              {copy?.description || "Predictive eye tracking drills condition internal cognitive forward models to drive smooth pursuit ahead of physiological retinal slip latencies (Barnes, 2008; Robinson, 1965). Extrapolating target velocity vectors and anticipating landing coordinates enables continuous gaze synchronization without lagging behind moving objects (Bennett & Barnes, 2003; Kowler, 1989). Pursuit tracks accurately to roughly 30°/s once locked on (Krauzlis, 2004), but it starts late, so prediction is what covers the gap before the eye is up to speed."}
             </p>
           </div>
         )}

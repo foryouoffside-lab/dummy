@@ -1,4 +1,4 @@
-import QuickDodgeClient from './QuickDodgeClient';
+import QuickDodgeClient from './QuickDodgeClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -224,6 +224,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Quick Dodge Challenge',
+  url: 'https://skilldrills.online/drills/physical/reflex-training/quick-dodge',
+  description: 'Train reflexes, mouse agility, and spatial evasion in this free browser reflex game. Dodge dynamic hazards and hostile projectiles.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -235,24 +247,28 @@ const howToSchema = {
       position: 1,
       name: 'Engage the Evasion Canvas',
       text: 'Click start to lock your cursor into the responsive canvas field and prepare for perimeter threat launches.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/quick-dodge#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Identify Vector Trajectories',
       text: 'Scan the screen perimeter to detect incoming red tracking nodes as they spawn, projecting their linear interception paths.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/quick-dodge#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Execute Ballistic Evasive Snaps',
       text: 'Snap your cursor orthogonally to threat vectors, clearing collision boundaries while settling into momentary open pockets.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/quick-dodge#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Sustain Combo Multipliers',
       text: 'Maintain continuous evasion over the 45-second clock to build and hold the maximum 3.0x multiplier for an elite score.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/quick-dodge#step-4',
     },
   ],
 };
@@ -266,52 +282,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
+  benchmarks: {
     title: 'Quick Dodge & Kinetic Evasion Benchmarks',
-    description: 'Empirical standards derived from cerebellar forward modeling (Kawato 1999), two-component motor control (Woodworth 1899), optical tau interception (Lee 1976), and chronometry bounds (Woods et al. 2015). Evaluates total points, dodge success rate, peak survived speed, and combo preservation.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial band'],
+    headers: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial Band'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Evasion Master',
-        stat: '24,000+ pts',
-        level: '95%+ Acc / 1400+ px/s',
-        accuracy: 'Grade S',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Precision Vector Evader',
-        stat: '17,000–23,999 pts',
-        level: '88–94% Acc / 1100–1399 px/s',
-        accuracy: 'Grade A',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Kinetic Dodger',
-        stat: '11,000–16,999 pts',
-        level: '80–87% Acc / 800–1099 px/s',
-        accuracy: 'Grade B',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Developing Tracker',
-        stat: '6,000–10,999 pts',
-        level: '70–79% Acc / 500–799 px/s',
-        accuracy: 'Grade C',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Swarm Vulnerable',
-        stat: '< 6,000 pts',
-        level: '< 70% Acc / < 500 px/s',
-        accuracy: 'Grade D',
-        percentile: 'Starting out',
-      },
+      ['Tier 1', 'Apex Evasion Master', '24,000+ pts', '95%+ Acc / 1400+ px/s', 'Grade S', 'Top 5% (Elite)'],
+      ['Tier 2', 'Precision Vector Evader', '17,000–23,999 pts', '88–94% Acc / 1100–1399 px/s', 'Grade A', 'Top 20% (Advanced)'],
+      ['Tier 3', 'Kinetic Dodger', '11,000–16,999 pts', '80–87% Acc / 800–1099 px/s', 'Grade B', 'Top 50% (Competent)'],
+      ['Tier 4', 'Developing Tracker', '6,000–10,999 pts', '70–79% Acc / 500–799 px/s', 'Grade C', 'Top 75% (Developing)'],
+      ['Tier 5', 'Novice Swarm Vulnerable', '< 6,000 pts', '< 70% Acc / < 500 px/s', 'Grade D', 'Below Average (Novice)'],
     ],
+    note: 'Empirical standards derived from cerebellar forward modeling (Kawato 1999), two-component motor control (Woodworth 1899), optical tau interception (Lee 1976), and chronometry bounds (Woods et al. 2015). Evaluates total points, dodge success rate, peak survived speed, and combo preservation.',
   },
   protocols: {
     title: 'How to train evasion reflexes',
@@ -365,10 +346,15 @@ export default function QuickDodgePage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <QuickDodgeClient />
+      <QuickDodgeClient copy={{ title: 'Quick Dodge Challenge', subtitle: 'Reflex Game Online & Kinetic Evasion Trainer' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

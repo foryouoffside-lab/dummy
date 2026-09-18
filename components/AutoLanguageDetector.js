@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Globe, X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import { LOCALES, LOCALE_META, DEFAULT_LOCALE, localizedPath } from '@/lib/i18n/locales';
 
 const PROMPTS = {
@@ -86,7 +86,7 @@ export default function AutoLanguageDetector() {
       if (matchedLocale && matchedLocale !== currentLocale && PROMPTS[matchedLocale]) {
         setSuggestion(matchedLocale);
       }
-    } catch (e) {}
+    } catch {}
   }, [pathname]);
 
   if (!suggestion) return null;
@@ -95,7 +95,7 @@ export default function AutoLanguageDetector() {
   const handleAccept = () => {
     try {
       localStorage.setItem('skilldrills_locale', suggestion);
-    } catch (e) {}
+    } catch {}
 
     setSuggestion(null);
     router.push(localizedPath(suggestion, pathname || '/'));
@@ -104,7 +104,7 @@ export default function AutoLanguageDetector() {
   const handleDismiss = () => {
     try {
       sessionStorage.setItem('skilldrills_dismissed_lang', 'true');
-    } catch (e) {}
+    } catch {}
     setSuggestion(null);
   };
 

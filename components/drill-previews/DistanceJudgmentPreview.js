@@ -73,7 +73,6 @@ export default function DistanceJudgmentPreview() {
     // Simulation state
     let targetZ = 55; // Target depth percentage (35% to 75%)
     let currentZ = 12; // Approaching sphere current depth percentage
-    let isApproaching = true;
     let interceptState = 'approaching'; // 'approaching' | 'hit' | 'reset'
     let stateTimer = 0;
     const approachSpeed = 38; // Z-units per second

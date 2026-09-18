@@ -62,7 +62,7 @@ function getGradeForFlow(peakFlow, totalScore) {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function FineMotorClient() {
+export default function FineMotorClient({ copy } = {}) {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -205,7 +205,7 @@ export default function FineMotorClient() {
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
-    } catch (e) {
+    } catch {
       const text = `🌊 I scored ${analytics.totalScore} PTS (${analytics.peakFlow}% Flow) on Wave Tracing Trainer! Test your hand-eye coordination at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
         navigator.share({ title: 'My Wave Tracing Trainer Score', text, url }).catch(() => {});
@@ -501,7 +501,7 @@ export default function FineMotorClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Mouse Tracing Game
+              <span data-seo-kw="1">{copy?.title || "Mouse Tracing Game"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               A mouse tracing game asks you to keep the cursor on a path that keeps moving, which measures continuous tracking rather than one-off accuracy. The eye follows a smoothly moving target accurately up to roughly 30&deg;/s; past that it falls behind and has to catch up with saccades (Krauzlis, 2004; Rashbass, 1961), and the hand can only stay on a line the eye is still tracking. The path itself is a Steering Law corridor: time to stay inside it scales with its length divided by its width (Accot &amp; Zhai, 1997).

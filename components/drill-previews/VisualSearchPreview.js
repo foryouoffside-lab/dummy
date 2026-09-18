@@ -335,7 +335,6 @@ export default function VisualSearchPreview() {
         const cell = cells[i];
         if (!cell) continue;
 
-        const isTarget = cell.isTarget;
         const hitAlpha = cell.hitAlpha || 0;
 
         // Cell background
@@ -403,69 +402,39 @@ export default function VisualSearchPreview() {
       }
       ctx.globalAlpha = 1.0;
 
-      // 6. Render Saccadic Ocular Reticle
+      // 6. Tactical Crosshair Reticle (matching FPS drill exact crosshair geometry)
       const rx = reticle.currentX;
       const ry = reticle.currentY;
-      const scale = reticle.clickScale;
-      const ringRadius = Math.max(11, Math.min(cellW, cellH) * 0.6) * scale;
       const isLock = state === 'hit';
+      const chColor = isLock ? '#10b981' : '#38bdf8';
 
       ctx.save();
       ctx.translate(rx, ry);
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      // Lock aura
-      if (reticle.lockGlow > 0) {
-        ctx.beginPath();
-        ctx.arc(0, 0, ringRadius * 1.35, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(16, 185, 129, ${reticle.lockGlow * 0.25})`;
-        ctx.fill();
-      }
+      const chRadius = 11;
+      const chGap = 4;
+      const tickLen = 11;
 
-      // Outer targeting crosshair ring
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(0, 0, ringRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = isLock ? '#10b981' : 'rgba(56, 189, 248, 0.85)';
-      ctx.lineWidth = 1.5;
-      if (isLock) {
-        ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = 10;
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-
-      // 4 Cardinal Tick Marks
-      const tickLen = 4;
-      ctx.strokeStyle = isLock ? '#10b981' : 'rgba(56, 189, 248, 0.9)';
-      ctx.lineWidth = 1.5;
-
-      // Top
-      ctx.beginPath();
-      ctx.moveTo(0, -ringRadius - 1);
-      ctx.lineTo(0, -ringRadius - tickLen);
+      ctx.arc(0, 0, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Bottom
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.moveTo(0, ringRadius + 1);
-      ctx.lineTo(0, ringRadius + tickLen);
+      ctx.moveTo(0, -tickLen); ctx.lineTo(0, -chGap);
+      ctx.moveTo(0, tickLen); ctx.lineTo(0, chGap);
+      ctx.moveTo(-tickLen, 0); ctx.lineTo(-chGap, 0);
+      ctx.moveTo(tickLen, 0); ctx.lineTo(chGap, 0);
       ctx.stroke();
 
-      // Left
-      ctx.beginPath();
-      ctx.moveTo(-ringRadius - 1, 0);
-      ctx.lineTo(-ringRadius - tickLen, 0);
-      ctx.stroke();
-
-      // Right
-      ctx.beginPath();
-      ctx.moveTo(ringRadius + 1, 0);
-      ctx.lineTo(ringRadius + tickLen, 0);
-      ctx.stroke();
-
-      // Center aiming micro-dot
+      // Center pip
       ctx.beginPath();
       ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
       ctx.fill();
 
       ctx.restore();

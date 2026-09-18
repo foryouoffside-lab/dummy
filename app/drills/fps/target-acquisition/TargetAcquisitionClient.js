@@ -18,7 +18,7 @@ import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -75,7 +75,7 @@ const RULES_ITEMS = [
   { title: "Wrong Click / Miss Penalty", text: "Wrong target or miss resets combo to 0 (-0.6s with Time Penalty enabled)." }
 ];
 
-export default function TargetAcquisitionClient() {
+export default function TargetAcquisitionClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -119,7 +119,7 @@ export default function TargetAcquisitionClient() {
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
     successfulHits: 0, missedClicks: 0, sequenceErrors: 0, setsCleared: 0,
     totalClicks: 0, correctHits: 0, maxCombo: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
 
@@ -304,7 +304,7 @@ export default function TargetAcquisitionClient() {
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       successfulHits: 0, missedClicks: 0, sequenceErrors: 0, setsCleared: 0,
       totalClicks: 0, correctHits: 0, maxCombo: 0,
-      particles: [], hitMarkers: [], screenShake: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h
     };
 
@@ -424,6 +424,7 @@ export default function TargetAcquisitionClient() {
               }
 
               createExplosion(hitTarget.x, hitTarget.y, '#00ff88');
+              eRef.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, '#00ff88'));
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -592,6 +593,8 @@ export default function TargetAcquisitionClient() {
         ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       // Render Hit Markers
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
@@ -653,7 +656,7 @@ export default function TargetAcquisitionClient() {
         bestCombo: analytics.maxCombo,
         rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
-        drillName: 'Target Acquisition Pro',
+        drillName: copy?.h1Keyword || 'Target Acquisition Pro',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
@@ -678,7 +681,8 @@ export default function TargetAcquisitionClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Target Acquisition Aim Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Target Acquisition Aim Trainer"}</span>
+              {copy?.h1Suffix || ""}
             </h1>
           </div>
         )}
@@ -687,10 +691,10 @@ export default function TargetAcquisitionClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: uiScore },
-              { label: "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: "Accuracy", val: `${accuracy}%`, color: "text-amber-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statScore || "Score", val: uiScore },
+              { label: copy?.statTime || "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: copy?.statAccuracy || "Accuracy", val: `${accuracy}%`, color: "text-amber-400" },
+              { label: copy?.statBestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -720,11 +724,11 @@ export default function TargetAcquisitionClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -743,7 +747,7 @@ export default function TargetAcquisitionClient() {
                   });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Miss Flash"
+                title={copy?.toggleFlash || "Toggle Miss Flash"}
               >
                 {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
               </button>
@@ -757,7 +761,7 @@ export default function TargetAcquisitionClient() {
                   });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Sound"
+                title={copy?.toggleSound || "Toggle Sound"}
               >
                 {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
@@ -775,8 +779,8 @@ export default function TargetAcquisitionClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -792,8 +796,8 @@ export default function TargetAcquisitionClient() {
             <FpsStartCard
               icon={Target}
               accent="amber"
-              title="Target Acquisition Pro"
-              subtitle="Visual Discrimination Speed • Endless Level Progression"
+              title={copy?.startTitle || "Target Acquisition Pro"}
+              subtitle={copy?.startSubtitle || "Visual Discrimination Speed • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -801,7 +805,7 @@ export default function TargetAcquisitionClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -812,10 +816,10 @@ export default function TargetAcquisitionClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.setsCleared, label: "Sets Cleared" },
-                { value: `${analytics.maxCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.finalLevel}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || "Accuracy" },
+                { value: analytics.setsCleared, label: copy?.statSetsCleared || "Sets Cleared" },
+                { value: `${analytics.maxCombo}x`, label: copy?.statMaxCombo || "Max Combo" },
+                { value: `Lv. ${analytics.finalLevel}`, label: copy?.statPeakLevel || "Peak Level" },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -827,7 +831,7 @@ export default function TargetAcquisitionClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Identify and click the brightest target in each cluster as quickly and accurately as possible.
+            {copy?.stageCaption || "Identify and click the brightest target in each cluster as quickly and accurately as possible."}
           </p>
         )}
 
@@ -836,12 +840,12 @@ export default function TargetAcquisitionClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-4">
                     <h3 className="text-xs font-bold text-gray-200 mb-1">{item.title}</h3>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
@@ -852,17 +856,17 @@ export default function TargetAcquisitionClient() {
 
             <DrillAccordion
               id="about"
-              title="About Target Acquisition Aim Trainer"
+              title={copy?.aboutTitle || "About Target Acquisition Aim Trainer"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6 font-sans">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-amber-400" /> What Is Target Acquisition?
+                    <Target className="w-4 h-4 text-amber-400" /> {copy?.aboutHeading || "What Is Target Acquisition?"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Target acquisition is finding the right target and moving onto it. Basic visual features like colour and orientation are processed in parallel across the whole visual field before attention binds them into an object (Treisman &amp; Gelade, 1980) &mdash; which is why a high-contrast target is found faster than a camouflaged one.
+                    {copy?.aboutText || "Target acquisition is finding the right target and moving onto it. Basic visual features like colour and orientation are processed in parallel across the whole visual field before attention binds them into an object (Treisman & Gelade, 1980) — which is why a high-contrast target is found faster than a camouflaged one."}
                   </p>
                 </section>
               </div>

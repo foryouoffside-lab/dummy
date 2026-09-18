@@ -41,7 +41,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function TriangularPursuitClient() {
+export default function TriangularPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -409,13 +409,13 @@ export default function TriangularPursuitClient() {
         {!isFullscreen && (
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Triangular Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Eye Tracking Accuracy Drill
+              <span data-seo-kw="1">{copy?.title || "Triangular Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                {copy?.subtitle || "Eye Tracking Accuracy Drill"}
               </span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Triangular pursuit conditions multi-vector foveal tracking and catch-up saccadic suppression by guiding gaze along an acute 3-node geometric trajectory. Tracking continuous linear target velocities interrupted by sharp angular directional shifts trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry &amp; Lefèvre, 2007). Smooth pursuit tracks accurately to roughly 30&deg;/s along a straight edge, but a corner exceeds that in an instant, so each vertex is closed by a catch-up saccade rather than by pursuit (Krauzlis, 2004).
+              {copy?.description || "Triangular pursuit conditions multi-vector foveal tracking and catch-up saccadic suppression by guiding gaze along an acute 3-node geometric trajectory. Tracking continuous linear target velocities interrupted by sharp angular directional shifts trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry & Lefèvre, 2007). Smooth pursuit tracks accurately to roughly 30°/s along a straight edge, but a corner exceeds that in an instant, so each vertex is closed by a catch-up saccade rather than by pursuit (Krauzlis, 2004)."}
             </p>
           </div>
         )}

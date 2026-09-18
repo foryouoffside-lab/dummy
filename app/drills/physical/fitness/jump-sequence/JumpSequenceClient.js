@@ -16,7 +16,7 @@ import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -106,7 +106,7 @@ const getLevelConfig = (level, combo = 0) => {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function JumpSequenceClient() {
+export default function JumpSequenceClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -152,7 +152,7 @@ export default function JumpSequenceClient() {
     chargeVal: 0,
     score: 0, level: 1, combo: 1.0, streak: 0, bestStreak: 0, timeLeft: DRILL_DURATION,
     hits: 0, misses: 0, totalAttempts: 0,
-    particles: [], screenShake: 0,
+    particles: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 120
   });
 
@@ -323,7 +323,7 @@ export default function JumpSequenceClient() {
       isCharging: false, isJumping: false, chargeVal: 0,
       score: 0, level: startLevel, combo: 1.0, streak: 0, bestStreak: 0, timeLeft: DRILL_DURATION,
       hits: 0, misses: 0, totalAttempts: 0,
-      particles: [], screenShake: 0,
+      particles: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h, peakSpeed: getLevelConfig(startLevel, 0).baseTargetSpeed
     };
 
@@ -540,6 +540,7 @@ export default function JumpSequenceClient() {
             }
 
             createExplosion(t.x, t.y, '#10b981');
+            e.hitRings.push(createHitRing(t.x, t.y, t.r, '#10b981'));
             drillAudio.playHit();
             resetPlayerAndTarget(w, h, e.level, e.streak);
           } else if (p.y >= h - 80) {
@@ -651,6 +652,8 @@ export default function JumpSequenceClient() {
       }
       ctx.globalAlpha = 1.0;
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.restore();
       if (gameState !== 'gameOver') {
         animationRef.current = requestAnimationFrame(loop);
@@ -698,10 +701,12 @@ export default function JumpSequenceClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Jump Sequence
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
-                Jump Sequence Training
-              </span>
+              <span data-seo-kw="1">{copy?.title || "Jump Sequence Training"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
               Intercepting something that is falling means predicting where it will be, not reacting to where it is. The visual system can read time-to-contact directly from the rate at which an approaching object&apos;s image expands, without needing to know its size or speed (Lee, 1976), and the movement itself is planned in advance from an internal model rather than steered by feedback once it is airborne (Kawato, 1999). This is a cursor interception drill: it trains that prediction, and does not measure vertical jump or stretch-shortening cycle mechanics, which need force-plate measurement (Komi, 2000).
@@ -713,19 +718,19 @@ export default function JumpSequenceClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.score || "Score"}</div>
               <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.timeLeft || "Time"}</div>
               <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestScore || "Best Score"}</div>
               <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestCombo || "Best Combo"}</div>
               <div className="text-lg sm:text-2xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -804,8 +809,8 @@ export default function JumpSequenceClient() {
             <FpsStartCard
               icon={Move}
               accent="cyan"
-              title="Jump Sequence"
-              subtitle="Vertical Trajectory & Mid-Air Steering • 15 Levels"
+              title={copy?.title || "Jump Sequence"}
+              subtitle={copy?.subtitle || "Vertical Trajectory & Mid-Air Steering • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -896,12 +901,12 @@ export default function JumpSequenceClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rules || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -912,13 +917,13 @@ export default function JumpSequenceClient() {
 
             <DrillAccordion
               id="about"
-              title="About Jump Sequence Training"
+              title={copy?.aboutTitle || "About Jump Sequence Training"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-4">
-                {ABOUT_SECTIONS.map((sec, idx) => {
-                  const IconComp = sec.icon;
+                {(copy?.aboutSections || ABOUT_SECTIONS).map((sec, idx) => {
+                  const IconComp = sec.icon || Move;
                   return (
                     <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-1.5">

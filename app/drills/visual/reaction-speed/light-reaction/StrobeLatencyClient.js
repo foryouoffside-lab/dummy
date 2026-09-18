@@ -103,7 +103,7 @@ function draw2dLightTarget(ctx, x, y, targetState) {
   ctx.restore();
 }
 
-export default function StrobeLatencyClient() {
+export default function StrobeLatencyClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -578,10 +578,10 @@ export default function StrobeLatencyClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Light Reaction Reflex Test
+              <span data-seo-kw="1">{copy?.title || "Light Reaction Reflex Test"}</span>
             </h1>
             <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-              Simple visual reaction time is how long it takes to respond to a light or a flash when you already know what to do — no choice, no decision. Healthy adults typically land around 200–250 ms (Woods et al., 2015; Kosinski, 2008). It is not a reflex: a true spinal reflex runs in tens of milliseconds, while this involves the visual cortex and motor cortex, which is why it is roughly ten times slower.
+              {copy?.description || "Simple visual reaction time is how long it takes to respond to a light or a flash when you already know what to do — no choice, no decision. Healthy adults typically land around 200–250 ms (Woods et al., 2015; Kosinski, 2008). It is not a reflex: a true spinal reflex runs in tens of milliseconds, while this involves the visual cortex and motor cortex, which is why it is roughly ten times slower."}
             </p>
           </div>
         )}
@@ -691,8 +691,8 @@ export default function StrobeLatencyClient() {
             <FpsStartCard
               icon={Zap}
               accent="amber"
-              title="Light Reaction Pro"
-              subtitle="Visual Strobe Latency • Reflex Speed"
+              title={copy?.startCardTitle || "Light Reaction Pro"}
+              subtitle={copy?.startCardSubtitle || "Visual Strobe Latency • Reflex Speed"}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

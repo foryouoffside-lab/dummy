@@ -1,0 +1,677 @@
+{
+  "category": "fps",
+  "category_name": "FPS Training",
+  "completed_count": 15,
+  "total_count": 15,
+  "remaining_count": 0,
+  "completed_drills": [
+    {
+      "id": 39,
+      "category_order": 1,
+      "slug": "180-degree-awareness",
+      "route": "/drills/fps/180-degree-awareness",
+      "category": "fps",
+      "status": "completed",
+      "completion_date": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "180° Aim Trainer — Snap Turn Awareness | SkillDrills",
+          "description": "Master reaction speed and 180° snap turns with our free online 180 Aim Trainer. Practice spatial awareness and dominate CS2 & Valorant.",
+          "primary_keyword": "180 aim trainer",
+          "keyword_count": 12
+        },
+        "de": {
+          "title": "180 Grad Aiming – FPS Snap Turn Trainer | SkillDrills",
+          "description": "Kostenloses 180-Grad-Aim-Training im Browser: Trainiere schnelle 180°-Drehungen, peripheres Sehen und Flashbang-Reaktionen für CS2, Valorant und Apex.",
+          "primary_keyword": "180 Grad Aiming",
+          "keyword_count": 12
+        },
+        "ko": {
+          "title": "180도 플릭 에임 연습 – 180도 화면전환 트레이너 | SkillDrills",
+          "description": "브라우저에서 무료로 즐기는 180도 플릭 에임 트레이너. 화면 가장자리와 후방의 표적을 주변시야로 포착하고, 팔 전체를 활용한 대각도 화면전환과 제동력을 과학적으로 훈련합니다.",
+          "primary_keyword": "180도 플릭",
+          "keyword_count": 12
+        },
+        "ja": {
+          "title": "180度 振り向き 練習 – 振り向きエイム・周辺視野 | SkillDrills",
+          "description": "ブラウザで無料プレイできる180度振り向きエイム練習。画面端や背後のターゲットに対する周辺視野認識、肘と肩を使った大振りフリック、終末制動力を科学的に強化します。",
+          "primary_keyword": "180度 振り向き 練習",
+          "keyword_count": 12
+        },
+        "pt": {
+          "title": "Treino de Giro 180° – Mira e Reação FPS | SkillDrills",
+          "description": "Treine giros rápidos de 180 graus, reflexo contra flancos e visão periférica no navegador. Melhore sua agilidade de braço e mira no CS2 e Valorant.",
+          "primary_keyword": "treino de 180 graus mira",
+          "keyword_count": 12
+        },
+        "es": {
+          "title": "Entrenamiento de Giro 180° – Reflejos | SkillDrills",
+          "description": "Entrena giros rápidos de 180 grados, detección periférica y reacción ante flancos en el navegador. Mejora tu puntería y control de alfombrilla en FPS.",
+          "primary_keyword": "entrenamiento de giro 180 fps",
+          "keyword_count": 12
+        },
+        "fr": {
+          "title": "Entraînement Demi-Tour 180° – Visée FPS | SkillDrills",
+          "description": "Entraînez les demi-tours à 180 degrés, la vision périphérique et la réaction aux attaques de dos. Perfectionnez vos flicks et votre vitesse sur CS2.",
+          "primary_keyword": "entraînement demi-tour 180 fps",
+          "keyword_count": 12
+        }
+      },
+      "schemas_count": 6,
+      "faqs_count": 10,
+      "benchmark_rows": 6,
+      "alternate_locales_count": 8
+    },
+    {
+      "id": 40,
+      "category_order": 2,
+      "slug": "angle-hold-trainer",
+      "route": "/drills/fps/angle-hold-trainer",
+      "category": "fps",
+      "status": "completed",
+      "completion_date": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Crosshair Placement & Angle Hold Trainer | SkillDrills",
+          "description": "Master crosshair placement and reaction speed with our free angle hold trainer. Learn to counter peekers and hold tight corners in CS2 and Valorant.",
+          "primary_keyword": "angle hold aim trainer",
+          "keyword_count": 14
+        },
+        "de": {
+          "title": "Crosshair Placement Training – Winkel halten | SkillDrills",
+          "description": "Kostenloser Crosshair Placement Trainer. Optimiere Wandabstand, Kopfhöhe und Reaktionszeit, um den Peeker-Advantage in CS2 und Valorant auszukontern.",
+          "primary_keyword": "Crosshair Placement Übung",
+          "keyword_count": 12
+        },
+        "ko": {
+          "title": "대기 에임 연습 – 각 쪼개기·피커스 어드밴티지 대처 | SkillDrills",
+          "description": "무료 브라우저 FPS 대기 에임(Angle Hold) 및 크로스헤어 플레이스먼트 연습 툴. 모퉁이 벽에서의 튀어나옴(피킹)에 대한 적정 대기폭과 격발 반응속도를 측정하고 피커스 어드밴티지를 무력화하는 방어 프리 에임을 단련하세요.",
+          "primary_keyword": "대기 에임 연습",
+          "keyword_count": 12
+        },
+        "ja": {
+          "title": "置きエイム練習 – プリエイム・飛び出し反応速度トレーナー | SkillDrills",
+          "description": "無料のオンライン置きエイム練習ツール。壁からの飛び出し（ピーク）に対する置き幅と初弾反応速度を測定・強化。アングルアドバンテージやピークアドバンテージを相殺するプリエイム技術をブラウザで即座に訓練。",
+          "primary_keyword": "置きエイム",
+          "keyword_count": 12
+        },
+        "pt": {
+          "title": "Posicionamento de Mira – Treino de Ângulos | SkillDrills",
+          "description": "Treine posicionamento de mira e marcação de ângulos no navegador. Calibre o espaçamento da parede e neutralize o peeker advantage no CS2 e Valorant.",
+          "primary_keyword": "posicionamento de mira treino",
+          "keyword_count": 12
+        },
+        "es": {
+          "title": "Colocación de Mira – Entrenamiento de Ángulos | SkillDrills",
+          "description": "Entrena colocación de mira y retención de ángulos en el navegador. Calibra la separación de esquina y supera la ventaja del peeker en CS2 y Valorant.",
+          "primary_keyword": "colocacion de mira entrenamiento",
+          "keyword_count": 12
+        },
+        "fr": {
+          "title": "Placement du Viseur – Tenue de Ligne FPS | SkillDrills",
+          "description": "Entraînez le placement du viseur et la tenue de ligne sur PC. Calibrez votre distance au mur et neutralisez le peeker advantage sur CS2 et Valorant.",
+          "primary_keyword": "placement du viseur entraînement",
+          "keyword_count": 12
+        }
+      },
+      "schemas_count": 6,
+      "faqs_count": 10,
+      "benchmark_rows": 5,
+      "alternate_locales_count": 8
+    },
+    {
+      "id": 41,
+      "category_order": 3,
+      "slug": "anti-strafe-jitter-duel",
+      "route": "/drills/fps/anti-strafe-jitter-duel",
+      "category": "fps",
+      "status": "completed",
+      "completion_date": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Anti-Strafe Jitter Trainer – Reactive Aim | SkillDrills",
+          "description": "Free anti-strafe jitter trainer. Train reactive tracking and counter close-range ADAD strafe spam with raw input in Apex Legends & Overwatch 2.",
+          "primary_keyword": "anti-strafe jitter trainer",
+          "keyword_count": 17
+        },
+        "de": {
+          "title": "Anti-Strafe Aim Trainer – Reaktives Tracking | SkillDrills",
+          "description": "Kostenloser Anti-Strafe Trainer im Browser: Meistere reaktives Tracking und unberechenbare ADAD-Strafes im Nahkampf für Apex Legends & Overwatch 2.",
+          "primary_keyword": "Anti-Strafe Aim Trainer",
+          "keyword_count": 12
+        },
+        "ko": {
+          "title": "무빙 트래킹 에임 연습 – ADAD 지터 트래커 | SkillDrills",
+          "description": "브라우저에서 무료로 즐기는 무빙 트래킹 에임 연습. 예측 불가능한 고빈도 ADAD 좌우 무빙과 근거리 지터 무빙을 정밀하게 추적하고 트래킹 에임 능력을 향상시키세요.",
+          "primary_keyword": "무빙 트래킹 에임 연습",
+          "keyword_count": 12
+        },
+        "ja": {
+          "title": "レレレ撃ち 練習 – ジッタートラッキング | SkillDrills",
+          "description": "ブラウザで無料プレイできるレレレ撃ち（ADAD移動）トラッキング練習。ApexやOverwatchの至近距離での高頻度な切り返しムーブやジッター移動に照準を吸い付かせるリアクティブトラッキングを科学的に鍛えます。",
+          "primary_keyword": "レレレ撃ち 練習",
+          "keyword_count": 12
+        },
+        "pt": {
+          "title": "Treino de Anti-Strafe – Tracking Reativo FPS | SkillDrills",
+          "description": "Treine tracking reativo contra strafes rápidos ADAD no navegador. Domine trocas de tiro a curta distância e microajustes no Apex Legends e Overwatch 2.",
+          "primary_keyword": "treino de tracking reativo",
+          "keyword_count": 12
+        },
+        "es": {
+          "title": "Tracking Reactivo – Entrenamiento Anti-Strafe | SkillDrills",
+          "description": "Entrena tracking reactivo contra strafes erráticos ADAD en el navegador. Domina duelos a corta distancia y microajustes en Apex Legends e Overwatch 2.",
+          "primary_keyword": "entrenamiento de tracking reactivo",
+          "keyword_count": 12
+        },
+        "fr": {
+          "title": "Tracking Réactif – Entraînement Anti-Strafe | SkillDrills",
+          "description": "Entraînez le tracking réactif face aux strafes rapides ADAD sur navigateur. Maîtrisez les duels au corps à corps dans Apex Legends et Overwatch 2.",
+          "primary_keyword": "entraînement tracking réactif",
+          "keyword_count": 12
+        }
+      },
+      "schemas_count": 6,
+      "faqs_count": 10,
+      "benchmark_rows": 5,
+      "alternate_locales_count": 8
+    },
+    {
+      "id": 42,
+      "category_order": 4,
+      "slug": "anti-zigzag-movement-trainer",
+      "route": "/drills/fps/anti-zigzag-movement-trainer",
+      "category": "fps",
+      "status": "completed",
+      "completion_date": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Anti-Zigzag Aim Trainer – Evasive Tracking | SkillDrills",
+          "description": "Free anti-zigzag aim trainer. Track evasive multi-directional movement and slide cancels without overshooting, for Apex, Warzone and Overwatch 2.",
+          "primary_keyword": "anti-zigzag aim trainer",
+          "keyword_count": 18
+        },
+        "de": {
+          "title": "Anti-Zigzag Aim Trainer – Zickzack Tracking | SkillDrills",
+          "description": "Kostenloser Anti-Zigzag-Trainer im Browser: Meistere reaktives Tracking gegen Zickzack-Ausweichbewegungen und Slide-Cancels für Apex Legends und Warzone.",
+          "primary_keyword": "Anti-Zigzag Aim Trainer",
+          "keyword_count": 12
+        },
+        "ko": {
+          "title": "지그재그 무빙 트래킹 – 슬라이딩 에임 연습 | SkillDrills",
+          "description": "웹 브라우저에서 무료로 즐기는 지그재그 무빙 트래킹 에임 연습. 에이펙스 레전드와 워존의 불규칙한 회피 기동, 슬라이딩 캔슬을 침착하게 추적하고 크로스헤어 오버슈팅을 완벽하게 교정하세요.",
+          "primary_keyword": "지그재그 무빙 트래킹",
+          "keyword_count": 12
+        },
+        "ja": {
+          "title": "ジグザグ移動 練習 – スライディング追従エイム | SkillDrills",
+          "description": "ブラウザで無料プレイできるジグザグ移動・スライディング追従エイム練習。Apex LegendsやWarzoneの不規則な切り返しやスライディングキャンセルに追従し、照準の行き過ぎ（オーバーシュート）を防ぎます。",
+          "primary_keyword": "ジグザグ移動 練習",
+          "keyword_count": 12
+        },
+        "pt": {
+          "title": "Tracking Zigue-Zague – Mira Contra Movimento | SkillDrills",
+          "description": "Treine tracking contra zigue-zague e slide cancels no navegador. Elimine o overshoot da mira e domine alvos com movimentação evasiva no Apex e Warzone.",
+          "primary_keyword": "treino de tracking zigue-zague",
+          "keyword_count": 12
+        },
+        "es": {
+          "title": "Tracking Zigzag – Puntería Contra Movimiento | SkillDrills",
+          "description": "Entrena tracking contra zigzag y slide cancels en el navegador. Elimina el overshoot de tu mira y domina objetivos evasivos en Apex Legends y Warzone.",
+          "primary_keyword": "entrenamiento de tracking zigzag",
+          "keyword_count": 12
+        },
+        "fr": {
+          "title": "Tracking Zigzag – Visée Mouvement Évasif | SkillDrills",
+          "description": "Entraînez le tracking contre les zigzags et slide cancels. Éliminez le dépassement du viseur et touchez les cibles évasives sur Apex et Warzone.",
+          "primary_keyword": "entraînement tracking zigzag",
+          "keyword_count": 12
+        }
+      },
+      "schemas_count": 6,
+      "faqs_count": 10,
+      "benchmark_rows": 5,
+      "alternate_locales_count": 8
+    },
+    {
+      "id": "fps/flick-shot-training",
+      "drill_number": 43,
+      "fps_index": 5,
+      "category": "fps",
+      "name": "Flick Shot Training",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "flick shot trainer",
+        "ko": "플릭 에임 연습",
+        "ja": "フリック エイム 練習",
+        "de": "Flick Shot Training",
+        "pt": "treino de flick shot",
+        "es": "entrenamiento de flick shot",
+        "fr": "entraînement flick shot"
+      },
+      "titles": {
+        "en": "Flick Shot Trainer – Snap Aim Practice | SkillDrills",
+        "ko": "플릭 에임 연습 – 끌어치기·스냅샷 트레이너 | SkillDrills",
+        "ja": "フリック エイム 練習 – スナップショット初弾精度 | SkillDrills",
+        "de": "Flick Shot Training – Snap Aim und Präzision | SkillDrills",
+        "pt": "Treino de Flick Shot – Mira Rápida e Precisão | SkillDrills",
+        "es": "Entrenamiento de Flick Shot – Puntería Rápida | SkillDrills",
+        "fr": "Entraînement Flick Shot – Tir Réflexe et Visée | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (568 routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas)"
+      }
+    },
+    {
+      "id": "fps/flow-state",
+      "drill_number": 44,
+      "fps_index": 6,
+      "category": "fps",
+      "name": "Flow State Aim Trainer",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "flow state aim trainer",
+        "ko": "플로우 상태 에임 연습",
+        "ja": "フロー状態 エイム 練習",
+        "de": "Flow State Aim Trainer",
+        "pt": "treino de foco fps",
+        "es": "entrenamiento de foco fps",
+        "fr": "entraînement focus fps"
+      },
+      "titles": {
+        "en": "Flow State Aim Trainer – Focus and Tracking | SkillDrills",
+        "ko": "플로우 상태 에임 연습 – 몰입 훈련 에임 트레이너 | SkillDrills",
+        "ja": "フロー状態 エイム 練習 – 集中力持続エイムトレーナー | SkillDrills",
+        "de": "Flow State Aim Trainer – FPS Fokus Training | SkillDrills",
+        "pt": "Treino de Foco FPS – Mira em Estado de Flow | SkillDrills",
+        "es": "Entrenamiento de Foco FPS – Estado de Flow | SkillDrills",
+        "fr": "Entraînement Focus FPS – Viser en État de Flow | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (571 routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas)"
+      }
+    },
+    {
+      "id": "fps/instant-response",
+      "drill_number": 45,
+      "fps_index": 7,
+      "category": "fps",
+      "name": "Instant Response Trainer",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "fps reaction time test",
+        "ko": "FPS 반응속도 테스트",
+        "ja": "FPS 反応速度 テスト",
+        "de": "FPS Reaktionszeit Test",
+        "pt": "tempo de reacao fps",
+        "es": "tiempo de reaccion fps",
+        "fr": "temps de reaction fps"
+      },
+      "titles": {
+        "en": "FPS Reaction Time Test – Gaming Reflex Speed | SkillDrills",
+        "ko": "FPS 반응속도 테스트 – 에임 반사신경·클릭 속도 | SkillDrills",
+        "ja": "FPS 反応速度 テスト – クリック反射神経測定 | SkillDrills",
+        "de": "FPS Reaktionszeit Test – Aim Reflex Trainer | SkillDrills",
+        "pt": "Tempo de Reação FPS – Treino de Reflexo | SkillDrills",
+        "es": "Tiempo de Reacción FPS – Reflejos de Tiro | SkillDrills",
+        "fr": "Temps de Réaction FPS – Vitesse et Réflexe | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (574 routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas)"
+      }
+    },
+    {
+      "id": "fps/micro-correction-precision",
+      "drill_number": 46,
+      "fps_index": 8,
+      "category": "fps",
+      "name": "Micro-Correction Precision",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "micro-correction aim trainer",
+        "ko": "마이크로 플릭 연습",
+        "ja": "マイクロフリック 練習",
+        "de": "Mikrokorrektur Aiming",
+        "pt": "treino de micro correcao mira",
+        "es": "entrenamiento de micro correccion",
+        "fr": "entraînement micro correction visée"
+      },
+      "titles": {
+        "en": "Micro-Correction Aim Trainer – Headshots | SkillDrills",
+        "ko": "마이크로 플릭 연습 – 에임 미세조정 트레이너 | SkillDrills",
+        "ja": "マイクロフリック練習 – エイム微調整トレーナー | SkillDrills",
+        "de": "Mikrokorrektur Aiming – FPS Headshot Trainer | SkillDrills",
+        "pt": "Treino de Micro Correção de Mira – Headshots | SkillDrills",
+        "es": "Micro Corrección de Puntería – Headshot FPS | SkillDrills",
+        "fr": "Micro-Correction de Visée – Précision FPS | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (577 routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/pro-smooth-pursuit",
+      "drill_number": 47,
+      "fps_index": 9,
+      "category": "fps",
+      "name": "Pro Smooth Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "smooth pursuit aim trainer",
+        "ko": "스무스 트래킹 에임 연습",
+        "ja": "スムーズ トラッキング 練習",
+        "de": "Smooth Pursuit Aim Trainer",
+        "pt": "treino de tracking suave fps",
+        "es": "entrenamiento de tracking suave",
+        "fr": "entraînement tracking fluide fps"
+      },
+      "titles": {
+        "en": "Smooth Pursuit Aim Trainer – Curve Tracking | SkillDrills",
+        "ko": "스무스 트래킹 에임 연습 – 활창 추적 안구 운동 | SkillDrills",
+        "ja": "スムーズ トラッキング 練習 – 滑走性眼球運動 | SkillDrills",
+        "de": "Smooth Pursuit Aim Trainer – Kurven-Tracking | SkillDrills",
+        "pt": "Treino de Tracking Suave – Mira em Curva | SkillDrills",
+        "es": "Tracking Suave de Puntería – Curvas FPS | SkillDrills",
+        "fr": "Tracking Fluide FPS – Visée en Poursuite | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (580 routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/recoil-control",
+      "drill_number": 48,
+      "fps_index": 10,
+      "category": "fps",
+      "name": "Recoil Control",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "recoil control trainer",
+        "ko": "반동 제어 연습",
+        "ja": "リコイル練習",
+        "de": "Recoil Control lernen",
+        "pt": "treino de controle de recoil",
+        "es": "control de retroceso fps",
+        "fr": "contrôle du recul fps"
+      },
+      "titles": {
+        "en": "Recoil Control Trainer – Spray Practice | SkillDrills",
+        "ko": "반동 제어 연습 – FPS 스프레이 조절 트레이너 | SkillDrills",
+        "ja": "リコイル練習 – FPS反動制御・スプレー練習 | SkillDrills",
+        "de": "Recoil Control lernen – FPS Rückstoßkontrolle | SkillDrills",
+        "pt": "Treino de Controle de Recoil – Spray FPS | SkillDrills",
+        "es": "Control de Retroceso FPS – Spray Pattern | SkillDrills",
+        "fr": "Contrôle du Recul FPS – Spray Pattern | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (583 routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/strafe-tracking",
+      "drill_number": 49,
+      "fps_index": 11,
+      "category": "fps",
+      "name": "Strafe Tracking",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "strafe tracking aim trainer",
+        "ko": "에임 트래킹 연습",
+        "ja": "追いエイム 練習",
+        "de": "Strafe Tracking Übung",
+        "pt": "treino de strafe tracking",
+        "es": "entrenamiento de strafe tracking",
+        "fr": "entraînement strafe tracking fps"
+      },
+      "titles": {
+        "en": "Strafe Tracking Aim Trainer – Reactive Aim | SkillDrills",
+        "ko": "에임 트래킹 연습 – 브라우저 무료 FPS 무빙 추적 트레이너 | SkillDrills",
+        "ja": "追いエイム練習 – ブラウザで無料FPSトラッキング・ストレイフ追従トレーナー | SkillDrills",
+        "de": "Strafe Tracking Übung – FPS Tracking Aim | SkillDrills",
+        "pt": "Treino de Strafe Tracking – Mira Reativa | SkillDrills",
+        "es": "Strafe Tracking de Puntería – Mira Reactiva | SkillDrills",
+        "fr": "Strafe Tracking FPS – Visée Réactive | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/target-acquisition",
+      "drill_number": 50,
+      "fps_index": 12,
+      "category": "fps",
+      "name": "Target Acquisition",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "target acquisition aim trainer",
+        "ko": "타겟 획득 에임",
+        "ja": "ターゲット捕捉 エイム",
+        "de": "Zielerfassung FPS Training",
+        "pt": "treino de aquisicao de alvos",
+        "es": "entrenamiento de adquisicion de blancos",
+        "fr": "acquisition de cibles fps"
+      },
+      "titles": {
+        "en": "Target Acquisition Aim Trainer – Precision | SkillDrills",
+        "ko": "타겟 획득 에임 연습 – 초탄 정확도 트레이너 | SkillDrills",
+        "ja": "ターゲット捕捉 エイム練習 – 初弾精度トレーナー | SkillDrills",
+        "de": "Zielerfassung FPS Training – First Shot Aim | SkillDrills",
+        "pt": "Treino de Aquisição de Alvos – Primeiro Tiro | SkillDrills",
+        "es": "Adquisición de Objetivos FPS – Primer Disparo | SkillDrills",
+        "fr": "Acquisition de Cibles FPS – Premier Tir | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/target-prioritization",
+      "drill_number": 51,
+      "fps_index": 13,
+      "category": "fps",
+      "name": "Target Prioritization",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "target prioritization aim trainer",
+        "ko": "타겟 우선순위 에임",
+        "ja": "ターゲット優先度 エイム",
+        "de": "Zielpriorisierung FPS",
+        "pt": "treino de priorizacao de alvos",
+        "es": "entrenamiento de priorizacion de objetivos",
+        "fr": "priorisation des cibles fps"
+      },
+      "titles": {
+        "en": "Target Prioritization Aim Trainer – Threat Aim | SkillDrills",
+        "ko": "타겟 우선순위 에임 연습 – 위협 평가 트레이너 | SkillDrills",
+        "ja": "ターゲット優先度 エイム練習 – 脅威度判定トレーナー | SkillDrills",
+        "de": "Zielpriorisierung FPS Training – Aim Trainer | SkillDrills",
+        "pt": "Treino de Priorização de Alvos – Mira FPS | SkillDrills",
+        "es": "Priorización de Objetivos FPS – Mira Táctica | SkillDrills",
+        "fr": "Priorisation des Cibles FPS – Visée Décisive | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/target-switching-swarm",
+      "drill_number": 52,
+      "fps_index": 14,
+      "category": "fps",
+      "name": "Target Switching Swarm",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "target switching aim trainer",
+        "ko": "타겟 스위칭 에임",
+        "ja": "ターゲット スイッチング エイム",
+        "de": "Target Switching Aim Trainer",
+        "pt": "treino de target switching",
+        "es": "target switching aim trainer",
+        "fr": "target switching aim trainer"
+      },
+      "titles": {
+        "en": "Target Switching Aim Trainer – Multi-Target | SkillDrills",
+        "ko": "타겟 스위칭 에임 연습 – 브라우저 무료 FPS 다중 타겟 전환 트레이너 | SkillDrills",
+        "ja": "ターゲット スイッチング エイム練習 – 無料FPSフリックトレーナー | SkillDrills",
+        "de": "Target Switching Aim Trainer – Zielwechsel | SkillDrills",
+        "pt": "Target Switching FPS – Troca Rápida de Alvos | SkillDrills",
+        "es": "Target Switching FPS – Cambio Rápido de Blanco | SkillDrills",
+        "fr": "Target Switching FPS – Changement de Cibles | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "fps/vertical-air-track",
+      "drill_number": 53,
+      "fps_index": 15,
+      "category": "fps",
+      "name": "Vertical Air-Track",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "vertical aim trainer",
+        "ko": "수직 에임 연습",
+        "ja": "垂直 エイム 練習",
+        "de": "Vertikales Aim Training",
+        "pt": "treino de mira vertical",
+        "es": "entrenamiento de punteria vertical",
+        "fr": "visee verticale fps"
+      },
+      "titles": {
+        "en": "Vertical Aim Trainer – Y-Axis Air Tracking | SkillDrills",
+        "ko": "수직 에임 연습 – 브라우저 무료 FPS 공중 트래킹 에임 트레이너 | SkillDrills",
+        "ja": "垂直 エイム 練習 – 無料ブラウザFPS縦エイム・空中トラッキングトレーナー | SkillDrills",
+        "de": "Vertikales Aim Training – Y-Achse Tracking | SkillDrills",
+        "pt": "Treino de Mira Vertical – Rastreamento Aéreo | SkillDrills",
+        "es": "Puntería Vertical FPS – Rastreo en el Eje Y | SkillDrills",
+        "fr": "Visée Verticale FPS – Suivi Aérien et Axe Y | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    }
+  ]
+}

@@ -345,18 +345,32 @@ export default function SteadyHandPreview() {
       const curY = state.cursor.y;
 
       ctx.save();
-      // Outer subtle cursor halo
-      ctx.beginPath();
-      ctx.arc(curX, curY, 8.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
-      ctx.fill();
+      const chColor = '#00ff88';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      // Cursor solid core pip
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(curX, curY, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#00ff88';
-      ctx.shadowColor = '#00ff88';
-      ctx.shadowBlur = 8;
+      ctx.arc(curX, curY, chRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(curX, curY - tickLen); ctx.lineTo(curX, curY - gap);
+      ctx.moveTo(curX, curY + tickLen); ctx.lineTo(curX, curY + gap);
+      ctx.moveTo(curX - tickLen, curY); ctx.lineTo(curX - gap, curY);
+      ctx.moveTo(curX + tickLen, curY); ctx.lineTo(curX + gap, curY);
+      ctx.stroke();
+
+      // Center pip
+      ctx.beginPath();
+      ctx.arc(curX, curY, 1.8, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 

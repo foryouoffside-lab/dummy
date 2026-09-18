@@ -264,31 +264,31 @@ export default function PeripheralPingPursuitPreview() {
       const chX = cx + driftX;
       const chY = cy + driftY;
 
-      // In-Game Central Fixation Crosshair lines (length 24px)
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
-      ctx.lineWidth = 1.8;
+      // Tactical Crosshair (matching FPS drill exact crosshair geometry)
+      const chColor = '#38bdf8';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
+
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      // Horizontal crosshair arm
-      ctx.moveTo(chX - 22, chY);
-      ctx.lineTo(chX - 5, chY);
-      ctx.moveTo(chX + 5, chY);
-      ctx.lineTo(chX + 22, chY);
-      // Vertical crosshair arm
-      ctx.moveTo(chX, chY - 22);
-      ctx.lineTo(chX, chY - 5);
-      ctx.moveTo(chX, chY + 5);
-      ctx.lineTo(chX, chY + 22);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Central fixation targeting circle
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = 1.2;
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.arc(chX, chY, 9, 0, Math.PI * 2);
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
       ctx.stroke();
 
-      // Center bright fixation pip
-      ctx.fillStyle = '#ffffff';
+      // Center pip
       ctx.beginPath();
       ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
       ctx.fill();

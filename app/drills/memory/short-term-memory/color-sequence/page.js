@@ -1,12 +1,16 @@
-import ColorSequenceClient from './ColorSequenceClient';
+import ColorSequenceClient from './ColorSequenceClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 export const metadata = {
-  title: "Color Memory Game - Free Visual Memory Test",
-  description: "Free color memory game. Recall growing colour sequences and find where your visual working memory limit sits. No sign-up, plays in your browser.",
+  title: "Color Memory Game – Simon Sequence Test | SkillDrills",
+  description: "Play the free Color Memory Game online. Challenge your visual working memory with expanding Simon color sequences. No download, plays free in browser.",
   keywords: [
     "color memory game",
+    "simon game",
+    "simon says game",
+    "simon game online",
     "color sequence memory",
     "visual memory test",
     "sequence memory test",
@@ -17,20 +21,19 @@ export const metadata = {
     "simon memory game online",
     "visual memory drill",
     "visuospatial sketchpad test",
-    "memory chunking techniques",
-    "カラー シーケンス 記憶",
-    "색상 기억 테스트"
+    "memory chunking techniques"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/memory/short-term-memory/color-sequence",
+    languages: getAlternateLanguages('/drills/memory/short-term-memory/color-sequence'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Color Memory Game - Free Visual Memory Test",
-    description: "Train visual working memory and sequential recall with our free online Color Memory Game. Challenge pattern span, overcome cognitive bottlenecks, and improve focus.",
+    title: "Color Memory Game – Simon Sequence Test | SkillDrills",
+    description: "Play the free Color Memory Game online. Challenge your visual working memory with expanding Simon color sequences. No download, plays free in browser.",
     url: "https://skilldrills.online/drills/memory/short-term-memory/color-sequence",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -38,9 +41,14 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Color Memory Game - Free Visual Memory Test",
-    description: "Train visual working memory and sequential recall with our free online Color Memory Game. Challenge pattern span, overcome cognitive bottlenecks, and improve focus.",
+    title: "Color Memory Game – Simon Sequence Test | SkillDrills",
+    description: "Play the free Color Memory Game online. Challenge your visual working memory with expanding Simon color sequences. No download, plays free in browser.",
   },
+};
+
+const copyEn = {
+  title: "Color Memory Game",
+  subtitle: "Simon Game Online & Visual Working Memory Sequence Test",
 };
 
 export default function ColorSequencePage() {
@@ -86,7 +94,23 @@ export default function ColorSequencePage() {
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   };
 
-  const faqSchema = {
+  
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Color Sequence Memory Test",
+  "url": "https://skilldrills.online/drills/memory/short-term-memory/color-sequence",
+  "description": "Interactive visual sequence recall game. Test and expand short-term memory capacity by repeating progressive color patterns.",
+  "dateModified": "2026-09-11",
+  "gamePlatform": "Web Browser",
+  "genre": ["Memory Training", "Brain Games", "Visual Memory", "Sequential Recall"],
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
+const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "dateModified": "2026-09-05",
@@ -182,18 +206,31 @@ export default function ColorSequencePage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
+        "url": "https://skilldrills.online/drills/memory/short-term-memory/color-sequence#step-1",
         "name": "Observe the Sequence Presentation",
         "text": "Watch the 6-pad color grid carefully as the sequence illuminates one color at a time without distractions."
       },
       {
         "@type": "HowToStep",
+        "position": 2,
+        "url": "https://skilldrills.online/drills/memory/short-term-memory/color-sequence#step-2",
         "name": "Chunk Elements into Multi-Color Units",
         "text": "Group colors into pairs or triplets (e.g., Red-Blue, Green-Yellow) rather than trying to hold individual hues independently."
       },
       {
         "@type": "HowToStep",
+        "position": 3,
+        "url": "https://skilldrills.online/drills/memory/short-term-memory/color-sequence#step-3",
         "name": "Reproduce the Sequence in Order",
         "text": "When the input prompt triggers, tap the color pads in the exact temporal sequence presented."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "url": "https://skilldrills.online/drills/memory/short-term-memory/color-sequence#step-4",
+        "name": "Consolidate Through Progressive Daily Practice",
+        "text": "Complete 3 to 5 rounds daily to reinforce frontoparietal memory circuits and expand your visual working memory span."
       }
     ]
   };
@@ -283,14 +320,19 @@ export default function ColorSequencePage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <ColorSequenceClient />
+      <ColorSequenceClient copy={copyEn} />
       <DrillGuide guide={colorSequenceGuide} />
+      
     </>
   );
 }

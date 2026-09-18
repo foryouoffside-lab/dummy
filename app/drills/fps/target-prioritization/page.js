@@ -1,9 +1,9 @@
-import TargetPrioritizationClient from './TargetPrioritizationClient';
+import TargetPrioritizationClient from './TargetPrioritizationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Target Prioritization Aim Trainer | SkillDrills",
+  title: "Target Prioritization Aim Trainer – Threat Aim | SkillDrills",
   description: "Free target prioritization aim trainer. Train threat evaluation, attention filtering and shot inhibition against mixed friendly and enemy targets.",
   keywords: [
     "target prioritization aim trainer",
@@ -17,21 +17,18 @@ export const metadata = {
     "CS2 threat sorting drill",
     "tactical decision making aim",
     "multi target threat prioritization",
-    "panic firing fix aim drill",
-    "decoy target suppression",
-    "free cognitive aim trainer",
-    "ターゲット優先度 エイム",
-    "타겟 우선순위 에임"
+    "panic firing fix aim drill"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/target-prioritization",
+    languages: getAlternateLanguages('/drills/fps/target-prioritization'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Target Prioritization Aim Trainer | SkillDrills",
+    title: "Target Prioritization Aim Trainer – Threat Aim | SkillDrills",
     description: "Master threat assessment speed, visual distractor filtering, response inhibition, and priority target selection for competitive shooters like Valorant, CS2, and Apex Legends.",
     url: "https://skilldrills.online/drills/fps/target-prioritization",
     siteName: 'SkillDrills',
@@ -40,7 +37,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Target Prioritization Aim Trainer | SkillDrills",
+    title: "Target Prioritization Aim Trainer – Threat Aim | SkillDrills",
     description: "Master threat assessment speed, visual distractor filtering, response inhibition, and priority target selection for competitive shooters like Valorant, CS2, and Apex Legends.",
   },
 };
@@ -54,6 +51,22 @@ export default function TargetPrioritizationPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Target Prioritization", "item": "https://skilldrills.online/drills/fps/target-prioritization" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Target Prioritization Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/target-prioritization",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS drill training threat evaluation, attention filtering, and shot inhibition against mixed friendly and enemy targets."
   };
 
   const softwareSchema = {
@@ -182,26 +195,34 @@ export default function TargetPrioritizationPage() {
     "@type": "HowTo",
     "name": "How to Train Target Prioritization and Threat Assessment",
     "description": "Step-by-step instructions to cultivate rapid threat discrimination, distractor suppression, and response inhibition.",
-    "step": [
+        "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Calibrate Input Sensitivity",
-        "text": "Match mouse sensitivity in Session Settings to preserve 1:1 hardware motor muscle memory."
+        "text": "Match mouse sensitivity in Session Settings to preserve 1:1 hardware motor muscle memory.",
+        "url": "https://skilldrills.online/drills/fps/target-prioritization#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Identify Immediate Red Threats",
-        "text": "Scan the spawn area to locate active High-Threat (Red) targets and snap to eliminate them before timer expiration."
+        "text": "Scan the spawn area to locate active High-Threat (Red) targets and snap to eliminate them before timer expiration.",
+        "url": "https://skilldrills.online/drills/fps/target-prioritization#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Transition to Secondary Yellow Threats",
-        "text": "After clearing all active red threats, immediately transition to eliminate medium-threat yellow targets before they escalate."
+        "text": "After clearing all active red threats, immediately transition to eliminate medium-threat yellow targets before they escalate.",
+        "url": "https://skilldrills.online/drills/fps/target-prioritization#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Inhibit Trigger on Friendly Green Units",
-        "text": "Actively suppress trigger pulls on friendly (Green) units; holding fire preserves combo streaks and prevents time penalties."
+        "text": "Actively suppress trigger pulls on friendly (Green) units; holding fire preserves combo streaks and prevents time penalties.",
+        "url": "https://skilldrills.online/drills/fps/target-prioritization#step-4"
       }
     ]
   };
@@ -285,6 +306,10 @@ export default function TargetPrioritizationPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -295,7 +320,12 @@ export default function TargetPrioritizationPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <TargetPrioritizationClient />
+      <TargetPrioritizationClient
+        copy={{
+          h1Keyword: "Target Prioritization Aim Trainer",
+          h1Suffix: " - Threat Assessment & Selection"
+        }}
+      />
       <DrillGuide guide={targetPrioritizationGuide} />
     </>
   );

@@ -1,4 +1,4 @@
-import StabilityChallengeClient from './StabilityChallengeClient';
+import StabilityChallengeClient from './StabilityChallengeClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -182,6 +182,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Stability Challenge',
+  url: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge',
+  description: 'Free online balance test. Master force vector counteraction, postural equilibrium, and central crosshair stabilization against dynamic wind resistance.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -190,23 +202,31 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Lock Pointer and Center Crosshair in Safe Ring',
-      text: 'Click "Start Drill" to lock the pointer and position your crosshair inside the glowing green central safe ring.',
+      text: 'Click ',
+      url: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge#step-1',
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Anticipate and Counter Dynamic Wind Vectors',
       text: 'As stochastic wind forces push your crosshair outward, smoothly glide your mouse in the exact opposite direction to maintain center positioning.',
+      url: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge#step-2',
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Build Unbroken Combo Multipliers Through Continuous Alignment',
       text: 'Sustain unbroken stability within the safe ring to escalate your combo multiplier up to 3.0x max for rapid score acceleration.',
+      url: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge#step-3',
     },
     {
       '@type': 'HowToStep',
+      position: 4,
       name: 'Adapt to Contracting Radii and Accelerating Push Strength',
       text: 'Survive higher levels as the safe zone radius shrinks from 45px to 20px and wind force pulses intensify toward the final seconds.',
+      url: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge#step-4',
     },
   ],
 };
@@ -221,52 +241,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
+  benchmarks: {
     title: 'Stability Challenge & Balance Training Benchmarks',
-    description: 'Empirical standards derived from postural perturbation research (Nashner & McCollum 1985, Winter 1995) and closed-loop motor stabilization metrics. Evaluates total score, maximum level achieved, safe zone retention percentage, and peak combo over 45 seconds.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Safe Ring Retention', 'Editorial band'],
+    headers: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Safe Ring Retention', 'Editorial Band'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Stabilizer',
-        stat: '15,300+ pts',
-        level: 'Level 12–15',
-        accuracy: '> 94% time in ring',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Master Anchor',
-        stat: '12,000–15,299 pts',
-        level: 'Level 9–11',
-        accuracy: '86–93% time in ring',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Proficient Counterer',
-        stat: '9,500–11,999 pts',
-        level: 'Level 6–8',
-        accuracy: '75–85% time in ring',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Intermediate Core',
-        stat: '6,000–9,499 pts',
-        level: 'Level 3–5',
-        accuracy: '60–74% time in ring',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Perturbed',
-        stat: '< 6,000 pts',
-        level: 'Level 1–2',
-        accuracy: '< 60% time in ring',
-        percentile: 'Starting out',
-      },
+      ['Tier 1', 'Apex Stabilizer', '15,300+ pts', 'Level 12–15', '> 94% time in ring', 'Exceptional (Top 1%)'],
+      ['Tier 2', 'Master Anchor', '12,000–15,299 pts', 'Level 9–11', '86–93% time in ring', 'Advanced (Top 5%)'],
+      ['Tier 3', 'Proficient Counterer', '9,500–11,999 pts', 'Level 6–8', '75–85% time in ring', 'Strong (Top 20%)'],
+      ['Tier 4', 'Intermediate Core', '6,000–9,499 pts', 'Level 3–5', '60–74% time in ring', 'Typical (Top 50%)'],
+      ['Tier 5', 'Novice Perturbed', '< 6,000 pts', 'Level 1–2', '< 60% time in ring', 'Starting Out (Baseline)'],
     ],
+    note: 'Empirical standards derived from postural perturbation research (Nashner & McCollum 1985, Winter 1995) and closed-loop motor stabilization metrics.',
   },
   protocols: {
     title: 'How to train balance and stability',
@@ -320,10 +305,15 @@ export default function StabilityChallengePage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <StabilityChallengeClient />
+      <StabilityChallengeClient copy={{ title: 'Stability Challenge', subtitle: 'Cursor Balance & Postural Stability Trainer' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

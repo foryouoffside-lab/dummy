@@ -1,4 +1,4 @@
-import ChromaSyncClient from './ChromaSyncClient';
+import ChromaSyncClient from './ChromaSyncClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -119,6 +119,18 @@ const webAppSchema = {
   "teaches": "Response Inhibition, Cognitive Behavioral Braking, Impulse Control, Motor Suppression Latency, Trigger Discipline"
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Go/No-Go Impulse Control Test",
+  "url": "https://skilldrills.online/drills/visual/reaction-speed/go/no-go",
+  "description": "Free online Go/No-Go impulse control test. React instantly to green Go targets while actively suppressing motor taps when red No-Go triggers appear.",
+  "genre": ["Action", "Brain Game", "Reaction Speed"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
@@ -130,25 +142,29 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Anchor Visual Gaze on the Center Target Reticle",
-      "text": "Position your eyes at the center of the display canvas where target stimuli appear, maintaining a relaxed yet vigilant visual posture."
+      "text": "Position your eyes at the center of the display canvas where target stimuli appear, maintaining a relaxed yet vigilant visual posture.",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/go/no-go#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Execute Rapid Motor Response on Green GO Targets",
-      "text": "Click the canvas or press the Spacebar as fast as possible whenever the emerald green GO stimulus flashes (+150 PTS × Combo)."
+      "text": "Click the canvas or press the Spacebar as fast as possible whenever the emerald green GO stimulus flashes (+150 PTS × Combo).",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/go/no-go#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
       "name": "Actively Suppress Motor Firing on Red NO-GO Targets",
-      "text": "Withhold your finger and refrain from tapping whenever the crimson red NO-GO stimulus appears (+100 PTS on successful restraint)."
+      "text": "Withhold your finger and refrain from tapping whenever the crimson red NO-GO stimulus appears (+100 PTS on successful restraint).",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/go/no-go#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Maintain Trigger Discipline Under Accelerating Speeds",
-      "text": "As your streak climbs, display presentation windows compress down to 100 ms, testing peak prefrontal hyperdirect motor braking."
+      "text": "As your streak climbs, display presentation windows compress down to 100 ms, testing peak prefrontal hyperdirect motor braking.",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/go/no-go#step-4"
     }
   ]
 };
@@ -329,8 +345,9 @@ export default function ChromaSyncPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <ChromaSyncClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <ChromaSyncClient copy={{ title: "Go/No-Go Impulse Control Test" }} />
       <DrillGuide guide={goNoGoGuide} />
     </>
   );
-}
+}

@@ -1,4 +1,4 @@
-import MotorSequencingClient from './MotorSequencingClient';
+import MotorSequencingClient from './MotorSequencingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -190,6 +190,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Agility Ladder Drills',
+  url: 'https://skilldrills.online/drills/physical/fitness/agility-ladder',
+  description: 'Free online agility ladder drills. Master bilateral motor sequencing, footwork timing, and rhythmic coordination.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -198,23 +210,31 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Track Descending Ladder Position',
-      text: 'Click "Start Drill" to lock your pointer. Visually intercept the top of the descending ladder as it enters from the top edge of the canvas.',
+      text: 'Click ',
+      url: 'https://skilldrills.online/drills/physical/fitness/agility-ladder#step-1',
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Sweep Alternating Rungs in Numerical Sequence',
       text: 'Glide your crosshair over Rung 1 (Left), then Rung 2 (Right), Rung 3 (Left), and Rung 4 (Right) in strict sequential order.',
+      url: 'https://skilldrills.online/drills/physical/fitness/agility-ladder#step-2',
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Clear Rungs Before Scrolling Past Canvas',
       text: 'Complete all 4 rungs before the ladder body exits the bottom boundary to earn base points and trigger particle audio confirmation.',
+      url: 'https://skilldrills.online/drills/physical/fitness/agility-ladder#step-3',
     },
     {
       '@type': 'HowToStep',
+      position: 4,
       name: 'Accelerate Sweeps to Maximize Combo Multiplier',
       text: 'Chain consecutive flawless ladders to drive your combo multiplier up to 3.0x max as scroll speeds accelerate toward 750 px/s over 45 seconds.',
+      url: 'https://skilldrills.online/drills/physical/fitness/agility-ladder#step-4',
     },
   ],
 };
@@ -228,52 +248,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
-    title: 'Agility Ladder Drills & Motor Sequencing Benchmarks',
-    description: 'Empirical standards derived from serial motor ordering research (Lashley 1951), generalized motor program theory (Schmidt 1975), and motor velocity metrics (Fitts 1954, Woodworth 1899). Evaluates total score, maximum level achieved, scroll speed survived, and peak combo over 45 seconds.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Scroll Velocity', 'Editorial band'],
+  benchmarks: {
+    title: 'Agility Ladder Drills & Motor Sequencing 5-Tier Performance Benchmarks',
+    headers: ['Performance Tier', 'Mastery Rank Title', 'Score Threshold', 'Level Reached', 'Scroll Velocity', 'Neuromotor Sequencing Profile'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Agility Master',
-        stat: '17,000+ pts',
-        level: 'Level 12–15',
-        accuracy: '650–750 px/s',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Elite Rhythm Sweeper',
-        stat: '13,000–16,999 pts',
-        level: 'Level 9–11',
-        accuracy: '500–625 px/s',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Advanced Sequence Stepper',
-        stat: '9,500–12,999 pts',
-        level: 'Level 6–8',
-        accuracy: '375–475 px/s',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Intermediate Rung Tracker',
-        stat: '6,000–9,499 pts',
-        level: 'Level 3–5',
-        accuracy: '250–350 px/s',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Ladder Learner',
-        stat: '< 6,000 pts',
-        level: 'Level 1–2',
-        accuracy: '< 250 px/s',
-        percentile: 'Starting out',
-      },
+      ['Tier 1: Apex Agility Master', 'Apex Agility Master', '17,000+ pts', 'Level 12 – 15', '650 – 750 px/s', 'Top 0.1% serialized motor programming efficiency; flawless high-frequency alternating tapping under 750 px/s scroll stress (Lashley 1951; Schmidt 1975)'],
+      ['Tier 2: Elite Rhythm Sweeper', 'Elite Rhythm Sweeper', '13,000 – 16,999 pts', 'Level 9 – 11', '500 – 625 px/s', 'High-level neuromuscular cadence with seamless left-right motor transitions and minimal ballistic correction overshoot (Fitts 1954)'],
+      ['Tier 3: Advanced Sequence Stepper', 'Advanced Sequence Stepper', '9,500 – 12,999 pts', 'Level 6 – 8', '375 – 475 px/s', 'Strong athletic and competitive baseline; consistent rung contact with minor rhythm variance at intermediate scroll velocities'],
+      ['Tier 4: Intermediate Rung Tracker', 'Intermediate Rung Tracker', '6,000 – 9,499 pts', 'Level 3 – 5', '250 – 350 px/s', 'Recreational motor coordination; occasional missed rungs when cadence exceeds 300 px/s due to delayed motor plan switching'],
+      ['Tier 5: Novice Ladder Learner', 'Novice Ladder Learner', '< 6,000 pts', 'Level 1 – 2', '< 250 px/s', 'Initial motor learning phase; rhythm desynchronization occurs under speed pressure, requiring deliberate cadence pacing']
     ],
+    note: 'Standards derived from serial motor ordering research (Lashley 1951), generalized motor program theory (Schmidt 1975), and motor velocity metrics (Fitts 1954, Woodworth 1899).'
   },
   protocols: {
     title: 'How to train footwork sequencing',
@@ -327,10 +312,15 @@ export default function AgilityLadderPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <MotorSequencingClient />
+      <MotorSequencingClient copy={{ title: 'Agility Ladder Drills', subtitle: 'Footwork Agility & Motor Sequencing Trainer' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

@@ -88,7 +88,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function StabilityChallengeClient() {
+export default function StabilityChallengeClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -581,7 +581,12 @@ export default function StabilityChallengeClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Stability challenge
+              <span data-seo-kw="1">{copy?.title || "Stability Challenge"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               Holding something steady against a force that keeps pushing it off centre is a continuous correction task, never a finished one. Standing balance works the same way: quiet standing is not motionless but a constant loop of small corrections around a drifting centre of pressure (Winter, 1995), organised into a few stereotyped strategies rather than improvised each time (Nashner &amp; McCollum, 1985). Vision needs roughly 100&ndash;150 ms to influence a movement already under way (Woodworth, 1899), so the faster the disturbance, the more you have to anticipate instead of react. This drill runs that loop through a mouse cursor &mdash; it trains the correction habit, and does not measure physical balance.
@@ -625,11 +630,11 @@ export default function StabilityChallengeClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.score || 'Score'}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.time || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -679,8 +684,8 @@ export default function StabilityChallengeClient() {
             <FpsStartCard
               icon={Wind}
               accent="emerald"
-              title="Stability Challenge"
-              subtitle="Wind Resistance Motor Control • 15 Levels"
+              title={copy?.title || "Stability Challenge"}
+              subtitle={copy?.subtitle || "Wind Resistance Motor Control • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -688,7 +693,7 @@ export default function StabilityChallengeClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.hudLabels?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN */}
@@ -711,7 +716,7 @@ export default function StabilityChallengeClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.hudLabels?.points || 'Points'}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -721,19 +726,19 @@ export default function StabilityChallengeClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.stability}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Stability</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.stability || 'Stability'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.blowouts}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Blowouts</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.blowouts || 'Blowouts'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Streak</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.maxStreak || 'Max Streak'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.peakLevel || 'Peak Level'}</p>
                   </div>
                 </div>
 
@@ -743,7 +748,7 @@ export default function StabilityChallengeClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.hudLabels?.playAgain || 'Play Again'}
                   </button>
                   <button 
                     onClick={shareScore} 
@@ -771,12 +776,12 @@ export default function StabilityChallengeClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -787,45 +792,41 @@ export default function StabilityChallengeClient() {
 
             <DrillAccordion
               id="about"
-              title="About Stability Challenge"
+              title={copy?.aboutTitle || "About Stability Challenge"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Wind className="w-4 h-4 text-emerald-400" /> Dynamic Force Counteraction &amp; Postural Equilibrium
+                    <Wind className="w-4 h-4 text-emerald-400" /> {copy?.aboutHeading || "Dynamic Force Counteraction & Postural Equilibrium"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    The <strong>Stability Challenge</strong> is a fine motor resistance tracking and postural equilibrium exercise. Dynamic wind force vectors continuously push your crosshair away from the center, requiring precise counter-directional mouse input to maintain central safe ring alignment.
+                    {copy?.aboutIntro || "The Stability Challenge is a fine motor resistance tracking and postural equilibrium exercise. Dynamic wind force vectors continuously push your crosshair away from the center, requiring precise counter-directional mouse input to maintain central safe ring alignment."}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Grounded in Nashner &amp; McCollum&apos;s (1985) postural synergy models and David A. Winter&apos;s (1995) perturbation balance principles, the drill forces your motor cortex to recruit closed-loop visual feedback corrections (Woodworth 1899). As your score rises, safe ring radii contract from 45px down to 20px while force magnitudes accelerate up to 850 strength units, testing high-frequency micro-adjustments and isometric stability under pressure.
+                    {copy?.aboutScience || "Grounded in Nashner & McCollum's (1985) postural synergy models and David A. Winter's (1995) perturbation balance principles, the drill forces your motor cortex to recruit closed-loop visual feedback corrections (Woodworth 1899). As your score rises, safe ring radii contract from 45px down to 20px while force magnitudes accelerate up to 850 strength units, testing high-frequency micro-adjustments and isometric stability under pressure."}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS and tactical shooter players training recoil control, esports competitors building micro-stabilization under pressure, and athletes strengthening fine motor resistance to involuntary drift.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Force vector counteraction, postural equilibrium, resistance tracking, central crosshair stabilization, and micro-adjustment precision.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Activity className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Recoil Counteraction</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Continuously countering unpredictable wind push mirrors the smooth counter-pressure needed to hold a crosshair steady through weapon recoil climb and flinch displacement.</p>
-                  </div>
+                  {(copy?.aboutCards || [
+                    { title: "Target Audience", icon: Users, color: "bg-blue-600", text: "FPS and tactical shooter players training recoil control, esports competitors building micro-stabilization under pressure, and athletes strengthening fine motor resistance to involuntary drift." },
+                    { title: "Mechanical Benefits", icon: TrendingUp, color: "bg-emerald-600", text: "Force vector counteraction, postural equilibrium, resistance tracking, central crosshair stabilization, and micro-adjustment precision." },
+                    { title: "Recoil Counteraction", icon: Activity, color: "bg-purple-600", text: "Continuously countering unpredictable wind push mirrors the smooth counter-pressure needed to hold a crosshair steady through weapon recoil climb and flinch displacement." }
+                  ]).map((card, idx) => {
+                    const IconComp = card.icon || [Users, TrendingUp, Activity][idx % 3];
+                    const color = card.color || ["bg-blue-600", "bg-emerald-600", "bg-purple-600"][idx % 3];
+                    return (
+                      <div key={idx} className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div className={`w-7 h-7 rounded-lg ${color} flex items-center justify-center`}><IconComp className="w-3.5 h-3.5 text-white" /></div>
+                          <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                        </div>
+                        <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </DrillAccordion>

@@ -88,7 +88,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function DynamicGridEvasionClient() {
+export default function DynamicGridEvasionClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -634,7 +634,12 @@ export default function DynamicGridEvasionClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Dynamic grid evasion
+              <span data-seo-kw="1">{copy?.title || "Dynamic Grid Evasion"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
               Attention can be moved to a location without moving the eyes there, and a cue that points to the right place speeds up responses while a misleading one slows them down (Posner, 1980). That is what a grid evasion task exercises: you watch the whole 3x3 field rather than fixating one cell. Warnings here contract to 0.45 seconds and hazards can cover 7 of the 9 cells, so late in a session there is no time to look at each cell in turn.
@@ -646,19 +651,19 @@ export default function DynamicGridEvasionClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.score || "Score"}</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.timeLeft || "Time Left"}</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestScore || "Best Score"}</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestCombo || "Best Combo"}</div>
               <div className="text-lg sm:text-xl font-black text-teal-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -737,8 +742,8 @@ export default function DynamicGridEvasionClient() {
             <FpsStartCard
               icon={LayoutGrid}
               accent="emerald"
-              title="Dynamic Grid Evasion"
-              subtitle="Spatial Hazard Avoidance & Rapid Flicking • 15 Levels"
+              title={copy?.title || "Dynamic Grid Evasion"}
+              subtitle={copy?.subtitle || "Spatial Hazard Avoidance & Rapid Flicking • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -829,12 +834,12 @@ export default function DynamicGridEvasionClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rules || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -845,45 +850,54 @@ export default function DynamicGridEvasionClient() {
 
             <DrillAccordion
               id="about"
-              title="About Dynamic Grid Evasion"
+              title={copy?.aboutTitle || "About Dynamic Grid Evasion"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <LayoutGrid className="w-4 h-4 text-emerald-400" /> Spatial Reflex Training &amp; Hazard Avoidance
+                    <LayoutGrid className="w-4 h-4 text-emerald-400" /> {copy?.aboutHeading || "Spatial Reflex Training & Hazard Avoidance"}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    <strong>Dynamic Grid Evasion</strong> is a high-intensity spatial reflex and peripheral scanning exercise. The play canvas is structured as a 3x3 tactical grid where amber warning pulses identify impending explosion zones. Players must scan all 9 sectors simultaneously and flick their crosshair into an uncompromised safe cell before the detonation triggers.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    Grounded in Anne Treisman&apos;s (1980) feature integration theory, Michael Posner&apos;s (1980) spatial orienting paradigm, and Robert Woodworth&apos;s (1899) voluntary movement framework, this drill exercises rapid exogenous visual attention and ballistic flick evasion. As difficulty escalates across 15 levels, warning windows contract from 1.4s down to 0.45s and threat counts rise from 3 up to 7 danger cells, leaving only 2 safe sectors under severe cognitive chronometry pressure.
-                  </p>
+                  {copy?.aboutText ? (
+                    <p className="text-sm leading-relaxed text-gray-300">{copy.aboutText}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        <strong>Dynamic Grid Evasion</strong> is a high-intensity spatial reflex and peripheral scanning exercise. The play canvas is structured as a 3x3 tactical grid where amber warning pulses identify impending explosion zones. Players must scan all 9 sectors simultaneously and flick their crosshair into an uncompromised safe cell before the detonation triggers.
+                      </p>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Grounded in Anne Treisman&apos;s (1980) feature integration theory, Michael Posner&apos;s (1980) spatial orienting paradigm, and Robert Woodworth&apos;s (1899) voluntary movement framework, this drill exercises rapid exogenous visual attention and ballistic flick evasion. As difficulty escalates across 15 levels, warning windows contract from 1.4s down to 0.45s and threat counts rise from 3 up to 7 danger cells, leaving only 2 safe sectors under severe cognitive chronometry pressure.
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                  {(copy?.aboutCards || [
+                    {
+                      title: "Target Audience",
+                      desc: "FPS players evading tactical AOE utility (molotovs, grenades, ults), action gamers mastering spatial awareness, and athletes training wide-angle peripheral scanning."
+                    },
+                    {
+                      title: "Skills Conditioned",
+                      desc: "Visual parallel search, covert attentional orienting, sub-second choice reaction latency, and ballistic flick deceleration."
+                    },
+                    {
+                      title: "Peripheral Scanning",
+                      desc: "Decentralized fixation across the 3x3 matrix prevents tunnel vision and reinforces rapid parallel feature extraction."
+                    }
+                  ]).map((card, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={`w-7 h-7 rounded-lg ${i === 0 ? 'bg-blue-600' : i === 1 ? 'bg-emerald-600' : 'bg-purple-600'} flex items-center justify-center`}>
+                          {i === 0 ? <Users className="w-3.5 h-3.5 text-white" /> : i === 1 ? <TrendingUp className="w-3.5 h-3.5 text-white" /> : <Eye className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">{card.desc}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS players evading tactical AOE utility (molotovs, grenades, ults), action gamers mastering spatial awareness, and athletes training wide-angle peripheral scanning.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Skills Conditioned</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Visual parallel search, covert attentional orienting, sub-second choice reaction latency, and ballistic flick deceleration.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Eye className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Peripheral Scanning</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Decentralized fixation across the 3x3 matrix prevents tunnel vision and reinforces rapid parallel feature extraction.</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </DrillAccordion>

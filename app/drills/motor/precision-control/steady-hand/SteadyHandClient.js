@@ -26,7 +26,7 @@ const DRILL_DURATION = 45; // Fixed 45-second session
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function SteadyHandClient() {
+export default function SteadyHandClient({ copy = null }) {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -98,11 +98,30 @@ export default function SteadyHandClient() {
   }, []);
 
   const getGradeForLaps = (laps, mistakes) => {
-    if (laps >= 8 && mistakes === 0) return { letter: 'S+', label: 'Grandmaster Stability', color: 'text-fuchsia-400' };
-    if (laps >= 6 && mistakes <= 1) return { letter: 'S', label: 'Master Stability', color: 'text-cyan-400' };
-    if (laps >= 4 && mistakes <= 2) return { letter: 'A', label: 'Diamond Precision', color: 'text-emerald-400' };
-    if (laps >= 2) return { letter: 'B', label: 'Platinum Control', color: 'text-yellow-400' };
-    return { letter: 'C', label: 'Gold Steady', color: 'text-orange-400' };
+    let letter, defaultLabel, color;
+    if (laps >= 8 && mistakes === 0) {
+      letter = 'S+';
+      defaultLabel = 'Grandmaster Stability';
+      color = 'text-fuchsia-400';
+    } else if (laps >= 6 && mistakes <= 1) {
+      letter = 'S';
+      defaultLabel = 'Master Stability';
+      color = 'text-cyan-400';
+    } else if (laps >= 4 && mistakes <= 2) {
+      letter = 'A';
+      defaultLabel = 'Diamond Precision';
+      color = 'text-emerald-400';
+    } else if (laps >= 2) {
+      letter = 'B';
+      defaultLabel = 'Platinum Control';
+      color = 'text-yellow-400';
+    } else {
+      letter = 'C';
+      defaultLabel = 'Gold Steady';
+      color = 'text-orange-400';
+    }
+    const label = copy?.gradeLabels?.[letter] || defaultLabel;
+    return { letter, label, color };
   };
 
   // === Core Game Management ===
@@ -221,9 +240,10 @@ export default function SteadyHandClient() {
   });
 
   const shareScore = useCallback(async () => {
-    const url = 'https://skilldrills.online/drills/motor/precision-control/steady-hand';
+    const url = copy?.shareUrl || 'https://skilldrills.online/drills/motor/precision-control/steady-hand';
     const gradeLetter = analytics.grade?.letter || 'B';
     const accuracy = analytics.mistakes === 0 ? '100%' : `${Math.max(0, 100 - analytics.mistakes * 5)}%`;
+    const drillName = copy?.shareDrillName || 'Steady Hand Circuit';
     try {
       const canvas = generateShareCard({
         score: analytics.laps,
@@ -231,20 +251,26 @@ export default function SteadyHandClient() {
         accuracy,
         rating: { letter: gradeLetter, label: analytics.grade?.label || 'Keep Going', emoji: '🖐️' },
         newBest: isNewBest,
-        drillName: 'Steady Hand Circuit',
+        drillName,
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🖐️ I completed ${analytics.laps} laps (${accuracy}) on Steady Hand Circuit! Practice at skilldrills.online!`;
+      let text = `🖐️ I completed ${analytics.laps} laps (${accuracy}) on ${drillName}! Practice at skilldrills.online!`;
+      if (copy?.shareTextTemplate) {
+        text = copy.shareTextTemplate
+          .replace('{laps}', analytics.laps)
+          .replace('{acc}', accuracy)
+          .replace('{drillName}', drillName);
+      }
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Steady Hand Circuit Score', text, url }).catch(() => {});
+        navigator.share({ title: copy?.shareTitle || `${drillName} Score`, text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
+        alert(copy?.copiedAlert || 'Score card copied to clipboard!');
       }
     }
-  }, [analytics, bestScore, isNewBest]);
+  }, [analytics, bestScore, isNewBest, copy]);
 
   const aimAt = useCallback((x, y) => {
     engine.current.crosshair.x = x;
@@ -455,10 +481,16 @@ export default function SteadyHandClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Steady Hand Game
+              {copy?.h1Prefix || null}
+              <span data-seo-kw="1">{copy?.h1Keyword || "Steady Hand Game"}</span>
+              {copy?.h1Suffix || null}
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              A steady hand game asks you to move a cursor along a narrow path without touching its edges, which measures fine motor steadiness rather than speed. The Steering Law sets the difficulty: the time to travel a corridor scales with its length divided by its width, so a corridor half as wide takes about twice as long to cross without a contact (Accot &amp; Zhai, 1997). Staying on the centreline is a closed-loop task &mdash; vision continuously corrects the hand while the movement is still under way (Woodworth, 1899).
+              {copy?.caption || (
+                <>
+                  A steady hand game asks you to move a cursor along a narrow path without touching its edges, which measures fine motor steadiness rather than speed. The Steering Law sets the difficulty: the time to travel a corridor scales with its length divided by its width, so a corridor half as wide takes about twice as long to cross without a contact (Accot &amp; Zhai, 1997). Staying on the centreline is a closed-loop task &mdash; vision continuously corrects the hand while the movement is still under way (Woodworth, 1899).
+                </>
+              )}
             </p>
           </div>
         )}
@@ -467,10 +499,10 @@ export default function SteadyHandClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Laps Cleared", val: analytics.laps || (gameState === 'playing' ? engine.current.laps : 0), color: "text-cyan-400" },
-              { label: "Time Left", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
-              { label: "Current Streak", val: gameState === 'playing' ? engine.current.streak : 0, color: "text-emerald-400" },
-              { label: "Best Laps", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statLaps || "Laps Cleared", val: analytics.laps || (gameState === 'playing' ? engine.current.laps : 0), color: "text-cyan-400" },
+              { label: copy?.statTime || "Time Left", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
+              { label: copy?.statStreak || "Current Streak", val: gameState === 'playing' ? engine.current.streak : 0, color: "text-emerald-400" },
+              { label: copy?.statBest || "Best Laps", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -499,11 +531,11 @@ export default function SteadyHandClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Laps</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statLaps || "Laps"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{analytics.laps || (gameState === 'playing' ? engine.current.laps : 0)}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
               </div>
             </>
@@ -554,8 +586,8 @@ export default function SteadyHandClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-cyan-500 mx-auto mb-4" />
-                <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
-                <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
+                <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-gray-300 font-medium">{copy?.pausedPrompt || "Click anywhere on the screen to lock cursor and resume."}</p>
               </div>
             </div>
           )}
@@ -572,8 +604,9 @@ export default function SteadyHandClient() {
             <FpsStartCard
               icon={Route}
               accent="cyan"
-              title="Steady Hand Circuit"
-              subtitle="Motor Precision & Line Tracking • 45s Timer"
+              title={copy?.startTitle || "Steady Hand Circuit"}
+              subtitle={copy?.startSubtitle || "Motor Precision & Line Tracking • 45s Timer"}
+              startButtonText={copy?.startBtn || "Start Drill"}
               isTouchOnlyDevice={false}
               onStart={startGame}
             />
@@ -581,7 +614,7 @@ export default function SteadyHandClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.countdownSubtitle || "GET READY"} />
           )}
 
           {/* END SCREEN */}
@@ -591,7 +624,7 @@ export default function SteadyHandClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.newBest || "NEW BEST"}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
@@ -603,7 +636,7 @@ export default function SteadyHandClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {analytics.laps}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Laps Cleared</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">{copy?.statLaps || "Laps Cleared"}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -611,19 +644,19 @@ export default function SteadyHandClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.laps}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Laps Cleared</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statLaps || "Laps Cleared"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-red-400">{analytics.mistakes}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Off-Path Errors</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.errorsLabel || "Off-Path Errors"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-amber-400">{analytics.maxStreak}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Streak</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.maxStreakLabel || "Max Streak"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-cyan-400">{analytics.speedLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Difficulty Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.difficultyLabel || "Difficulty Level"}</p>
                   </div>
                 </div>
 
@@ -633,19 +666,19 @@ export default function SteadyHandClient() {
                     onClick={startGame}
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Train Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.trainAgain || "Train Again"}
                   </button>
                   <button
                     onClick={shareScore}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
+                    title={copy?.shareTitle || "Share Score"}
                   >
                     <Share2 className="w-4 h-4 text-cyan-400" />
                   </button>
                   <button
                     onClick={handleExitDrill}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit & Return"
+                    title={copy?.exitTitle || "Exit & Return"}
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>
@@ -660,34 +693,38 @@ export default function SteadyHandClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Trace the exact" highlight="glowing cyan line" result="Goal Clear resets timer to 45s" />
-                <RuleItem num="2" text="Reaching Goal" highlight="Endless scaling" result="More segments & jagged" />
-                <RuleItem num="3" text="Off-Path Reset" highlight="Line Deviation" result="Resets position to start" />
-                <RuleItem num="4" text="Strict Tracking" highlight="Desktop Exclusive" result="1:1 Raw Mouse Input" />
+                <RuleItem num="1" text={copy?.rule1Text || "Trace the exact"} highlight={copy?.rule1Highlight || "glowing cyan line"} result={copy?.rule1Result || "Goal Clear resets timer to 45s"} />
+                <RuleItem num="2" text={copy?.rule2Text || "Reaching Goal"} highlight={copy?.rule2Highlight || "Endless scaling"} result={copy?.rule2Result || "More segments & jagged"} />
+                <RuleItem num="3" text={copy?.rule3Text || "Off-Path Reset"} highlight={copy?.rule3Highlight || "Line Deviation"} result={copy?.rule3Result || "Resets position to start"} />
+                <RuleItem num="4" text={copy?.rule4Text || "Strict Tracking"} highlight={copy?.rule4Highlight || "Desktop Exclusive"} result={copy?.rule4Result || "1:1 Raw Mouse Input"} />
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Steady Hand Game"
+              title={copy?.aboutTitle || "About Steady Hand Game"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Route className="w-4 h-4 text-cyan-400" /> Continuous Path Precision &amp; Hand Tremor Suppression
+                    <Route className="w-4 h-4 text-cyan-400" /> {copy?.aboutHeading || "Continuous Path Precision & Hand Tremor Suppression"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    The <strong>Steady Hand Game</strong> develops hand-eye coordination, fine motor control, and continuous path-tracing stability. By challenging you to guide your cursor precisely along a winding, jagged trajectory corridor without crossing boundary tolerances, it isolates the micro-stabilizing muscles in your wrist and forearm required for surgical mouse control.
+                    {copy?.aboutP1 || (
+                      <>The <strong>Steady Hand Game</strong> develops hand-eye coordination, fine motor control, and continuous path-tracing stability. By challenging you to guide your cursor precisely along a winding, jagged trajectory corridor without crossing boundary tolerances, it isolates the micro-stabilizing muscles in your wrist and forearm required for surgical mouse control.</>
+                    )}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Grounded in Johnny Accot &amp; Shumin Zhai&apos;s (1997) Steering Law, movement time through constrained tunnels depends on the integral of path length divided by corridor width. As your lap count increases, path complexity multiplies and tolerance margins tighten from 50px down to 12px, forcing your motor cortex to recruit closed-loop visual feedback corrections (Woodworth 1899) and suppress physiological tremor.
+                    {copy?.aboutP2 || (
+                      <>Grounded in Johnny Accot &amp; Shumin Zhai&apos;s (1997) Steering Law, movement time through constrained tunnels depends on the integral of path length divided by corridor width. As your lap count increases, path complexity multiplies and tolerance margins tighten from 50px down to 12px, forcing your motor cortex to recruit closed-loop visual feedback corrections (Woodworth 1899) and suppress physiological tremor.</>
+                    )}
                   </p>
                 </div>
 
@@ -695,23 +732,23 @@ export default function SteadyHandClient() {
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.aboutCard1Title || "Target Audience"}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, digital artists, graphic designers, surgeons, and individuals seeking to improve hand stability and reduce cursor jitter.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.aboutCard1Text || "Esports athletes, digital artists, graphic designers, surgeons, and individuals seeking to improve hand stability and reduce cursor jitter."}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.aboutCard2Title || "Mechanical Benefits"}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Fine motor coordination, continuous hand steadiness, smooth velocity regulation, and antagonist muscle stabilization.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.aboutCard2Text || "Fine motor coordination, continuous hand steadiness, smooth velocity regulation, and antagonist muscle stabilization."}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Dynamic Tightening</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.aboutCard3Title || "Dynamic Tightening"}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Corridor width contracts dynamically while vertex angles become sharper, demanding rigorous micro-steering discipline.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.aboutCard3Text || "Corridor width contracts dynamically while vertex angles become sharper, demanding rigorous micro-steering discipline."}</p>
                   </div>
                 </div>
               </div>

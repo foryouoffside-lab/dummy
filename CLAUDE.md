@@ -110,10 +110,12 @@ STATUS: SUCCESS | MILESTONE SECURED. END OF CORE CONVERSATION SYSTEM.
   - Verification performed
   - Remaining known limitations
 
-## 9. DEFERRED
+## 10. GLOBAL SEO / AEO / GEO MANDATE
 
-- Next.js DevTools MCP (`next-devtools-mcp`) requires Next.js 16; repo is on 15.x.
-  Revisit after a Next 16 upgrade.
+- Any optimization of a page, drill, metadata, or locale tree MUST strictly adhere to [docs/seo/GLOBAL_PAGE_SEO_AEO_GEO_STANDARD.md](docs/seo/GLOBAL_PAGE_SEO_AEO_GEO_STANDARD.md).
+- NEVER create a localized country page without verified search volume (demand-driven only).
+- Non-localized countries must always fallback to English (`x-default`). Never use hard IP auto-redirects.
+- All pages must pass the 30-point audit checklist before being considered complete.
 
 # Ponytail: Lazy Senior Dev Mode
 

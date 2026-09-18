@@ -1,4 +1,4 @@
-import StrobeLatencyClient from './StrobeLatencyClient';
+import StrobeLatencyClient from './StrobeLatencyClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -117,6 +117,18 @@ const webAppSchema = {
   "teaches": "Simple Visual Reaction Time, Optic-Motor Latency, Neuromuscular Reflex Speed, Phototransduction Threshold, Strobe Latency Chronometry"
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Light Reaction Reflex Test",
+  "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction",
+  "description": "Free light reaction reflex test. Measure simple visual reaction time and millisecond optical reflex latency online.",
+  "genre": ["Action", "Reaction Speed", "Reflex Game"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
@@ -128,25 +140,29 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Anchor Visual Gaze on the Center Reticle",
-      "text": "Position your eyes directly on the dark central circular target, maintaining focused foveal attention without premature muscle tension."
+      "text": "Position your eyes directly on the dark central circular target, maintaining focused foveal attention without premature muscle tension.",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Wait for the Unpredictable White Strobe Flash",
-      "text": "Anticipate the strobe flash across randomized inter-stimulus delay intervals ranging from 300 ms to 2,500 ms."
+      "text": "Anticipate the strobe flash across randomized inter-stimulus delay intervals ranging from 300 ms to 2,500 ms.",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
       "name": "Execute Instant Motor Click on Flash Onset",
-      "text": "Click the canvas or press the Spacebar immediately upon the first photon flash (+150 PTS × Combo × Level multiplier)."
+      "text": "Click the canvas or press the Spacebar immediately upon the first photon flash (+150 PTS × Combo × Level multiplier).",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Avoid Speculative Spam Clicking",
-      "text": "Tapping before the flash or clicking rapidly triggers a 1.2-second anti-spam cooldown, enforcing genuine neuromuscular reaction."
+      "text": "Tapping before the flash or clicking rapidly triggers a 1.2-second anti-spam cooldown, enforcing genuine neuromuscular reaction.",
+      "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction#step-4"
     }
   ]
 };
@@ -327,7 +343,8 @@ export default function StrobeLatencyPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <StrobeLatencyClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <StrobeLatencyClient copy={{ title: "Light Reaction Reflex Test" }} />
       <DrillGuide guide={lightReactionGuide} />
     </>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, VolumeX, Target, Trophy, TrendingUp, Zap } from 'lucide-react';
+import { RefreshCw, Share2, LogOut, Check, Volume2, VolumeX } from 'lucide-react';
 
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -30,7 +30,7 @@ const getSavedData = () => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { totalSessions: 0 };
     return { totalSessions: 0, ...JSON.parse(raw) };
-  } catch (e) {
+  } catch {
     return { totalSessions: 0 };
   }
 };
@@ -38,10 +38,10 @@ const getSavedData = () => {
 const saveData = (data: { totalSessions: number }) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {}
+  } catch {}
 };
 
-export default function ZigZagPathPursuitClient() {
+export default function ZigZagPathPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -147,12 +147,12 @@ export default function ZigZagPathPursuitClient() {
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
-    } catch (e) {
+    } catch {
       const text = 'Zig-Zag Path Pursuit — Free Visual Tracking & Gaze Calibration Drill!';
       if (typeof navigator !== 'undefined' && navigator.share) {
         try {
           await navigator.share({ title: 'Zig-Zag Path Pursuit Drill', text, url });
-        } catch (e) {}
+        } catch {}
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(url);
         alert('Drill link copied to clipboard!');
@@ -428,13 +428,13 @@ export default function ZigZagPathPursuitClient() {
         {!isFullscreen && (
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Zig-Zag Path Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Eye Tracking Coordination Drill
+              <span data-seo-kw="1">{copy?.title || "Zig-Zag Path Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                {copy?.subtitle || "Eye Tracking Coordination Drill"}
               </span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Zig-zag path pursuit conditions multi-vector foveal tracking and rapid catch-up saccades by guiding gaze along an alternating multi-segment polyline. Navigating sharp diagonal inflection points trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry &amp; Lefèvre, 2007). Pursuit holds to roughly 30&deg;/s on each straight leg, and every reversal exceeds it, so the eye alternates between smooth tracking and catch-up saccades (Krauzlis, 2004).
+              {copy?.description || "Zig-zag path pursuit conditions multi-vector foveal tracking and rapid catch-up saccades by guiding gaze along an alternating multi-segment polyline. Navigating sharp diagonal inflection points trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry & Lefèvre, 2007). Pursuit holds to roughly 30°/s on each straight leg, and every reversal exceeds it, so the eye alternates between smooth tracking and catch-up saccades (Krauzlis, 2004)."}
             </p>
           </div>
         )}

@@ -241,7 +241,6 @@ export default function CrossBodyMovementPreview() {
       // Energy chevron indicators along vector line
       const vecDx = endX - startX;
       const vecDy = endY - startY;
-      const vecDist = Math.hypot(vecDx, vecDy);
       const chevronCount = 4;
       const angle = Math.atan2(vecDy, vecDx);
 

@@ -1,38 +1,35 @@
-import TargetSwitchingSwarmClient from './TargetSwitchingSwarmClient';
+import TargetSwitchingSwarmClient from './TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Target Switching Aim Trainer | SkillDrills",
-  description: "Free target switching aim trainer. Train rapid flicks between multiple targets with no reset pause, for multi-enemy fights in CS2 and Valorant.",
+  title: 'Target Switching Aim Trainer – Multi-Target | SkillDrills',
+  description: 'Free target switching aim trainer. Train rapid flicks between multiple targets with no reset pause, for multi-enemy fights in CS2 and Valorant.',
   keywords: [
-    "target switching aim trainer",
-    "target switching trainer",
-    "target switching drill",
-    "multi target aim trainer",
-    "multi target flick training",
-    "target swarm trainer",
-    "flick transition trainer",
-    "rapid target switching",
-    "multi kill aim trainer",
-    "Valorant target switching",
-    "cs2 spray transfer trainer",
-    "apex legends target switching",
-    "flick deceleration training",
-    "visual indexing aim training",
-    "free multi target aim trainer",
-    "ターゲット スイッチング エイム",
-    "타겟 스위칭 에임"
+    'target switching aim trainer',
+    'target switching trainer',
+    'target switching drill',
+    'multi target aim trainer',
+    'multi target flick training',
+    'target swarm trainer',
+    'flick transition trainer',
+    'rapid target switching',
+    'multi kill aim trainer',
+    'valorant target switching',
+    'cs2 spray transfer trainer',
+    'flick deceleration training'
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/target-switching-swarm",
+    languages: getAlternateLanguages('/drills/fps/target-switching-swarm'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Target Switching Aim Trainer | SkillDrills",
+    title: 'Target Switching Aim Trainer – Multi-Target FPS | SkillDrills',
     description: "Improve rapid multi-target transitions, flick deceleration, and multi-kill mechanics with our free Target Switching Aim Trainer for Valorant, CS2, and Apex Legends.",
     url: "https://skilldrills.online/drills/fps/target-switching-swarm",
     siteName: 'SkillDrills',
@@ -41,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Target Switching Aim Trainer | SkillDrills",
+    title: 'Target Switching Aim Trainer – Multi-Target FPS | SkillDrills',
     description: "Improve rapid multi-target transitions, flick deceleration, and multi-kill mechanics with our free Target Switching Aim Trainer for Valorant, CS2, and Apex Legends.",
   },
 };
@@ -63,9 +60,9 @@ export default function TargetSwitchingSwarmPage() {
     "name": "Target Switching Aim Trainer",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
-    "dateModified": "2026-09-05",
+    "dateModified": "2026-09-11",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A free browser FPS aim trainer for improving rapid target switching, multi-kill sequences, and flick transitions between active target swarms.",
+    "description": "A free browser FPS drill training multi-target flick transitions, spray transfers, and visual indexing across dynamic target swarms.",
     "genre": "FPS Training / Target Switching",
     "url": "https://skilldrills.online/drills/fps/target-switching-swarm",
     "publisher": {
@@ -75,13 +72,26 @@ export default function TargetSwitchingSwarmPage() {
     }
   };
 
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Target Switching Aim Trainer",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Web Browser",
+    "dateModified": "2026-09-11",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "browserRequirements": "Requires Pointer Lock API, JavaScript, HTML5 Canvas",
+    "description": "A free browser FPS drill training multi-target flick transitions, spray transfers, and visual indexing across dynamic target swarms.",
+    "url": "https://skilldrills.online/drills/fps/target-switching-swarm"
+  };
+
   const videoGameSchema = {
     "@context": "https://schema.org",
     "@type": "VideoGame",
     "name": "Target Switching Aim Trainer",
     "url": "https://skilldrills.online/drills/fps/target-switching-swarm",
-    "description": "A free browser FPS aim trainer for improving rapid target switching, multi-kill sequences, and flick transitions between active target swarms.",
-    "dateModified": "2026-09-05",
+    "description": "A free browser FPS drill training multi-target flick transitions, spray transfers, and visual indexing across dynamic target swarms.",
+    "dateModified": "2026-09-11",
     "gamePlatform": "Web Browser",
     "genre": ["FPS Training", "Aim Trainer", "Target Switching"],
     "playMode": "SinglePlayer",
@@ -93,7 +103,7 @@ export default function TargetSwitchingSwarmPage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "dateModified": "2026-09-05",
+    "dateModified": "2026-09-11",
     "mainEntity": [
       {
         "@type": "Question",
@@ -183,68 +193,75 @@ export default function TargetSwitchingSwarmPage() {
     "@type": "HowTo",
     "name": "How to Train Target Switching Swarm",
     "description": "Step-by-step instructions to train rapid target switches, visual indexing, and multi-kill kinematics.",
-    "step": [
+        "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Calibrate Sensitivity and Engage Pointer Lock",
-        "text": "Match your in-game DPI and sensitivity in Settings, click Start, and lock the hardware mouse cursor to the canvas."
+        "text": "Match your in-game DPI and sensitivity in Settings, click Start, and lock the hardware mouse cursor to the canvas.",
+        "url": "https://skilldrills.online/drills/fps/target-switching-swarm#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Acquire Initial Swarm Target",
-        "text": "Flick rapidly to the closest cyan target in the swarm and click to destroy it, gaining +100 PTS and session time bonus."
+        "text": "Flick rapidly to the closest cyan target in the swarm and click to destroy it, gaining +100 PTS and session time bonus.",
+        "url": "https://skilldrills.online/drills/fps/target-switching-swarm#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Transition Instantly Without Hesitation",
-        "text": "Immediately launch a ballistic flick toward the next target in sequence without pausing to confirm the previous hit."
+        "text": "Immediately launch a ballistic flick toward the next target in sequence without pausing to confirm the previous hit.",
+        "url": "https://skilldrills.online/drills/fps/target-switching-swarm#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Maintain Unbroken Flow Rhythm",
-        "text": "Decouple wrist tension to execute smooth multi-target snaps, chaining streaks to unlock high-difficulty swarm density."
+        "text": "Decouple wrist tension to execute smooth multi-target snaps, chaining streaks to unlock high-difficulty swarm density.",
+        "url": "https://skilldrills.online/drills/fps/target-switching-swarm#step-4"
       }
     ]
   };
 
   const targetSwitchingGuide = {
-    heading: "Target Switching Aim Trainer Guide & Swarm Kinematics",
+    heading: "Target Switching Aim Trainer Guide & Multi-Target Kinematics",
     intro: [
-      "Target Switching Aim Trainer is a high-density kinetic drill designed to isolate and accelerate multi-target transitions, visual indexing, and ballistic snap deceleration. In competitive shooters—such as Valorant, Counter-Strike 2, Apex Legends, and Overwatch 2—gunfight victory frequently hinges on multi-frag sequences where a player must neutralize multiple targets in sub-second succession.",
-      "The motor control principles of multi-target redirection are grounded in Paul M. Fitts's (1954) speed-accuracy tradeoff relationship and David E. Meyer et al.'s (1988) stochastic optimized submovement model. When transitioning between targets, skilled aimers execute a two-phase motor program: a high-velocity ballistic primary impulse that covers approximately 90% of the angular distance, followed by rapid viscoelastic deceleration and micro-submovements to achieve hit registration.",
-      "Visual cognitive processing during swarm engagement relies on Anne Treisman & Garry Gelade's (1980) Feature-Integration Theory and Jeremy M. Wolfe's (1994, 2007) Guided Search architecture. Before the crosshair reaches the current target, the visual system deploys preattentive parallel search across peripheral visual fields, indexing the spatial coordinates of subsequent targets to pre-program the next ballistic flick trajectory.",
-      "By eliminating post-elimination confirmation pauses and training chronometric precision (Woods et al., 2015), this drill eliminates target hesitation and conditions smooth, automated crosshair transitions across dense target swarms.",
+      "Target Switching Swarm is a high-velocity motor control and visual indexing drill engineered to condition rapid, unhesitating transitions between multiple hostile targets. In tactical shooters like Counter-Strike 2 and Valorant, and dynamic battle royales like Apex Legends, team fights rarely present isolated 1v1 duels. Winning clutch rounds requires eliminating a primary opponent and instantaneously snapping to neutralize a secondary flanker without post-kill cognitive pause.",
+      "The psychophysics of target switching is governed by Fitts' Law (Fitts, 1954) and the stochastic optimized submovement model established by David E. Meyer et al. (1988). Under this framework, an aimed movement comprises an initial ballistic primary submovement covering approximately 90% of the trajectory, followed by feedback-guided micro-corrective secondary submovements. Novice aimers waste 100-250 ms pausing after each kill to confirm the elimination before re-engaging visual search. Elite target switchers initiate the primary saccade to the next target before the previous target's destruction animation even completes.",
+      "Visual indexing in crowded target swarms relies on feature integration and preattentive visual search mechanisms (Anne M. Treisman & Garry Gelade, 1980; Jeremy M. Wolfe, 2007). The human visual cortex can track multiple spatial tokens concurrently via visual indexing (FINST theory), allowing players to route efficient spatial flick sequences through clusters of targets, minimizing cumulative angular distance traveled.",
       "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
     ],
     benchmarks: {
-      title: "Target Switching Transition Latency & Multi-Kill Benchmarks",
-      headers: ["Performance Tier", "Switch Transition Latency", "Hit Accuracy", "Competitive In-Game Implication"],
+      title: "Target Switching & Rapid Transition Benchmarks",
+      headers: ["Performance Tier", "Switch Transition Time", "Elimination Rate (Targets/Min)", "Competitive In-Game Implication"],
       rows: [
-        ["Tier 1 (Radiant / Apex Predator / Swarm Pro)", "Sub-190 ms", "96% – 99%+", "Near-instantaneous target transitions; flawless multi-frag execution and seamless spray transfers against simultaneous peeks"],
-        ["Tier 2 (Competitive Master / Tier-2 Esports)", "190 – 240 ms", "90% – 95%", "Exceptional transit velocity; clean primary ballistic snaps with minimal deceleration wobble; highly reliable 1v2 clutch fragger"],
-        ["Tier 3 (High-Skill Diamond / Ascendant)", "240 – 310 ms", "82% – 89%", "Solid multi-target acquisition; occasional 40–60 ms hesitation between distant switches; capable of routine double kills"],
-        ["Tier 4 (Intermediate / Gold / Platinum)", "310 – 390 ms", "72% – 81%", "Noticeable hit-confirmation delays; tends to overflick distant targets and requires corrective submovements"],
-        ["Tier 5 (Developing / Novice)", "390 ms+", "Sub-72%", "Choppy stop-and-go mechanics; frequent target timeouts; struggles to track more than one target in chaotic site retakes"]
+        ["Tier 1 (Radiant / Faceit Level 10 / Pro)", "Sub-210 ms", "110+ Targets/min", "Flawless multi-target spray transfers; zero confirmation pause; effortless 1v3 site defenses and clutch retakes"],
+        ["Tier 2 (Immortal / Faceit 8-9 / Master)", "210 – 260 ms", "92 – 110 Targets/min", "Crisp target sequencing; minor deceleration wobble on wide-angle switches; consistently converts multi-kill trades"],
+        ["Tier 3 (Ascendant / Diamond / High Skill)", "260 – 320 ms", "74 – 92 Targets/min", "Good switching within tight target clusters; struggles when secondary targets require switches across screen halves"],
+        ["Tier 4 (Platinum / Gold / Intermediate)", "320 – 400 ms", "56 – 74 Targets/min", "Noticeable post-kill confirmation pause (100+ ms hesitation); frequently overshoots secondary targets due to poor deceleration braking"],
+        ["Tier 5 (Silver / Bronze / Novice)", "400 ms+", "Sub-56 Targets/min", "Resets mouse completely between targets; visual search restarts from zero after every kill; heavy wrist tension prevents fluid flick chaining"]
       ],
-      note: "Switch transition latency measures elapsed time between target destruction and crosshair arrival on the next target; hit accuracy represents registered hits divided by total mouse clicks (Woods et al., 2015)."
+      note: "Switch transition time measures the interval between target destruction and crosshair arrival at the subsequent target; elimination rate measures sustained destruction throughput over the active drill duration (Woods et al., 2015)."
     },
     techniques: {
-      title: "Evidence-Based Protocols for Perfecting Target Switching",
+      title: "Evidence-Based Protocols for Mastering Target Switching",
       items: [
         {
-          name: "Ballistic Snap with Viscoelastic Deceleration",
-          desc: "Initiate transit flicks with explosive initial acceleration driven by forearm gliding, followed by relaxed viscoelastic deceleration as the crosshair enters the target zone (Meyer et al., 1988). Avoid muscular over-tensing that causes crosshair bounce.",
-          tips: "Let the mouse pad's natural friction assist deceleration rather than tensing your wrist muscles rigidly."
+          name: "Saccadic Pre-Routing & Visual Indexing",
+          desc: "Shift your gaze to the secondary target while your hand is still completing the final micro-adjustment on the primary target (Treisman & Gelade, 1980; Wolfe, 2007). Eye movements precede hand movements by 50-80 ms.",
+          tips: "Never stare at a target after clicking it; let peripheral vision confirm destruction while foveal vision locks onto the next candidate."
         },
         {
-          name: "Peripheral Visual Pre-Queuing (Look-Ahead Gaze)",
-          desc: "Deploy guided search mechanisms (Wolfe, 1994; 2007) to shift your foveal focus toward the next target candidate 20–40 ms before completing the current click. Never stare at a target after clicking it.",
-          tips: "Your eyes should lead the crosshair: look at target B the instant target A is confirmed in peripheral vision."
+          name: "Terminal Braking & Ballistic Submovement Optimization",
+          desc: "Apply firm muscular counter-tension during the final 10% of the flick trajectory to stop the mouse abruptly over target center without oscillating (Meyer et al., 1988).",
+          tips: "Think of your mouse as having hydraulic brakes: accelerate explosively off the previous target, then clamp down firmly over the next."
         },
         {
-          name: "Elimination of Confirmation Hesitation",
-          desc: "Break the habit of pausing to observe kill animations or confirmation popups. Condition your motor cortex to transition continuously into the next stroke, trusting the initial ballistic impulse.",
-          tips: "Treat multiple targets as a single rhythmic musical beat: snap-click, snap-click, snap-click without pauses."
+          name: "Nearest-Neighbor Spatial Routing",
+          desc: "Process the swarm layout to eliminate target clusters in order of minimal angular separation, rather than erratically crossing the canvas back and forth (Fitts, 1954).",
+          tips: "Clear out adjacent pairs first before launching across wide screen diagonals."
         },
         {
           name: "Decoupled Grip Tension & Micro-Adjustability",
@@ -262,8 +279,6 @@ export default function TargetSwitchingSwarmPage() {
     ],
     audience: "Competitive FPS players in Valorant, Counter-Strike 2, Apex Legends, and Overwatch 2 seeking faster multi-target acquisition, effortless spray transfers, and elimination of post-kill hesitation in multi-enemy engagements.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-    // Works named in this page's copy, with DOIs so a reader or an answer
-    // engine can check the figures rather than take them on trust.
     sources: pickSources('woods2015', 'fitts1954', 'meyer1988', 'treisman1980', 'wolfe2007'),
     related: [
       { href: "/drills/fps/target-prioritization", label: "Target Prioritization Aim Trainer" },
@@ -286,6 +301,10 @@ export default function TargetSwitchingSwarmPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -296,7 +315,12 @@ export default function TargetSwitchingSwarmPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <TargetSwitchingSwarmClient />
+      <TargetSwitchingSwarmClient
+        copy={{
+          h1Keyword: "Target Switching Aim Trainer",
+          h1Suffix: " - Free Multi-Target Drill"
+        }}
+      />
       <DrillGuide guide={targetSwitchingGuide} />
     </>
   );

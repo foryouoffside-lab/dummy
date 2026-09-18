@@ -1,9 +1,9 @@
-import MicroCorrectionClient from './MicroCorrectionClient';
+import MicroCorrectionClient from './MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Micro-Correction Aim Trainer - Headshot Precision",
+  title: "Micro-Correction Aim Trainer – Headshots | SkillDrills",
   description: "Master terminal deceleration, snap landing accuracy, and sub-degree micro-adjustments for tactical FPS games like Valorant and CS2 with raw pointer lock.",
   keywords: [
     "micro-correction aim trainer",
@@ -16,26 +16,19 @@ export const metadata = {
     "micro-adjustment aim training",
     "headshot accuracy trainer",
     "snap deceleration training",
-    "how to improve micro adjustments valorant",
-    "cs2 micro adjustment practice",
-    "fine motor aim control",
-    "anti overflick drill",
-    "precision click timing",
     "tactical shooter micro adjustment",
-    "foveal micro saccades aim",
-    "post flick correction",
-    "マイクロフリック 練習",
-    "마이크로 플릭"
+    "fine motor aim control"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/micro-correction-precision",
+    languages: getAlternateLanguages('/drills/fps/micro-correction-precision'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Micro-Correction Aim Trainer - Headshot Precision",
+    title: "Micro-Correction Aim Trainer – Headshots | SkillDrills",
     description: "Master terminal deceleration, snap landing accuracy, and sub-degree micro-adjustments for tactical FPS games like Valorant and CS2 with raw pointer lock.",
     url: "https://skilldrills.online/drills/fps/micro-correction-precision",
     siteName: 'SkillDrills',
@@ -44,7 +37,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Micro-Correction Aim Trainer - Headshot Precision",
+    title: "Micro-Correction Aim Trainer – Headshots | SkillDrills",
     description: "Master terminal deceleration, snap landing accuracy, and sub-degree micro-adjustments for tactical FPS games like Valorant and CS2 with raw pointer lock.",
   },
 };
@@ -58,6 +51,22 @@ export default function MicroCorrectionPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Micro-Correction Aim Trainer", "item": "https://skilldrills.online/drills/fps/micro-correction-precision" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Micro-Correction Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/micro-correction-precision",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS micro-correction aim trainer. Train your crosshair micro-adjustments, snap deceleration, and headshot precision under pressure."
   };
 
   const softwareSchema = {
@@ -189,21 +198,25 @@ export default function MicroCorrectionPage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Configure Game Sensitivity",
         "text": "Set your game and sensitivity in Session Settings to mirror your 1:1 hardware coordinates and bypass operating system mouse curves."
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Execute the Primary Ballistic Flick",
         "text": "Flick rapidly toward the target spawn location, utilizing arm and wrist acceleration to cover the majority of the distance."
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Engage Friction Deceleration",
         "text": "Apply immediate muscular braking to stop mouse momentum within the target's immediate perimeter."
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Micro-Adjust with Fingertips and Confirm",
         "text": "Execute a subtle sub-degree fingertip adjustment to place the reticle dead center on the target, confirm visually, and click."
       }
@@ -289,6 +302,12 @@ export default function MicroCorrectionPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
 
+      {/* WebApplication Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+
       {/* VideoGame Schema */}
       <script
         type="application/ld+json"
@@ -307,7 +326,12 @@ export default function MicroCorrectionPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <MicroCorrectionClient />
+      <MicroCorrectionClient
+        copy={{
+          h1Keyword: "Micro-Correction Aim Trainer",
+          h1Suffix: " - Headshot Precision & Deceleration"
+        }}
+      />
 
       <DrillGuide guide={microCorrectionGuide} />
     </>

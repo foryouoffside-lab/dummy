@@ -237,39 +237,33 @@ export default function TracingPreview() {
       const chY = state.cursor.y;
 
       ctx.save();
+      const chColor = isOffPath ? '#64748b' : '#00ff88';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      // Precision Crosshair Lines
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 1.4;
-      const crossArm = 14;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.moveTo(chX - crossArm, chY); ctx.lineTo(chX + crossArm, chY);
-      ctx.moveTo(chX, chY - crossArm); ctx.lineTo(chX, chY + crossArm);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // On-path green lock ring
-      if (!isOffPath) {
-        ctx.beginPath();
-        ctx.arc(chX, chY, 11, 0, Math.PI * 2);
-        ctx.strokeStyle = '#00ff88';
-        ctx.lineWidth = 1.5;
-        ctx.shadowColor = '#00ff88';
-        ctx.shadowBlur = 4;
-        ctx.stroke();
-      }
-
-      // Central Indicator Core Dot
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.arc(chX, chY, 5.5, 0, Math.PI * 2);
-      ctx.fillStyle = isOffPath ? '#64748b' : '#00ff88';
-      ctx.fill();
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
+      ctx.stroke();
 
-      // Inner White Center Pip
+      // Center pip
       ctx.beginPath();
-      ctx.arc(chX, chY, 1.6, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
+      ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.restore();
 
       ctx.restore();

@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function PeripheralPingPursuitClient() {
+export default function PeripheralPingPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -390,13 +390,13 @@ export default function PeripheralPingPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Peripheral Ping Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Peripheral Vision Training Drill
+              <span data-seo-kw="1">{copy?.title || "Peripheral Ping Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Peripheral Vision Training Drill"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Peripheral vision training conditions covert spatial attention by expanding your functional visual field without breaking central foveal fixation (Posner, 1980; Eriksen & St. James, 1986). Detecting transient peripheral flashes while suppressing overt gaze shifts strengthens frontoparietal attentional networks and accelerates threat detection across wide angles (Wolfe, 1994; Leigh & Zee, 2015). A saccade to a target detected in the periphery takes on the order of 200 ms to initiate (Findlay &amp; Walker, 1999), which is the cost this drill trains you to avoid paying on every target.
+              {copy?.description || "Peripheral vision training conditions covert spatial attention by expanding your functional visual field without breaking central foveal fixation (Posner, 1980; Eriksen & St. James, 1986). Detecting transient peripheral flashes while suppressing overt gaze shifts strengthens frontoparietal attentional networks and accelerates threat detection across wide angles (Wolfe, 1994; Leigh & Zee, 2015). A saccade to a target detected in the periphery takes on the order of 200 ms to initiate (Findlay & Walker, 1999), which is the cost this drill trains you to avoid paying on every target."}
             </p>
           </div>
         )}

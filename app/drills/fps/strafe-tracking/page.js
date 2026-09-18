@@ -1,9 +1,10 @@
-import StrafeTrackingClient from './StrafeTrackingClient';
+import StrafeTrackingClient from './StrafeTrackingClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Strafe Tracking Aim Trainer | SkillDrills",
+  title: "Strafe Tracking Aim Trainer – Reactive Aim | SkillDrills",
   description: "Train reactive strafe tracking, directional reversal reading, and continuous smooth pursuit aim for Apex Legends, Overwatch 2, Valorant, and CS2.",
   keywords: [
     "strafe tracking aim trainer",
@@ -17,22 +18,18 @@ export const metadata = {
     "overwatch tracking trainer",
     "aim tracking practice",
     "directional reading aim drill",
-    "high ttk aim trainer",
-    "free tracking aim trainer",
-    "overtracking fix aim drill",
-    "wrist glide smoothness trainer",
-    "ストレイフ トラッキング エイム",
-    "스트레이프 트래킹"
+    "wrist glide smoothness trainer"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/strafe-tracking",
+    languages: getAlternateLanguages('/drills/fps/strafe-tracking'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Strafe Tracking Aim Trainer | SkillDrills",
+    title: "Strafe Tracking Aim Trainer – Reactive Aim | SkillDrills",
     description: "Train reactive strafe tracking, directional reversal reading, and continuous smooth pursuit aim for Apex Legends, Overwatch 2, Valorant, and CS2.",
     url: "https://skilldrills.online/drills/fps/strafe-tracking",
     siteName: 'SkillDrills',
@@ -41,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Strafe Tracking Aim Trainer | SkillDrills",
+    title: "Strafe Tracking Aim Trainer – Reactive Aim | SkillDrills",
     description: "Train reactive strafe tracking, directional reversal reading, and continuous smooth pursuit aim for Apex Legends, Overwatch 2, Valorant, and CS2.",
   },
 };
@@ -55,6 +52,18 @@ export default function StrafeTrackingPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Strafe Tracking", "item": "https://skilldrills.online/drills/fps/strafe-tracking" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Strafe Tracking Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/strafe-tracking",
+    "description": "Master reactive strafe tracking, counter-strafe reading, and smooth pursuit motor responses for competitive FPS games.",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "browserRequirements": "Requires HTML5 Canvas and Pointer Lock API support",
+    "dateModified": "2026-09-11"
   };
 
   const softwareSchema = {
@@ -186,23 +195,31 @@ export default function StrafeTrackingPage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Calibrate Hardware Sensitivity",
-        "text": "Match your mouse sensitivity and DPI in Session Settings to mirror your primary competitive shooter profile for 1:1 motor transfer."
+        "text": "Match your mouse sensitivity and DPI in Session Settings to mirror your primary competitive shooter profile for 1:1 motor transfer.",
+        "url": "https://skilldrills.online/drills/fps/strafe-tracking#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Fixate Foveal Gaze on Target Mass",
-        "text": "Focus your central vision directly on the moving target rather than fixating on your crosshair reticle."
+        "text": "Focus your central vision directly on the moving target rather than fixating on your crosshair reticle.",
+        "url": "https://skilldrills.online/drills/fps/strafe-tracking#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Match Continuous Lateral Velocity",
-        "text": "Glide your mouse with loose wrist and forearm pressure, maintaining centered reticle contact to accumulate combo multipliers."
+        "text": "Glide your mouse with loose wrist and forearm pressure, maintaining centered reticle contact to accumulate combo multipliers.",
+        "url": "https://skilldrills.online/drills/fps/strafe-tracking#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "React Decisively to Direction Swaps",
-        "text": "Suppress predictive guessing; wait for visual reversal feedback before smoothly reversing mouse trajectory to eliminate overshooting."
+        "text": "Suppress predictive guessing; wait for visual reversal feedback before smoothly reversing mouse trajectory to eliminate overshooting.",
+        "url": "https://skilldrills.online/drills/fps/strafe-tracking#step-4"
       }
     ]
   };
@@ -274,11 +291,21 @@ export default function StrafeTrackingPage() {
     ]
   };
 
+  const copyEn = {
+    h1Prefix: null,
+    h1Keyword: "Strafe Tracking Aim Trainer",
+    h1Suffix: null
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
       <script
         type="application/ld+json"
@@ -296,7 +323,7 @@ export default function StrafeTrackingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <StrafeTrackingClient />
+      <StrafeTrackingClient copy={copyEn} />
       <DrillGuide guide={strafeTrackingGuide} />
     </>
   );

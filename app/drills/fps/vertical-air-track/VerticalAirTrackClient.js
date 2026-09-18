@@ -21,7 +21,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
@@ -112,7 +112,7 @@ const ABOUT_SECTIONS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function VerticalAirTrackClient() {
+export default function VerticalAirTrackClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // start | countdown | playing | gameOver
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -157,7 +157,7 @@ export default function VerticalAirTrackClient() {
     level: 1, score: 0, timeLeft: DRILL_DURATION,
     successfulHits: 0, timeouts: 0, totalTicks: 0, onTargetTicks: 0,
     combo: 0, bestCombo: 0, isFiring: false,
-    particles: [], hitMarkers: [], screenShake: 0, lastShotTime: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0, lastShotTime: 0,
     logicalWidth: 0, logicalHeight: 0
   });
 
@@ -317,6 +317,7 @@ export default function VerticalAirTrackClient() {
       isFiring: false,
       particles: [],
       hitMarkers: [],
+      hitRings: [],
       screenShake: 0,
       lastShotTime: 0,
       logicalWidth: w,
@@ -590,6 +591,7 @@ export default function VerticalAirTrackClient() {
 
               drillAudio.playHit();
               createExplosion(hitTarget.x, hitTarget.y, '#00ff88');
+              e.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, '#00ff88'));
               createHitMarker(hitTarget.x, hitTarget.y);
               
               e.targets = e.targets.filter(t => t.id !== hitTarget.id);
@@ -684,6 +686,8 @@ export default function VerticalAirTrackClient() {
         ctx.fillRect(p.x, p.y, 3, 3);
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       // Hit markers
       ctx.lineWidth = 2;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
@@ -773,7 +777,8 @@ export default function VerticalAirTrackClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Vertical Aim Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Vertical Aim Trainer"}</span>
+              {copy?.h1Suffix || ""}
             </h1>
           </div>
         )}
@@ -782,10 +787,10 @@ export default function VerticalAirTrackClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: score },
-              { label: "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
-              { label: "Accuracy", val: `${accuracy}%`, color: "text-red-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statScore || "Score", val: score },
+              { label: copy?.statTime || "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
+              { label: copy?.statAccuracy || "Accuracy", val: `${accuracy}%`, color: "text-red-400" },
+              { label: copy?.statBestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -813,12 +818,12 @@ export default function VerticalAirTrackClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{score}</p>
               </div>
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
@@ -873,8 +878,8 @@ export default function VerticalAirTrackClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -890,8 +895,8 @@ export default function VerticalAirTrackClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="redOrange"
-              title="Vertical Air-Track"
-              subtitle="Hardware Raw Input • Endless Level Progression"
+              title={copy?.startTitle || "Vertical Air-Track"}
+              subtitle={copy?.startSubtitle || "Hardware Raw Input • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -905,10 +910,10 @@ export default function VerticalAirTrackClient() {
               score={score}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Tracking Accuracy" },
-                { value: analytics.successfulHits, label: "Targets Destroyed" },
-                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || "Tracking Accuracy" },
+                { value: analytics.successfulHits, label: copy?.statTargetsDestroyed || "Targets Destroyed" },
+                { value: `${analytics.bestCombo}x`, label: copy?.statMaxCombo || "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: copy?.statPeakLevel || "Peak Level" },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareDrillLink}
@@ -920,7 +925,7 @@ export default function VerticalAirTrackClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Track targets moving along parabolic vertical trajectories to build smooth vertical tracking precision.
+            {copy?.stageCaption || "Track targets moving along parabolic vertical trajectories to build smooth vertical tracking precision."}
           </p>
         )}
 
@@ -929,12 +934,12 @@ export default function VerticalAirTrackClient() {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
@@ -942,7 +947,7 @@ export default function VerticalAirTrackClient() {
 
             <DrillAccordion
               id="about"
-              title="About Vertical Air-Track"
+              title={copy?.aboutTitle || "About Vertical Air-Track"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >

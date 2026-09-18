@@ -130,7 +130,7 @@ const RELATED_DRILLS = [
   { id: "divided-attention", name: "Divided Attention Test", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" }
 ];
 
-export default function RSVPReaderClient() {
+export default function RSVPReaderClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -433,7 +433,7 @@ export default function RSVPReaderClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Reading Speed Test
+              <span data-seo-kw="1">{copy?.title || "Reading Speed Test"}</span>
             </h1>
           </div>
         )}

@@ -1,0 +1,338 @@
+{
+  "category": "cognitive",
+  "category_name": "Cognitive Training",
+  "completed_count": 8,
+  "total_count": 8,
+  "remaining_count": 0,
+  "completed_drills": [
+    {
+      "id": "cognitive/focus/concentration-grid",
+      "drill_number": 69,
+      "cognitive_index": 1,
+      "category": "cognitive",
+      "subfolder": "focus",
+      "name": "Concentration Grid / Schulte Table",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "schulte table",
+        "de": "Schulte-Tabelle",
+        "ko": "슐테 테이블",
+        "ja": "シュルテテーブル",
+        "pt": "tabela de schulte",
+        "es": "tabla de schulte",
+        "fr": "table de schulte"
+      },
+      "page_titles": {
+        "en": "Concentration Grid – Schulte Table Trainer | SkillDrills",
+        "de": "Schulte-Tabelle Online – Konzentrationsgitter | SkillDrills",
+        "ko": "슐테 테이블 – 무료 온라인 주변시야 집중력 격자 | SkillDrills",
+        "ja": "シュルテテーブル – 無料ブラウザ周辺視野・集中力トレーニング | SkillDrills",
+        "pt": "Tabela de Schulte Online – Treino de Foco | SkillDrills",
+        "es": "Tabla de Schulte Online – Test de Foco | SkillDrills",
+        "fr": "Table de Schulte en Ligne – SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/focus/distraction-fighter",
+      "drill_number": 70,
+      "cognitive_index": 2,
+      "category": "cognitive",
+      "subfolder": "focus",
+      "name": "Distraction Fighter / Stroop Test",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "stroop test online",
+        "de": "stroop test online kostenlos",
+        "ko": "스트룹 효과 테스트",
+        "ja": "ストループテスト",
+        "pt": "teste de stroop online",
+        "es": "test de stroop online",
+        "fr": "test de stroop en ligne"
+      },
+      "page_titles": {
+        "en": "Stroop Test Online – Color Word Interference | SkillDrills",
+        "de": "Stroop-Test Online – Farb-Wort-Interferenz | SkillDrills",
+        "ko": "스트룹 검사 – 무료 온라인 인지 억제 집중력 테스트 | SkillDrills",
+        "ja": "ストループテスト – 無料オンライン認知干渉・抑制機能テスト | SkillDrills",
+        "pt": "Teste de Stroop Online – Foco e Inibição | SkillDrills",
+        "es": "Test de Stroop Online – Control Inhibitorio | SkillDrills",
+        "fr": "Test de Stroop en Ligne – Attention | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/processing-speed/reaction-time",
+      "drill_number": 71,
+      "cognitive_index": 3,
+      "category": "cognitive",
+      "subfolder": "processing-speed",
+      "name": "Choice Reaction Time Test",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "choice reaction time test",
+        "de": "Wahlreaktionszeit Test",
+        "ko": "선택 반응시간 테스트",
+        "ja": "選択反応時間 テスト",
+        "pt": "teste de tempo de reacao",
+        "es": "test de tiempo de reaccion",
+        "fr": "test temps de reaction"
+      },
+      "page_titles": {
+        "en": "Choice Reaction Time Test – Decision Speed | SkillDrills",
+        "de": "Wahlreaktionszeit Test – Entscheidungszeit | SkillDrills",
+        "ko": "선택 반응시간 테스트・판단 속도 측정 – 힉의 법칙 인지속도 | SkillDrills",
+        "ja": "選択反応時間テスト・判断速度測定 – ヒックの法則診断 | SkillDrills",
+        "pt": "Teste de Tempo de Reação de Escolha – CRT | SkillDrills",
+        "es": "Test de Tiempo de Reacción de Elección – CRT | SkillDrills",
+        "fr": "Test de Temps de Réaction de Choix – CRT | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/processing-speed/rsvp-reader",
+      "drill_number": 72,
+      "cognitive_index": 4,
+      "category": "cognitive",
+      "subfolder": "processing-speed",
+      "name": "RSVP Speed Reader",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "rsvp speed reader",
+        "de": "Schnelllesetest RSVP",
+        "ko": "속독 연습 RSVP",
+        "ja": "速読 トレーニング",
+        "pt": "leitor rsvp",
+        "es": "lector rsvp",
+        "fr": "lecteur rsvp"
+      },
+      "page_titles": {
+        "en": "RSVP Speed Reader – Reading Speed Test | SkillDrills",
+        "de": "Schnelllesetest RSVP – Lesegeschwindigkeit | SkillDrills",
+        "ko": "속독 연습 RSVP・읽기 속도 테스트 – 분당 단어수 WPM 측정 | SkillDrills",
+        "ja": "速読トレーニング・RSVP読書速度測定 – 毎分単語数WPM診断 | SkillDrills",
+        "pt": "Leitor RSVP – Teste de Leitura Dinâmica WPM | SkillDrills",
+        "es": "Lector RSVP – Test de Velocidad de Lectura WPM | SkillDrills",
+        "fr": "Lecteur RSVP – Test de Vitesse de Lecture WPM | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/processing-speed/symbol-matching",
+      "drill_number": 73,
+      "cognitive_index": 5,
+      "category": "cognitive",
+      "subfolder": "processing-speed",
+      "name": "Symbol Digit Modalities Test",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "symbol digit modalities test",
+        "de": "Symbol Digit Modalities Test",
+        "ko": "기호 숫자 매칭 인지속도",
+        "ja": "符号テスト SDMT",
+        "pt": "teste sdmt online",
+        "es": "test sdmt online",
+        "fr": "test sdmt en ligne"
+      },
+      "page_titles": {
+        "en": "Symbol Digit Modalities Test – SDMT Online | SkillDrills",
+        "de": "Symbol-Digit-Modalities-Test – SDMT Online | SkillDrills",
+        "ko": "기호 숫자 매칭 인지속도・SDMT 인지 검사 – 정보처리속도 테스트 | SkillDrills",
+        "ja": "符号テストSDMT・記号数字置換 – 情報処理速度診断 | SkillDrills",
+        "pt": "Teste SDMT – Símbolos e Dígitos Online | SkillDrills",
+        "es": "Test SDMT – Símbolos y Dígitos Online | SkillDrills",
+        "fr": "Test SDMT – Symboles et Chiffres en Ligne | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/attention/concentration-stamina",
+      "drill_number": 74,
+      "cognitive_index": 6,
+      "category": "cognitive",
+      "subfolder": "attention",
+      "name": "Concentration Stamina / Attention Span Test",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "attention span test",
+        "de": "Konzentrationstest",
+        "ko": "집중력 테스트",
+        "ja": "集中力テスト",
+        "pt": "teste de concentracao",
+        "es": "test de concentracion",
+        "fr": "test de concentration"
+      },
+      "page_titles": {
+        "en": "Attention Span Test – Concentration Stamina | SkillDrills",
+        "de": "Konzentrationstest – Daueraufmerksamkeit | SkillDrills",
+        "ko": "집중력 테스트・지속 주의력 검사 – 주의력 스태미나 측정 | SkillDrills",
+        "ja": "集中力テスト・持続的注意測定 – 集中力持続スタミナ診断 | SkillDrills",
+        "pt": "Teste de Concentração – Atenção Sustentada | SkillDrills",
+        "es": "Test de Concentración – Atención Sostenida | SkillDrills",
+        "fr": "Test de Concentration – Attention Soutenue | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/attention/divided-attention",
+      "drill_number": 75,
+      "cognitive_index": 7,
+      "category": "cognitive",
+      "subfolder": "attention",
+      "name": "Divided Attention Test / Dual-Task Training",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "divided attention test",
+        "de": "Geteilte Aufmerksamkeit Test",
+        "ko": "주의분할 테스트",
+        "ja": "注意分割テスト",
+        "pt": "teste de atencao dividida",
+        "es": "test de atencion dividida",
+        "fr": "test d attention divisee"
+      },
+      "page_titles": {
+        "en": "Divided Attention Test – Dual-Task Focus | SkillDrills",
+        "de": "Geteilte Aufmerksamkeit Test – Dual-Task | SkillDrills",
+        "ko": "주의분할 테스트・이중과제 훈련 – 듀얼태스크 인지능력 측정 | SkillDrills",
+        "ja": "注意分割テスト・二重課題トレーニング – デュアルタスク能力測定 | SkillDrills",
+        "pt": "Teste de Atenção Dividida – Foco Duplo | SkillDrills",
+        "es": "Test de Atención Dividida – Doble Tarea | SkillDrills",
+        "fr": "Test d Attention Divisée – Double Tâche | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (Code 0, 614 static routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "cognitive/attention/multi-tasking",
+      "drill_number": 76,
+      "cognitive_index": 8,
+      "category": "cognitive",
+      "subfolder": "attention",
+      "name": "Multitasking Test / Dual-Stream Target Flow",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "multitasking test",
+        "de": "Multitasking Test",
+        "ko": "멀티태스킹 테스트",
+        "ja": "マルチタスク 練習",
+        "pt": "teste de multitarefa",
+        "es": "test de multitarea",
+        "fr": "test de multitache"
+      },
+      "page_titles": {
+        "en": "Multitasking Test – Dual-Stream Attention | SkillDrills",
+        "de": "Multitasking Test – Dual-Stream Fokus | SkillDrills",
+        "ko": "멀티태스킹 테스트・이중 표적 추적 훈련 – 병렬 인지 속도 측정 | SkillDrills",
+        "ja": "マルチタスクテスト・二重ターゲット追従 – 並行処理能力診断 | SkillDrills",
+        "pt": "Teste de Multitarefa – Foco em Fluxo Duplo | SkillDrills",
+        "es": "Test de Multitarea – Foco en Flujo Doble | SkillDrills",
+        "fr": "Test de Multitâche – Focale à Double Flux | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (Code 0, 617 static routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    }
+  ],
+  "status": "100% COMPLETE"
+}

@@ -366,50 +366,32 @@ export default function PursuitTrackerPreview() {
       ctx.save();
       ctx.translate(reticle.x, reticle.y);
 
-      const reticleColor = isLocked ? '#10b981' : 'rgba(56, 189, 248, 0.85)';
-      const reticleR = reticle.radius;
-
-      // Outer reticle circle
-      ctx.beginPath();
-      ctx.arc(0, 0, reticleR, 0, Math.PI * 2);
+      const reticleColor = isLocked ? '#10b981' : '#38bdf8';
       ctx.strokeStyle = reticleColor;
-      ctx.lineWidth = 1.5;
-      if (isLocked) {
-        ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = 8;
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      ctx.fillStyle = reticleColor;
 
-      // Reticle Crosshair Ticks (Cardinal)
-      const tickExt = 6;
-      ctx.strokeStyle = reticleColor;
-      ctx.lineWidth = 1.5;
-      // Top
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.moveTo(0, -reticleR - 1);
-      ctx.lineTo(0, -reticleR - tickExt);
+      ctx.arc(0, 0, chRadius, 0, Math.PI * 2);
       ctx.stroke();
-      // Bottom
+
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.moveTo(0, reticleR + 1);
-      ctx.lineTo(0, reticleR + tickExt);
-      ctx.stroke();
-      // Left
-      ctx.beginPath();
-      ctx.moveTo(-reticleR - 1, 0);
-      ctx.lineTo(-reticleR - tickExt, 0);
-      ctx.stroke();
-      // Right
-      ctx.beginPath();
-      ctx.moveTo(reticleR + 1, 0);
-      ctx.lineTo(reticleR + tickExt, 0);
+      ctx.moveTo(0, -tickLen); ctx.lineTo(0, -gap);
+      ctx.moveTo(0, tickLen); ctx.lineTo(0, gap);
+      ctx.moveTo(-tickLen, 0); ctx.lineTo(-gap, 0);
+      ctx.moveTo(tickLen, 0); ctx.lineTo(gap, 0);
       ctx.stroke();
 
       // Center laser dot
       ctx.beginPath();
       ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
       ctx.fill();
 
       ctx.restore();

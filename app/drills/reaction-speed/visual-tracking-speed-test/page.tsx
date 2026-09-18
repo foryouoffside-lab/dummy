@@ -1,5 +1,6 @@
-import VisualTrackingSpeedTestWrapper from './VisualTrackingSpeedTestWrapper';
+import VisualTrackingSpeedTestWrapper from './VisualTrackingSpeedTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -24,6 +25,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test',
+    languages: getAlternateLanguages('/drills/reaction-speed/visual-tracking-speed-test'),
   },
   robots: { index: true, follow: true },
   openGraph: {
@@ -85,34 +87,62 @@ const educationalSchema = {
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Visual Pursuit & Tracking Speed",
-  "description": "Step-by-step instructions on improving your visual tracking speed and click timing.",
+  "name": "How to Train Visual Tracking Speed",
+  "description": "Step-by-step instructions on tracking dynamic targets and improving catch-up saccade accuracy.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Launch the Test",
-      "text": "Press Start Drill to initialize the Visual Tracking Speed Test in full screen mode."
+      "name": "Start the Test",
+      "text": "Press Start Drill to initialize the visual tracking arena in full screen.",
+      "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Maintain Smooth Pursuit",
-      "text": "Focus your eyes smoothly on moving targets as they accelerate across unpredictable trajectories."
+      "name": "Lock Gaze on Target",
+      "text": "Focus your foveal vision on the moving orb as it travels across the arena.",
+      "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "React and Click",
-      "text": "Tap or click the target center immediately before its lifespan duration limit expires and triggers a timeout."
+      "name": "Track Sudden Changes",
+      "text": "Execute smooth pursuit and instant catch-up saccades when the orb changes trajectory or speed.",
+      "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Climb the Levels",
-      "text": "Maintain your accuracy to raise the adaptive level and test your reflexes at higher target velocities."
+      "name": "Review Pursuit Precision",
+      "text": "Check your smooth pursuit fidelity, catch-up latency, and gaze stability scores.",
+      "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test#step-4"
     }
   ]
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Visual Tracking Speed Test",
+  "alternateName": ["Smooth Pursuit Test", "Eye Tracking Speed Drill", "Visual Reflex Test"],
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Scientific smooth pursuit and catch-up saccade visual tracking speed assessment tool.",
+  "softwareVersion": "2.0"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Visual Tracking Speed Test - Smooth Pursuit Eye Training",
+  "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test",
+  "description": "Test and condition smooth pursuit eye movements and dynamic re-acquisition reflexes online.",
+  "genre": ["Reflex Game", "Action", "Esports Training"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -280,6 +310,14 @@ export default function VisualTrackingSpeedTestPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(educationalSchema) }}
       />
       <script
@@ -290,7 +328,7 @@ export default function VisualTrackingSpeedTestPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <VisualTrackingSpeedTestWrapper />
+      <VisualTrackingSpeedTestWrapper copy={{ title: 'Visual Tracking Speed Test' }} />
       <DrillGuide guide={visualTrackingGuide} />
     </>
   );

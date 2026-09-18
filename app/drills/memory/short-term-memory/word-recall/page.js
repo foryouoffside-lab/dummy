@@ -1,9 +1,10 @@
-import WordRecallClient from './WordRecallClient';
+import WordRecallClient from './WordRecallClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Verbal Memory Test - Free Word Recall Game",
+  title: "Verbal Memory Test – Word Recall Game | SkillDrills",
   description: "Free verbal memory test. Recall word lists, see the serial position effect in your own scores, and learn the encoding tricks that beat it.",
   keywords: [
     "verbal memory test",
@@ -21,13 +22,14 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/memory/short-term-memory/word-recall",
+    languages: getAlternateLanguages('/drills/memory/short-term-memory/word-recall'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Verbal Memory Test - Free Word Recall Game",
+    title: "Verbal Memory Test – Word Recall Game | SkillDrills",
     description: "Measure and train verbal working memory with our free online Verbal Memory Test. Master narrative linking, study list retention, and build cognitive recall.",
     url: "https://skilldrills.online/drills/memory/short-term-memory/word-recall",
     siteName: 'SkillDrills',
@@ -36,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Verbal Memory Test - Free Word Recall Game",
+    title: "Verbal Memory Test – Word Recall Game | SkillDrills",
     description: "Measure and train verbal working memory with our free online Verbal Memory Test. Master narrative linking, study list retention, and build cognitive recall.",
   },
 };
@@ -82,6 +84,28 @@ export default function WordRecallPage() {
     "operatingSystem": "All",
     "isAccessibleForFree": true,
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Verbal Memory Test",
+    "description": "Free cognitive verbal memory assessment measuring immediate free recall, semantic associative encoding, and narrative chunking capacity across progressive word lists.",
+    "url": "https://skilldrills.online/drills/memory/short-term-memory/word-recall",
+    "genre": ["Memory Game", "Cognitive Training", "Brain Game"],
+    "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "value": 1
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
   };
 
   const faqSchema = {
@@ -180,18 +204,31 @@ export default function WordRecallPage() {
     "step": [
       {
         "@type": "HowToStep",
+      "position": 1,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/word-recall#step-1",
         "name": "Read and Semantically Encode the Word List",
         "text": "Observe the presented words during the memorization phase, pronouncing each word sub-vocally while forming a mental image."
       },
       {
         "@type": "HowToStep",
+      "position": 2,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/word-recall#step-2",
         "name": "Construct an Associative Narrative Link",
         "text": "Weave the words into a vivid, continuous micro-story (e.g., 'The knight climbed the mountain with a golden lantern') to chunk the items together."
       },
       {
         "@type": "HowToStep",
-        "name": "Execute Free Recall Retrieval",
-        "text": "When the input prompt triggers, type the recalled words separated by spaces, starting with the freshest recency words before reciting your narrative."
+      "position": 3,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/word-recall#step-3",
+        "name": "Offload Terminal Recency Words Immediately",
+        "text": "When the input box activates, instantly type the final 2 or 3 words while they are still fresh in short-term echoic memory."
+      },
+      {
+        "@type": "HowToStep",
+      "position": 4,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/word-recall#step-4",
+        "name": "Execute Free Recall Retrieval from Narrative Schema",
+        "text": "Unroll your mental story from the beginning to recall all primary items, separating words with spaces, and submit your round."
       }
     ]
   };
@@ -281,13 +318,22 @@ export default function WordRecallPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <WordRecallClient />
+      <WordRecallClient
+        copy={{
+          h1Keyword: "Verbal Memory Test",
+          h1Suffix: " - Free Word Recall Game"
+        }}
+      />
       <DrillGuide guide={wordRecallGuide} />
     </>
   );

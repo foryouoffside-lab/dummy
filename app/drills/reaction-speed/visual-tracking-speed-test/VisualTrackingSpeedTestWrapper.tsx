@@ -1,5 +1,7 @@
 'use client';
 
-import VisualTrackingSpeedTestClient from './VisualTrackingSpeedTestClient';
+import VisualTrackingSpeedTestClient, { VisualTrackingSpeedTestClientProps } from './VisualTrackingSpeedTestClient';
 
-export default VisualTrackingSpeedTestClient;
+export default function VisualTrackingSpeedTestWrapper(props: VisualTrackingSpeedTestClientProps) {
+  return <VisualTrackingSpeedTestClient {...props} />;
+}

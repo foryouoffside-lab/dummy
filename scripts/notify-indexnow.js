@@ -1,5 +1,8 @@
-// scripts/notify-indexnow.js
 // Automatically notifies search engines after deployment
+if (process.env.ENABLE_INDEXNOW !== 'true') {
+  console.log('IndexNow submission is disabled until post-deployment (set ENABLE_INDEXNOW=true to run). Skipping.');
+  process.exit(0);
+}
 
 const { DRILLS } = require('../lib/drillsRegistry');
 

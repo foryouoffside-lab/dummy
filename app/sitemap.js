@@ -21,7 +21,7 @@
 //     earn or realistically can earn, measured in Search Console.
 
 import { DRILLS } from '../lib/drillsRegistry';
-import { LOCALES, DEFAULT_LOCALE, LOCALIZED_ROUTES, hasLocalizedRoute } from '../lib/i18n/locales';
+import { LOCALES, DEFAULT_LOCALE, LOCALIZED_ROUTES, hasLocalizedRoute, localeUrl } from '../lib/i18n/locales';
 
 const BASE_URL = 'https://skilldrills.online';
 
@@ -163,7 +163,7 @@ export default async function sitemap() {
         .filter((route) => hasLocalizedRoute(loc, route))
         .map((route) =>
           entry(
-            route === '/' ? '/' + loc : '/' + loc + route,
+            localeUrl(loc, route),
             UPDATED.localized,
             'weekly',
             LOCALIZED_PRIORITY[route] ?? 0.8

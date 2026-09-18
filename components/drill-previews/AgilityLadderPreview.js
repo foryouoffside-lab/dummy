@@ -410,18 +410,22 @@ export default function AgilityLadderPreview() {
       ctx.scale(state.reticle.scale, state.reticle.scale);
 
       // Outer reticle ring
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 2;
-      ctx.shadowColor = '#10b981';
-      ctx.shadowBlur = 6;
+      const chColor = '#10b981';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
+
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(0, 0, 11, 0, Math.PI * 2);
+      ctx.arc(0, 0, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
       // Cardinal crosshair ticks
-      ctx.lineWidth = 1.5;
-      const gap = 4;
-      const tickLen = 11;
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
       ctx.moveTo(0, -tickLen); ctx.lineTo(0, -gap);
       ctx.moveTo(0, tickLen); ctx.lineTo(0, gap);
@@ -430,11 +434,8 @@ export default function AgilityLadderPreview() {
       ctx.stroke();
 
       // Center laser dot
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 4;
       ctx.beginPath();
-      ctx.arc(0, 0, 2, 0, Math.PI * 2);
+      ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();

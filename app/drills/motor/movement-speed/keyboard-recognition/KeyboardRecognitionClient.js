@@ -19,6 +19,7 @@ import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -158,7 +159,8 @@ Fake prompts require you to freeze rather than react, training the same response
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function KeyboardRecognitionClient() {
+export default function KeyboardRecognitionClient({ copy = null }) {
+  const { t, locale } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -678,10 +680,13 @@ export default function KeyboardRecognitionClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Keyboard Speed Test
+              {copy?.title || t('keyboardRecognition.title', 'Keyboard Speed Test')}
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                {copy?.subtitle || t('keyboardRecognition.subtitle', 'Keybind Reaction Trainer & Speed Test')}
+              </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              A keyboard speed test measures how long it takes to see a prompt and press the key that matches it. Simple visual reaction on its own takes roughly 200&ndash;250 ms (Woods et al., 2015), and every extra key you might have to choose between adds to that: Hick&apos;s Law puts choice reaction time at approximately a logarithmic function of the number of alternatives (Hick, 1952). Practice does not beat that law &mdash; it makes each key mapping automatic so the choice step shrinks.
+              {copy?.caption || t('keyboardRecognition.caption', "A keyboard speed test measures how long it takes to see a prompt and press the key that matches it. Simple visual reaction on its own takes roughly 200–250 ms (Woods et al., 2015), and every extra key you might have to choose between adds to that: Hick's Law puts choice reaction time at approximately a logarithmic function of the number of alternatives (Hick, 1952). Practice does not beat that law — it makes each key mapping automatic so the choice step shrinks.")}
             </p>
           </div>
         )}
@@ -690,10 +695,10 @@ export default function KeyboardRecognitionClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: uiScore },
-              { label: "Time Left", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: "Accuracy", val: `${uiAccuracy}%`, color: "text-emerald-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: t('keyboardRecognition.score', 'Score'), val: uiScore },
+              { label: t('keyboardRecognition.timeLeft', 'Time Left'), val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: t('keyboardRecognition.accuracy', 'Accuracy'), val: `${uiAccuracy}%`, color: "text-emerald-400" },
+              { label: t('keyboardRecognition.bestScore', 'Best Score'), val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -722,11 +727,11 @@ export default function KeyboardRecognitionClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('keyboardRecognition.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('keyboardRecognition.time', 'Time')}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -830,17 +835,17 @@ export default function KeyboardRecognitionClient() {
             <FpsStartCard
               icon={Keyboard}
               accent="emerald"
-              title="Keyboard Speed Test"
-              subtitle="Keybind Muscle Memory & Response Inhibition • 60s Timer"
+              title={copy?.startTitle || t('keyboardRecognition.startTitle', 'Keyboard Speed Test')}
+              subtitle={copy?.startSubtitle || t('keyboardRecognition.startSubtitle', 'Keybind Muscle Memory & Response Inhibition • 60s Timer')}
               isTouchOnlyDevice={isTouchOnlyDevice}
-              touchBlockedLabel="Keyboard Required"
+              touchBlockedLabel={t('keyboardRecognition.keyboardRequired', 'Keyboard Required')}
               onStart={enterDrill}
             />
           )}
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={t('keyboardRecognition.getReady', 'GET READY')} />
           )}
 
           {/* END SCREEN */}
@@ -863,7 +868,7 @@ export default function KeyboardRecognitionClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{t('keyboardRecognition.points', 'Points')}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -873,19 +878,19 @@ export default function KeyboardRecognitionClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{t('keyboardRecognition.accuracy', 'Accuracy')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.avgReaction}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{t('keyboardRecognition.avgReaction', 'Avg Reaction')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{t('keyboardRecognition.maxCombo', 'Max Combo')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.kpm}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">KPM</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{t('keyboardRecognition.kpm', 'KPM')}</p>
                   </div>
                 </div>
 
@@ -895,19 +900,19 @@ export default function KeyboardRecognitionClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {t('keyboardRecognition.playAgain', 'Play Again')}
                   </button>
                   <button 
                     onClick={shareScore} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
+                    title={t('keyboardRecognition.shareScore', 'Share Score')}
                   >
                     <Share2 className="w-4 h-4 text-emerald-400" />
                   </button>
                   <button 
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Drill & Return"
+                    title={t('keyboardRecognition.exitDrill', 'Exit Drill & Return')}
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>
@@ -924,12 +929,12 @@ export default function KeyboardRecognitionClient() {
             <div className="rounded-2xl border border-white/10 bg-[#080811] p-5 shadow-xl">
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/5">
                 <Cpu className="w-4 h-4 text-emerald-400" />
-                <h2 className="font-bold text-white text-xs tracking-wide uppercase font-mono">Session Configuration</h2>
+                <h2 className="font-bold text-white text-xs tracking-wide uppercase font-mono">{t('keyboardRecognition.sessionConfig', 'Session Configuration')}</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider block mb-1.5">Gameplay Mode</label>
+                  <label className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider block mb-1.5">{t('keyboardRecognition.gameplayMode', 'Gameplay Mode')}</label>
                   <select value={trainingMode} onChange={(e) => setTrainingMode(e.target.value)} className="w-full text-xs font-bold bg-[#040609] border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-emerald-500 transition-colors">
                     <option value="dynamic">Dynamic Mixed Progression</option><option value="single">Single Key Recognition</option>
                     <option value="letters">Letters Only (A-Z)</option><option value="numbers">Numbers Only (0-9)</option>
@@ -939,7 +944,7 @@ export default function KeyboardRecognitionClient() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider block mb-1.5">Difficulty</label>
+                  <label className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider block mb-1.5">{t('keyboardRecognition.difficulty', 'Difficulty')}</label>
                   <select value={difficultySetting} onChange={(e) => setDifficultySetting(e.target.value)} className="w-full text-xs font-bold bg-[#040609] border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-emerald-500 transition-colors">
                     <option value="adaptive">Adaptive Engine</option><option value="easy">Easy (1.5x Time)</option>
                     <option value="medium">Medium (1.0x Time)</option><option value="hard">Hard (0.75x Time)</option>
@@ -947,7 +952,7 @@ export default function KeyboardRecognitionClient() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider block mb-1.5">Esports Presets</label>
+                  <label className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider block mb-1.5">{t('keyboardRecognition.esportsPresets', 'Esports Presets')}</label>
                   <div className="grid grid-cols-3 gap-1">
                     {Object.keys(PRESETS_ANNOTATED).map(pName => (
                       <button key={pName} onClick={() => handleLoadPreset(pName)} className={`py-1 px-1 rounded text-[9px] font-mono font-bold border transition-colors ${selectedProfile === pName ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-white/10 bg-[#040609] text-slate-400 hover:text-white'}`}>{pName}</button>
@@ -957,7 +962,7 @@ export default function KeyboardRecognitionClient() {
               </div>
 
               <div className="flex items-center justify-between mb-3 pt-2 border-t border-white/5">
-                <h3 className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">Active Key Bindings Map</h3>
+                <h3 className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">{t('keyboardRecognition.activeKeyMap', 'Active Key Bindings Map')}</h3>
                 <span className="px-2.5 py-0.5 text-[10px] font-mono rounded bg-white/5 border border-white/10 text-slate-300">Selected Keys: {enabledKeys.length}</span>
               </div>
 
@@ -990,12 +995,17 @@ export default function KeyboardRecognitionClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={t('keyboardRecognition.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {[
+                  { title: t('keyboardRecognition.rule1Title', "Correct Input"), text: t('keyboardRecognition.rule1Text', "Match key prompt before sequence timer expires to score +120 PTS.") },
+                  { title: t('keyboardRecognition.rule2Title', "Fake Prompts (Traps)"), text: t('keyboardRecognition.rule2Text', "Ignore fake invalid prompts to score +200 PTS & build response inhibition.") },
+                  { title: t('keyboardRecognition.rule3Title', "Wrong Key / Fail Trap"), text: t('keyboardRecognition.rule3Text', "Pressing wrong key or falling for fake prompt trap resets active combo.") },
+                  { title: t('keyboardRecognition.rule4Title', "Combos & Sequences"), text: t('keyboardRecognition.rule4Text', "Chain unbroken prompt matches to build score multipliers and adaptive speed.") }
+                ].map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -1006,20 +1016,20 @@ export default function KeyboardRecognitionClient() {
 
             <DrillAccordion
               id="about"
-              title="About the Keyboard Speed Test"
+              title={t('keyboardRecognition.aboutTitle', 'About the Keyboard Speed Test')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Keyboard className="w-4 h-4 text-emerald-400" /> Bridging Visual Prompt Recognition &amp; Keybind Execution
+                    <Keyboard className="w-4 h-4 text-emerald-400" /> {t('keyboardRecognition.aboutHeading', 'Bridging Visual Prompt Recognition & Keybind Execution')}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    The <strong>Keyboard Speed Test</strong> is an advanced neuro-motor training tool designed to bridge the gap between visual prompt detection and subconscious mechanical execution. In competitive titles like <strong>Valorant, CS2, Fortnite, Minecraft, and Apex Legends</strong>, clutch split-second decisions demand firing abilities and utility without glancing at the physical keyboard.
+                    {t('keyboardRecognition.aboutP1', 'The Keyboard Speed Test is an advanced neuro-motor training tool designed to bridge the gap between visual prompt detection and subconscious mechanical execution. In competitive titles like Valorant, CS2, Fortnite, Minecraft, and Apex Legends, clutch split-second decisions demand firing abilities and utility without glancing at the physical keyboard.')}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    By training under F.C. Donders&apos; (1868) choice reaction paradigm, Hick&apos;s (1952) law of alternative stimuli, and Gordon Logan&apos;s (1984) response inhibition countermanding, this drill directly conditions the corticospinal pathways responsible for rapid finger articulation while purging hesitation and panic key-smashing.
+                    {t('keyboardRecognition.aboutP2', 'By training under F.C. Donders\' (1868) choice reaction paradigm, Hick\'s (1952) law of alternative stimuli, and Gordon Logan\'s (1984) response inhibition countermanding, this drill directly conditions the corticospinal pathways responsible for rapid finger articulation while purging hesitation and panic key-smashing.')}
                   </p>
                 </div>
 
@@ -1027,23 +1037,23 @@ export default function KeyboardRecognitionClient() {
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><Target className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                      <h4 className="text-xs font-bold text-white">{t('keyboardRecognition.card1Title', 'Target Audience')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Competitive gamers, speedtypers, and esports players developing unhesitating muscle memory for high-frequency keybind setups.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('keyboardRecognition.card1Desc', 'Competitive gamers, speedtypers, and esports players developing unhesitating muscle memory for high-frequency keybind setups.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Cognitive Benefits</h4>
+                      <h4 className="text-xs font-bold text-white">{t('keyboardRecognition.card2Title', 'Cognitive Benefits')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Reduces choice latency, exercises working-memory sequence recall, and trains response inhibition to prevent panic inputs.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('keyboardRecognition.card2Desc', 'Reduces choice latency, exercises working-memory sequence recall, and trains response inhibition to prevent panic inputs.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Adaptive Difficulty</h4>
+                      <h4 className="text-xs font-bold text-white">{t('keyboardRecognition.card3Title', 'Adaptive Difficulty')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Dynamically scales prompt display windows from 1.5x down to 0.55x, with automated trap frequency modulation.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('keyboardRecognition.card3Desc', 'Dynamically scales prompt display windows from 1.5x down to 0.55x, with automated trap frequency modulation.')}</p>
                   </div>
                 </div>
               </div>

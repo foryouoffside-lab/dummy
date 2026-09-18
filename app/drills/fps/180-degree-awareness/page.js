@@ -1,7 +1,7 @@
-import AwarenessDrillClient from './AwarenessDrillClient';
+import AwarenessDrillClient from './AwarenessDrillClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
   title: "180° Aim Trainer — Snap Turn Awareness | SkillDrills",
   description: "Master reaction speed and 180° snap turns with our free online 180 Aim Trainer. Practice spatial awareness and dominate CS2 & Valorant.",
@@ -24,6 +24,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/180-degree-awareness",
+    languages: getAlternateLanguages('/drills/fps/180-degree-awareness'),
   },
   robots: {
     index: true,
@@ -58,6 +59,22 @@ export default function AwarenessDrillPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "180° Awareness Pro", "item": "https://skilldrills.online/drills/fps/180-degree-awareness" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "180° Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/180-degree-awareness",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS 180 aim trainer. Train peripheral awareness, large-angle swipe muscle memory, and snap turn accuracy for CS2 and Valorant."
   };
 
   const softwareSchema = {
@@ -187,18 +204,27 @@ export default function AwarenessDrillPage() {
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Engage Pointer Lock & Center",
-        "text": "Click Start Drill to lock your cursor and place your physical mouse in the center of your mousepad."
+        "position": 1,
+        "name": "Engage Pointer Lock & Center Mouse",
+        "text": "Click Start Drill to lock your cursor and place your physical mouse in the exact center of your mousepad."
       },
       {
         "@type": "HowToStep",
-        "name": "Detect Peripheral Target",
-        "text": "Identify target spawns at extreme lateral edges using peripheral motion detection while keeping gaze centered."
+        "position": 2,
+        "name": "Detect Peripheral Target Stimulus",
+        "text": "Identify target spawns at extreme lateral edges using peripheral motion detection while keeping your central gaze stable."
       },
       {
         "@type": "HowToStep",
-        "name": "Swipe, Decelerate & Click",
-        "text": "Execute a high-velocity forearm swipe, apply muscular deceleration stopping power, and confirm target click."
+        "position": 3,
+        "name": "Execute Ballistic Forearm Swipe",
+        "text": "Perform a high-velocity lateral forearm swipe driven by the elbow and shoulder across your calibrated cm/360° turn distance."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Engage Muscular Deceleration & Click",
+        "text": "Apply antagonist muscular braking at the target boundary, confirm foveal alignment, and click to register the elimination."
       }
     ]
   };
@@ -281,6 +307,10 @@ export default function AwarenessDrillPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -292,7 +322,12 @@ export default function AwarenessDrillPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <AwarenessDrillClient />
+      <AwarenessDrillClient
+        copy={{
+          h1Keyword: "180° Aim Trainer",
+          h1Suffix: " — Snap Turn Awareness"
+        }}
+      />
       <DrillGuide guide={awarenessGuide} />
     </>
   );

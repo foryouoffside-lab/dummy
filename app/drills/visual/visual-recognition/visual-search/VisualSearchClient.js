@@ -63,7 +63,7 @@ const SEARCH_PAIRS = [
   { target: '3', distractors: ['8', 'B', 'E'] }
 ];
 
-export default function VisualSearchClient() {
+export default function VisualSearchClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -392,8 +392,9 @@ export default function VisualSearchClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Conjunctive Visual Search Test
+              <span data-seo-kw="1">{copy?.title || "Conjunctive Visual Search Test"}</span>
             </h1>
+            {copy?.subtitle && <p className="text-sm text-slate-400 mt-1">{copy.subtitle}</p>}
           </div>
         )}
 
@@ -533,8 +534,8 @@ export default function VisualSearchClient() {
             <FpsStartCard
               icon={Search}
               accent="cyan"
-              title="Visual Search"
-              subtitle="Conjunctive Scanning • Target Isolation"
+              title={copy?.title || "Visual Search"}
+              subtitle={copy?.subtitle || "Conjunctive Scanning • Target Isolation"}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

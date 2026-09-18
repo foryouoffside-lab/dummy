@@ -22,6 +22,7 @@ import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -33,6 +34,7 @@ const ELITE_SCORE = 18000; // 6000 -> 18000 (3x)
 const TIME_PER_HIT = 0.6; // +0.6s per valid hit
 const TIME_PENALTY = 0.8; // -0.8s on miss / target timeout (opt-in gated)
 const STORAGE_KEY = 'skilldrills_visual_tracking_speed_test_v3';
+const TARGET_FILL_COLOR = '#ef4444';
 
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
@@ -77,7 +79,16 @@ const getLevelConfig = (level: number, combo = 0) => {
 type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
 type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 
-export default function VisualTrackingSpeedTestClient() {
+export interface VisualTrackingSpeedTestClientProps {
+  copy?: {
+    title?: string;
+    subtitle?: string;
+    caption?: string;
+  };
+}
+
+export default function VisualTrackingSpeedTestClient({ copy }: VisualTrackingSpeedTestClientProps = {}) {
+  const { t, locale } = useTranslation();
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -389,7 +400,8 @@ export default function VisualTrackingSpeedTestClient() {
         setUiCombo(e.combo);
         drillAudio.playHit();
 
-        // Particles explosion (Tactical Rose / Red)
+        // Particles explosion (colored to match the target's own rendered body)
+        const hitColor = TARGET_FILL_COLOR;
         for (let i = 0; i < 10; i++) {
           const angle = Math.random() * Math.PI * 2;
           const spd = 2 + Math.random() * 4;
@@ -398,7 +410,7 @@ export default function VisualTrackingSpeedTestClient() {
             y: e.target.y,
             vx: Math.cos(angle) * spd,
             vy: Math.sin(angle) * spd,
-            color: '#ef4444',
+            color: hitColor,
             life: 1.0
           });
         }
@@ -411,7 +423,7 @@ export default function VisualTrackingSpeedTestClient() {
           maxR: e.target.radius * 2.6,
           life: 0.28,
           maxLife: 0.28,
-          color: '#ef4444'
+          color: hitColor
         });
 
         e.target.active = false;
@@ -580,9 +592,9 @@ export default function VisualTrackingSpeedTestClient() {
 
         // Filled red body with subtle glow
         ctx.globalAlpha = 0.88;
-        ctx.shadowColor = '#ef4444';
+        ctx.shadowColor = TARGET_FILL_COLOR;
         ctx.shadowBlur = 14;
-        ctx.fillStyle = '#ef4444';
+        ctx.fillStyle = TARGET_FILL_COLOR;
         ctx.beginPath();
         ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
         ctx.fill();
@@ -691,7 +703,7 @@ export default function VisualTrackingSpeedTestClient() {
       {/* Mobile Orientation Alert */}
       {isMobile && isPortrait && (
         <div className="w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-300 flex items-center justify-center gap-2">
-          <span>Rotate to landscape mode for a wider 2D visual tracking arena.</span>
+          <span>{t('visualTracking.rotateAlert', 'Rotate to landscape mode for a wider 2D visual tracking arena.')}</span>
         </div>
       )}
 
@@ -702,10 +714,10 @@ export default function VisualTrackingSpeedTestClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Visual Tracking Speed Test
+              <span data-seo-kw="1">{copy?.title || t('visualTracking.title', 'Visual Tracking Speed Test')}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Visual tracking speed is how well your eyes follow a moving target and re-acquire it after a sudden change of direction. Smooth pursuit keeps pace up to roughly 30&deg;/s, and a catch-up saccade follows an abrupt change about 100&ndash;130&nbsp;ms later (Rashbass, 1961).
+              {copy?.caption || t('visualTracking.caption', 'Visual tracking speed is how well your eyes follow a moving target and re-acquire it after a sudden change of direction. Smooth pursuit keeps pace up to roughly 30°/s, and a catch-up saccade follows an abrupt change about 100–130 ms later (Rashbass, 1961).')}
             </p>
           </div>
         )}
@@ -714,10 +726,10 @@ export default function VisualTrackingSpeedTestClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore, color: 'text-red-400' },
-              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Level', value: `L${uiLevel}`, color: 'text-indigo-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+              { label: t('visualTracking.score', 'Score'), value: uiScore, color: 'text-red-400' },
+              { label: t('visualTracking.time', 'Time'), value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: t('visualTracking.level', 'Level'), value: `L${uiLevel}`, color: 'text-indigo-400' },
+              { label: t('visualTracking.bestScore', 'Best Score'), value: bestScore, color: 'text-amber-400' },
             ].map(card => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -741,11 +753,11 @@ export default function VisualTrackingSpeedTestClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('visualTracking.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('visualTracking.timeLeft', 'Time Left')}</p>
                 <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -797,8 +809,8 @@ export default function VisualTrackingSpeedTestClient() {
             <FpsStartCard
               icon={Target}
               accent="red"
-              title="Visual Tracking Speed Test"
-              subtitle="Smooth Pursuit • Kinetic Interception"
+              title={copy?.title || t('visualTracking.title', 'Visual Tracking Speed Test')}
+              subtitle={copy?.subtitle || t('visualTracking.startSubtitle', 'Smooth Pursuit • Kinetic Interception')}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -806,7 +818,7 @@ export default function VisualTrackingSpeedTestClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={t('visualTracking.getReady', 'GET READY')} />
           )}
 
           {/* UNIVERSAL RESULT CARD */}
@@ -817,10 +829,10 @@ export default function VisualTrackingSpeedTestClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Avg Reaction', value: analytics.avgReactionTime, suffix: 'ms' },
-                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
-                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+                { label: t('visualTracking.accuracy', 'Accuracy'), value: analytics.accuracy, suffix: '%' },
+                { label: t('visualTracking.avgReaction', 'Avg Reaction'), value: analytics.avgReactionTime, suffix: 'ms' },
+                { label: t('visualTracking.peakLevel', 'Peak Level'), value: `Lv. ${analytics.finalLevel}` },
+                { label: t('visualTracking.maxCombo', 'Max Combo'), value: analytics.maxCombo, suffix: 'x' },
               ]}
               onPlayAgain={enterDrill}
               onShare={sharePage}
@@ -835,63 +847,63 @@ export default function VisualTrackingSpeedTestClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={t('visualTracking.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Intercept Kinetic Targets" highlight="+100 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
-                <RuleItem num="2" text="Combo & Heat System" highlight="Up to 3.0x Multiplier" result="Higher streaks increase velocity and bounce frequency" />
-                <RuleItem num="3" text="Level Progression" highlight="Continuous Scaling" result="Targets shrink, accelerate, and time-to-live tightens" />
+                <RuleItem num="1" text={t('visualTracking.rule1Text', 'Intercept Kinetic Targets')} highlight={t('visualTracking.rule1Highlight', '+100 PTS')} result={t('visualTracking.rule1Result', '× Combo × Level bonus (+0.6s clock per hit)')} />
+                <RuleItem num="2" text={t('visualTracking.rule2Text', 'Combo & Heat System')} highlight={t('visualTracking.rule2Highlight', 'Up to 3.0x Multiplier')} result={t('visualTracking.rule2Result', 'Higher streaks increase velocity and bounce frequency')} />
+                <RuleItem num="3" text={t('visualTracking.rule3Text', 'Level Progression')} highlight={t('visualTracking.rule3Highlight', 'Continuous Scaling')} result={t('visualTracking.rule3Result', 'Targets shrink, accelerate, and time-to-live tightens')} />
                 <RuleItem 
                   num="4" 
-                  text="Miss & Timeout Rules" 
-                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
-                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
+                  text={t('visualTracking.rule4Text', 'Miss & Timeout Rules')} 
+                  highlight={penaltyEnabled ? t('visualTracking.rule4Penalty', '-0.8s Penalty') : t('visualTracking.rule4NoPenalty', 'Zero Penalties (Default)')} 
+                  result={penaltyEnabled ? t('visualTracking.rule4PenaltyResult', 'Deducts 0.8s & resets combo') : t('visualTracking.rule4NoPenaltyResult', 'Resets combo. Time penalty is opt-in via settings')} 
                 />
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Visual Tracking Speed Test"
+              title={t('visualTracking.aboutTitle', 'About Visual Tracking Speed Test')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-red-400" /> What Is Visual Tracking & Kinetic Target Interception?
+                    <Eye className="w-4 h-4 text-red-400" /> {t('visualTracking.aboutHeading', 'What Is Visual Tracking & Kinetic Target Interception?')}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Visual Tracking Speed Test</strong> measures how fast and accurately you can acquire, track, and click targets gliding dynamically across your visual field. Unlike static flicking, moving target interception requires predicting projectile trajectory and matching crosshair speed to intercept point.
+                    {t('visualTracking.aboutP1', 'Visual Tracking Speed Test measures how fast and accurately you can acquire, track, and click targets gliding dynamically across your visual field. Unlike static flicking, moving target interception requires predicting projectile trajectory and matching crosshair speed to intercept point.')}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Consistently intercepting high-velocity targets builds ocular smooth pursuit, dynamic visual acuity (DVA), and click-timing precision across diverse gaming environments.
+                    {t('visualTracking.aboutP2', 'Consistently intercepting high-velocity targets builds ocular smooth pursuit, dynamic visual acuity (DVA), and click-timing precision across diverse gaming environments.')}
                   </p>
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                      <h4 className="text-xs font-bold text-white">{t('visualTracking.aboutCard1Title', 'Who Should Use This?')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Fast-paced FPS, arena shooter, and battle royale players looking to improve moving target interception and predictive clicks.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('visualTracking.aboutCard1Desc', 'Fast-paced FPS, arena shooter, and battle royale players looking to improve moving target interception and predictive clicks.')}</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Dynamic Visual Acuity</h4>
+                      <h4 className="text-xs font-bold text-white">{t('visualTracking.aboutCard2Title', 'Dynamic Visual Acuity')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Improves your ability to clearly resolve details and boundaries of moving targets across 2D visual angles.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('visualTracking.aboutCard2Desc', 'Improves your ability to clearly resolve details and boundaries of moving targets across 2D visual angles.')}</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Kinetic Intercept Precision</h4>
+                      <h4 className="text-xs font-bold text-white">{t('visualTracking.aboutCard3Title', 'Kinetic Intercept Precision')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Trains the neuromuscular connection to execute click commands precisely at the interception point.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('visualTracking.aboutCard3Desc', 'Trains the neuromuscular connection to execute click commands precisely at the interception point.')}</p>
                   </div>
                 </div>
               </div>
@@ -903,13 +915,13 @@ export default function VisualTrackingSpeedTestClient() {
         {!isFullscreen && (
           <section className="mt-4">
             <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Reaction Speed Drills
+              {t('visualTracking.relatedTitle', 'Related Reaction Speed Drills')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {RELATED_DRILLS.map((drill) => (
                 <Link
                   key={drill.id}
-                  href={drill.href}
+                  href={locale && locale !== 'en' ? `/${locale}${drill.href}` : drill.href}
                   className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
                 >
                   <div>

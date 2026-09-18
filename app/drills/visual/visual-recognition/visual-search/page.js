@@ -1,4 +1,4 @@
-import VisualSearchClient from './VisualSearchClient';
+import VisualSearchClient from './VisualSearchClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -184,6 +184,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Conjunctive Visual Search Test",
+  "url": "https://skilldrills.online/drills/visual/visual-recognition/visual-search",
+  "description": "Free conjunctive visual search assessment. Scan high-density letter matrices with rotated distractors to measure target acquisition latency and selective attention.",
+  "genre": ["Action", "Brain Game", "Visual Search"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -196,24 +208,28 @@ const howToSchema = {
       position: 1,
       name: 'Identify the Active Target Character',
       text: 'Note the highlighted target symbol indicated in the HUD (such as C, E, or P) and identify its defining visual feature.',
+      url: 'https://skilldrills.online/drills/visual/visual-recognition/visual-search#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Execute Serpentine Grid Sweeps',
       text: 'Scan the 12x8 cell matrix using smooth, horizontal serpentine sweeps rather than scattered random fixations.',
+      url: 'https://skilldrills.online/drills/visual/visual-recognition/visual-search#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Isolate Feature Discrepancies',
       text: 'Detect open contours or unique segment intersections among the rotated distractors using parafoveal vision.',
+      url: 'https://skilldrills.online/drills/visual/visual-recognition/visual-search#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Acquire and Retarget Immediately',
       text: 'Tap or click the target immediately upon identification. As the target relocates, instantly transition your gaze without pausing.',
+      url: 'https://skilldrills.online/drills/visual/visual-recognition/visual-search#step-4',
     },
   ],
 };
@@ -229,7 +245,8 @@ export default function VisualSearchPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
 
-      <VisualSearchClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <VisualSearchClient copy={{ title: "Conjunctive Visual Search Test" }} />
 
       <DrillGuide
         eyebrow="Visual Psychophysics & Attentional Architecture"
@@ -417,4 +434,4 @@ export default function VisualSearchPage() {
       </DrillGuide>
     </>
   );
-}
+}

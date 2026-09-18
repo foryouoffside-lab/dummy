@@ -20,6 +20,7 @@ export default function MicroCorrectionPreview() {
             <span className="mc-sheen" />
             <span className="mc-core" />
           </div>
+          <span className="mc-hit-ring" />
           <span className="mc-hitmarker mc-hit-cyan">
             <i className="mc-hit-l1" />
             <i className="mc-hit-l2" />
@@ -36,6 +37,7 @@ export default function MicroCorrectionPreview() {
             <span className="mc-sheen" />
             <span className="mc-core" />
           </div>
+          <span className="mc-hit-ring" />
           <span className="mc-hitmarker mc-hit-green">
             <i className="mc-hit-l1" />
             <i className="mc-hit-l2" />

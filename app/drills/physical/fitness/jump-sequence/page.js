@@ -1,4 +1,4 @@
-import JumpSequenceClient from './JumpSequenceClient';
+import JumpSequenceClient from './JumpSequenceClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -225,6 +225,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Jump Sequence Training',
+  url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence',
+  description: 'Free online jump sequence training drill. Master stretch-shortening cycle impulse, trajectory calculation, and airborne target interception.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -237,30 +249,34 @@ const howToSchema = {
       position: 1,
       name: 'Charge Vertical Takeoff Impulse',
       text: 'Hover your cursor over the player base dot at the bottom surface. Press and hold click to accumulate launch kinetic energy, matching the charge bar to the height of the approaching target.',
+      url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Execute Ballistic Liftoff & Airborne Steering',
       text: 'Release the click to trigger ballistic ascent. While airborne, slide your mouse laterally to engage internal forward models and steer your ascending arc toward the target vector.',
+      url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Intercept Target with Optical Tau Precision',
       text: 'Track the inverse expansion rate of the moving target sphere. Adjust your trajectory so that your player dot directly intersects the target boundary before gravitational descent begins.',
+      url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Touch Down & Maintain Rhythmic Cadence',
       text: 'Upon landing or clearing the sequence, instantly acquire the new target position, initiate the next charge cycle, and preserve unbroken combo multipliers over the 45-second testing window.',
+      url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence#step-4',
     },
   ],
 };
 
 const guideProps = {
-  sources: pickSources('komi2000', 'kawato1999', 'lee1976', 'woodworth1899', 'fitts1954'),
+  sources: pickSources('komi2000', 'kawato1999', 'lee1976', 'woodworth1899', 'fitts1954', 'woods2015'),
   intro: {
     title: 'How interception timing is measured',
     paragraphs: [
@@ -268,52 +284,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
-    title: 'Jump Sequence Training & Trajectory Interception Benchmarks',
-    description: 'Empirical standards derived from stretch-shortening cycle kinetics (Komi 2000), cerebellar forward models (Kawato 1999), and optical tau time-to-contact interception (Lee 1976). Evaluates total score, trajectory interception accuracy, peak target speed, and airborne control over 45 seconds.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial band'],
+  benchmarks: {
+    title: 'Jump Sequence Training & Trajectory Interception 5-Tier Performance Benchmarks',
+    headers: ['Performance Tier', 'Mastery Rank Title', 'Score Threshold', 'Interception Rate & Speed', 'Performance Grade', 'Neuromotor Airborne Profile'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Trajectory Master',
-        stat: '17,000+ pts',
-        level: '92%+ Acc / 800+ px/s',
-        accuracy: 'Grade S',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Precision Aerial Striker',
-        stat: '12,000–16,999 pts',
-        level: '84–91% Acc / 650–799 px/s',
-        accuracy: 'Grade A',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Skilled Jump Interceptor',
-        stat: '7,500–11,999 pts',
-        level: '75–83% Acc / 500–649 px/s',
-        accuracy: 'Grade B',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Developing Parabola Navigator',
-        stat: '4,000–7,499 pts',
-        level: '65–74% Acc / 350–499 px/s',
-        accuracy: 'Grade C',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Liftoff Trainee',
-        stat: '< 4,000 pts',
-        level: '< 65% Acc / < 350 px/s',
-        accuracy: 'Grade D',
-        percentile: 'Starting out',
-      },
+      ['Tier 1: Apex Trajectory Master', 'Apex Trajectory Master', '17,000+ pts', '92%+ Acc / 800+ px/s', 'Grade S (Top 0.1%)', 'Exceptional cerebellar forward modeling and optical tau time-to-contact estimation; flawless ballistic ascent interception (Komi 2000; Kawato 1999)'],
+      ['Tier 2: Precision Aerial Striker', 'Precision Aerial Striker', '12,000 – 16,999 pts', '84 – 91% Acc / 650 – 799 px/s', 'Grade A (Top 5%)', 'Advanced predictive liftoff impulse calibration with smooth mid-air parabolic steering and minimal terminal deceleration lag (Lee 1976)'],
+      ['Tier 3: Skilled Jump Interceptor', 'Skilled Jump Interceptor', '7,500 – 11,999 pts', '75 – 83% Acc / 500 – 649 px/s', 'Grade B (Top 20%)', 'Solid athletic baseline; consistent apex interception on linear flight paths with slight timing dispersion on high-arc targets'],
+      ['Tier 4: Developing Parabola Navigator', 'Developing Parabola Navigator', '4,000 – 7,499 pts', '65 – 74% Acc / 350 – 499 px/s', 'Grade C (Average)', 'Recreational motor control; frequent late liftoff charges caused by reactive rather than predictive time-to-contact estimation'],
+      ['Tier 5: Novice Liftoff Trainee', 'Novice Liftoff Trainee', '< 4,000 pts', '< 65% Acc / < 350 px/s', 'Grade D (Novice)', 'Early motor acquisition phase; struggles to gauge gravitational curvature, resulting in frequent target overshoot and low combo retention']
     ],
+    note: 'Empirical standards derived from stretch-shortening cycle kinetics (Komi 2000), cerebellar forward models (Kawato 1999), and optical tau time-to-contact interception (Lee 1976).'
   },
   protocols: {
     title: 'How to train jump timing',
@@ -367,10 +348,15 @@ export default function JumpSequencePage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <JumpSequenceClient />
+      <JumpSequenceClient copy={{ title: 'Jump Sequence Training', subtitle: 'Mid-Air Interception & Plyometric Timing Drill' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

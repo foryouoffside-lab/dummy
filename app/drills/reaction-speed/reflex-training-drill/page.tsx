@@ -1,4 +1,4 @@
-import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
+import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -97,27 +97,55 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Launch the Drill",
-      "text": "Press Start Drill to initialize the Reflex Training Drill in full screen."
+      "text": "Press Start Drill to initialize the Reflex Training Drill in full screen.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Scan the Burst",
-      "text": "Keep your eyes alert to every target flashing on screen at once — watch each one's countdown ring."
+      "text": "Keep your eyes alert to every target flashing on screen at once — watch each one's countdown ring.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
       "name": "React and Click",
-      "text": "Click or tap each target's center before its individual timeout expires, prioritizing whichever is closest to disappearing."
+      "text": "Click or tap each target's center before its individual timeout expires, prioritizing whichever is closest to disappearing.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Climb the Levels",
-      "text": "Maintain high accuracy and consecutive hits to level up and face larger simultaneous target bursts."
+      "text": "Maintain high accuracy and consecutive hits to level up and face larger simultaneous target bursts.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill#step-4"
     }
   ]
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Reflex Training Drill",
+  "alternateName": ["Reflex Game", "Divided Attention Reflex Trainer", "Reaction Speed Game"],
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Multi-target burst reflex trainer isolating divided attention and neuromuscular speed.",
+  "softwareVersion": "2.0"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Reflex Training Drill - Multi-Target Burst Game",
+  "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill",
+  "description": "Isolates and trains simultaneous multi-target acquisition, divided attention, and motor reaction speed.",
+  "genre": ["Reflex Game", "Action", "Esports Training"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -286,6 +314,14 @@ export default function ReflexTrainingDrillPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(educationalSchema) }}
       />
       <script
@@ -296,7 +332,7 @@ export default function ReflexTrainingDrillPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <ReflexTrainingDrillWrapper />
+      <ReflexTrainingDrillWrapper copy={{ title: 'Reflex Training Drill' }} />
       <DrillGuide guide={reflexDrillGuide} />
     </>
   );

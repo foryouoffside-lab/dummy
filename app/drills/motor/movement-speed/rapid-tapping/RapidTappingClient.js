@@ -14,13 +14,14 @@ import { drillAudio } from '@/lib/drillAudio';
 import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import { drillTimeout } from '@/lib/drillTimeout';
-import { createBackdropCache, getCanvasDpr, drawPulseRing } from '@/lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '@/lib/canvasFx';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const DRILL_DURATION = 45;
 const ELITE_SCORE = 80;
@@ -42,21 +43,22 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-const getCoachAdvice = (cps, totalClicks, score) => {
+const getCoachAdvice = (cps, totalClicks, score, t) => {
   if (cps < 5) {
-    return "Low click rate detected — practice single-finger tapping rhythm to build baseline finger speed before attempting advanced techniques.";
+    return t ? t('rapidTapping.coachLow', "Low click rate detected — practice single-finger tapping rhythm to build baseline finger speed before attempting advanced techniques.") : "Low click rate detected — practice single-finger tapping rhythm to build baseline finger speed before attempting advanced techniques.";
   }
   if (cps < 8) {
-    return "Solid baseline speed! Try experimenting with jitter clicking or butterfly clicking to increase your CPS beyond 10+ clicks per second.";
+    return t ? t('rapidTapping.coachSolid', "Solid baseline speed! Try experimenting with jitter clicking or butterfly clicking to increase your CPS beyond 10+ clicks per second.") : "Solid baseline speed! Try experimenting with jitter clicking or butterfly clicking to increase your CPS beyond 10+ clicks per second.";
   }
   if (cps < 12) {
-    return "Great clicking velocity! Focus on maintaining finger muscle endurance to prevent fatigue as the ball shrink rate accelerates.";
+    return t ? t('rapidTapping.coachGreat', "Great clicking velocity! Focus on maintaining finger muscle endurance to prevent fatigue as the ball shrink rate accelerates.") : "Great clicking velocity! Focus on maintaining finger muscle endurance to prevent fatigue as the ball shrink rate accelerates.";
   }
-  return "Elite CPS performance! Your rapid tapping speed and muscle endurance easily rival top-tier competitive Minecraft and FPS players.";
+  return t ? t('rapidTapping.coachElite', "Elite CPS performance! Your rapid tapping speed and muscle endurance easily rival top-tier competitive Minecraft and FPS players.") : "Elite CPS performance! Your rapid tapping speed and muscle endurance easily rival top-tier competitive Minecraft and FPS players.";
 };
 
 
-export default function RapidTappingClient() {
+export default function RapidTappingClient({ copy } = {}) {
+  const { locale, t } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -106,6 +108,7 @@ export default function RapidTappingClient() {
     clickTimestamps: [],
     particles: [],
     hitMarkers: [],
+    hitRings: [],
     screenShake: 0,
     logicalWidth: 800,
     logicalHeight: 450
@@ -216,17 +219,17 @@ export default function RapidTappingClient() {
     const finalScore = Math.floor(e.score);
 
     let letter = 'D';
-    let label = 'ROOKIE';
+    let label = copy?.rankRookie || t('rapidTapping.rankRookie', 'ROOKIE');
     let color = 'text-slate-400';
 
-    if (finalScore >= 60 || finalCps >= 11) { letter = 'S+'; label = 'ELITE TAPPER'; color = 'text-yellow-400'; }
-    else if (finalScore >= 40 || finalCps >= 9) { letter = 'S'; label = 'MASTER TAPPER'; color = 'text-amber-400'; }
-    else if (finalScore >= 25 || finalCps >= 7) { letter = 'A'; label = 'PRO TAPPER'; color = 'text-emerald-400'; }
-    else if (finalScore >= 15 || finalCps >= 5) { letter = 'B'; label = 'ADVANCED'; color = 'text-cyan-400'; }
-    else if (finalScore >= 5 || finalCps >= 3) { letter = 'C'; label = 'INTERMEDIATE'; color = 'text-blue-400'; }
+    if (finalScore >= 60 || finalCps >= 11) { letter = 'S+'; label = copy?.rankElite || t('rapidTapping.rankElite', 'ELITE TAPPER'); color = 'text-yellow-400'; }
+    else if (finalScore >= 40 || finalCps >= 9) { letter = 'S'; label = copy?.rankMaster || t('rapidTapping.rankMaster', 'MASTER TAPPER'); color = 'text-amber-400'; }
+    else if (finalScore >= 25 || finalCps >= 7) { letter = 'A'; label = copy?.rankPro || t('rapidTapping.rankPro', 'PRO TAPPER'); color = 'text-emerald-400'; }
+    else if (finalScore >= 15 || finalCps >= 5) { letter = 'B'; label = copy?.rankAdvanced || t('rapidTapping.rankAdvanced', 'ADVANCED'); color = 'text-cyan-400'; }
+    else if (finalScore >= 5 || finalCps >= 3) { letter = 'C'; label = copy?.rankIntermediate || t('rapidTapping.rankIntermediate', 'INTERMEDIATE'); color = 'text-blue-400'; }
 
     const grade = { letter, label, color };
-    const advice = getCoachAdvice(finalCps, e.clicks, finalScore);
+    const advice = getCoachAdvice(finalCps, e.clicks, finalScore, t);
 
     setAnalytics({
       finalScore,
@@ -254,7 +257,7 @@ export default function RapidTappingClient() {
     setBestScore(updatedData.bestScore);
     setBestCps(updatedData.bestCps);
     setGameState('gameOver');
-  }, []);
+  }, [t, copy]);
 
   const handlePointerDown = useCallback((e) => {
     if (!gameActiveRef.current || isPausedRef.current) return;
@@ -291,6 +294,7 @@ export default function RapidTappingClient() {
         eng.score += 1;
         drillAudio.playHit();
         spawnParticles(cx, cy, '#d946ef', 14);
+        eng.hitRings.push(createHitRing(cx, cy, eng.radius, '#d946ef'));
         eng.screenShake = 6;
 
         // Dynamic difficulty shrink acceleration
@@ -455,6 +459,8 @@ export default function RapidTappingClient() {
         ctx.fillStyle = p.color;
         ctx.fill();
       }
+
+      drawHitRings(ctx, e.hitRings, dt);
 
       // Render Hit Markers
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
@@ -659,20 +665,20 @@ export default function RapidTappingClient() {
         accuracy: `${analytics.cps} CPS`,
         rating: { letter: gradeLetter, label: analytics.grade?.label || 'Keep Going', emoji: '⚡' },
         newBest: isNewBest,
-        drillName: 'CPS Test',
+        drillName: copy?.title || t('rapidTapping.title', 'CPS Test'),
         playerName: player,
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on the CPS Test! Practice at skilldrills.online!`;
+      const text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on the ${copy?.title || t('rapidTapping.title', 'CPS Test')}! Practice at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'CPS Test Score', text, url }).catch(() => {});
+        navigator.share({ title: `${copy?.title || t('rapidTapping.title', 'CPS Test')} Score`, text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
         alert('Score card copied to clipboard!');
       }
     }
-  }, [uiScore, analytics, bestScore, isNewBest]);
+  }, [uiScore, analytics, bestScore, isNewBest, t, copy]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -682,10 +688,10 @@ export default function RapidTappingClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              CPS Test
+              <span data-seo-kw="1">{copy?.title || t('rapidTapping.title', 'CPS Test')}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              A CPS test counts how many times you can click a mouse button in one second. Sustained one-finger clicking runs to roughly 5&ndash;7 clicks per second, because the standard finger tapping test puts a healthy adult&apos;s dominant index finger near 50&ndash;55 taps per 10 seconds (Halstead, 1947) &mdash; the much higher numbers quoted online come from jitter and butterfly techniques, which do not use one finger press per click.
+              {copy?.desc || t('rapidTapping.desc', "A CPS test counts how many times you can click a mouse button in one second. Sustained one-finger clicking runs to roughly 5–7 clicks per second, because the standard finger tapping test puts a healthy adult's dominant index finger near 50–55 taps per 10 seconds (Halstead, 1947) — the much higher numbers quoted online come from jitter and butterfly techniques, which do not use one finger press per click.")}
             </p>
           </div>
         )}
@@ -694,10 +700,10 @@ export default function RapidTappingClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: uiScore },
-              { label: "Time Left", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: "CPS Rate", val: liveCps, color: "text-fuchsia-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.score || t('rapidTapping.score', "Score"), val: uiScore },
+              { label: copy?.timeLeft || t('rapidTapping.timeLeft', "Time Left"), val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: copy?.cpsRate || t('rapidTapping.cpsRate', "CPS Rate"), val: liveCps, color: "text-fuchsia-400" },
+              { label: copy?.bestScore || t('rapidTapping.bestScore', "Best Score"), val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -727,11 +733,11 @@ export default function RapidTappingClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.score || t('rapidTapping.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.time || t('rapidTapping.time', 'Time')}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -782,8 +788,8 @@ export default function RapidTappingClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-fuchsia-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — drill timer and pointer lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.paused || t('rapidTapping.paused', 'Game Paused')}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.clickResume || t('rapidTapping.clickResume', 'Click to resume — drill timer and pointer lock will re-engage.')}</p>
               </div>
             </div>
           )}
@@ -799,8 +805,8 @@ export default function RapidTappingClient() {
             <FpsStartCard
               icon={Activity}
               accent="fuchsia"
-              title="CPS Test"
-              subtitle="CPS Click Speed Trainer • Hardware Raw Input"
+              title={copy?.title || t('rapidTapping.title', 'CPS Test')}
+              subtitle={copy?.startSubtitle || t('rapidTapping.startSubtitle', 'CPS Click Speed Trainer • Hardware Raw Input')}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -808,7 +814,7 @@ export default function RapidTappingClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || t('rapidTapping.getReady', 'GET READY')} />
           )}
 
           {/* END SCREEN */}
@@ -819,7 +825,7 @@ export default function RapidTappingClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(217,70,239,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.newBest || t('rapidTapping.newBest', 'NEW BEST')}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
@@ -831,7 +837,7 @@ export default function RapidTappingClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.points || t('rapidTapping.points', 'Points')}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -841,19 +847,19 @@ export default function RapidTappingClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.cps}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Average CPS</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.avgCps || t('rapidTapping.avgCps', 'Average CPS')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.totalClicks}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Total Clicks</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.totalClicks || t('rapidTapping.totalClicks', 'Total Clicks')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">+{analytics.maxDifficulty}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Difficulty</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.maxDifficulty || t('rapidTapping.maxDifficulty', 'Max Difficulty')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{bestCps}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak CPS</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.peakCps || t('rapidTapping.peakCps', 'Peak CPS')}</p>
                   </div>
                 </div>
 
@@ -863,19 +869,19 @@ export default function RapidTappingClient() {
                     onClick={enterDrill}
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.playAgain || t('rapidTapping.playAgain', 'Play Again')}
                   </button>
                   <button
                     onClick={shareScore}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
+                    title={copy?.shareScore || t('rapidTapping.shareScore', 'Share Score')}
                   >
                     <Share2 className="w-4 h-4 text-fuchsia-400" />
                   </button>
                   <button
                     onClick={handleExitDrill}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit & Return"
+                    title={copy?.exit || t('rapidTapping.exit', 'Exit & Return')}
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>
@@ -891,34 +897,54 @@ export default function RapidTappingClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || t('rapidTapping.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Rapid Target Tapping" highlight="(Click Target Ball)" result="Expands target radius & prevents decay" />
-                <RuleItem num="2" text="Scoring Threshold" highlight="+1 Point per 10 Clicks" result="Builds final session score" />
-                <RuleItem num="3" text="Dynamic Shrink Rate" highlight="Accelerates at higher scores" result="Pushes finger speed & endurance limits" />
-                <RuleItem num="4" text="Zero Ball Radius" highlight="Triggers Penalty Reset" result="Resets ball to base size with time penalty" />
+                <RuleItem
+                  num="1"
+                  text={copy?.rule1Title || t('rapidTapping.rule1Title', 'Rapid Target Tapping')}
+                  highlight={copy?.rule1Highlight || t('rapidTapping.rule1Highlight', '(Click Target Ball)')}
+                  result={copy?.rule1Result || t('rapidTapping.rule1Result', 'Expands target radius & prevents decay')}
+                />
+                <RuleItem
+                  num="2"
+                  text={copy?.rule2Title || t('rapidTapping.rule2Title', 'Scoring Threshold')}
+                  highlight={copy?.rule2Highlight || t('rapidTapping.rule2Highlight', '+1 Point per 10 Clicks')}
+                  result={copy?.rule2Result || t('rapidTapping.rule2Result', 'Builds final session score')}
+                />
+                <RuleItem
+                  num="3"
+                  text={copy?.rule3Title || t('rapidTapping.rule3Title', 'Dynamic Shrink Rate')}
+                  highlight={copy?.rule3Highlight || t('rapidTapping.rule3Highlight', 'Accelerates at higher scores')}
+                  result={copy?.rule3Result || t('rapidTapping.rule3Result', 'Pushes finger speed & endurance limits')}
+                />
+                <RuleItem
+                  num="4"
+                  text={copy?.rule4Title || t('rapidTapping.rule4Title', 'Zero Ball Radius')}
+                  highlight={copy?.rule4Highlight || t('rapidTapping.rule4Highlight', 'Triggers Penalty Reset')}
+                  result={copy?.rule4Result || t('rapidTapping.rule4Result', 'Resets ball to base size with time penalty')}
+                />
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About the CPS Test"
+              title={copy?.aboutTitle || t('rapidTapping.aboutTitle', 'About the CPS Test')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-fuchsia-400" /> Neuromuscular Tapping Frequency &amp; Clicking Endurance
+                    <Activity className="w-4 h-4 text-fuchsia-400" /> {copy?.aboutHeading || t('rapidTapping.aboutHeading', 'Neuromuscular Tapping Frequency & Clicking Endurance')}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    The <strong>CPS Test (rapid tapping test)</strong> isolates and evaluates the maximum firing rate of your neuromuscular pathway, measuring how many discrete ballistic inputs your motor cortex can generate per second. In competitive gaming environments like <strong>Minecraft PvP, MOBA combat, and semi-automatic pistol rounds in CS2/Valorant</strong>, click frequency directly determines damage throughput and engagement outcomes.
+                    {copy?.aboutP1 || t('rapidTapping.aboutP1', 'The CPS Test (rapid tapping test) isolates and evaluates the maximum firing rate of your neuromuscular pathway, measuring how many discrete ballistic inputs your motor cortex can generate per second. In competitive gaming environments like Minecraft PvP, MOBA combat, and semi-automatic pistol rounds in CS2/Valorant, click frequency directly determines damage throughput and engagement outcomes.')}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    While casual tapping relies on voluntary finger flexor contractions averaging 5–7 CPS, advanced techniques like <strong>jitter clicking</strong> (transmitting micro-vibrations via isometric forearm co-contraction) and <strong>butterfly clicking</strong> (alternating dual-finger actuation) push mechanical switch actuation up to 12–20+ CPS. Grounded in Ward Halstead&apos;s (1947) finger tapping norms and Todor &amp; Kyprie&apos;s (1980) motor oscillation research, our continuous shrink-rate engine tests both your burst velocity and muscular endurance over a sustained 45-second session.
+                    {copy?.aboutP2 || t('rapidTapping.aboutP2', "While casual tapping relies on voluntary finger flexor contractions averaging 5–7 CPS, advanced techniques like jitter clicking (transmitting micro-vibrations via isometric forearm co-contraction) and butterfly clicking (alternating dual-finger actuation) push mechanical switch actuation up to 12–20+ CPS. Grounded in Ward Halstead's (1947) finger tapping norms and Todor & Kyprie's (1980) motor oscillation research, our continuous shrink-rate engine tests both your burst velocity and muscular endurance over a sustained 45-second session.")}
                   </p>
                 </div>
 
@@ -926,23 +952,23 @@ export default function RapidTappingClient() {
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.cardAudienceTitle || t('rapidTapping.cardAudienceTitle', 'Target Audience')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Competitive Minecraft PvP players, tactical FPS gamers, and rhythm game enthusiasts training finger tapping frequency and endurance.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.cardAudienceDesc || t('rapidTapping.cardAudienceDesc', 'Competitive Minecraft PvP players, tactical FPS gamers, and rhythm game enthusiasts training finger tapping frequency and endurance.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Physiological Benefits</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.cardPhysioTitle || t('rapidTapping.cardPhysioTitle', 'Physiological Benefits')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Strengthens finger extensor and flexor tendons, elevates motor unit recruitment velocity, and delays neuromuscular fatigue.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.cardPhysioDesc || t('rapidTapping.cardPhysioDesc', 'Strengthens finger extensor and flexor tendons, elevates motor unit recruitment velocity, and delays neuromuscular fatigue.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-pink-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Dynamic Decay Engine</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.cardDecayTitle || t('rapidTapping.cardDecayTitle', 'Dynamic Decay Engine')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Target decay accelerates up to +600px/sec as score increases, demanding faster CPS and unrelenting tap frequency.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.cardDecayDesc || t('rapidTapping.cardDecayDesc', 'Target decay accelerates up to +600px/sec as score increases, demanding faster CPS and unrelenting tap frequency.')}</p>
                   </div>
                 </div>
               </div>
@@ -988,4 +1014,4 @@ function RuleItem({ num, text, highlight = '', result }) {
     </div>
   );
 }
-
+

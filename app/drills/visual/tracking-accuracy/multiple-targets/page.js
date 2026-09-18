@@ -1,4 +1,4 @@
-import GhostLinkClient from './GhostLinkClient';
+import GhostLinkClient from './GhostLinkClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -117,6 +117,18 @@ const webAppSchema = {
   "teaches": "Multiple Object Tracking, Divided Visual Attention, Spatial Working Memory, Multifocal Indexing, Distractor Suppression"
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Multiple Object Tracking Test",
+  "url": "https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets",
+  "description": "Free Multiple Object Tracking (MOT) test online. Track multiple moving targets simultaneously across complex trajectories to test divided visual attention.",
+  "genre": ["Action", "Brain Game", "Visual Tracking"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
@@ -128,25 +140,29 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Memorize Highlighted Target Spheres",
-      "text": "During the initial 2-second preview phase, identify and lock your visual attention onto the highlighted green target spheres."
+      "text": "During the initial 2-second preview phase, identify and lock your visual attention onto the highlighted green target spheres.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Anchor Centroid Gaze as Spheres Fade",
-      "text": "As the targets revert to neutral distractor appearance and begin bouncing across the viewport, anchor your gaze near their geometric center point."
+      "text": "As the targets revert to neutral distractor appearance and begin bouncing across the viewport, anchor your gaze near their geometric center point.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
       "name": "Track Parallel Trajectories Through Collisions",
-      "text": "Maintain parallel peripheral attention across all target items throughout the duration, tracking them through 2D momentum deflections."
+      "text": "Maintain parallel peripheral attention across all target items throughout the duration, tracking them through 2D momentum deflections.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Identify and Click Original Targets",
-      "text": "When motion ceases in the identification phase, click all original target spheres (+20 PTS per target) to compute your accuracy rating."
+      "text": "When motion ceases in the identification phase, click all original target spheres (+20 PTS per target) to compute your accuracy rating.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets#step-4"
     }
   ]
 };
@@ -327,8 +343,9 @@ export default function GhostLinkPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <GhostLinkClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <GhostLinkClient copy={{ title: "Multiple Object Tracking Test" }} />
       <DrillGuide guide={multipleTargetsGuide} />
     </>
   );
-}
+}

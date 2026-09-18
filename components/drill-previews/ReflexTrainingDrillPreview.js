@@ -286,23 +286,34 @@ export default function ReflexTrainingDrillPreview() {
 
       const chX = curTargetX * width;
       const chY = curTargetY * height;
-      const chSize = 9;
 
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.lineWidth = 1.4;
+      const chColor = '#ef4444';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
+
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      // Reticle ticks
-      ctx.moveTo(chX, chY - 3); ctx.lineTo(chX, chY - chSize);
-      ctx.moveTo(chX, chY + 3); ctx.lineTo(chX, chY + chSize);
-      ctx.moveTo(chX - 3, chY); ctx.lineTo(chX - chSize, chY);
-      ctx.moveTo(chX + 3, chY); ctx.lineTo(chX + chSize, chY);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
       ctx.stroke();
 
       // Center reticle dot
-      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(chX, chY, 1.2, 0, Math.PI * 2);
+      ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 

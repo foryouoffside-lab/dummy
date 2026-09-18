@@ -84,7 +84,7 @@ const RELATED_DRILLS = [
   { id: "reaction-time", name: "Neuro Speed & Reflex Test", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" }
 ];
 
-export default function DualTargetFlowClient() {
+export default function DualTargetFlowClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -574,7 +574,7 @@ export default function DualTargetFlowClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Multitasking Test
+              <span data-seo-kw="1">{copy?.title || "Multitasking Test"}</span>
             </h1>
           </div>
         )}

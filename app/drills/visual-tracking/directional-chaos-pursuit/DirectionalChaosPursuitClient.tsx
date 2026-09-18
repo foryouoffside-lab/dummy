@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function DirectionalChaosPursuitClient() {
+export default function DirectionalChaosPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -416,13 +416,13 @@ export default function DirectionalChaosPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Directional Chaos Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Erratic Motion Eye Drill
+              <span data-seo-kw="1">{copy?.title || "Directional Chaos Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Erratic Motion Eye Drill"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Chaotic target tracking forces the visual system to operate under real-time reactive feedback rather than relying on predictive internal models (Bahill et al., 1980). When unpredictable velocity shifts displace the target from central gaze, the oculomotor network must rapidly fire corrective saccades and re-establish pursuit gain (Barnes, 2008; Krauzlis, 2004). Pursuit holds accuracy up to roughly 30&deg;/s, so every unpredictable direction change drops the eye behind the target until a catch-up saccade closes the gap (Krauzlis, 2004).
+              {copy?.description || "Chaotic target tracking forces the visual system to operate under real-time reactive feedback rather than relying on predictive internal models (Bahill et al., 1980). When unpredictable velocity shifts displace the target from central gaze, the oculomotor network must rapidly fire corrective saccades and re-establish pursuit gain (Barnes, 2008; Krauzlis, 2004). Pursuit holds accuracy up to roughly 30°/s, so every unpredictable direction change drops the eye behind the target until a catch-up saccade closes the gap (Krauzlis, 2004)."}
             </p>
           </div>
         )}

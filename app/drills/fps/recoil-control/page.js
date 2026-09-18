@@ -1,9 +1,10 @@
-import RecoilControlClient from './RecoilControlClient';
+import RecoilControlClient from './RecoilControlClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Recoil Control Trainer — Spray Practice | SkillDrills",
+  title: "Recoil Control Trainer – Spray Practice | SkillDrills",
   description: "Master weapon spray patterns, vertical mouse pull-down velocity, and horizontal recoil compensation for tactical shooters like CS2 and Valorant.",
   keywords: [
     "recoil control trainer",
@@ -17,24 +18,18 @@ export const metadata = {
     "free spray pattern trainer online",
     "how to pull down on spray",
     "improve first magazine accuracy",
-    "spray control training",
-    "recoil compensation training",
-    "burst fire accuracy",
-    "cs2 spray transfer training",
-    "vertical recoil pull down",
-    "horizontal spray compensation",
-    "リコイル 制御 練習",
-    "반동 제어 연습"
+    "spray control training"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/recoil-control",
+    languages: getAlternateLanguages('/drills/fps/recoil-control'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Recoil Control Trainer — Spray Practice | SkillDrills",
+    title: "Recoil Control Trainer – Spray Practice | SkillDrills",
     description: "Master weapon spray patterns, vertical mouse pull-down velocity, and horizontal recoil compensation for tactical shooters like CS2 and Valorant.",
     url: "https://skilldrills.online/drills/fps/recoil-control",
     siteName: 'SkillDrills',
@@ -43,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Recoil Control Trainer — Spray Practice | SkillDrills",
+    title: "Recoil Control Trainer – Spray Practice | SkillDrills",
     description: "Master weapon spray patterns, vertical mouse pull-down velocity, and horizontal recoil compensation for tactical shooters like CS2 and Valorant.",
   },
 };
@@ -57,6 +52,22 @@ export default function RecoilControlPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Recoil Control Trainer", "item": "https://skilldrills.online/drills/fps/recoil-control" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Recoil Control Trainer",
+    "url": "https://skilldrills.online/drills/fps/recoil-control",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS drill for mastering recoil control, spray patterns, and weapon compensation for CS2, Valorant, PUBG, and other shooters."
   };
 
   const softwareSchema = {
@@ -102,63 +113,71 @@ export default function RecoilControlPage() {
         "name": "What is recoil control in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Recoil control is the mechanical motor compensation players execute by moving their mouse in the exact opposite direction and timing of an automatic weapon's muzzle climb to maintain pinpoint bullet grouping."
+          "text": "Recoil control is the physical counter-movement applied to the mouse to counteract the programmatic vertical climb and horizontal sway (spray pattern) of an automatic weapon during sustained fire."
         }
       },
       {
         "@type": "Question",
-        "name": "How do I control recoil in CS2 and Valorant?",
+        "name": "Why is the first 8-10 bullet pull-down the most critical phase of a spray?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "In CS2, weapons like the AK-47 feature fixed spray patterns requiring a firm downward mouse pull for the first 8–10 bullets, followed by controlled left-and-right horizontal sweeps. Valorant weapons like the Vandal feature deterministic vertical climb for the first 5–6 bullets before shifting into randomized horizontal bloom."
+          "text": "For the first 8-10 rounds of an assault rifle spray (such as the AK-47), recoil climb is predominantly vertical with minimal horizontal deviation. Mastering this initial pull-down guarantees reliable kills within the standard 200-400ms time-to-kill window."
         }
       },
       {
         "@type": "Question",
-        "name": "What is the difference between weapon recoil and inaccuracy spread bloom?",
+        "name": "How does recoil control differ between CS2, Valorant, and Apex Legends?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Recoil is the predictable, repeatable geometric displacement path of the weapon's barrel during automatic fire. Spread bloom is the randomized cone of inaccuracy added on top of recoil, which expands with movement or continuous fire."
+          "text": "CS2 utilizes fully deterministic, static spray patterns that follow identical coordinate offsets across all 30 rounds. Valorant features deterministic vertical climb for the first 5-6 bullets, followed by randomized horizontal bloom. Apex Legends combines moderate per-weapon recoil curves with recoil smoothing (jitter aiming or strafe compensation) during movement."
         }
       },
       {
         "@type": "Question",
-        "name": "Why is the first 8 to 10 bullets the most critical part of a spray pattern?",
+        "name": "How does generalized motor program (GMP) theory explain spray control?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The first 8 to 10 bullets of automatic rifles (like the AK-47 and M4A1-S) exhibit linear vertical climb with minimal horizontal deviation. Compensating this initial burst requires simple vertical pull-down, offering the highest damage conversion before horizontal spray kicks in."
+          "text": "In motor control neuroscience (Schmidt & Lee, 2011), rapid motor actions under 700ms execute too quickly for closed-loop visual feedback. High-level aimers store the spray pattern as an open-loop generalized motor program with invariant relative timing and force parameters."
         }
       },
       {
         "@type": "Question",
-        "name": "How does Motor Schema Theory explain spray pattern muscle memory?",
+        "name": "What is a spray transfer and how do you execute it?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Formalized by Richard A. Schmidt & Timothy D. Lee (2011), rapid motor actions are stored as Generalized Motor Programs (GMPs). Deliberate spray training establishes invariant neuromuscular timing schemas in the motor cortex, allowing players to execute pull-down patterns automatically without conscious visual latency."
+          "text": "A spray transfer involves shifting sustained automatic fire from a neutralized target to a second adjacent target without releasing the trigger. It requires flicking to the new target while accounting for the ongoing vertical and horizontal offset of the current bullet index."
         }
       },
       {
         "@type": "Question",
-        "name": "What is spray transfer and how do pro players execute multi-target sprays?",
+        "name": "How do mouse sensitivity and mousepad friction affect recoil control?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Spray transfer is the technique of redirecting ongoing automatic fire from an eliminated target to a secondary enemy without releasing the trigger, adjusting for the active mid-magazine recoil offset during the flick."
+          "text": "Lower sensitivities require larger physical forearm strokes, which increases motor stability and reduces percentage-error variance. Control-oriented mousepads with higher dynamic friction prevent overshoot during rapid vertical mouse deceleration."
         }
       },
       {
         "@type": "Question",
-        "name": "How do mouse sensitivity and mousepad friction affect spray control?",
+        "name": "Should you pull down with your wrist or your forearm during a spray?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Low sensitivity requires larger forearm pull-downs, providing higher mechanical stability and error tolerance. High dynamic pad friction assists controlled deceleration, preventing hand over-pull during vertical compensation."
+          "text": "Short bursts (3-7 bullets) can be managed via finger flexion and wrist extension. Sustained sprays (15-30 bullets) require locking the wrist and gliding the entire forearm downward from the elbow to avoid reaching the end of wrist range of motion."
         }
       },
       {
         "@type": "Question",
-        "name": "What arm and wrist mechanics produce the smoothest vertical recoil pull-down?",
+        "name": "What is the difference between weapon spread (bloom) and recoil pattern?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Initiating the primary vertical drag from the wrist and fingers for short bursts, and transitioning to a smooth forearm drag anchored at the elbow for full 30-round sprays, prevents wrist jamming and preserves horizontal micro-steering."
+          "text": "Recoil pattern is the predictable geometric displacement of the weapon barrel over time. Spread (bloom) is the random angular inaccuracy cone applied to each individual bullet, which expands during movement or continuous fire and cannot be fully compensated by mouse movement."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this recoil trainer completely free to use in the browser?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, SkillDrills Recoil Control Trainer is 100% free, runs directly in modern desktop browsers via HTML5 Pointer Lock, and requires no account creation or downloads."
         }
       },
       {
@@ -166,15 +185,7 @@ export default function RecoilControlPage() {
         "name": "How often should I practice recoil control drills?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Practicing 5 to 10 minutes of disciplined spray pattern compensation daily before ranked matches solidifies motor schemas and primes neuromuscular readiness without inducing wrist fatigue."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Why does missing shots or poor magazine accuracy reset my combo streak?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Missing shots or emptying a magazine with less than 40% accuracy resets your combo multiplier to enforce spray discipline and penalize uncontrolled ammo dumping. When optional Time Penalty is enabled, it also deducts 0.6 seconds from your timer."
+          "text": "Practicing 10 to 15 minutes daily before matches establishes consistent neuromuscular activation. Overtraining beyond 30 continuous minutes often causes forearm fatigue and degraded motor precision."
         }
       }
     ]
@@ -188,70 +199,78 @@ export default function RecoilControlPage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Configure Game Sensitivity",
-        "text": "Align your DPI and in-game sensitivity in Session Settings to preserve 1:1 hardware coordinates."
+        "text": "Align your DPI and in-game sensitivity in Session Settings to preserve 1:1 hardware coordinates.",
+        "url": "https://skilldrills.online/drills/fps/recoil-control#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Initiate Sustained Fire",
-        "text": "Hold left click to begin automatic fire, monitoring muzzle rise and initial bullet impact displacement."
+        "text": "Hold left click to begin automatic fire, monitoring muzzle rise and initial bullet impact displacement.",
+        "url": "https://skilldrills.online/drills/fps/recoil-control#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Pull Down Vertically",
-        "text": "For the first 8–10 bullets, execute a steady downward mouse pull at constant velocity to cancel barrel climb."
+        "text": "For the first 8–10 bullets, execute a steady downward mouse pull at constant velocity to cancel barrel climb.",
+        "url": "https://skilldrills.online/drills/fps/recoil-control#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Counter-Steer Horizontal Sway",
-        "text": "As the spray shifts horizontally, invert your mouse path (steering right when spray kicks left) to hold a tight grouping."
+        "text": "As the spray shifts horizontally, invert your mouse path (steering right when spray kicks left) to hold a tight grouping.",
+        "url": "https://skilldrills.online/drills/fps/recoil-control#step-4"
       }
     ]
   };
 
   const recoilControlGuide = {
-    heading: "Recoil Control Trainer Guide & Spray Compensation Mechanics",
+    heading: "Recoil Control Trainer Guide & Spray Biomechanics",
     intro: [
-      "Recoil Control Trainer is an empirical sensorimotor training drill engineered to calibrate muscle memory for weapon spray patterns, vertical pull-down velocity, and horizontal counter-steering. In competitive tactical shooters such as Counter-Strike 2, Valorant, and Rainbow Six Siege, gunfights frequently extend beyond single-tap headshots—demanding that players sustain laser-accurate bullet clusters through full 30-round automatic bursts.",
-      "The motor learning foundation of rapid recoil compensation is explained by Generalized Motor Program (GMP) theory, formalized by Richard A. Schmidt & Timothy D. Lee (2011). Under GMP theory, complex rapid movements that unfold too quickly for continuous unprimed visual feedback (such as compensating 10 bullets in under 700 ms) are executed as pre-structured motor programs with invariant relative timing and force parameters stored in the motor cortex.",
-      "During sustained fire, human motor control deploys Robert S. Woodworth's two-component aiming model (1899) and David E. Meyer's optimized submovement framework (1988): an initial open-loop muscular pull-down countering known vertical climb, followed by closed-loop sensory-guided micro-adjustments that counter-weave against horizontal weapon sway and moving target hitboxes.",
-      "Governed by Fitts' Law speed-accuracy dynamics (1954) and tracked with performance.now() digital chronometry (Woods et al., 2015), this drill teaches players to eliminate spray panic, develop rock-solid pull-down mechanics, and secure multi-kill spray transfers under pressure.",
+      "Recoil Control Trainer is an empirical sensorimotor drill engineered to build the muscle memory required to counteract programmatic weapon spray patterns, vertical climb velocity, and horizontal sway in first-person shooters. In tactical and battle royale shooters such as Counter-Strike 2, VALORANT, Apex Legends, and PUBG, combat frequently extends beyond single-tap headshots. When targets execute erratic evasive maneuvers, sustained automatic fire with tight bullet grouping decides the gunfight.",
+      "The motor learning framework governing rapid recoil compensation is defined by Richard A. Schmidt and Timothy D. Lee's Generalized Motor Program (GMP) theory (Schmidt & Lee, 2011). Because 10-round bursts occur in under 700 milliseconds—faster than human closed-loop visual feedback can process individual bullet impacts—elite players execute a pre-structured open-loop motor program containing invariant relative timing and force parameters.",
+      "This motor process aligns with Robert S. Woodworth's classic two-component model of aiming (Woodworth, 1899) and David E. Meyer's optimized submovement model (Meyer et al., 1988): an initial ballistic open-loop pull-down of the mouse followed by fine corrective submovements to compensate for horizontal sway and dynamic target strafes.",
+      "Motor precision adheres to Fitts's Law (Fitts, 1954) and Schmidt's impulse variability model (Schmidt et al., 1979): as the velocity and force of downward mouse pulling increase, muscular output variability expands. By training with high-resolution digital chronometry using performance.now() (Woods et al., 2015), this drill isolates the steady pull-down velocity necessary to minimize grouping spread.",
       "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
     ],
     benchmarks: {
-      title: "Magazine Accuracy & Spray Control Performance Tiers",
-      headers: ["Performance Tier", "Magazine Accuracy %", "Motor Control Mechanics", "Competitive In-Game Implication"],
+      title: "Magazine Accuracy & Recoil Control Skill Tiers",
+      headers: ["Skill Tier", "Magazine Accuracy %", "Motor Control Characteristics", "In-Game Combat Implication"],
       rows: [
-        ["Tier 1 (Apex Laser)", "78% – 90%+", "Near-perfect vertical pull-down; sub-pixel horizontal counter-weaving across all 30 rounds with zero bloom overrun", "Dominates multi-kill spray transfers in CS2 Faceit 10, Radiant, and professional competitive lobbies"],
-        ["Tier 2 (Competitive Pro)", "62% – 78%", "Crisp first-10 bullet headshot cluster; smooth horizontal transition with rapid re-centering on evasive targets", "Consistently wins medium-range rifle duels; reliable spray transfers against adjacent enemies"],
-        ["Tier 3 (High-Skill FPS)", "48% – 62%", "Solid initial pull-down; minor over-pull or delayed horizontal compensation on rounds 12–25", "Effective close-to-medium spray control; occasional bullet climb over enemy shoulders at range"],
-        ["Tier 4 (Intermediate)", "35% – 48%", "Inconsistent pull-down velocity; bullets climb over target head after bullet 7 due to hesitation", "Prone to losing spray duels; forced to rely on single-taps or short 3-round bursts"],
-        ["Tier 5 (Developing / Bloom Jitter)", "Sub-35%", "Excessive hand tension causing erratic vertical dragging; uncontrolled bloom spread across entire screen", "Fails magazine discipline threshold; bullets scatter wildly outside enemy hitboxes"]
+        ["Tier 1 (Apex Laser)", "78% – 90%+", "Near-perfect vertical velocity matching; sub-pixel horizontal counter-steering across all 30 rounds with zero wasted bullets.", "Lethal multi-target spray transfers in CS2 Faceit Level 10, VALORANT Radiant, and Apex Predator lobbies."],
+        ["Tier 2 (Competitive Pro)", "62% – 78%", "Pinpoint first 10-round headshot grouping; rapid recentering during horizontal spray inversions on moving targets.", "Wins mid-range rifle duels reliably; consistently executes two-target spray transfers."],
+        ["Tier 3 (High-Skill FPS)", "48% – 62%", "Solid vertical pull-down; minor over-compensation or delay during bullets 12–25 when horizontal recoil shifts.", "Reliable close-to-mid range sprays; struggles with long-range full-auto spray transfers."],
+        ["Tier 4 (Intermediate)", "35% – 48%", "Inconsistent pull-down velocity; hesitates around bullet 7, allowing muzzle rise over the target's head.", "Loses spray duels frequently; forced to rely on single taps or short 3-round bursts."],
+        ["Tier 5 (Developing / Jittery)", "Sub-35%", "Excessive hand tension causing erratic vertical jerks; bullets scatter across the full canvas.", "Fails the 40% magazine discipline threshold; wastes ammunition outside target hitbox."]
       ],
-      note: "Accuracy percentages represent confirmed target hits divided by total rounds fired per magazine, tracked with performance.now() chronometry (Woods et al., 2015)."
+      note: "Accuracy percentages represent confirmed target hits divided by total rounds fired per magazine cycle, measured via performance.now() chronometry (Woods et al., 2015)."
     },
     techniques: {
-      title: "Evidence-Based Protocols for Perfecting Recoil Spray Control",
+      title: "Evidence-Based Protocols for Perfecting Recoil Control",
       items: [
         {
-          name: "The First-10 Vertical Pull-Down Impulse",
-          desc: "The initial 8–10 rounds of standard assault rifles feature purely vertical climb with virtually zero horizontal sway. Memorize this linear downward impulse as an automated motor program (Schmidt & Lee, 2011). A smooth pull-down repeats better than a hard one because motor output grows more variable as a movement gets faster and more forceful (Schmidt et al., 1979).",
-          tips: "Do not wait to see bullets rise on screen; initiate downward mouse movement simultaneously with trigger press."
+          name: "Open-Loop First 10-Bullet Commitment",
+          desc: "Do not wait to see where your bullets land before pulling down. The first 8–10 rounds of an assault rifle spray climb vertically at a fixed rate. Commit to an immediate, fluid downward pull the instant you press fire (Schmidt & Lee, 2011).",
+          tips: "Focus 100% on a consistent initial pull-down speed before attempting horizontal corrections."
         },
         {
-          name: "Inverted S-Curve Horizontal Counter-Weaving",
-          desc: "After bullet 10, rifles sway into an inverted S-curve pattern. Compensate by steering your mouse in the mirror direction: if the weapon kicks right, guide your hand gently left (Meyer et al., 1988).",
-          tips: "Smooth micro-steering beats sharp jerks—over-correcting horizontally throws bullets outside the hitbox."
+          name: "Elbow-Driven Forearm Gliding Over Wrist Cramping",
+          desc: "Pulling down solely with the wrist causes the palm to compress against the pad, hitting the end of wrist articulation around bullet 12. Anchor wide vertical sprays from the elbow, gliding the entire forearm backward on the pad.",
+          tips: "Keep your wrist locked in neutral alignment and let your forearm pull the mouse down smoothly."
         },
         {
-          name: "Forearm Gliding & Wrist Stability Decoupling",
-          desc: "For short 3–7 round bursts, pull down using fine finger flexor and wrist curling. For extended 15–30 round sprays, lock the wrist angle and glide your entire forearm downward along the mousepad from the elbow to prevent running out of vertical wrist travel.",
-          tips: "Ensure your forearm has unobstructed pad clearance so your arm does not stick to your desk."
+          name: "Horizontal Inversion Counter-Steering",
+          desc: "When a weapon's spray kicks to the right, your mouse must counter-steer to the left. Learn the inflection point where the vertical climb pauses and horizontal oscillation begins.",
+          tips: "Anticipate the horizontal shift by rhythm rather than chasing bullet holes on screen."
         },
         {
-          name: "Spray Reset & Burst Cadence Discipline",
-          desc: "If your crosshair completely loses connection with the target past bullet 15, do not hold down the trigger hoping for random bloom hits. Release mouse1 for 200–300 ms to allow inaccuracy bloom to fully reset, then re-acquire the target with a fresh burst.",
-          tips: "Disciplined spray resets win more gunfights than desperate full-magazine prayers."
+          name: "Muscle Tension Modulation & Soft Grip",
+          desc: "Tensing the forearm increases muscular noise and causes erratic vertical tremors (Schmidt et al., 1979). Maintain a light, relaxed grip so your mouse glides without stuttering.",
+          tips: "If your sprays feel jittery or inconsistent, consciously reduce your grip pressure by half."
         }
       ]
     },
@@ -275,40 +294,41 @@ export default function RecoilControlPage() {
       { href: "/drills/fps/target-acquisition", label: "Target Acquisition Aim Trainer" }
     ]
   };
+  const copyEn = {
+    h1Prefix: null,
+    h1Keyword: "Recoil Control Trainer",
+    h1Suffix: null
+  };
 
   return (
     <>
-      {/* Breadcrumb Schema */}
+      {/* 6 Schema.org JSON-LD definitions */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* VideoGame Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
-
-      {/* FAQPage Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <RecoilControlClient />
+      <RecoilControlClient copy={copyEn} />
 
       <DrillGuide guide={recoilControlGuide} />
     </>

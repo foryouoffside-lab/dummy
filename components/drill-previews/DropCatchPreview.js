@@ -63,7 +63,7 @@ export default function DropCatchPreview() {
       }
     };
 
-    const spawnCycle = (w, h) => {
+    const spawnCycle = (w) => {
       // Spawn a paired set: one valid green target and one red decoy on separate vertical lanes
       const laneL = w * 0.32;
       const laneR = w * 0.68;
@@ -345,9 +345,9 @@ export default function DropCatchPreview() {
         ctx.save();
         ctx.globalAlpha = hw.life;
         const currentR = hw.radius + (1 - hw.life) * 32;
-        ctx.strokeStyle = '#10b981';
+        ctx.strokeStyle = '#00ff88';
         ctx.lineWidth = 2.5;
-        ctx.shadowColor = '#10b981';
+        ctx.shadowColor = '#00ff88';
         ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(hw.x, hw.y, currentR, 0, Math.PI * 2);

@@ -350,37 +350,36 @@ export default function EntropicGridPreview() {
         ctx.restore();
       }
 
-      // --- DRAW PURSUIT RETICLE ---
+      // --- DRAW TACTICAL CROSSHAIR (matching FPS drill exact crosshair geometry) ---
       ctx.save();
       ctx.translate(reticle.x, reticle.y);
       const isLockHit = reticle.state === 'hit';
-      const retColor = isLockHit ? '#10b981' : 'rgba(56, 189, 248, 0.9)';
-      const retR = 15 * reticle.clickScale;
+      const chColor = isLockHit ? '#10b981' : '#38bdf8';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
+      const chRadius = 11;
+      const chGap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(0, 0, retR, 0, Math.PI * 2);
-      ctx.strokeStyle = retColor;
-      ctx.lineWidth = 1.6;
-      if (isLockHit) {
-        ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = 10;
-      }
+      ctx.arc(0, 0, chRadius, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.shadowBlur = 0;
 
-      // Cardinal ticks
-      const tLen = 4;
-      ctx.strokeStyle = retColor;
-      ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.moveTo(0, -retR - 1); ctx.lineTo(0, -retR - tLen); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, retR + 1); ctx.lineTo(0, retR + tLen); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-retR - 1, 0); ctx.lineTo(-retR - tLen, 0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(retR + 1, 0); ctx.lineTo(retR + tLen, 0); ctx.stroke();
+      // 4 Cross lines with gap (inward from ring to gap)
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(0, -tickLen); ctx.lineTo(0, -chGap);
+      ctx.moveTo(0, tickLen); ctx.lineTo(0, chGap);
+      ctx.moveTo(-tickLen, 0); ctx.lineTo(-chGap, 0);
+      ctx.moveTo(tickLen, 0); ctx.lineTo(chGap, 0);
+      ctx.stroke();
 
-      // Center laser dot
+      // Center pip
       ctx.beginPath();
       ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
       ctx.fill();
 
       ctx.restore();

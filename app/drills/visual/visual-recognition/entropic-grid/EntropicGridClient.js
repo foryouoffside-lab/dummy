@@ -50,7 +50,7 @@ const saveData = (data) => {
 const getRandomChar = () => CHARS[Math.floor(Math.random() * CHARS.length)];
 const getRandomString = () => getRandomChar() + getRandomChar();
 
-export default function EntropicGridClient() {
+export default function EntropicGridClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -425,7 +425,7 @@ export default function EntropicGridClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Entropic Grid Visual Search
+              <span data-seo-kw="1">{copy?.title || "Entropic Grid Visual Search"}</span>
             </h1>
             <p className="text-sm text-slate-400 mt-1">
               A visual attention test measures how fast you can find a target among competing items — here, target codes hidden in a 100-cell field. How long that takes depends less on the number of items than on similarity — search slows as the target resembles its distractors and as the distractors differ from each other (Duncan &amp; Humphreys, 1989; Treisman &amp; Gelade, 1980). Here the background regenerates every 700 ms, so the display never settles into a pattern you can memorise.

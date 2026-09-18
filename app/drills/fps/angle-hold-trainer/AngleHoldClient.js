@@ -20,7 +20,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -28,6 +28,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -119,19 +120,12 @@ const ABOUT_SECTIONS = [
 
 
 
-const RELATED_DRILLS = [
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turns and peripheral threat detection.", href: "/drills/fps/180-degree-awareness" },
-  { id: "instant-response", name: "Instant Response", cat: "FPS Reaction", desc: "Train raw single-stimulus reflex acquisition.", href: "/drills/fps/instant-response" },
-  { id: "target-acquisition", name: "Target Acquisition Pro", cat: "FPS Precision", desc: "Master visual discrimination and threat selection under pressure.", href: "/drills/fps/target-acquisition" },
-  { id: "micro-correction-precision", name: "Micro Flicks", cat: "FPS Precision", desc: "Optimize tight-angle crosshair micro corrections.", href: "/drills/fps/micro-correction-precision" },
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "anti-strafe-jitter-duel", name: "Anti-Strafe Jitter", cat: "FPS Duel", desc: "Flick & track reactive ADAD strafing targets.", href: "/drills/fps/anti-strafe-jitter-duel" }
-];
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AngleHoldClient() {
+export default function AngleHoldClient({ copy = null }) {
+  const { t, locale } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -174,7 +168,7 @@ export default function AngleHoldClient() {
     target: { active: false, x: 0, y: 0, side: 'right', isFake: false, spawnTime: 0, peekDuration: 1400, pulseSeed: 0.5 },
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION, nextPeekTime: 0,
     successfulHits: 0, missedClicks: 0, preFires: 0, targetsEscaped: 0, totalShots: 0,
-    reactionTimes: [], maxCombo: 0, particles: [], hitMarkers: [], screenShake: 0,
+    reactionTimes: [], maxCombo: 0, particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
 
@@ -351,7 +345,7 @@ export default function AngleHoldClient() {
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       nextPeekTime: performance.now() + 800, successfulHits: 0, missedClicks: 0,
       preFires: 0, targetsEscaped: 0, totalShots: 0, reactionTimes: [], maxCombo: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     setIsFullscreen(true);
@@ -454,7 +448,9 @@ export default function AngleHoldClient() {
                 bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
                 drillAudio.playHit();
-                createExplosion(tgt.x, tgt.y, '#00ff88');
+                const hitColor = eRef.combo >= 10 ? '#5eead4' : '#00ff88';
+                createExplosion(tgt.x, tgt.y, hitColor);
+                eRef.hitRings.push(createHitRing(tgt.x, tgt.y, config.targetRadius, hitColor));
                 createHitMarker(ch.x, ch.y);
                 setUiScore(eRef.score);
               }
@@ -625,6 +621,8 @@ export default function AngleHoldClient() {
         drawTacticalTarget(ctx, tgt.x, tgt.y, config.targetRadius, targetColor, true);
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -710,8 +708,18 @@ export default function AngleHoldClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Crosshair Placement & Angle Hold Trainer
+              {copy?.h1Prefix || null}
+              <span data-seo-kw="1">{copy?.h1Keyword || copy?.title || t('angleHold.title', 'Crosshair Placement & Angle Hold Trainer')}</span>
+              {copy?.h1Suffix || null}
+              {(copy?.subtitle || t('angleHold.subtitle', null)) && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy?.subtitle || t('angleHold.subtitle', '')}
+                </span>
+              )}
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              {copy?.caption || t('angleHold.caption', 'Angle holding tests your simple reaction latency and trigger discipline when holding chokepoints against peeking opponents. Rather than dynamic flicking, defensive angle holding isolates visual onset reaction time and pre-aim offset geometry to neutralize peeker’s advantage in tactical shooters.')}
+            </p>
           </div>
         )}
 
@@ -719,10 +727,10 @@ export default function AngleHoldClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore },
-              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-blue-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+              { label: copy?.statScore || t('angleHold.score', 'Score'), value: uiScore },
+              { label: copy?.statTime || t('angleHold.time', 'Time'), value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || t('angleHold.accuracy', 'Accuracy'), value: `${accuracy}%`, color: 'text-blue-400' },
+              { label: copy?.statBestScore || t('angleHold.bestScore', 'Best Score'), value: bestScore, color: 'text-amber-400' },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -752,11 +760,11 @@ export default function AngleHoldClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || t('angleHold.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || t('angleHold.time', 'Time')}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -824,8 +832,8 @@ export default function AngleHoldClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="orange"
-              title="Angle Hold Pro"
-              subtitle="Crosshair Placement & Peek Reaction • Endless Level Progression"
+              title={copy?.startTitle || t('angleHold.startTitle', 'Angle Hold Pro')}
+              subtitle={copy?.startSubtitle || t('angleHold.startSubtitle', 'Crosshair Placement & Peek Reaction • Endless Level Progression')}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -833,7 +841,7 @@ export default function AngleHoldClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || t('angleHold.getReady', 'GET READY')} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -844,10 +852,10 @@ export default function AngleHoldClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.avgReactionMs, suffix: "ms", label: "Avg Reaction" },
-                { value: `${analytics.maxCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.finalLevel}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || t('angleHold.accuracy', 'Accuracy') },
+                { value: analytics.avgReactionMs, suffix: "ms", label: copy?.statAvgReaction || t('angleHold.avgReaction', 'Avg Reaction') },
+                { value: `${analytics.maxCombo}x`, label: copy?.statMaxCombo || t('angleHold.maxCombo', 'Max Combo') },
+                { value: `Lv. ${analytics.finalLevel}`, label: copy?.statPeakLevel || t('angleHold.peakLevel', 'Peak Level') },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -859,7 +867,7 @@ export default function AngleHoldClient() {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Hold your crosshair against the corner and click the instant a peeking target appears.
+            {copy?.bottomCaption || t('angleHold.bottomCaption', 'Hold your crosshair against the corner and click the instant a peeking target appears.')}
           </p>
         )}
 
@@ -868,12 +876,12 @@ export default function AngleHoldClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.accordionRulesTitle || t('angleHold.accordionRulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
@@ -881,78 +889,58 @@ export default function AngleHoldClient() {
 
             <DrillAccordion
               id="about"
-              title="About Angle Hold Pro"
+              title={copy?.accordionAboutTitle || t('angleHold.accordionAboutTitle', 'About Angle Hold Pro')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-orange-400" /> What Is Crosshair Placement & Angle Holding?
+                    <Crosshair className="w-4 h-4 text-orange-400" /> {copy?.overviewTitle || t('angleHold.overviewTitle', 'What Is Crosshair Placement & Angle Holding?')}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    Holding an angle means reacting to an opponent who appears exactly where you are already aiming. A typical adult reacts to one expected visual stimulus in 200&ndash;250&nbsp;ms, and having to decide whether to shoot adds more, because reaction time rises with the number of alternatives (Donders, 1868; Hick, 1952).
+                    {copy?.overviewLead || 'Holding an angle means reacting to an opponent who appears exactly where you are already aiming. A typical adult reacts to one expected visual stimulus in 200–250 ms, and having to decide whether to shoot adds more, because reaction time rises with the number of alternatives (Donders, 1868; Hick, 1952).'}
                   </p>
-                  {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                  {(copy?.aboutIntro || ABOUT_INTRO).map((para, i) => (
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < (copy?.aboutIntro || ABOUT_INTRO).length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {ABOUT_CARDS.map((card, i) => (
+                {(copy?.aboutCards || ABOUT_CARDS).map((card, i) => {
+                  const CardIcon = card.icon || (i === 0 ? Users : i === 1 ? TrendingUp : Zap);
+                  return (
                     <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
-                          <card.icon className="w-3.5 h-3.5 text-white" />
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-orange-600'} flex items-center justify-center`}>
+                          <CardIcon className="w-3.5 h-3.5 text-white" />
                         </div>
                         <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
-                {ABOUT_SECTIONS.map((section, i) => (
-                  <section key={i}>
-                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                      <section.icon className="w-4 h-4 text-orange-400" /> {section.title}
-                    </h3>
-                    {section.paragraphs.map((para, j) => (
-                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
-                    ))}
-                  </section>
-                ))}
+                {(copy?.aboutSections || ABOUT_SECTIONS).map((section, i) => {
+                  const SectionIcon = section.icon || (i === 0 ? Activity : i === 1 ? Target : Eye);
+                  return (
+                    <section key={i}>
+                      <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                        <SectionIcon className="w-4 h-4 text-orange-400" /> {section.title}
+                      </h3>
+                      {section.paragraphs.map((para, j) => (
+                        <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                      ))}
+                    </section>
+                  );
+                })}
               </div>
             </DrillAccordion>
           </div>
         )}
 
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-orange-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-orange-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
       </main>
 
       {/* ── FOOTER ── */}

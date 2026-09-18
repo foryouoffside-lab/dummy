@@ -1,4 +1,4 @@
-import SpeedDrillClient from './SpeedDrillClient';
+import SpeedDrillClient from './SpeedDrillClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -225,6 +225,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Speed Drill Training',
+  url: 'https://skilldrills.online/drills/physical/fitness/speed-drill',
+  description: 'Free online speed drill training. Test target acquisition speed and rapid tapping under dynamic shrinking boundary constraints.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -237,24 +249,28 @@ const howToSchema = {
       position: 1,
       name: 'Detect Saliency Cues in Peripheral Vision',
       text: 'Maintain soft gaze across the central display area. Use peripheral rods to identify the high-contrast yellow target spawn vector instantly upon appearance.',
+      url: 'https://skilldrills.online/drills/physical/fitness/speed-drill#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Initiate Ballistic Motor Flick',
       text: 'Execute an immediate, decisive open-loop mouse snap toward the target trajectory without waiting for multiple cognitive confirmation loops.',
+      url: 'https://skilldrills.online/drills/physical/fitness/speed-drill#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Execute Optical Tau Interception Click',
       text: 'Monitor the target decay boundary (τ). Trigger the mouse click while the target retains sufficient radius to maximize landing margin and earn +0.6s clock extensions.',
+      url: 'https://skilldrills.online/drills/physical/fitness/speed-drill#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Reset Neutral Cursor & Build Streak Multipliers',
       text: 'Instantly re-center your cursor posture after each hit, maintaining unbroken combo chains to drive the score multiplier up to 3.0x maximum.',
+      url: 'https://skilldrills.online/drills/physical/fitness/speed-drill#step-4',
     },
   ],
 };
@@ -268,52 +284,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
-    title: 'Speed Drill Training & Target Acquisition Benchmarks',
-    description: 'Empirical standards derived from Fitts’s Law index of difficulty (Fitts 1954), ballistic two-component motor control (Woodworth 1899), and reaction chronometry latency distributions (Woods et al. 2015). Evaluates total points, accuracy percentage, peak speed multiplier, and surviving duration.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial band'],
+  benchmarks: {
+    title: 'Speed Drill Training & Target Acquisition 5-Tier Performance Benchmarks',
+    headers: ['Performance Tier', 'Mastery Rank Title', 'Score Threshold', 'Accuracy & Speed Multiplier', 'Performance Grade', 'Neuromotor Tapping Profile'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Speed Master',
-        stat: '24,000+ pts',
-        level: '90%+ Acc / 3.0x+ Speed',
-        accuracy: 'Grade S',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Precision Flick Striker',
-        stat: '17,000–23,999 pts',
-        level: '82–89% Acc / 2.4–2.9x Speed',
-        accuracy: 'Grade A',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Rapid Target Acquirer',
-        stat: '11,000–16,999 pts',
-        level: '74–81% Acc / 1.8–2.3x Speed',
-        accuracy: 'Grade B',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Developing Reflex Tapper',
-        stat: '6,000–10,999 pts',
-        level: '65–73% Acc / 1.3–1.7x Speed',
-        accuracy: 'Grade C',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Target Pursuer',
-        stat: '< 6,000 pts',
-        level: '< 65% Acc / < 1.3x Speed',
-        accuracy: 'Grade D',
-        percentile: 'Starting out',
-      },
+      ['Tier 1: Apex Speed Master', 'Apex Speed Master', '24,000+ pts', '90%+ Acc / 3.0x+ Speed', 'Grade S (Top 0.1%)', 'Exceptional ballistic open-loop flick efficiency; near-zero latency terminal deceleration on rapidly decaying targets (Woodworth 1899; Fitts 1954)'],
+      ['Tier 2: Precision Flick Striker', 'Precision Flick Striker', '17,000 – 23,999 pts', '82 – 89% Acc / 2.4 – 2.9x Speed', 'Grade A (Top 5%)', 'Advanced visual search and rapid motor planning; reliable clock extension chaining with high accuracy under high speed multipliers'],
+      ['Tier 3: Rapid Target Acquirer', 'Rapid Target Acquirer', '11,000 – 16,999 pts', '74 – 81% Acc / 1.8 – 2.3x Speed', 'Grade B (Top 20%)', 'Competitive baseline; consistent acquisition of peripheral targets with minor overshoots on shrinking boundaries'],
+      ['Tier 4: Developing Reflex Tapper', 'Developing Reflex Tapper', '6,000 – 10,999 pts', '65 – 73% Acc / 1.3 – 1.7x Speed', 'Grade C (Average)', 'Standard recreational speed; struggles to sustain combo extensions when decay rates accelerate beyond 2.0x'],
+      ['Tier 5: Novice Target Pursuer', 'Novice Target Pursuer', '< 6,000 pts', '< 65% Acc / < 1.3x Speed', 'Grade D (Novice)', 'Early motor training phase; excessive correction loops and low click timing coordination resulting in premature timer expiration']
     ],
+    note: 'Empirical standards derived from Fitts’s Law index of difficulty (Fitts 1954), ballistic two-component motor control (Woodworth 1899), and reaction chronometry latency distributions (Woods et al. 2015).'
   },
   protocols: {
     title: 'How to train tapping speed',
@@ -367,10 +348,15 @@ export default function SpeedDrillPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <SpeedDrillClient />
+      <SpeedDrillClient copy={{ title: 'Speed Drill Training', subtitle: 'Target Acquisition & Rapid Tapping Trainer' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

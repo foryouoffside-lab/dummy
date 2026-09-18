@@ -7,7 +7,12 @@ import {
   Eye,
   Home,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Layers,
+  Zap,
+  Target,
+  Clock,
+  Activity
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
 import { getDrillTagline, sortByInterest } from '@/lib/drillCatalog';
@@ -19,6 +24,30 @@ import StickyMobileCta from '@/components/StickyMobileCta';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 import { hasLocalizedRoute } from '@/lib/i18n/locales';
+
+const visualCategories = [
+  {
+    id: 'reaction-control',
+    name: 'Reaction & Impulse Control',
+    icon: Zap,
+    description: 'Calibrate phototransduction reaction speed and suppress false-positive motor responses',
+    drillNames: ['light-reaction', 'no-go'],
+  },
+  {
+    id: 'tracking-accuracy',
+    name: 'Tracking & Smooth Pursuit',
+    icon: Eye,
+    description: 'Condition continuous foveal tracking, catch-up saccades, and multiple object tracking',
+    drillNames: ['moving-target', 'multiple-targets', 'pursuit-tracker'],
+  },
+  {
+    id: 'recognition-depth',
+    name: 'Recognition & Spatial Depth',
+    icon: Target,
+    description: 'Accelerate parallel feature scanning, contrast sensitivity, and 3D depth judgment',
+    drillNames: ['distance-judgment', 'visual-search', 'entropic-grid', 'rhythm-anomaly'],
+  },
+];
 
 const FOLDER_TO_STORAGE_KEY = {
   'visual-search': 'skilldrills_visual_search_v4',
@@ -152,7 +181,7 @@ export default function VisualDrillsClient({ faqs = [] }) {
           <p className="mt-2 text-sm sm:text-base text-ink-2 leading-relaxed">
             {t(
               'hubs.visual.desc',
-              'Visual training drills measure how quickly and how accurately your visual system finds, follows and judges things on a screen. Each one isolates a different function: simple visual reaction, which runs about 200–250 ms in healthy adults (Woods et al., 2015); smooth pursuit, which stays accurate to roughly 30°/s before the eye needs catch-up saccades (Krauzlis, 2004); visual search; multiple object tracking; and depth judgement. Free, no sign-up, and every score stays in your browser.'
+              'Train visual search speed, dynamic visual acuity, peripheral target detection, and depth perception.'
             )}
           </p>
         </div>
@@ -181,32 +210,118 @@ export default function VisualDrillsClient({ faqs = [] }) {
           />
         </Reveal>
 
-        {/* Visual Training Tips Panel */}
-        <Reveal className="mt-16 mb-12">
-          <div className="p-8 bg-surface-1 rounded-3xl border border-hairline shadow-xl backdrop-blur-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-fuchsia-500 to-pink-500 opacity-70" />
-            <h2 className="text-lg font-bold text-ink-1 mb-6 flex items-center gap-2 tracking-wide font-mono uppercase">
-              <Sparkles className="w-5 h-5 text-fuchsia-400" />
-              Visual Performance Strategies
-            </h2>
+        {/* Visual Training Domains - 3 Category Cards with Crawlable Links */}
+        <Reveal className="mb-14">
+          <div className="bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
+            <div className="flex items-center gap-2 mb-6">
+              <Layers className="w-5 h-5 text-fuchsia-400" />
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                Visual Training Domains
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {visualCategories.map((cat) => {
+                const Icon = cat.icon;
+                const drillsInCat = drills.filter((d) => cat.drillNames.includes(d.folderName));
+                return (
+                  <div
+                    key={cat.id}
+                    className="bg-surface-2/80 border border-hairline rounded-2xl p-5 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold tracking-tight text-ink-1">
+                            {cat.name}
+                          </h3>
+                          <span className="text-xs font-medium text-fuchsia-400">
+                            {drillsInCat.length} {drillsInCat.length === 1 ? 'Drill' : 'Drills'}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-ink-2 leading-relaxed mb-4">
+                        {cat.description}
+                      </p>
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
-              <div className="p-4 bg-surface-2 rounded-xl border border-hairline">
-                <h3 className="font-bold text-ink-1 mb-2 text-sm">1. Saccadic Fixation</h3>
-                <p className="text-xs text-ink-2 leading-relaxed">
-                  Prioritize peripheral target acquisition drills to minimize target re-fixation times. Always calibrate under stable ambient lighting.
+                    <div className="space-y-2 pt-3 border-t border-hairline">
+                      {drillsInCat.map((drill) => {
+                        const href = hasLocalizedRoute(locale, drill.href)
+                          ? localizeHref(drill.href)
+                          : drill.href;
+                        const fallbackTagline = getDrillTagline(drill.href, drill.description);
+                        const localized = getLocalizedDrill(drill.href, locale, drill.name, fallbackTagline);
+                        return (
+                          <Link
+                            key={drill.href}
+                            href={href}
+                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-fuchsia-500/10 border border-hairline hover:border-fuchsia-500/30 transition-all text-sm"
+                          >
+                            <span className="font-medium text-ink-1 group-hover/item:text-fuchsia-300 transition-colors truncate pr-2">
+                              {localized.name}
+                            </span>
+                            <span className="text-xs font-medium text-ink-3 group-hover/item:text-fuchsia-400 shrink-0 flex items-center gap-1">
+                              {drill.duration}
+                              <ChevronRight className="w-3 h-3 transition-transform group-hover/item:translate-x-0.5" />
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Engine & Hardware Optimization */}
+        <Reveal className="mb-14">
+          <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+            <div className="flex items-center gap-2 mb-6">
+              <Sparkles className="w-5 h-5 text-fuchsia-400" />
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                Engine &amp; Hardware Optimization
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center mb-3">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Sub-Frame Canvas Interpolation
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  High-precision sub-pixel canvas rendering eliminates motion blur and spatial quantization jitter across high-refresh displays up to 360Hz.
                 </p>
               </div>
-              <div className="p-4 bg-surface-2 rounded-xl border border-hairline">
-                <h3 className="font-bold text-ink-1 mb-2 text-sm">2. Contrast Sensitivity</h3>
-                <p className="text-xs text-ink-2 leading-relaxed">
-                  Overloading visual search pathways with entropic grid training improves object isolation in low-contrast, chaotic game scenarios.
+
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center mb-3">
+                  <Eye className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Gaze Fixation Stability
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  Algorithmic contrast calibration ensures visual targets pop cleanly against chaotic distractors without inducing ocular ciliary strain.
                 </p>
               </div>
-              <div className="p-4 bg-surface-2 rounded-xl border border-hairline">
-                <h3 className="font-bold text-ink-1 mb-2 text-sm">3. Dynamic Rest Cycle</h3>
-                <p className="text-xs text-ink-2 leading-relaxed">
-                  Apply the 20-20-20 technique between intense drills to prevent ciliary muscle strain and maintain high kinetic reaction rates.
+
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center mb-3">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Zero-Lag Input Interception
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  Direct hardware-level event dispatch captures clicks and touches immediately upon actuation, bypassing browser input buffering delays.
                 </p>
               </div>
             </div>
@@ -219,7 +334,7 @@ export default function VisualDrillsClient({ faqs = [] }) {
             <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-fuchsia-400" />
-                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                   {t('home.faqTitle', 'Frequently Asked Questions')}
                 </h2>
               </div>

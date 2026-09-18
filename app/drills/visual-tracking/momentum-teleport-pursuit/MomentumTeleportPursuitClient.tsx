@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function MomentumTeleportPursuitClient() {
+export default function MomentumTeleportPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -421,13 +421,13 @@ export default function MomentumTeleportPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Momentum Teleport Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Anticipatory Eye Tracking Drill
+              <span data-seo-kw="1">{copy?.title || "Momentum Teleport Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Anticipatory Eye Tracking Drill"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Anticipatory eye tracking drills condition rapid saccadic target re-acquisition followed by immediate velocity matching when objects teleport across space (Rashbass, 1961; Findlay & Walker, 1999). Preserving momentum across spatial coordinate jumps trains the visual cortex to maintain internal velocity representations, bridging saccadic suppression and smooth pursuit continuity (Bahill et al., 1980; Barnes, 2008). Pursuit itself only tracks accurately to roughly 30&deg;/s (Krauzlis, 2004), which is why a jump has to be closed by a saccade rather than by pursuit alone.
+              {copy?.description || "Anticipatory eye tracking drills condition rapid saccadic target re-acquisition followed by immediate velocity matching when objects teleport across space (Rashbass, 1961; Findlay & Walker, 1999). Preserving momentum across spatial coordinate jumps trains the visual cortex to maintain internal velocity representations, bridging saccadic suppression and smooth pursuit continuity (Bahill et al., 1980; Barnes, 2008). Pursuit itself only tracks accurately to roughly 30°/s (Krauzlis, 2004), which is why a jump has to be closed by a saccade rather than by pursuit alone."}
             </p>
           </div>
         )}

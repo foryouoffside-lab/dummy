@@ -1,4 +1,4 @@
-import KineticInterceptClient from './KineticInterceptClient';
+import KineticInterceptClient from './KineticInterceptClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -117,6 +117,18 @@ const webAppSchema = {
   "teaches": "Smooth Pursuit Tracking, Dynamic Visual Acuity, Velocity Extrapolation, Ballistic Interception, Closed-Loop Motor Correction"
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Moving Target Intercept Test",
+  "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target",
+  "description": "Free moving target intercept drill. Track, anticipate, and click dynamic moving targets to measure visual tracking accuracy and smooth interception.",
+  "genre": ["Action", "Aim Trainer", "Visual Tracking"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
@@ -128,25 +140,29 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Acquire the Kinetic Target",
-      "text": "Locate the moving sphere as it spawns and lock your foveal gaze onto its centroid to establish smooth pursuit tracking."
+      "text": "Locate the moving sphere as it spawns and lock your foveal gaze onto its centroid to establish smooth pursuit tracking.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Predict Trajectory Vector & Boundary Bounces",
-      "text": "Anticipate the target's forward velocity and angle of reflection off viewport borders, leading the target slightly ahead of its current position."
+      "text": "Anticipate the target's forward velocity and angle of reflection off viewport borders, leading the target slightly ahead of its current position.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
       "name": "Execute Ballistic Intercept Click",
-      "text": "Click or tap cleanly on the target hitbox before the shift interval expires (+150 PTS × Combo × Level multiplier and +0.6s added clock)."
+      "text": "Click or tap cleanly on the target hitbox before the shift interval expires (+150 PTS × Combo × Level multiplier and +0.6s added clock).",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Maintain Combo Streak Under Escalating Pace",
-      "text": "Sustain precision as movement velocity accelerates and hitbox size contracts, avoiding misclicks to protect your combo multiplier."
+      "text": "Sustain precision as movement velocity accelerates and hitbox size contracts, avoiding misclicks to protect your combo multiplier.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target#step-4"
     }
   ]
 };
@@ -327,7 +343,8 @@ export default function KineticInterceptPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <KineticInterceptClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <KineticInterceptClient copy={{ title: "Moving Target Intercept Test" }} />
       <DrillGuide guide={movingTargetGuide} />
     </>
   );

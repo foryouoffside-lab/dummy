@@ -179,7 +179,6 @@ export default function MultipleTargetsPreview() {
           }
         } else if (phase === 'IDENTIFY') {
           // Progressively pick the 3 target balls: at 0.3s, 0.8s, 1.3s
-          const targetIndices = [0, 1, 2];
           if (phaseTimer >= 0.3 && !selectedIndices.includes(0)) {
             selectedIndices.push(0);
             reticle.targetX = balls[0].x;
@@ -359,25 +358,37 @@ export default function MultipleTargetsPreview() {
         }
       });
 
-      // Draw selection reticle in IDENTIFY phase
+      // Draw selection reticle in IDENTIFY phase (matching FPS drill exact crosshair geometry)
       if (reticle.active) {
+        const chColor = '#38bdf8';
         ctx.save();
         ctx.translate(reticle.x, reticle.y);
+        ctx.strokeStyle = chColor;
+        ctx.fillStyle = chColor;
+
+        const chRadius = 11;
+        const gap = 4;
+        const tickLen = 11;
+
+        // Circle
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(0, 0, BALL_RADIUS + 8, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
-        ctx.lineWidth = 1.5;
+        ctx.arc(0, 0, chRadius, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Cross ticks
-        const tLen = 4;
-        const oR = BALL_RADIUS + 8;
+        // 4 Cross lines with gap
+        ctx.lineWidth = 1.3;
         ctx.beginPath();
-        ctx.moveTo(0, -oR - 1); ctx.lineTo(0, -oR - tLen);
-        ctx.moveTo(0, oR + 1); ctx.lineTo(0, oR + tLen);
-        ctx.moveTo(-oR - 1, 0); ctx.lineTo(-oR - tLen, 0);
-        ctx.moveTo(oR + 1, 0); ctx.lineTo(oR + tLen, 0);
+        ctx.moveTo(0, -tickLen); ctx.lineTo(0, -gap);
+        ctx.moveTo(0, tickLen); ctx.lineTo(0, gap);
+        ctx.moveTo(-tickLen, 0); ctx.lineTo(-gap, 0);
+        ctx.moveTo(tickLen, 0); ctx.lineTo(gap, 0);
         ctx.stroke();
+
+        // Center pip
+        ctx.beginPath();
+        ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.restore();
       }

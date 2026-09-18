@@ -21,7 +21,7 @@ import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -104,7 +104,7 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-export default function SpeedDrillClient() {
+export default function SpeedDrillClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -151,7 +151,7 @@ export default function SpeedDrillClient() {
     spawnTime: 0,
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
     hits: 0, misses: 0, bestStreak: 0, bestReactionTime: 0, totalActions: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 1.0
   });
 
@@ -326,7 +326,7 @@ export default function SpeedDrillClient() {
       spawnTime: 0,
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       hits: 0, misses: 0, bestStreak: 0, bestReactionTime: 9999, totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h, peakSpeed: 1.0
     };
 
@@ -414,6 +414,8 @@ export default function SpeedDrillClient() {
 
           drillAudio.playHit();
           createExplosion(eng.target.x, eng.target.y, '#eab308');
+          const hitColor = eng.combo >= 10 ? '#38bdf8' : '#eab308';
+          eng.hitRings.push(createHitRing(eng.target.x, eng.target.y, eng.target.r, hitColor));
           spawnTarget(eng.logicalWidth, eng.logicalHeight, eng.level);
         } else {
           applyPenalty();
@@ -559,6 +561,8 @@ export default function SpeedDrillClient() {
       }
       ctx.globalAlpha = 1.0;
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
         const activeColor = pointerLocked ? '#eab308' : '#eab308';
@@ -626,13 +630,15 @@ export default function SpeedDrillClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Speed Drill
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
-                Speed Drill Training
-              </span>
+              <span data-seo-kw="1">{copy?.title || "Speed Drill Training"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
-              A speed drill measures how fast you can move onto a target and click it as the target gets smaller and the time allowed gets shorter. Fitts&apos;s Law sets the floor: movement time grows with the logarithm of the distance to a target divided by its width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954). The movement arrives in two parts &mdash; a fast ballistic impulse, then a slower visually guided correction (Woodworth, 1899) &mdash; and it is the correction that shrinking targets make expensive.
+              {copy?.description || "A speed drill measures how fast you can move onto a target and click it as the target gets smaller and the time allowed gets shorter. Fitts's Law sets the floor: movement time grows with the logarithm of the distance to a target divided by its width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954). The movement arrives in two parts — a fast ballistic impulse, then a slower visually guided correction (Woodworth, 1899) — and it is the correction that shrinking targets make expensive."}
             </p>
           </div>
         )}
@@ -641,19 +647,19 @@ export default function SpeedDrillClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.score || 'Score'}</div>
               <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.time || 'Time'}</div>
               <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestScore || 'Best Score'}</div>
               <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestCombo || 'Best Combo'}</div>
               <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -679,12 +685,12 @@ export default function SpeedDrillClient() {
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.score || 'Score'}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
                 </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.time || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -734,8 +740,8 @@ export default function SpeedDrillClient() {
             <FpsStartCard
               icon={Zap}
               accent="amber"
-              title="Speed Drill"
-              subtitle="Rapid Target Acquisition & Tapping • Continuous Scaling"
+              title={copy?.title || "Speed Drill"}
+              subtitle={copy?.subtitle || "Rapid Target Acquisition & Tapping • Continuous Scaling"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -743,7 +749,7 @@ export default function SpeedDrillClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.hudLabels?.getReady || "GET READY"} />
           )}
 
           {/* UNIVERSAL RESULT CARD */}
@@ -754,10 +760,10 @@ export default function SpeedDrillClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Hits', value: analytics.hits },
-                { label: 'Best Reaction', value: analytics.bestReaction, suffix: 'ms' },
-                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: copy?.resultLabels?.accuracy || 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: copy?.resultLabels?.hits || 'Hits', value: analytics.hits },
+                { label: copy?.resultLabels?.bestReaction || 'Best Reaction', value: analytics.bestReaction, suffix: 'ms' },
+                { label: copy?.resultLabels?.peakLevel || 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -771,12 +777,12 @@ export default function SpeedDrillClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -787,13 +793,13 @@ export default function SpeedDrillClient() {
 
             <DrillAccordion
               id="about"
-              title="About Speed Drill Training"
+              title={copy?.aboutTitle || "About Speed Drill Training"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-4">
-                {ABOUT_SECTIONS.map((sec, idx) => {
-                  const IconComp = sec.icon;
+                {(copy?.aboutSections || ABOUT_SECTIONS).map((sec, idx) => {
+                  const IconComp = sec.icon || Zap;
                   return (
                     <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-1.5">

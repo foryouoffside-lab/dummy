@@ -33,7 +33,7 @@ const getSavedData = () => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { bestScore: 0, bestStreak: 0, totalSessions: 0 };
     return { bestScore: 0, bestStreak: 0, totalSessions: 0, ...JSON.parse(raw) };
-  } catch (e) {
+  } catch {
     return { bestScore: 0, bestStreak: 0, totalSessions: 0 };
   }
 };
@@ -41,7 +41,7 @@ const getSavedData = () => {
 const saveData = (data) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {}
+  } catch {}
 };
 
 // ==========================================
@@ -74,7 +74,7 @@ class GameErrorBoundary extends React.Component {
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
-export default function AutoPursuitClient() {
+export default function AutoPursuitClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -483,7 +483,7 @@ export default function AutoPursuitClient() {
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
-    } catch (e) {
+    } catch {
       const text = `🎯 I achieved Grade ${analytics.grade?.letter || 'C'} (${analytics.grade?.label || 'Good'}) with ${uiScore} PTS and ${analytics.accuracy}% accuracy on Smooth Pursuit Tracker (45s)! Try it: ${url}`;
       if (typeof navigator !== 'undefined' && navigator.share) {
         navigator.share({ title: 'My Pursuit Tracking Score', text, url }).catch(() => {});
@@ -502,7 +502,7 @@ export default function AutoPursuitClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Smooth Pursuit Tracker
+              <span data-seo-kw="1">{copy?.title || "Smooth Pursuit Tracker"}</span>
             </h1>
             <p className="text-sm text-slate-400 mt-1">
               Smooth pursuit is the eye movement that follows a continuously moving target, distinct from the saccades that jump between fixed points. It tracks accurately up to about 30&deg;/s, and beyond that the eye lags and needs catch-up saccades (Krauzlis, 2004; Rashbass, 1961). Pursuit also cannot be produced voluntarily on a blank screen &mdash; it needs a moving stimulus to lock onto.
@@ -766,7 +766,7 @@ export default function AutoPursuitClient() {
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
                       <h4 className="text-xs font-bold text-white">Tracking Tip</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Anticipate the orb's next direction rather than chasing its current position — it changes speed and heading without warning.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Anticipate the orb&apos;s next direction rather than chasing its current position — it changes speed and heading without warning.</p>
                   </div>
                 </div>
               </div>

@@ -108,7 +108,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AntiStrafeJitterClient() {
+export default function AntiStrafeJitterClient({ copy = null }) {
   const [gameState, setGameState] = useState('start');
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -620,7 +620,8 @@ export default function AntiStrafeJitterClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Anti-Strafe Jitter Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Anti-Strafe Jitter Trainer"}</span>
+              {copy?.h1Suffix !== undefined ? copy.h1Suffix : " - Reactive Tracking Aim"}
             </h1>
           </div>
         )}
@@ -629,10 +630,10 @@ export default function AntiStrafeJitterClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: score },
-              { label: 'Time', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-cyan-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+              { label: copy?.statScore || 'Score', value: score },
+              { label: copy?.statTime || 'Time', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || 'Accuracy', value: `${accuracy}%`, color: 'text-cyan-400' },
+              { label: copy?.statBestScore || 'Best Score', value: bestScore, color: 'text-amber-400' },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -717,8 +718,8 @@ export default function AntiStrafeJitterClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -734,8 +735,8 @@ export default function AntiStrafeJitterClient() {
             <FpsStartCard
               icon={Shield}
               accent="cyan"
-              title="Anti-Strafe Jitter Duel"
-              subtitle="Reactive Movement Reading • Endless Level Progression"
+              title={copy?.startTitle || "Anti-Strafe Jitter Duel"}
+              subtitle={copy?.startSubtitle || "Reactive Movement Reading • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -743,7 +744,7 @@ export default function AntiStrafeJitterClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -769,7 +770,7 @@ export default function AntiStrafeJitterClient() {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Track and hold your crosshair on erratic, close-range ADAD jitter targets as they rapidly counter-strafe.
+            {copy?.stageCaption || "Track and hold your crosshair on erratic, close-range ADAD jitter targets as they rapidly counter-strafe."}
           </p>
         )}
 
@@ -778,12 +779,12 @@ export default function AntiStrafeJitterClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
@@ -791,7 +792,7 @@ export default function AntiStrafeJitterClient() {
 
             <DrillAccordion
               id="about"
-              title="About Anti-Strafe Jitter Duel"
+              title={copy?.aboutTitle || "About Anti-Strafe Jitter Duel"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -837,32 +838,7 @@ export default function AntiStrafeJitterClient() {
           </div>
         )}
 
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+
       </main>
 
       {/* ── FOOTER ── */}

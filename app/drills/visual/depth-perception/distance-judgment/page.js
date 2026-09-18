@@ -1,4 +1,4 @@
-import DistanceJudgmentClient from './DistanceJudgmentClient';
+import DistanceJudgmentClient from './DistanceJudgmentClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -44,7 +44,7 @@ export const metadata = {
     "visual training online"
   ],
   openGraph: {
-    title: "Distance Judgment Depth Perception Test | SkillDrills",
+    title: "Depth Perception Test & Distance Judgment | SkillDrills",
     description: "Measure stereoscopic depth acuity and visual intercept timing with this free online 3D depth perception drill.",
     type: "website",
     url: "https://skilldrills.online/drills/visual/depth-perception/distance-judgment",
@@ -53,7 +53,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Distance Judgment Depth Perception Test | SkillDrills",
+    title: "Depth Perception Test & Distance Judgment | SkillDrills",
     description: "Train 3D stereoscopic depth perception and intercept timing online. Free browser-based distance judgment drill.",
   },
   robots: { index: true, follow: true },
@@ -116,6 +116,21 @@ const webAppSchema = {
   "teaches": "Stereoscopic Depth Perception, Time-to-Contact Estimation, Looming Optical Velocity Discrimination, Intercept Timing"
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Distance Judgment Test — Depth Perception Simulator",
+  "url": "https://skilldrills.online/drills/visual/depth-perception/distance-judgment",
+  "description": "Interactive 3D depth perception and distance judgment simulator. Train stereoscopic visual alignment and binocular parallax.",
+  "dateModified": "2026-09-11",
+  "gamePlatform": "Web Browser",
+  "genre": ["Visual Training", "Depth Perception", "Distance Judgment"],
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
@@ -126,24 +141,32 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 1,
+      "url": "https://skilldrills.online/drills/visual/depth-perception/distance-judgment#step-1",
+      
       "name": "Anchor Visual Gaze on the Target Depth Ring",
       "text": "Fixate your visual attention on the cyan target depth ring located along the center of the perspective corridor."
     },
     {
       "@type": "HowToStep",
       "position": 2,
+      "url": "https://skilldrills.online/drills/visual/depth-perception/distance-judgment#step-2",
+      
       "name": "Track the Looming Optical Expansion",
       "text": "Observe the 3D sphere as it spawns in the deep virtual distance and travels forward along the visual Z-axis."
     },
     {
       "@type": "HowToStep",
       "position": 3,
+      "url": "https://skilldrills.online/drills/visual/depth-perception/distance-judgment#step-3",
+      
       "name": "Execute Intercept Tap at Coplanar Alignment",
       "text": "Click, tap, or press the Spacebar at the exact instant the expanding sphere's perimeter matches the reference ring's diameter."
     },
     {
       "@type": "HowToStep",
       "position": 4,
+      "url": "https://skilldrills.online/drills/visual/depth-perception/distance-judgment#step-4",
+      
       "name": "Adapt to Progressive Velocity Scaling",
       "text": "As your score advances, approach velocity accelerates from 2,200 ms down to 500 ms, testing rapid temporal-to-spatial calibration."
     }
@@ -303,6 +326,11 @@ const distanceGuide = {
   ]
 };
 
+const copyEn = {
+  h1Keyword: "Distance Judgment Test",
+  h1Suffix: " — Online Depth Perception Trainer",
+};
+
 export default function DistanceJudgmentPage() {
   return (
     <>
@@ -320,14 +348,19 @@ export default function DistanceJudgmentPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <DistanceJudgmentClient />
+      <DistanceJudgmentClient copy={copyEn} />
       <DrillGuide guide={distanceGuide} />
+      
     </>
   );
-}
+}

@@ -25,6 +25,7 @@ export default function AngleHoldPreview() {
             <span className="ah-sheen" />
             <span className="ah-core" />
           </div>
+          <span className="ah-hit-ring" />
           <span className="ah-hitmarker">
             <i className="ah-hit-l1" />
             <i className="ah-hit-l2" />

@@ -66,7 +66,7 @@ const getLevelConfig = (level, combo = 0) => {
   };
 };
 
-export default function StrafeTrackingClient() {
+export default function StrafeTrackingClient({ copy = null }) {
   const [gameState, setGameState] = useState('start');
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -617,8 +617,17 @@ export default function StrafeTrackingClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Strafe Tracking Aim Trainer
+              {copy?.h1Prefix || null}
+              <span data-seo-kw="1">{copy?.h1Keyword || "Strafe Tracking Aim Trainer"}</span>
+              {copy?.h1Suffix || null}
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              {copy?.caption || (
+                <>
+                  Strafe tracking is keeping your crosshair on an opponent who changes direction unpredictably. Human smooth pursuit follows accurately to roughly 30&deg;/s, and each abrupt reversal costs a catch-up saccade about 100&ndash;130&nbsp;ms later (Rashbass, 1961; Krauzlis, 2004).
+                </>
+              )}
+            </p>
           </div>
         )}
 
@@ -626,10 +635,10 @@ export default function StrafeTrackingClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Status', value: gameState === 'playing' ? 'TRACKING' : gameState === 'gameOver' ? 'COMPLETE' : 'STANDBY', color: 'text-green-400' },
-              { label: 'Time Left', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-green-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-yellow-400' },
+              { label: copy?.statStatus || 'Status', value: gameState === 'playing' ? (copy?.statusTracking || 'TRACKING') : gameState === 'gameOver' ? (copy?.statusComplete || 'COMPLETE') : (copy?.statusStandby || 'STANDBY'), color: 'text-green-400' },
+              { label: copy?.statTime || 'Time Left', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || 'Accuracy', value: `${accuracy}%`, color: 'text-green-400' },
+              { label: copy?.statBest || 'Best Score', value: bestScore, color: 'text-yellow-400' },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -657,12 +666,12 @@ export default function StrafeTrackingClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || 'Score'}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{score}</p>
               </div>
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
@@ -711,8 +720,8 @@ export default function StrafeTrackingClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedPrompt || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -727,8 +736,9 @@ export default function StrafeTrackingClient() {
             <FpsStartCard
               icon={Target}
               accent="green"
-              title="Strafe Tracking"
-              subtitle="Hardware Raw Input • Endless Level Progression"
+              title={copy?.startTitle || "Strafe Tracking"}
+              subtitle={copy?.startSubtitle || "Hardware Raw Input • Endless Level Progression"}
+              startButtonText={copy?.startButtonText}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -736,7 +746,7 @@ export default function StrafeTrackingClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -747,11 +757,14 @@ export default function StrafeTrackingClient() {
               score={score}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Tracking Accuracy" },
-                { value: `${analytics.bestCombo}s`, label: "Max Lock Streak" },
-                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
-                { value: `${analytics.offTargetTime}s`, label: "Off-Target Time" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || "Tracking Accuracy" },
+                { value: `${analytics.bestCombo}s`, label: copy?.statLockStreak || "Max Lock Streak" },
+                { value: `Lv. ${analytics.levelReached}`, label: copy?.statPeakLevel || "Peak Level" },
+                { value: `${analytics.offTargetTime}s`, label: copy?.statOffTarget || "Off-Target Time" },
               ]}
+              playAgainText={copy?.playAgainText}
+              shareText={copy?.shareText}
+              exitText={copy?.exitText}
               onPlayAgain={enterDrill}
               onShare={shareDrillLink}
               onExit={handleExitDrill}
@@ -762,7 +775,7 @@ export default function StrafeTrackingClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Hold your crosshair on the moving target as it rapidly counter-strafes and changes direction across the floor.
+            {copy?.bottomCaption || "Hold your crosshair on the moving target as it rapidly counter-strafes and changes direction across the floor."}
           </p>
         )}
 
@@ -771,58 +784,62 @@ export default function StrafeTrackingClient() {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Settings"
+              title={copy?.rulesTitle || "Drill Instructions & Settings"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Target Tracking" highlight="Pure Reactive (+0.4s/s)" result="Keep crosshair locked on target" />
-                <RuleItem num="2" text="Time Adjusting" highlight={`${DRILL_DURATION}s Starting Duration`} result="Uncapped session timer" />
-                <RuleItem num="3" text="Off-Target Penalty" highlight="Failure Penalty" result="1s off-target resets combo streak (-0.6s with Time Penalty enabled)" />
-                <RuleItem num="4" text="Level Progression" highlight="+1 Level / 1400 PTS" result="Continuous Speed & Direction Frequency" />
+                {copy?.rulesItems ? (
+                  copy.rulesItems.map((item, i) => (
+                    <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
+                  ))
+                ) : (
+                  <>
+                    <RuleItem num="1" text="Target Tracking" highlight="Pure Reactive (+0.4s/s)" result="Keep crosshair locked on target" />
+                    <RuleItem num="2" text="Time Adjusting" highlight={`${DRILL_DURATION}s Starting Duration`} result="Uncapped session timer" />
+                    <RuleItem num="3" text="Off-Target Penalty" highlight="Failure Penalty" result="1s off-target resets combo streak (-0.6s with Time Penalty enabled)" />
+                    <RuleItem num="4" text="Level Progression" highlight="+1 Level / 1400 PTS" result="Continuous Speed & Direction Frequency" />
+                  </>
+                )}
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Strafe Tracking"
+              title={copy?.aboutTitle || "About Strafe Tracking"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6 font-sans">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2">
-                    What Is Strafe Tracking Training?
+                    {copy?.whatIsTitle || "What Is Strafe Tracking Training?"}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    Strafe tracking is keeping your crosshair on an opponent who changes direction unpredictably. Human smooth pursuit follows accurately to roughly 30&deg;/s, and each abrupt reversal costs a catch-up saccade about 100&ndash;130&nbsp;ms later (Rashbass, 1961; Krauzlis, 2004).
+                    {copy?.whatIsLead || "Strafe tracking is keeping your crosshair on an opponent who changes direction unpredictably. Human smooth pursuit follows accurately to roughly 30°/s, and each abrupt reversal costs a catch-up saccade about 100–130 ms later (Rashbass, 1961; Krauzlis, 2004)."}
                   </p>
-                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Strafe Tracking Training</strong> builds the continuous motor compensation required to keep your crosshair locked onto targets moving erratically horizontally across your screen.
-                  </p>
+                  {(copy?.aboutIntro || [
+                    "Strafe Tracking Training builds the continuous motor compensation required to keep your crosshair locked onto targets moving erratically horizontally across your screen."
+                  ]).map((para, i) => (
+                    <p key={i} className="text-sm leading-relaxed mb-3 text-gray-300">{para}</p>
+                  ))}
                 </section>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                  {(copy?.aboutCards || [
+                    { iconBg: "bg-blue-600", title: "Who Should Use This?", text: "Ranked players and esports competitors looking to track fast ADAD strafing and erratic movement patterns." },
+                    { iconBg: "bg-fuchsia-600", title: "Skills Trained", text: "Reactive tracking, aim smoothness, counter-strafe reading, directional transition speed, and wrist glide control." },
+                    { iconBg: "bg-orange-600", title: "Hardware Raw Input", text: "1:1 unaccelerated pointer lock mouse movement calibrated to simulate true in-game competitive mouse feel." }
+                  ]).map((card, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-blue-600'} flex items-center justify-center`}>
+                          <Target className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Ranked players and esports competitors looking to track fast ADAD strafing and erratic movement patterns.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Skills Trained</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Reactive tracking, aim smoothness, counter-strafe reading, directional transition speed, and wrist glide control.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Hardware Raw Input</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">1:1 unaccelerated pointer lock mouse movement calibrated to simulate true in-game competitive mouse feel.</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </DrillAccordion>

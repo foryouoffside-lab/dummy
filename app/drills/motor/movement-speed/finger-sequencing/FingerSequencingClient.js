@@ -17,7 +17,7 @@ import { drillPenalty } from '@/lib/drillPenalty';
 import { drillTimeout } from '@/lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '@/lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '@/lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing } from '@/lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '@/lib/canvasFx';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
@@ -71,7 +71,7 @@ const getLevelConfig = (level, combo = 0) => {
   };
 };
 
-export default function FingerSequencingClient() {
+export default function FingerSequencingClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -119,7 +119,7 @@ export default function FingerSequencingClient() {
     sequenceTimer: 2.8, maxSequenceTime: 2.8,
     successfulHits: 0, missedClicks: 0, timeouts: 0, maxCombo: 0,
     reactionTimes: [], totalActions: 0, chainsCompleted: 0,
-    particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
   });
 
   const triggerFlash = useCallback(() => {
@@ -385,6 +385,7 @@ export default function FingerSequencingClient() {
       eng.activeIndex++;
 
       spawnParticles(target.x, target.y, '#10b981', 10);
+      eng.hitRings.push(createHitRing(target.x, target.y, target.r, '#10b981'));
       drillAudio.playHit();
 
       if (eng.activeIndex >= eng.chain.length) {
@@ -568,6 +569,8 @@ export default function FingerSequencingClient() {
         ctx.fillStyle = p.color;
         ctx.fill();
       }
+
+      drawHitRings(ctx, e.hitRings, dt);
 
       const cx = e.crosshair.x;
       const cy = e.crosshair.y;
@@ -787,7 +790,7 @@ export default function FingerSequencingClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Sequence Aim Trainer
+              <span data-seo-kw="1">{copy?.title || "Sequence Aim Trainer"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               Sequential target switching means clicking a set of targets in a required order rather than whichever one is easiest to reach. An ordered sequence like that runs as a single pre-planned motor program instead of one fresh decision per target (Lashley, 1951; Keele, 1968), so the time is spent in the transitions between targets, not in the clicks. Each transition is itself a Fitts&apos;s Law movement, timed by the log of the gap between two targets divided by their width (Fitts, 1954).

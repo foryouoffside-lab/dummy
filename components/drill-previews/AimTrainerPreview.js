@@ -47,6 +47,7 @@ export default function AimTrainerPreview() {
       },
       particles: [],
       hitMarkers: [],
+      hitRings: [],
       screenShake: 0,
     };
 
@@ -83,6 +84,14 @@ export default function AimTrainerPreview() {
           color: colors[Math.floor(Math.random() * colors.length)],
         });
       }
+
+      state.hitRings.push({
+        x,
+        y,
+        r: 14,
+        life: 1.0,
+        color: '#00ff88',
+      });
 
       state.hitMarkers.push({
         x,
@@ -234,6 +243,15 @@ export default function AimTrainerPreview() {
         }
       }
 
+      for (let i = state.hitRings.length - 1; i >= 0; i--) {
+        const hr = state.hitRings[i];
+        hr.r += dt * 45;
+        hr.life -= dt * 3.2;
+        if (hr.life <= 0) {
+          state.hitRings.splice(i, 1);
+        }
+      }
+
       // Screen shake decay
       let shakeX = 0;
       let shakeY = 0;
@@ -353,6 +371,17 @@ export default function AimTrainerPreview() {
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+      }
+
+      for (const hr of state.hitRings) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, hr.life * 0.8);
+        ctx.strokeStyle = hr.color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(hr.x, hr.y, hr.r, 0, Math.PI * 2);
+        ctx.stroke();
         ctx.restore();
       }
 

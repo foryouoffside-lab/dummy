@@ -50,7 +50,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function ConstantSlowPursuitClient() {
+export default function ConstantSlowPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -393,9 +393,9 @@ export default function ConstantSlowPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Constant Slow Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Smooth Pursuit Eye Exercise
+              <span data-seo-kw="1">{copy?.title || "Constant Slow Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Smooth Pursuit Eye Exercise"}
               </span>
             </h1>
           </div>

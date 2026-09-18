@@ -15,7 +15,7 @@ import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -191,7 +191,7 @@ class Ladder {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function MotorSequencingClient() {
+export default function MotorSequencingClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -234,7 +234,7 @@ export default function MotorSequencingClient() {
     scrollSpeed: 150,
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
     laddersCompleted: 0, missedLadders: 0, bestStreak: 0, totalActions: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 150
   });
 
@@ -384,7 +384,7 @@ export default function MotorSequencingClient() {
       scrollSpeed: getLevelConfig(startLevel).scrollSpeed,
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       laddersCompleted: 0, missedLadders: 0, bestStreak: 0, totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h, peakSpeed: getLevelConfig(startLevel).scrollSpeed
     };
 
@@ -563,6 +563,7 @@ export default function MotorSequencingClient() {
 
               drillAudio.playHit();
               createExplosion(res.x, res.y, '#10b981');
+              e.hitRings.push(createHitRing(res.x, res.y, ladder.hitbox, '#10b981'));
             }
           }
 
@@ -597,6 +598,8 @@ export default function MotorSequencingClient() {
       if (gameState === 'playing' || gameState === 'start') {
         e.ladders.forEach((l) => l.draw(ctx, w, h));
       }
+
+      drawHitRings(ctx, e.hitRings, dt);
 
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
@@ -675,7 +678,12 @@ export default function MotorSequencingClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Agility ladder drills
+              <span data-seo-kw="1">{copy?.title || "Agility Ladder Drills"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
               An agility ladder drill is a fixed footwork pattern repeated at increasing speed. Fast sequences are not run as one decision per step: the order is held as a pre-planned motor program (Lashley, 1951) and generalised into a pattern that can be rescaled to a new speed without being relearned (Schmidt, 1975). This version drives the pattern through a cursor at up to 750 px/s over 45 seconds, so it trains the sequencing and the rhythm, not the footwork itself.
@@ -687,19 +695,19 @@ export default function MotorSequencingClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.score || "Score"}</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.timeLeft || "Time Left"}</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestScore || "Best Score"}</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestCombo || "Best Combo"}</div>
               <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -778,8 +786,8 @@ export default function MotorSequencingClient() {
             <FpsStartCard
               icon={Grid}
               accent="emerald"
-              title="Motor Sequencing"
-              subtitle="Bilateral Cadence & Rhythm • 15 Levels"
+              title={copy?.title || "Motor Sequencing"}
+              subtitle={copy?.subtitle || "Bilateral Cadence & Rhythm • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -870,12 +878,12 @@ export default function MotorSequencingClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rules || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -886,45 +894,54 @@ export default function MotorSequencingClient() {
 
             <DrillAccordion
               id="about"
-              title="About Agility Ladder Drills"
+              title={copy?.aboutTitle || "About Agility Ladder Drills"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Grid className="w-4 h-4 text-emerald-400" /> Bilateral Motor Sequencing &amp; Rhythmic Timing
+                    <Grid className="w-4 h-4 text-emerald-400" /> {copy?.aboutHeading || "Bilateral Motor Sequencing & Rhythmic Timing"}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    <strong>Agility Ladder Drills</strong> (Motor Sequencing) trains bilateral coordination, rhythmic cursor sweeps, and serial motor action execution. Inspired by athletic speed-ladder drills, players sweep their crosshair left and right across descending rungs in strict sequential order (1 → 2 → 3 → 4).
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    Grounded in Karl Lashley&apos;s (1951) serial motor ordering principles, Richard Schmidt&apos;s (1975) Generalized Motor Program (GMP) schema, and Paul Fitts&apos;s (1954) movement amplitude laws, this drill trains motor timing invariance. As difficulty scales across 15 levels, scroll velocity accelerates from 150 px/s up to 750 px/s and rung hitboxes constrict from 18px down to 10px, requiring rapid metronomic wrist-forearm alternation under strict temporal deadlines.
-                  </p>
+                  {copy?.aboutText ? (
+                    <p className="text-sm leading-relaxed text-gray-300">{copy.aboutText}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        <strong>Agility Ladder Drills</strong> (Motor Sequencing) trains bilateral coordination, rhythmic cursor sweeps, and serial motor action execution. Inspired by athletic speed-ladder drills, players sweep their crosshair left and right across descending rungs in strict sequential order (1 → 2 → 3 → 4).
+                      </p>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Grounded in Karl Lashley&apos;s (1951) serial motor ordering principles, Richard Schmidt&apos;s (1975) Generalized Motor Program (GMP) schema, and Paul Fitts&apos;s (1954) movement amplitude laws, this drill trains motor timing invariance. As difficulty scales across 15 levels, scroll velocity accelerates from 150 px/s up to 750 px/s and rung hitboxes constrict from 18px down to 10px, requiring rapid metronomic wrist-forearm alternation under strict temporal deadlines.
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                  {(copy?.aboutCards || [
+                    {
+                      title: "Target Audience",
+                      desc: "Gamers perfecting counter-strafing rhythm and crosshair placement across doorways, athletic trainees building footwork-to-hand coordination, and precision esports competitors."
+                    },
+                    {
+                      title: "Skills Conditioned",
+                      desc: "Bilateral alternation rhythm, serial motor chunking, dynamic interceptive tracking, and agonist-antagonist deceleration timing."
+                    },
+                    {
+                      title: "Adaptive Velocity",
+                      desc: "Scroll speed scales from 150 to 750 px/s with subtle lateral variance, forcing continuous feedforward adaptation."
+                    }
+                  ]).map((card, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={`w-7 h-7 rounded-lg ${i === 0 ? 'bg-blue-600' : i === 1 ? 'bg-emerald-600' : 'bg-purple-600'} flex items-center justify-center`}>
+                          {i === 0 ? <Users className="w-3.5 h-3.5 text-white" /> : i === 1 ? <TrendingUp className="w-3.5 h-3.5 text-white" /> : <Activity className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">{card.desc}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers perfecting counter-strafing rhythm and crosshair placement across doorways, athletic trainees building footwork-to-hand coordination, and precision esports competitors.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Skills Conditioned</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Bilateral alternation rhythm, serial motor chunking, dynamic interceptive tracking, and agonist-antagonist deceleration timing.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Activity className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Adaptive Velocity</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Scroll speed scales from 150 to 750 px/s with subtle lateral variance, forcing continuous feedforward adaptation.</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </DrillAccordion>

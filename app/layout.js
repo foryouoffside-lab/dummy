@@ -1,5 +1,5 @@
 import './../styles/globals.css';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SiteHeader from '@/components/SiteHeader';
@@ -16,18 +16,6 @@ const inter = Inter({
   fallback: ['system-ui', 'arial'],
   adjustFontFallback: true,
   variable: '--font-inter',
-});
-
-// The UI leans on a monospaced register for readouts, timings and eyebrow labels.
-// Without this it fell through to whatever the OS ships (Consolas on Windows,
-// Menlo on macOS), so the same page looked like a different product per platform.
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  weight: ['400', '500', '700'],
-  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
-  variable: '--font-jetbrains-mono',
 });
 
 export const metadata = {
@@ -149,7 +137,7 @@ export default function RootLayout({ children }) {
         <meta name="language" content="English" />
         <meta name="rating" content="general" />
       </head>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased`}>
         <ZoomGuard />
         <SiteHeader />
         <AutoLanguageDetector />

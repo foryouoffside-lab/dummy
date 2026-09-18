@@ -19,6 +19,7 @@ export default function TargetSwitchingSwarmPreview() {
             <span className="tss-orb" />
             <span className="tss-core" />
           </div>
+          <span className="tss-hit-ring" />
           <span className="tss-hitmarker">
             <i className="tss-hit-l1" />
             <i className="tss-hit-l2" />
@@ -34,6 +35,7 @@ export default function TargetSwitchingSwarmPreview() {
             <span className="tss-orb" />
             <span className="tss-core" />
           </div>
+          <span className="tss-hit-ring" />
           <span className="tss-hitmarker">
             <i className="tss-hit-l1" />
             <i className="tss-hit-l2" />
@@ -49,6 +51,7 @@ export default function TargetSwitchingSwarmPreview() {
             <span className="tss-orb" />
             <span className="tss-core" />
           </div>
+          <span className="tss-hit-ring" />
           <span className="tss-hitmarker">
             <i className="tss-hit-l1" />
             <i className="tss-hit-l2" />

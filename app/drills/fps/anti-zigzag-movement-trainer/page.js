@@ -1,9 +1,9 @@
-import AntiZigzagClient from './AntiZigzagClient';
+import AntiZigzagClient from './AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Anti-Zigzag Aim Trainer - Evasive Strafe Tracking",
+  title: "Anti-Zigzag Aim Trainer – Evasive Tracking | SkillDrills",
   description: "Free anti-zigzag aim trainer. Track evasive multi-directional movement and slide cancels without overshooting, for Apex, Warzone and Overwatch 2.",
   keywords: [
     "anti-zigzag aim trainer",
@@ -27,13 +27,14 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
+    languages: getAlternateLanguages('/drills/fps/anti-zigzag-movement-trainer'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Anti-Zigzag Aim Trainer - Evasive Strafe Tracking",
+    title: "Anti-Zigzag Aim Trainer – Evasive Tracking | SkillDrills",
     description: "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafes in Apex Legends, Warzone, and Overwatch 2 with raw pointer lock.",
     url: "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
     siteName: 'SkillDrills',
@@ -42,7 +43,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Anti-Zigzag Aim Trainer - Evasive Strafe Tracking",
+    title: "Anti-Zigzag Aim Trainer – Evasive Tracking | SkillDrills",
     description: "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafes in Apex Legends, Warzone, and Overwatch 2 with raw pointer lock.",
   },
 };
@@ -56,6 +57,22 @@ export default function AntiZigzagPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Anti-Zigzag Aim Trainer", "item": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Anti-Zigzag Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free browser-based anti-zigzag aim trainer. Track evasive multi-directional movement and slide cancels with raw pointer lock."
   };
 
   const softwareSchema = {
@@ -187,18 +204,31 @@ export default function AntiZigzagPage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Calibrate Sensitivity",
-        "text": "Match your in-game sensitivity using the Universal Sensitivity Selector to guarantee 1:1 muscle memory transfer."
+        "text": "Match your in-game sensitivity using the Universal Sensitivity Selector to guarantee 1:1 muscle memory transfer.",
+        "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
+        "name": "Engage Fullscreen and Pointer Lock",
+        "text": "Click Start Drill to lock your mouse cursor with raw 1:1 hardware input and zero browser acceleration.",
+        "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer#step-2"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
         "name": "Anchor on the V-Crossover Corridor",
-        "text": "Focus visual attention along the central corridor of the strafe path rather than over-flicking behind outer extremes."
+        "text": "Focus visual attention along the central corridor of the strafe path rather than over-flicking behind outer extremes.",
+        "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Maintain Continuous Dwell Lock",
-        "text": "Keep crosshair aligned inside the target hitbox to deplete its health before the target lifespan timer expires."
+        "text": "Keep crosshair aligned inside the target hitbox to deplete its health before the target lifespan timer expires.",
+        "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer#step-4"
       }
     ]
   };
@@ -257,8 +287,6 @@ export default function AntiZigzagPage() {
     ],
     audience: "Competitive FPS players (Apex Legends, Call of Duty: Warzone, Overwatch 2, The Finals, CODM), close-quarters tracking duelists, and players struggling against evasive movement and slide-cancel desync.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-    // Works named in this page's copy, with DOIs so a reader or an answer
-    // engine can check the figures rather than take them on trust.
     sources: pickSources('woods2015', 'krauzlis2004', 'fitts1954', 'green2003', 'rashbass1961', 'accotZhai1997'),
     related: [
       { href: "/drills/fps/anti-strafe-jitter-duel", label: "Anti-Strafe Jitter Trainer" },
@@ -274,6 +302,10 @@ export default function AntiZigzagPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
       <script
         type="application/ld+json"

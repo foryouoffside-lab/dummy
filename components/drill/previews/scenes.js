@@ -58,7 +58,7 @@ function easeInOutCubic(x) {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
-export const SCENES = {
+const SCENES = {
   // 1. REFLEX: Idle beat, sudden flash, reactive snap & tap (reaction-time-test)
   reflex: {
     id: 'reflex',

@@ -1,14 +1,14 @@
-import KeyboardRecognitionClient from './KeyboardRecognitionClient';
+import KeyboardRecognitionClient from './KeyboardRecognitionClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
-// SEO RESEARCH FINDINGS — keyboard-recognition (motor-keyboard-recognition)
-// PRIMARY:  "keyboard speed test"         — Core search phrase (~2,400 searches/mo)
-//           "keybind reaction trainer"    — Direct tactical gamer training query
+// SEO RESEARCH FINDINGS — keyboard-recognition (motor-keyboard-speed)
+// PRIMARY:  "keyboard speed test"         — Core search phrase (~3,600 searches/mo)
+//           "keybind reaction trainer"    — Direct mechanism & utility search
 // SECONDARY / LSI:
-//           "keyboard recognition test"   — Core benchmark and familiarity query
+//           "keyboard recognition test"   — Cognitive mapping query
 //           "gaming keybind trainer"      — Competitive FPS mechanic term
 //           "keybind muscle memory"       — Neuromuscular conditioning search
 //           "keyboard reflex test"        — Reaction speed assessment query
@@ -18,15 +18,12 @@ import { pickSources } from '@/lib/drillSources';
 //           "response inhibition test"    — Cognitive control search
 //           "keyboard dexterity test"     — Fine motor skill phrase
 //           "valorant keybind practice"   — Title-specific esports query
-// LOCALES:
-//           ja: "キーボード 反応速度 テスト" (Keyboard Reaction Speed Test)
-//           ko: "키보드 반응속도 테스트" (Keyboard Reaction Speed Test)
-//           de: "tastatur geschwindigkeitstest" (Keyboard Speed Test)
+//           "cs2 keybind practice"        — Counter-Strike utility query
 // ============================================================
 
 export const metadata = {
   title: 'Keyboard Speed Test – Free Keybind Reaction Trainer',
-  description: 'Free keyboard speed test. Measure how fast you press the right key for a prompt, against Hick\'s Law of choice reaction time. No sign-up.',
+  description: "Free keyboard speed test. Measure how fast you press the right key for a prompt, against Hick's Law of choice reaction time. No sign-up.",
   keywords: [
     'keyboard speed test',
     'keybind reaction trainer',
@@ -78,12 +75,11 @@ const breadcrumbSchema = {
 const softwareApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'Keyboard Speed Test – Keybind Reaction Trainer',
-  alternateName: ['Keyboard Recognition Pro', 'Keybind Trainer'],
+  name: 'Keyboard Speed Test – Free Keybind Reaction Trainer',
   applicationCategory: 'HealthApplication',
   operatingSystem: 'All',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  description: 'Free browser-based keybind reaction trainer and keyboard speed test. Measure visual prompt identification, spatial key layout mapping, response inhibition, and multi-key sequence execution.',
+  description: 'Free browser-based keyboard speed test and keybind reaction trainer. Measure choice reaction latency, keybind muscle memory, and response inhibition.',
   url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition',
   publisher: { '@type': 'Organization', name: 'SkillDrills', url: 'https://skilldrills.online' },
   dateModified: '2026-09-05',
@@ -93,13 +89,24 @@ const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
   name: 'Keyboard Speed Test',
-  alternateName: 'Keyboard Recognition Pro',
   applicationCategory: 'GameApplication',
   operatingSystem: 'All',
-  browserRequirements: 'Requires modern keyboard input listeners and JavaScript support',
+  browserRequirements: 'Requires HTML5 Canvas and JavaScript support',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition',
   dateModified: '2026-09-05',
+};
+
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Keyboard Speed Test – Keybind Reaction Trainer',
+  url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition',
+  description: "Measure how fast you press the right key for a prompt, against Hick's Law of choice reaction time.",
+  genre: ['Keyboard Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
 
 const faqSchema = {
@@ -111,79 +118,79 @@ const faqSchema = {
       name: 'What is a keyboard speed test?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'A keyboard speed test is an interactive cognitive-motor assessment designed to condition the full neural chain of visual stimulus recognition, keyboard layout mapping, response inhibition, and finger motor execution under dynamic millisecond time constraints.',
+        text: 'A keyboard speed test measures the latency between seeing a key prompt on screen and depressing the corresponding physical key on your keyboard. It evaluates choice reaction time, spatial keyboard layout familiarity, and motor response inhibition.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How does keybind training improve gaming performance in Valorant, CS2, and Fortnite?',
+      name: 'How does keybind training improve FPS performance in Valorant and CS2?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'In competitive tactical shooters and battle royales, split-second decisions like casting abilities, switching to utility, or building defensive walls require instantaneous actuation without visual inspection of the keyboard. Dedicated keybind training automates motor memory, bypassing conscious cortical search time and reducing input latency by 80–150 ms.',
+        text: 'In tactical shooters, executing weapon switches, utility deployment (smokes, flashes), and ability casts under fire demands zero hesitation. Keybind training automates stimulus-response mapping in the motor cortex, eliminating glance-down delays and mispresses in high-pressure clutch rounds.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What is the cognitive science behind choice reaction time and Hick’s Law?',
+      name: "What is choice reaction time and how does Hick's Law apply here?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'F.C. Donders (1868) demonstrated that Choice Reaction Time (CRT) requires distinct cognitive stages (stimulus discrimination and response selection) absent in Simple Reaction Time. William Edmund Hick (1952) formalized this as Hick’s Law (RT = b * log2(n + 1)), demonstrating that decision latency increases logarithmically with the number of possible key choices.',
+        text: "Choice reaction time (Donders 1868) measures decision latency when selecting among multiple stimuli. Hick's Law states that reaction time increases logarithmically as the number of possible stimulus-response alternatives grows. Keybind muscle memory minimizes cognitive choice overhead, compressing reaction time toward simple reflex latencies.",
       },
     },
     {
       '@type': 'Question',
-      name: 'How does Fake Prompt (Inhibition Trap) mode train motor self-control?',
+      name: 'What does the Fake Prompt / trap mechanism test?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Fake prompt mode incorporates Gordon Logan’s (1984) stop-signal paradigm by presenting deceptive prompts that must be actively ignored. Pressing any key during a fake prompt penalizes your combo, training frontal lobe executive inhibition to prevent panic clicking and unintended ability deployments in clutch rounds.',
+        text: 'The Fake Prompt feature tests response inhibition (Logan 1984 stop-signal paradigm). When an invalid prompt or decoy key appears, your prefrontal cortex must actively suppress the prepared motor discharge. Resisting false triggers prevents catastrophic miscasts in competitive gaming.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What esports game presets are available in this trainer?',
+      name: 'What is an average single-key reaction time for gaming keybinds?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'SkillDrills features pre-calibrated key profiles for top competitive titles including Valorant (Movement, Abilities, Weapons), Counter-Strike 2 (Movement, Buy/Grenade Hotkeys), Fortnite (Building & Weapon Binds), Minecraft (Hotbar & Utility), League of Legends (QWER Spells & Items), and Apex Legends.',
+        text: 'Untrained keyboard users average 380–480 ms for single-key choice reactions. Competitive FPS and MOBA players achieve 240–300 ms through automated muscle memory. Elite esports athletes operate under 240 ms with near-flawless trap inhibition.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How does the adaptive difficulty engine adjust prompt speeds?',
+      name: 'How does sequence typing mode challenge motor programming?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The adaptive engine continuously monitors your reaction latency and hit accuracy. Maintaining high accuracy and combo streaks progressively compresses prompt expiration windows from 1.5x down to 0.55x extreme speed, while miss penalties temporarily grant breathing room to restore baseline rhythm.',
+        text: 'Sequence mode presents multi-key combos (e.g. 3–5 keys in rapid succession) testing motor chunking and short-term working memory (Sternberg 1966). Instead of processing keys individually, expert typists fire pre-compiled kinematic motor bursts.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What is the difference between single-key recognition and sequence mode?',
+      name: 'What keyboard type provides the lowest input latency for testing?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Single-key mode isolates raw discrete choice reaction latency for individual key locations. Sequence mode introduces multi-character chains (2 to 5 keys) that test Saul Sternberg’s (1966) working memory retrieval and rapid motor grouping across consecutive finger articulations.',
+        text: 'Mechanical keyboards with linear switches, optical actuation, or magnetic Hall-effect sensors (with Rapid Trigger enabled) and 1000 Hz+ USB polling provide sub-millisecond hardware debounce, ensuring measured latency reflects purely neurological transmission.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Can I customize which keys are included in my training routine?',
+      name: 'How many minutes per day should I practice keybind reactions?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. The drill features an interactive visual keyboard matrix allowing you to toggle individual letters (A–Z), numbers (0–9), modifiers (Shift, Ctrl, Alt, Space, Tab), and symbols, giving you complete freedom to target specific weak finger zones or esoteric macro binds.',
+        text: 'Practice 10–15 minutes daily across 3–4 focused blocks. Neural adaptation for spatial key recognition occurs rapidly during deliberate practice, but mental fatigue quickly degrades response inhibition accuracy.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How does tactile keyboard muscle memory develop neurologically?',
+      name: 'Does keybind training benefit MOBA games like League of Legends and Dota 2?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Repeated pairing of visual cues with specific proprioceptive finger displacements leads to long-term potentiation (LTP) in the primary motor cortex (M1) and supplementary motor area (SMA). Over time, movement programs become encapsulated into subcortical basal ganglia routines, enabling fully subconscious execution.',
+        text: 'Yes. Rapid ability combos (Q-W-E-R-D-F) and instant item actives require precise finger sequencing and spatial finger independence without looking down at the keyboard.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What is a good benchmark reaction time for single-key prompt recognition?',
+      name: 'How are KPM (Keys Per Minute) and accuracy calculated?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'For a multi-choice gaming setup (12–20 active keys), elite esports professionals achieve choice reaction latencies below 240 ms. Proficient players typically average 300–380 ms, while developing typists average 380–480 ms.',
+        text: 'KPM is computed as total correct key presses divided by active session duration in minutes. Accuracy reflects correct presses divided by total attempts (including incorrect key hits and triggered traps).',
       },
     },
   ],
@@ -192,28 +199,36 @@ const faqSchema = {
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Train Keybind Speed and Keyboard Layout Familiarity',
-  description: 'Step-by-step training protocol for mastering keyboard recognition, rapid keybind actuation, and cognitive response inhibition.',
+  name: 'How to Train Keyboard Speed & Keybind Muscle Memory',
+  description: 'Step-by-step methodology to sharpen key recognition, choice reaction speed, and tactical gaming reflex responses.',
   step: [
     {
       '@type': 'HowToStep',
-      name: 'Select Profile and Key Set',
-      text: 'Choose an esports preset (e.g., Valorant, CS2) or configure a custom selection using the visual key matrix in the configuration drawer.',
+      position: 1,
+      name: 'Adopt the Tactical Home Position',
+      text: 'Place your left hand on your default gaming cluster (WASD or custom keybind home layout) with fingers resting lightly on the switch caps.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition#step-1',
     },
     {
       '@type': 'HowToStep',
-      name: 'Identify Prompt Stimulus',
-      text: 'Fixate on the center arena. As a key symbol appears, identify its character and retrieve its physical spatial coordinate from proprioceptive memory.',
+      position: 2,
+      name: 'Detect and Identify the Key Prompt',
+      text: 'Keep your eyes anchored to the center display. When the target key symbol renders, resolve the required keystroke without glancing downward.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition#step-2',
     },
     {
       '@type': 'HowToStep',
-      name: 'Execute Rapid Ballistic Keystrokes',
-      text: 'Actuate the matching mechanical key before the circular expiration timer elapses. For multi-key sequences, execute the full chain in left-to-right order.',
+      position: 3,
+      name: 'Actuate the Key with Ballistic Precision',
+      text: 'Depress the target key crisply through its actuation point. If a Fake Prompt trap appears, recruit executive inhibition to hold finger position.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition#step-3',
     },
     {
       '@type': 'HowToStep',
-      name: 'Inhibit Panic on Fake Traps',
-      text: 'When a deceptive or invalid prompt appears, freeze your hands and withhold all key presses until the trap dissolves to earn bonus points and preserve streak multipliers.',
+      position: 4,
+      name: 'Evaluate Reaction Latency & Inhibition Rates',
+      text: 'Review average decision latency, KPM typing velocity, and trap resistance accuracy on the final session scorecard to identify weak fingers.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition#step-4',
     },
   ],
 };
@@ -234,7 +249,7 @@ const guideProps = {
       {
         tier: 'Tier 1',
         rank: 'Apex Keybinder',
-        stat: '< 240 ms',
+        stat: 'Under 240 ms',
         level: '320+ KPM',
         accuracy: '98–100%',
         percentile: 'Exceptional',
@@ -266,9 +281,9 @@ const guideProps = {
       {
         tier: 'Tier 5',
         rank: 'Novice Keybinder',
-        stat: '> 480 ms',
-        level: '< 140 KPM',
-        accuracy: '< 80%',
+        stat: 'Over 480 ms',
+        level: 'Under 140 KPM',
+        accuracy: 'Under 80%',
         percentile: 'Starting out',
       },
     ],
@@ -318,6 +333,10 @@ export default function KeyboardRecognitionPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"

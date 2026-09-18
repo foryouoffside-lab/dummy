@@ -62,14 +62,14 @@ const RULES_ITEMS = [
   { title: "Inhibitory Control", text: "Ignore non-matching stimuli. False alarms and missed targets count against your accuracy, but never end the session early." }
 ];
 
-const ABOUT_TEXT = `Focus Test (Concentration Stamina) is an advanced Continuous Performance Test (CPT) designed to evaluate sustained visual attention, working memory updating, and task-set switching under speed pressure. Originating from cognitive psychology and ergonomics, continuous stamina tests challenge the brain's executive control network to maintain high vigilance over extended sequences.
+const ABOUT_TEXT = `Attention Span Test (Concentration Stamina) is an advanced Continuous Performance Test (CPT) designed to evaluate sustained visual attention, working memory updating, and task-set switching under speed pressure. Originating from cognitive psychology and ergonomics, continuous stamina tests challenge the brain's executive control network to maintain high vigilance over extended sequences.
 
 By requiring instantaneous categorization of incoming visual stimuli while periodically switching target rules, the drill trains cognitive flexibility, impulse suppression, and focus stability under cognitive fatigue.`;
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function ConcentrationStaminaClient() {
+export default function ConcentrationStaminaClient({ copy } = {}) {
   const [phase, setPhase] = useState('start'); // 'start' | 'countdown' | 'playing' | 'ended'
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
@@ -365,14 +365,14 @@ export default function ConcentrationStaminaClient() {
         accuracy: endSummary.accuracy,
         rating: { letter: gradeInfo.grade, label: gradeInfo.label, emoji: '🧠' },
         newBest: endSummary.isNewBest,
-        drillName: 'Focus Test',
+        drillName: 'Attention Span Test',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🧠 I scored ${endSummary.score} PTS (Level ${endSummary.peakLevel}) on the Focus Test (Concentration Stamina)! Accuracy: ${endSummary.accuracy}%. Practice free cognitive focus drills at skilldrills.online!`;
+      const text = `🧠 I scored ${endSummary.score} PTS (Level ${endSummary.peakLevel}) on the Attention Span Test (Concentration Stamina)! Accuracy: ${endSummary.accuracy}%. Practice free cognitive focus drills at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Focus Test Score', text, url }).catch(() => {});
+        navigator.share({ title: 'Attention Span Test Score', text, url }).catch(() => {});
       }
     }
   }, [endSummary, gradeInfo, bestScore]);
@@ -381,12 +381,14 @@ export default function ConcentrationStaminaClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title — left-aligned sentence-case H1 and 2-sentence definition snippet */}
         {!isFullscreen && (
           <div className="flex flex-col">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Focus Test & Concentration Stamina Drill
+              <span data-seo-kw="1">{copy?.title || "Concentration Stamina – Attention Span Test"}</span>
             </h1>
+            <p className="mt-3 text-sm text-slate-400 leading-relaxed">
+              Take this free attention span test to measure your sustained vigilance, target discrimination, and rule-switching stamina under speed pressure. Evaluates cognitive endurance across alternating classification rules, scoring accuracy and misses rather than raw reaction speed.
+            </p>
           </div>
         )}
 
@@ -449,7 +451,7 @@ export default function ConcentrationStaminaClient() {
             <FpsStartCard
               icon={Brain}
               accent="indigo"
-              title="Focus Test"
+              title="Attention Span Test"
               subtitle="Concentration Stamina • Continuous Performance Test"
               isTouchOnlyDevice={false}
               onStart={enterDrill}
@@ -609,7 +611,7 @@ export default function ConcentrationStaminaClient() {
 
         <DrillAccordion
           id="about"
-          title="About Focus Test & Concentration Stamina"
+          title="About the Attention Span Test"
           isOpen={openAccordion === 'about'}
           onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
         >

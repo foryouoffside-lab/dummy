@@ -391,36 +391,37 @@ export default function VisualTrackingSpeedTestPreview() {
         ctx.restore();
       }
 
-      // --- Tactical Diamond Reticle ---
+      // --- Tactical Crosshair ---
       ctx.save();
       const chX = crosshair.x;
       const chY = crosshair.y;
-      const chLen = 8;
-      const chGap = 3;
+      const chColor = '#10b981';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      // 4 ticks
-      ctx.moveTo(chX - chGap - chLen, chY);
-      ctx.lineTo(chX - chGap, chY);
-      ctx.moveTo(chX + chGap, chY);
-      ctx.lineTo(chX + chGap + chLen, chY);
-      ctx.moveTo(chX, chY - chGap - chLen);
-      ctx.lineTo(chX, chY - chGap);
-      ctx.moveTo(chX, chY + chGap);
-      ctx.lineTo(chX, chY + chGap + chLen);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Subtle diamond marker at center
-      const dSize = 3;
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.moveTo(chX, chY - dSize);
-      ctx.lineTo(chX + dSize, chY);
-      ctx.lineTo(chX, chY + dSize);
-      ctx.lineTo(chX - dSize, chY);
-      ctx.closePath();
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
       ctx.stroke();
+
+      // Center pip
+      ctx.beginPath();
+      ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
+      ctx.fill();
 
       ctx.restore();
 

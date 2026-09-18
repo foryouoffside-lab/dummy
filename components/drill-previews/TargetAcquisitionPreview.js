@@ -14,6 +14,7 @@ export default function TargetAcquisitionPreview() {
         <div className="ta-prev-tgt ta-tgt-1">
           <span className="ta-pulse" />
           <div className="ta-orb" />
+          <span className="ta-hit-ring" />
           <span className="ta-hitmarker">
             <i className="ta-hit-l1" />
             <i className="ta-hit-l2" />
@@ -24,6 +25,7 @@ export default function TargetAcquisitionPreview() {
         <div className="ta-prev-tgt ta-tgt-2">
           <span className="ta-pulse" />
           <div className="ta-orb" />
+          <span className="ta-hit-ring" />
           <span className="ta-hitmarker">
             <i className="ta-hit-l1" />
             <i className="ta-hit-l2" />
@@ -34,6 +36,7 @@ export default function TargetAcquisitionPreview() {
         <div className="ta-prev-tgt ta-tgt-3">
           <span className="ta-pulse" />
           <div className="ta-orb" />
+          <span className="ta-hit-ring" />
           <span className="ta-hitmarker">
             <i className="ta-hit-l1" />
             <i className="ta-hit-l2" />

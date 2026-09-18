@@ -1,4 +1,4 @@
-import RhythmAnomalyClient from './RhythmAnomalyClient';
+import RhythmAnomalyClient from './RhythmAnomalyClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -185,30 +185,52 @@ const faqSchema = {
   ]
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Rhythm Anomaly Timing Test",
+  "url": "https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly",
+  "description": "Free rhythm anomaly visual timing drill. Detect subtle temporal phase shifts, micro-jitters, and frequency anomalies in pulsing optical streams.",
+  "genre": ["Action", "Brain Game", "Timing Game"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Visual Temporal Perception with Rhythm Anomaly Drill",
-  "description": "Improve your out-of-sync rhythm detection and temporal visual acuity using our free online Rhythm Anomaly test.",
+  "name": "How to Train Visual Rhythm and Temporal Anomaly Detection",
+  "description": "Master visual timing discrimination, flicker detection, and phase shift recognition using our free Rhythm Anomaly drill.",
   "dateModified": "2026-09-05",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Observe the Pulse Matrix",
-      "text": "Adopt a soft-focus gaze across the entire 6x6 matrix to absorb the baseline pulsing cadence."
+      "name": "Lock Onto the Pulsing Rhythmic Metronome",
+      "text": "Center your gaze on the visual strobe element and observe its rhythmic baseline flashing rate.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Detect the Anomaly Cell",
-      "text": "Identify the single cell pulsing at an accelerated frequency or displaying an out-of-phase illumination lead."
+      "name": "Internalize the Baseline Periodic Cadence",
+      "text": "Allow your visual cortex to synchronize with the steady pulse frequency to establish an internal temporal baseline.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Click to Advance Level",
-      "text": "Click the anomaly cell immediately to compound your streak and escalate grid pulse tempo over the 45-second trial."
+      "name": "Detect the Temporal Phase Anomaly",
+      "text": "Spot any sudden acceleration, hitch, stutter, or phase offset that breaks the established visual tempo.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly#step-3"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Register Immediate Perceptual Commitment",
+      "text": "Click or tap immediately upon perceiving the rhythm disruption to log millisecond temporal discrimination latency.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly#step-4"
     }
   ]
 };
@@ -223,7 +245,8 @@ export default function RhythmAnomalyPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <RhythmAnomalyClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <RhythmAnomalyClient copy={{ title: "Rhythm Anomaly Timing Test" }} />
       <DrillGuide
         eyebrow="Temporal Psychophysics & Visual Chronometry"
         title="The Science of Visual Rhythm, Flicker Fusion & Temporal Frequency Discrimination"

@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Focus Test — free online concentration stamina and attention endurance drill';
+export const alt = 'Attention Span Test — free online concentration stamina and attention endurance drill';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -74,7 +74,7 @@ export default async function Image() {
               letterSpacing: -2,
             }}
           >
-            Focus Test
+            Attention Span Test
           </div>
           <div
             style={{

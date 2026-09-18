@@ -1,0 +1,172 @@
+{
+  "category": "motor",
+  "category_name": "Motor Control",
+  "total_drills": 9,
+  "completed_count": 9,
+  "remaining_count": 0,
+  "category_status": "COMPLETED (9 of 9 Complete - 100.0%)",
+  "completed_drills": [
+    {
+      "id": 84,
+      "name": "Aim Trainer",
+      "slug": "motor/hand-eye-coordination/aim-trainer",
+      "category": "motor",
+      "subcategory": "hand-eye-coordination",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/01_aim-trainer.md"
+    },
+    {
+      "id": 85,
+      "name": "Drag and Drop Test",
+      "slug": "motor/hand-eye-coordination/drag-and-drop",
+      "category": "motor",
+      "subcategory": "hand-eye-coordination",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/02_drag-and-drop.md"
+    },
+    {
+      "id": 86,
+      "name": "Precision Flick Shot",
+      "slug": "motor/hand-eye-coordination/precision-flick-shot",
+      "category": "motor",
+      "subcategory": "hand-eye-coordination",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/03_precision-flick-shot.md"
+    },
+    {
+      "id": 87,
+      "name": "Keyboard Tester",
+      "slug": "motor/keyboard-tester",
+      "category": "motor",
+      "subcategory": "keyboard-tester",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/04_keyboard-tester.md"
+    },
+    {
+      "id": 88,
+      "name": "Finger Sequencing",
+      "slug": "motor/movement-speed/finger-sequencing",
+      "category": "motor",
+      "subcategory": "movement-speed",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/05_finger-sequencing.md"
+    },
+    {
+      "id": 89,
+      "name": "Keyboard Recognition",
+      "slug": "motor/movement-speed/keyboard-recognition",
+      "category": "motor",
+      "subcategory": "movement-speed",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/06_keyboard-recognition.md"
+    },
+    {
+      "id": 90,
+      "name": "Rapid Tapping",
+      "slug": "motor/movement-speed/rapid-tapping",
+      "category": "motor",
+      "subcategory": "movement-speed",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/07_rapid-tapping.md"
+    },
+    {
+      "id": 91,
+      "name": "Steady Hand",
+      "slug": "motor/precision-control/steady-hand",
+      "category": "motor",
+      "subcategory": "precision-control",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/08_steady-hand.md"
+    },
+    {
+      "id": 92,
+      "name": "Tracing",
+      "slug": "motor/precision-control/tracing",
+      "category": "motor",
+      "subcategory": "precision-control",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/motor/09_tracing.md"
+    }
+  ]
+}

@@ -41,7 +41,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function SplitScreenTrackingClient() {
+export default function SplitScreenTrackingClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -425,13 +425,13 @@ export default function SplitScreenTrackingClient() {
         {!isFullscreen && (
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Split-Screen Tracking
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Divided Attention Eye Test
+              <span data-seo-kw="1">{copy?.title || "Split-Screen Tracking"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                {copy?.subtitle || "Divided Attention Eye Test"}
               </span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Split-screen tracking conditions divided visual attention by training observers to monitor two independent targets moving along orthogonal vertical and horizontal axes simultaneously. By utilizing covert peripheral vision between hemifields, this drill strengthens parallel visual processing and reduces attentional tunneling (Pylyshyn &amp; Storm, 1988; Alvarez &amp; Cavanagh, 2005). Most people can track about four or five independent moving targets at once, with accuracy falling away sharply beyond that (Pylyshyn &amp; Storm, 1988).
+              {copy?.description || "Split-screen tracking conditions divided visual attention by training observers to monitor two independent targets moving along orthogonal vertical and horizontal axes simultaneously. By utilizing covert peripheral vision between hemifields, this drill strengthens parallel visual processing and reduces attentional tunneling (Pylyshyn & Storm, 1988; Alvarez & Cavanagh, 2005). Most people can track about four or five independent moving targets at once, with accuracy falling away sharply beyond that (Pylyshyn & Storm, 1988)."}
             </p>
           </div>
         )}

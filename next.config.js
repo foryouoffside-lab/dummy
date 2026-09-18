@@ -245,20 +245,12 @@ const nextConfig = {
   // ============================================
   
   experimental: {
-    optimizeCss: false,
+    optimizeCss: true,
     optimizePackageImports: [
       'lucide-react', 
       '@vercel/analytics',
       '@vercel/speed-insights',
     ],
-  },
-  
-  // ============================================
-  // WEBPACK SPLIT CHUNKS (Reduces TBT)
-  // ============================================
-  
-  webpack: (config, { isServer, dev }) => {
-    return config;
   },
   
   eslint: {

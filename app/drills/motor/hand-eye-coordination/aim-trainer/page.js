@@ -1,4 +1,4 @@
-import AimTrainerClient from './AimTrainerClient';
+import AimTrainerClient from './AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -25,8 +25,8 @@ import { pickSources } from '@/lib/drillSources';
 // ============================================================
 
 export const metadata = {
-  title: 'Aim Trainer – Free Mouse Precision & Flick Shot Drill',
-  description: 'Train mouse accuracy, micro-flicks, and reaction speed with this free FPS aim trainer. Grounded in Fitts\'s Law with dynamic score-based difficulty scaling.',
+  title: 'Aim Trainer – Mouse Precision and Flick Shot | SkillDrills',
+  description: 'Train mouse accuracy, micro-flicks, and reaction speed with this free FPS aim trainer, grounded in Fitts Law with dynamic score-based difficulty scaling.',
   keywords: [
     'aim trainer',
     'fps aim trainer',
@@ -186,6 +186,22 @@ const faqSchema = {
   ],
 };
 
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Aim Trainer Elite Online",
+  "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
+  "description": "Free online browser-based 2D aim trainer for FPS gamers. Practice target acquisition, mouse accuracy, and click timing.",
+  "dateModified": "2026-09-11",
+  "gamePlatform": "Web Browser",
+  "genre": ["Aim Trainer", "FPS Training", "Hand-Eye Coordination", "Reaction Speed"],
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -195,31 +211,43 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
-      position: 1,
+      "position": 1,
+      "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer#step-1",
+      
       name: 'Initialize Raw Mouse Input',
       text: 'Click the start card to lock pointer input and establish your baseline crosshair centering.',
     },
     {
       '@type': 'HowToStep',
-      position: 2,
+      "position": 2,
+      "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer#step-2",
+      
       name: 'Execute Ballistic Target Acquisition',
       text: 'Rapidly flick toward newly spawned targets with a smooth, decisive primary arm/wrist impulse.',
     },
     {
       '@type': 'HowToStep',
-      position: 3,
+      "position": 3,
+      "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer#step-3",
+      
       name: 'Apply Terminal Micro-Corrections',
       text: 'Decelerate smoothly as the crosshair nears the target, centering the reticle before executing the click.',
     },
     {
       '@type': 'HowToStep',
-      position: 4,
+      "position": 4,
+      "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer#step-4",
+      
       name: 'Build and Sustain Combo Multipliers',
       text: 'Chain consecutive hits without misses or timeouts to compound combo multipliers up to 3.0x bonus points.',
     },
   ],
 };
 
+const copyEn = {
+  h1Keyword: "Aim Trainer Online",
+  h1Suffix: " - Aim Trainer Elite Online",
+};
 export default function AimTrainerPage() {
   const sources = pickSources('fitts1954', 'mackenzie1992', 'elliott2010', 'woodworth1899', 'woods2015');
 
@@ -228,10 +256,14 @@ export default function AimTrainerPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
 
-      <AimTrainerClient />
+      <AimTrainerClient copy={copyEn} />
 
       <DrillGuide
         eyebrow="Motor Control Psychophysics & Human-Computer Interaction"

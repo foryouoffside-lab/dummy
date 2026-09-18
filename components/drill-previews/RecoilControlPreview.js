@@ -23,6 +23,7 @@ export default function RecoilControlPreview() {
           {/* Impact sparks */}
           <span className="rc-spark rc-spark-1" />
           <span className="rc-spark rc-spark-2" />
+          <span className="rc-hit-ring" />
           <span className="rc-hitmarker">
             <i className="rc-hit-l1" />
             <i className="rc-hit-l2" />

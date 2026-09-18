@@ -10,188 +10,115 @@
  */
 
 import React, { useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Play } from 'lucide-react';
 import { previewTicker } from '@/lib/previewTicker';
 import { getDrillPreview } from '@/lib/drillPreviews';
 import { getScene } from './previews/scenes';
-import InstantResponsePreview from '../drill-previews/InstantResponsePreview';
-import Awareness180Preview from '../drill-previews/Awareness180Preview';
-import FlowStatePreview from '../drill-previews/FlowStatePreview';
-import TargetAcquisitionPreview from '../drill-previews/TargetAcquisitionPreview';
-import AntiZigzagPreview from '../drill-previews/AntiZigzagPreview';
-import FlickShotPreview from '../drill-previews/FlickShotPreview';
-import MicroCorrectionPreview from '../drill-previews/MicroCorrectionPreview';
-import ProSmoothPursuitPreview from '../drill-previews/ProSmoothPursuitPreview';
-import RecoilControlPreview from '../drill-previews/RecoilControlPreview';
-import StrafeTrackingPreview from '../drill-previews/StrafeTrackingPreview';
-import TargetPrioritizationPreview from '../drill-previews/TargetPrioritizationPreview';
-import TargetSwitchingSwarmPreview from '../drill-previews/TargetSwitchingSwarmPreview';
-import AngleHoldPreview from '../drill-previews/AngleHoldPreview';
-import AntiStrafeJitterPreview from '../drill-previews/AntiStrafeJitterPreview';
-import VerticalAirTrackPreview from '../drill-previews/VerticalAirTrackPreview';
-import DistractionFighterPreview from '../drill-previews/DistractionFighterPreview';
-import ConcentrationGridPreview from '../drill-previews/ConcentrationGridPreview';
-import MultiTaskingPreview from '../drill-previews/MultiTaskingPreview';
-import ReactionTimePreview from '../drill-previews/ReactionTimePreview';
-import RsvpReaderPreview from '../drill-previews/RsvpReaderPreview';
-import DividedAttentionPreview from '../drill-previews/DividedAttentionPreview';
-import SymbolMatchingPreview from '../drill-previews/SymbolMatchingPreview';
-import ConcentrationStaminaPreview from '../drill-previews/ConcentrationStaminaPreview';
-import GridMemorizationPreview from '../drill-previews/GridMemorizationPreview';
-import ColorSequencePreview from '../drill-previews/ColorSequencePreview';
-import DigitSpanPreview from '../drill-previews/DigitSpanPreview';
-import WordRecallPreview from '../drill-previews/WordRecallPreview';
-import ObjectLocationPreview from '../drill-previews/ObjectLocationPreview';
-import PathTracingPreview from '../drill-previews/PathTracingPreview';
-import NBackPreview from '../drill-previews/NBackPreview';
-import AimTrainerPreview from '../drill-previews/AimTrainerPreview';
-import DragAndDropPreview from '../drill-previews/DragAndDropPreview';
-import PrecisionFlickShotPreview from '../drill-previews/PrecisionFlickShotPreview';
-import FingerSequencingPreview from '../drill-previews/FingerSequencingPreview';
-import KeyboardRecognitionPreview from '../drill-previews/KeyboardRecognitionPreview';
-import RapidTappingPreview from '../drill-previews/RapidTappingPreview';
-import SteadyHandPreview from '../drill-previews/SteadyHandPreview';
-import TracingPreview from '../drill-previews/TracingPreview';
-import QuickDodgePreview from '../drill-previews/QuickDodgePreview';
-import StabilityChallengePreview from '../drill-previews/StabilityChallengePreview';
-import ComplexPatternPreview from '../drill-previews/ComplexPatternPreview';
-import CrossBodyMovementPreview from '../drill-previews/CrossBodyMovementPreview';
-import DynamicGridEvasionPreview from '../drill-previews/DynamicGridEvasionPreview';
-import AgilityLadderPreview from '../drill-previews/AgilityLadderPreview';
-import JumpSequencePreview from '../drill-previews/JumpSequencePreview';
-import SpeedDrillPreview from '../drill-previews/SpeedDrillPreview';
-import DropCatchPreview from '../drill-previews/DropCatchPreview';
-import PeripheralThreatSweeperPreview from '../drill-previews/PeripheralThreatSweeperPreview';
-import ReactionChainPreview from '../drill-previews/ReactionChainPreview';
-import MovingTargetPreview from '../drill-previews/MovingTargetPreview';
-import DistanceJudgmentPreview from '../drill-previews/DistanceJudgmentPreview';
-import GoNoGoPreview from '../drill-previews/GoNoGoPreview';
-import LightReactionPreview from '../drill-previews/LightReactionPreview';
-import MultipleTargetsPreview from '../drill-previews/MultipleTargetsPreview';
-import PursuitTrackerPreview from '../drill-previews/PursuitTrackerPreview';
-import EntropicGridPreview from '../drill-previews/EntropicGridPreview';
-import RhythmAnomalyPreview from '../drill-previews/RhythmAnomalyPreview';
-import VisualSearchPreview from '../drill-previews/VisualSearchPreview';
-import ConstantSlowPursuitPreview from '../drill-previews/ConstantSlowPursuitPreview';
-import DirectionalChaosPursuitPreview from '../drill-previews/DirectionalChaosPursuitPreview';
-import DynamicEvasionPursuitPreview from '../drill-previews/DynamicEvasionPursuitPreview';
-import GhostingSuppressPursuitPreview from '../drill-previews/GhostingSuppressPursuitPreview';
-import InfinityPursuitPreview from '../drill-previews/InfinityPursuitPreview';
-import MomentumTeleportPursuitPreview from '../drill-previews/MomentumTeleportPursuitPreview';
-import PeripheralPingPursuitPreview from '../drill-previews/PeripheralPingPursuitPreview';
-import PredictivePursuitPreview from '../drill-previews/PredictivePursuitPreview';
-import SineWavePursuitPreview from '../drill-previews/SineWavePursuitPreview';
-import SpatialShiftPursuitPreview from '../drill-previews/SpatialShiftPursuitPreview';
-import SplitScreenTrackingPreview from '../drill-previews/SplitScreenTrackingPreview';
-import StaircaseStepPreview from '../drill-previews/StaircaseStepPreview';
-import StrobePredictionPursuitPreview from '../drill-previews/StrobePredictionPursuitPreview';
-import TriangularPursuitPreview from '../drill-previews/TriangularPursuitPreview';
-import ZigZagPathPursuitPreview from '../drill-previews/ZigZagPathPursuitPreview';
-import BarrierSequencePursuitPreview from '../drill-previews/BarrierSequencePursuitPreview';
-import FPSTrackingTrainerPreview from '../drill-previews/FPSTrackingTrainerPreview';
-import MarketDoorsPursuitPreview from '../drill-previews/MarketDoorsPursuitPreview';
-import ReactionGamePreview from '../drill-previews/ReactionGamePreview';
-import ReactionTimeTestPreview from '../drill-previews/ReactionTimeTestPreview';
-import ReflexTrainingDrillPreview from '../drill-previews/ReflexTrainingDrillPreview';
-import SaccadicGalleryPreview from '../drill-previews/SaccadicGalleryPreview';
-import VisualTrackingSpeedTestPreview from '../drill-previews/VisualTrackingSpeedTestPreview';
+
+// Each dedicated preview is its own code-split chunk (next/dynamic, no SSR --
+// these are aria-hidden decorative canvases). A hub page only ever renders the
+// previews for its own drills, so it should only ever fetch those chunks
+// instead of eagerly bundling all ~80 preview components into every page that
+// mounts a DrillCarousel.
+const dyn = (name) => dynamic(() => import(`../drill-previews/${name}`), { ssr: false });
 
 const DEDICATED_PREVIEWS = {
-  '/drills/fps/instant-response': InstantResponsePreview,
-  '/drills/fps/180-degree-awareness': Awareness180Preview,
-  '/drills/fps/flow-state': FlowStatePreview,
-  '/drills/fps/target-acquisition': TargetAcquisitionPreview,
-  '/drills/fps/anti-zigzag-movement-trainer': AntiZigzagPreview,
-  '/drills/fps/flick-shot-training': FlickShotPreview,
-  '/drills/fps/micro-correction-precision': MicroCorrectionPreview,
-  '/drills/fps/pro-smooth-pursuit': ProSmoothPursuitPreview,
-  '/drills/fps/recoil-control': RecoilControlPreview,
-  '/drills/fps/strafe-tracking': StrafeTrackingPreview,
-  '/drills/fps/target-prioritization': TargetPrioritizationPreview,
-  '/drills/fps/target-switching-swarm': TargetSwitchingSwarmPreview,
-  '/drills/fps/angle-hold-trainer': AngleHoldPreview,
-  '/drills/fps/anti-strafe-jitter-duel': AntiStrafeJitterPreview,
-  '/drills/fps/vertical-air-track': VerticalAirTrackPreview,
+  '/drills/fps/instant-response': dyn('InstantResponsePreview'),
+  '/drills/fps/180-degree-awareness': dyn('Awareness180Preview'),
+  '/drills/fps/flow-state': dyn('FlowStatePreview'),
+  '/drills/fps/target-acquisition': dyn('TargetAcquisitionPreview'),
+  '/drills/fps/anti-zigzag-movement-trainer': dyn('AntiZigzagPreview'),
+  '/drills/fps/flick-shot-training': dyn('FlickShotPreview'),
+  '/drills/fps/micro-correction-precision': dyn('MicroCorrectionPreview'),
+  '/drills/fps/pro-smooth-pursuit': dyn('ProSmoothPursuitPreview'),
+  '/drills/fps/recoil-control': dyn('RecoilControlPreview'),
+  '/drills/fps/strafe-tracking': dyn('StrafeTrackingPreview'),
+  '/drills/fps/target-prioritization': dyn('TargetPrioritizationPreview'),
+  '/drills/fps/target-switching-swarm': dyn('TargetSwitchingSwarmPreview'),
+  '/drills/fps/angle-hold-trainer': dyn('AngleHoldPreview'),
+  '/drills/fps/anti-strafe-jitter-duel': dyn('AntiStrafeJitterPreview'),
+  '/drills/fps/vertical-air-track': dyn('VerticalAirTrackPreview'),
 
   // Cognitive Drills
-  '/drills/cognitive/focus/distraction-fighter': DistractionFighterPreview,
-  '/drills/cognitive/focus/concentration-grid': ConcentrationGridPreview,
-  '/drills/cognitive/attention/multi-tasking': MultiTaskingPreview,
-  '/drills/cognitive/processing-speed/reaction-time': ReactionTimePreview,
-  '/drills/cognitive/processing-speed/rsvp-reader': RsvpReaderPreview,
-  '/drills/cognitive/attention/divided-attention': DividedAttentionPreview,
-  '/drills/cognitive/processing-speed/symbol-matching': SymbolMatchingPreview,
-  '/drills/cognitive/attention/concentration-stamina': ConcentrationStaminaPreview,
+  '/drills/cognitive/focus/distraction-fighter': dyn('DistractionFighterPreview'),
+  '/drills/cognitive/focus/concentration-grid': dyn('ConcentrationGridPreview'),
+  '/drills/cognitive/attention/multi-tasking': dyn('MultiTaskingPreview'),
+  '/drills/cognitive/processing-speed/reaction-time': dyn('ReactionTimePreview'),
+  '/drills/cognitive/processing-speed/rsvp-reader': dyn('RsvpReaderPreview'),
+  '/drills/cognitive/attention/divided-attention': dyn('DividedAttentionPreview'),
+  '/drills/cognitive/processing-speed/symbol-matching': dyn('SymbolMatchingPreview'),
+  '/drills/cognitive/attention/concentration-stamina': dyn('ConcentrationStaminaPreview'),
 
   // Memory Drills
-  '/drills/memory/spatial-memory/grid-memorization': GridMemorizationPreview,
-  '/drills/memory/short-term-memory/color-sequence': ColorSequencePreview,
-  '/drills/memory/short-term-memory/digit-span': DigitSpanPreview,
-  '/drills/memory/short-term-memory/word-recall': WordRecallPreview,
-  '/drills/memory/spatial-memory/object-location': ObjectLocationPreview,
-  '/drills/memory/spatial-memory/path-tracing': PathTracingPreview,
-  '/drills/memory/working-memory/n-back': NBackPreview,
+  '/drills/memory/spatial-memory/grid-memorization': dyn('GridMemorizationPreview'),
+  '/drills/memory/short-term-memory/color-sequence': dyn('ColorSequencePreview'),
+  '/drills/memory/short-term-memory/digit-span': dyn('DigitSpanPreview'),
+  '/drills/memory/short-term-memory/word-recall': dyn('WordRecallPreview'),
+  '/drills/memory/spatial-memory/object-location': dyn('ObjectLocationPreview'),
+  '/drills/memory/spatial-memory/path-tracing': dyn('PathTracingPreview'),
+  '/drills/memory/working-memory/n-back': dyn('NBackPreview'),
 
   // Motor Drills
-  '/drills/motor/hand-eye-coordination/aim-trainer': AimTrainerPreview,
-  '/drills/motor/hand-eye-coordination/drag-and-drop': DragAndDropPreview,
-  '/drills/motor/hand-eye-coordination/precision-flick-shot': PrecisionFlickShotPreview,
-  '/drills/motor/movement-speed/finger-sequencing': FingerSequencingPreview,
-  '/drills/motor/movement-speed/keyboard-recognition': KeyboardRecognitionPreview,
-  '/drills/motor/movement-speed/rapid-tapping': RapidTappingPreview,
-  '/drills/motor/precision-control/steady-hand': SteadyHandPreview,
-  '/drills/motor/precision-control/tracing': TracingPreview,
+  '/drills/motor/hand-eye-coordination/aim-trainer': dyn('AimTrainerPreview'),
+  '/drills/motor/hand-eye-coordination/drag-and-drop': dyn('DragAndDropPreview'),
+  '/drills/motor/hand-eye-coordination/precision-flick-shot': dyn('PrecisionFlickShotPreview'),
+  '/drills/motor/movement-speed/finger-sequencing': dyn('FingerSequencingPreview'),
+  '/drills/motor/movement-speed/keyboard-recognition': dyn('KeyboardRecognitionPreview'),
+  '/drills/motor/movement-speed/rapid-tapping': dyn('RapidTappingPreview'),
+  '/drills/motor/precision-control/steady-hand': dyn('SteadyHandPreview'),
+  '/drills/motor/precision-control/tracing': dyn('TracingPreview'),
 
   // Physical Drills
-  '/drills/physical/balance-training/stability-challenge': StabilityChallengePreview,
-  '/drills/physical/coordination/complex-pattern': ComplexPatternPreview,
-  '/drills/physical/coordination/cross-body-movement': CrossBodyMovementPreview,
-  '/drills/physical/coordination/dynamic-grid-evasion': DynamicGridEvasionPreview,
-  '/drills/physical/fitness/agility-ladder': AgilityLadderPreview,
-  '/drills/physical/fitness/jump-sequence': JumpSequencePreview,
-  '/drills/physical/fitness/speed-drill': SpeedDrillPreview,
-  '/drills/physical/reflex-training/drop-catch': DropCatchPreview,
-  '/drills/physical/reflex-training/peripheral-threat-sweeper': PeripheralThreatSweeperPreview,
-  '/drills/physical/reflex-training/quick-dodge': QuickDodgePreview,
-  '/drills/physical/reflex-training/reaction-chain': ReactionChainPreview,
+  '/drills/physical/balance-training/stability-challenge': dyn('StabilityChallengePreview'),
+  '/drills/physical/coordination/complex-pattern': dyn('ComplexPatternPreview'),
+  '/drills/physical/coordination/cross-body-movement': dyn('CrossBodyMovementPreview'),
+  '/drills/physical/coordination/dynamic-grid-evasion': dyn('DynamicGridEvasionPreview'),
+  '/drills/physical/fitness/agility-ladder': dyn('AgilityLadderPreview'),
+  '/drills/physical/fitness/jump-sequence': dyn('JumpSequencePreview'),
+  '/drills/physical/fitness/speed-drill': dyn('SpeedDrillPreview'),
+  '/drills/physical/reflex-training/drop-catch': dyn('DropCatchPreview'),
+  '/drills/physical/reflex-training/peripheral-threat-sweeper': dyn('PeripheralThreatSweeperPreview'),
+  '/drills/physical/reflex-training/quick-dodge': dyn('QuickDodgePreview'),
+  '/drills/physical/reflex-training/reaction-chain': dyn('ReactionChainPreview'),
 
   // Visual Drills
-  '/drills/visual/depth-perception/distance-judgment': DistanceJudgmentPreview,
-  '/drills/visual/reaction-speed/go/no-go': GoNoGoPreview,
-  '/drills/visual/reaction-speed/light-reaction': LightReactionPreview,
-  '/drills/visual/tracking-accuracy/moving-target': MovingTargetPreview,
-  '/drills/visual/tracking-accuracy/multiple-targets': MultipleTargetsPreview,
-  '/drills/visual/tracking-accuracy/pursuit-tracker': PursuitTrackerPreview,
-  '/drills/visual/visual-recognition/entropic-grid': EntropicGridPreview,
-  '/drills/visual/visual-recognition/rhythm-anomaly': RhythmAnomalyPreview,
-  '/drills/visual/visual-recognition/visual-search': VisualSearchPreview,
+  '/drills/visual/depth-perception/distance-judgment': dyn('DistanceJudgmentPreview'),
+  '/drills/visual/reaction-speed/go/no-go': dyn('GoNoGoPreview'),
+  '/drills/visual/reaction-speed/light-reaction': dyn('LightReactionPreview'),
+  '/drills/visual/tracking-accuracy/moving-target': dyn('MovingTargetPreview'),
+  '/drills/visual/tracking-accuracy/multiple-targets': dyn('MultipleTargetsPreview'),
+  '/drills/visual/tracking-accuracy/pursuit-tracker': dyn('PursuitTrackerPreview'),
+  '/drills/visual/visual-recognition/entropic-grid': dyn('EntropicGridPreview'),
+  '/drills/visual/visual-recognition/rhythm-anomaly': dyn('RhythmAnomalyPreview'),
+  '/drills/visual/visual-recognition/visual-search': dyn('VisualSearchPreview'),
 
   // Visual Tracking Drills
-  '/drills/visual-tracking/constant-slow-pursuit': ConstantSlowPursuitPreview,
-  '/drills/visual-tracking/directional-chaos-pursuit': DirectionalChaosPursuitPreview,
-  '/drills/visual-tracking/dynamic-evasion-pursuit': DynamicEvasionPursuitPreview,
-  '/drills/visual-tracking/ghosting-suppress-pursuit': GhostingSuppressPursuitPreview,
-  '/drills/visual-tracking/infinity-pursuit': InfinityPursuitPreview,
-  '/drills/visual-tracking/momentum-teleport-pursuit': MomentumTeleportPursuitPreview,
-  '/drills/visual-tracking/peripheral-ping-pursuit': PeripheralPingPursuitPreview,
-  '/drills/visual-tracking/predictive-pursuit': PredictivePursuitPreview,
-  '/drills/visual-tracking/sine-wave-pursuit': SineWavePursuitPreview,
-  '/drills/visual-tracking/spatial-shift-pursuit': SpatialShiftPursuitPreview,
-  '/drills/visual-tracking/split-screen-tracking': SplitScreenTrackingPreview,
-  '/drills/visual-tracking/staircase-step': StaircaseStepPreview,
-  '/drills/visual-tracking/strobe-prediction-pursuit': StrobePredictionPursuitPreview,
-  '/drills/visual-tracking/triangular-pursuit': TriangularPursuitPreview,
-  '/drills/visual-tracking/zig-zag-path-pursuit': ZigZagPathPursuitPreview,
+  '/drills/visual-tracking/constant-slow-pursuit': dyn('ConstantSlowPursuitPreview'),
+  '/drills/visual-tracking/directional-chaos-pursuit': dyn('DirectionalChaosPursuitPreview'),
+  '/drills/visual-tracking/dynamic-evasion-pursuit': dyn('DynamicEvasionPursuitPreview'),
+  '/drills/visual-tracking/ghosting-suppress-pursuit': dyn('GhostingSuppressPursuitPreview'),
+  '/drills/visual-tracking/infinity-pursuit': dyn('InfinityPursuitPreview'),
+  '/drills/visual-tracking/momentum-teleport-pursuit': dyn('MomentumTeleportPursuitPreview'),
+  '/drills/visual-tracking/peripheral-ping-pursuit': dyn('PeripheralPingPursuitPreview'),
+  '/drills/visual-tracking/predictive-pursuit': dyn('PredictivePursuitPreview'),
+  '/drills/visual-tracking/sine-wave-pursuit': dyn('SineWavePursuitPreview'),
+  '/drills/visual-tracking/spatial-shift-pursuit': dyn('SpatialShiftPursuitPreview'),
+  '/drills/visual-tracking/split-screen-tracking': dyn('SplitScreenTrackingPreview'),
+  '/drills/visual-tracking/staircase-step': dyn('StaircaseStepPreview'),
+  '/drills/visual-tracking/strobe-prediction-pursuit': dyn('StrobePredictionPursuitPreview'),
+  '/drills/visual-tracking/triangular-pursuit': dyn('TriangularPursuitPreview'),
+  '/drills/visual-tracking/zig-zag-path-pursuit': dyn('ZigZagPathPursuitPreview'),
 
   // Reaction Speed Drills
-  '/drills/reaction-speed/barrier-sequence-pursuit': BarrierSequencePursuitPreview,
-  '/drills/reaction-speed/fps-tracking-trainer': FPSTrackingTrainerPreview,
-  '/drills/reaction-speed/market-doors-pursuit': MarketDoorsPursuitPreview,
-  '/drills/reaction-speed/reaction-game': ReactionGamePreview,
-  '/drills/reaction-speed/reaction-time-test': ReactionTimeTestPreview,
-  '/drills/reaction-speed/reflex-training-drill': ReflexTrainingDrillPreview,
-  '/drills/reaction-speed/saccadic-gallery': SaccadicGalleryPreview,
-  '/drills/reaction-speed/visual-tracking-speed-test': VisualTrackingSpeedTestPreview,
+  '/drills/reaction-speed/barrier-sequence-pursuit': dyn('BarrierSequencePursuitPreview'),
+  '/drills/reaction-speed/fps-tracking-trainer': dyn('FPSTrackingTrainerPreview'),
+  '/drills/reaction-speed/market-doors-pursuit': dyn('MarketDoorsPursuitPreview'),
+  '/drills/reaction-speed/reaction-game': dyn('ReactionGamePreview'),
+  '/drills/reaction-speed/reaction-time-test': dyn('ReactionTimeTestPreview'),
+  '/drills/reaction-speed/reflex-training-drill': dyn('ReflexTrainingDrillPreview'),
+  '/drills/reaction-speed/saccadic-gallery': dyn('SaccadicGalleryPreview'),
+  '/drills/reaction-speed/visual-tracking-speed-test': dyn('VisualTrackingSpeedTestPreview'),
 };
 
 // stroke drives the scene's marks; dim is the grid it draws them on; glow and

@@ -96,7 +96,7 @@ const RELATED_DRILLS = [
   { id: "multi-tasking", name: "Multitasking Test", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" }
 ];
 
-export default function SymbolMatchingClient() {
+export default function SymbolMatchingClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -461,7 +461,7 @@ export default function SymbolMatchingClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Symbol Digit Modalities Test
+              <span data-seo-kw="1">{copy?.title || "Symbol Digit Modalities Test"}</span>
             </h1>
           </div>
         )}

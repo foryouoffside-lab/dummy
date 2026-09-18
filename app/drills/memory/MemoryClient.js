@@ -7,12 +7,12 @@ import {
   Brain,
   Layers,
   Compass,
-  Database,
-  GitBranch,
-  Zap,
   Home,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Clock,
+  Cpu,
+  ShieldCheck
 } from "lucide-react";
 import { DRILLS } from "@/lib/drillsRegistry";
 import { getDifficultyRank } from "@/lib/scoringEngine";
@@ -105,12 +105,12 @@ export default function MemoryClient({ faqs = [] }) {
                 levels[d.folderName] = parsed.bestLevel;
                 break;
               }
-            } catch (e) {}
+            } catch {}
           }
         }
       });
       setDrillLevels(levels);
-    } catch (e) {}
+    } catch {}
   }, [isClient]);
 
   // Binary data grid background animation with reduced motion & intersection awareness
@@ -274,51 +274,119 @@ export default function MemoryClient({ faqs = [] }) {
           />
         </Reveal>
 
-        {/* Benefits Grid */}
-        <Reveal className="mb-12">
-          <div className="bg-surface-1 border border-hairline rounded-3xl p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
-            <h3 className="text-lg font-bold uppercase tracking-wider text-ink-1 mb-6 flex items-center gap-2 font-mono">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
-              MEMORY STACK IMPROVEMENT VECTORS
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                {
-                  icon: Database,
-                  title: "Working Buffer",
-                  desc: "Augment sensory sequence mapping and pattern retention grids.",
-                },
-                {
-                  icon: Compass,
-                  title: "Spatial Tracing",
-                  desc: "Sharpen layout memory recall and path tracking resolution.",
-                },
-                {
-                  icon: GitBranch,
-                  title: "Recall Streaks",
-                  desc: "Build durable concept connections across non-adjacent recall points.",
-                },
-                {
-                  icon: Zap,
-                  title: "N-Back Endurance",
-                  desc: "Maximize mental data processing rates under progressive cognitive loads.",
-                },
-              ].map((benefit, i) => {
-                const Icon = benefit.icon;
+        {/* Memory Training Domains - 3 Category Cards with Crawlable Links */}
+        <Reveal className="mb-14">
+          <div className="bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
+            <div className="flex items-center gap-2 mb-6">
+              <Layers className="w-5 h-5 text-indigo-400" />
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                Memory Training Domains
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {memoryCategories.map((cat) => {
+                const Icon = cat.icon;
                 return (
-                  <div key={i} className="bg-surface-2 border border-hairline rounded-xl p-4">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
-                      <Icon className="w-4 h-4" />
+                  <div
+                    key={cat.folderName}
+                    className="bg-surface-2/80 border border-hairline rounded-2xl p-5 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold tracking-tight text-ink-1">
+                            {cat.name}
+                          </h3>
+                          <span className="text-xs font-medium text-indigo-400">
+                            {cat.drills.length} {cat.drills.length === 1 ? 'Drill' : 'Drills'}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-ink-2 leading-relaxed mb-4">
+                        {cat.description}
+                      </p>
                     </div>
-                    <h4 className="font-bold text-indigo-400 mb-1 uppercase text-xs tracking-wider font-mono">
-                      {benefit.title}
-                    </h4>
-                    <p className="text-xs text-ink-2 leading-relaxed">
-                      {benefit.desc}
-                    </p>
+
+                    <div className="space-y-2 pt-3 border-t border-hairline">
+                      {cat.drills.map((drill) => {
+                        const href = hasLocalizedRoute(locale, drill.href)
+                          ? localizeHref(drill.href)
+                          : drill.href;
+                        const fallbackTagline = getDrillTagline(drill.href, drill.description);
+                        const localized = getLocalizedDrill(drill.href, locale, drill.name, fallbackTagline);
+                        return (
+                          <Link
+                            key={drill.href}
+                            href={href}
+                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-indigo-500/10 border border-hairline hover:border-indigo-500/30 transition-all text-sm"
+                          >
+                            <span className="font-medium text-ink-1 group-hover/item:text-indigo-300 transition-colors truncate pr-2">
+                              {localized.name}
+                            </span>
+                            <span className="text-xs font-medium text-ink-3 group-hover/item:text-indigo-400 shrink-0 flex items-center gap-1">
+                              {drill.duration}
+                              <ChevronRight className="w-3 h-3 transition-transform group-hover/item:translate-x-0.5" />
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Engine & Hardware Optimization */}
+        <Reveal className="mb-14">
+          <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+            <div className="flex items-center gap-2 mb-6">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                Engine &amp; Hardware Optimization
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Sub-Frame Sequence Sync
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  Decoupled rendering intervals present visual and auditory stimulus items with zero frame tearing or drift, guaranteeing consistent cognitive retention testing.
+                </p>
+              </div>
+
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Adaptive Span Scaler
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  Real-time cognitive load matrices continuously monitor trial accuracy to dynamically increase N-back depth or span limits precisely at your performance boundary.
+                </p>
+              </div>
+
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Encrypted Local Persistence
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  All streak history, trial timings, and memory milestones remain safely encapsulated in your browser&apos;s local store. Zero cloud latency, zero tracking overhead.
+                </p>
+              </div>
             </div>
           </div>
         </Reveal>
@@ -329,7 +397,7 @@ export default function MemoryClient({ faqs = [] }) {
             <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-indigo-400" />
-                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                   {t('home.faqTitle', 'Frequently Asked Questions')}
                 </h2>
               </div>

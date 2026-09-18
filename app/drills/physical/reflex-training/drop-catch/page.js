@@ -1,4 +1,4 @@
-import DropCatchClient from './DropCatchClient';
+import DropCatchClient from './DropCatchClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -38,7 +38,7 @@ import { pickSources } from '@/lib/drillSources';
 export const metadata = {
   title: 'Drop Catch Reflex Test - Free Reaction Timing Drill',
   description:
-    'Free online reflex drop catch test. Catch falling green targets and avoid red decoys in this high-speed reflex training game for reaction time and impulse control.',
+    'Free drop catch reflex test online. Catch falling targets under gravity to measure visual reaction time, anticipation latency, and catch precision in ms.',
   keywords: [
     // Primary terms
     'reflex drop catch',
@@ -224,6 +224,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Drop Catch Reflex Test',
+  url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch',
+  description: 'Free online reflex drop catch test. Catch falling green targets and avoid red decoys in this high-speed reaction training drill.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -236,30 +248,34 @@ const howToSchema = {
       position: 1,
       name: 'Acquire Accelerating Vertical Stimulus',
       text: 'Track the upper boundary of the display canvas. Identify newly spawned falling spheres as they accelerate downward under gravitational physics.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Filter Decoy Distractors via Stop-Signal Inhibition',
       text: 'Engage Donders Type C discrimination. If the sphere is red with an X marking, withhold your click entirely to win the internal horse-race and preserve combo multipliers.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Execute Optical Tau Interception Click',
       text: 'For valid green targets, calculate time-to-contact (τ) and snap your cursor to intercept the falling sphere before it touches the bottom floor boundary.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Accumulate Clock Extensions & Level Progression',
       text: 'Every clean green interception adds +0.6 seconds to your session clock, enabling long-duration sessions that ramp up to supersonic falling velocities.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch#step-4',
     },
   ],
 };
 
 const guideProps = {
-  sources: pickSources('lee1976', 'logan1984', 'donders1868', 'woodworth1899', 'fitts1954'),
+  sources: pickSources('lee1976', 'logan1984', 'donders1868', 'woodworth1899', 'fitts1954', 'woods2015'),
   intro: {
     title: 'How drop-catch reactions are measured',
     paragraphs: [
@@ -267,52 +283,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
+  benchmarks: {
     title: 'Drop Catch Reflex & Gravitational Interception Benchmarks',
-    description: 'Empirical standards derived from time-to-contact psychophysics (Lee 1976), stop-signal response inhibition (Logan et al. 1984), and Donders Type C mental chronometry (Donders 1868). Evaluates total points, catch accuracy, discrimination reaction latency, and decoy suppression rate.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Latency', 'Grade', 'Editorial band'],
+    headers: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Latency', 'Grade', 'Editorial Band'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Interceptor',
-        stat: '24,000+ pts',
-        level: '90%+ Acc / < 200ms Latency',
-        accuracy: 'Grade S',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Precision Reflex Catcher',
-        stat: '17,000–23,999 pts',
-        level: '82–89% Acc / 200–240ms Latency',
-        accuracy: 'Grade A',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Skilled Target Acquirer',
-        stat: '11,000–16,999 pts',
-        level: '74–81% Acc / 241–290ms Latency',
-        accuracy: 'Grade B',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Developing Reflex Trainee',
-        stat: '6,000–10,999 pts',
-        level: '65–73% Acc / 291–350ms Latency',
-        accuracy: 'Grade C',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Decoy Vulnerable',
-        stat: '< 6,000 pts',
-        level: '< 65% Acc / > 350ms Latency',
-        accuracy: 'Grade D',
-        percentile: 'Starting out',
-      },
+      ['Tier 1', 'Apex Interceptor', '24,000+ pts', '90%+ Acc / < 200ms Latency', 'Grade S', 'Top 5% (Elite)'],
+      ['Tier 2', 'Precision Reflex Catcher', '17,000–23,999 pts', '82–89% Acc / 200–240ms Latency', 'Grade A', 'Top 20% (Advanced)'],
+      ['Tier 3', 'Skilled Target Acquirer', '11,000–16,999 pts', '74–81% Acc / 241–290ms Latency', 'Grade B', 'Top 50% (Competent)'],
+      ['Tier 4', 'Developing Reflex Trainee', '6,000–10,999 pts', '65–73% Acc / 291–350ms Latency', 'Grade C', 'Top 75% (Developing)'],
+      ['Tier 5', 'Novice Decoy Vulnerable', '< 6,000 pts', '< 65% Acc / > 350ms Latency', 'Grade D', 'Below Average (Novice)'],
     ],
+    note: 'Empirical standards derived from time-to-contact psychophysics (Lee 1976), stop-signal response inhibition (Logan et al. 1984), and Donders Type C mental chronometry (Donders 1868). Evaluates total points, catch accuracy, discrimination reaction latency, and decoy suppression rate.',
   },
   protocols: {
     title: 'How to train drop-catch reactions',
@@ -366,10 +347,15 @@ export default function DropCatchPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DropCatchClient />
+      <DropCatchClient copy={{ title: 'Drop Catch Reflex Test', subtitle: 'Reaction Timing & Free-Fall Catch Drill' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

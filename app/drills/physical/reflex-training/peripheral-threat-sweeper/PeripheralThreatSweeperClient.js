@@ -21,7 +21,7 @@ import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -104,7 +104,7 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-export default function PeripheralThreatSweeperClient() {
+export default function PeripheralThreatSweeperClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -149,7 +149,7 @@ export default function PeripheralThreatSweeperClient() {
     nextThreatId: 0,
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
     successfulSweeps: 0, missedClicks: 0, breaches: 0, maxCombo: 0, totalActions: 0,
-    spawnTimer: 0, particles: [], hitMarkers: [], screenShake: 0, shieldGlow: 0,
+    spawnTimer: 0, particles: [], hitMarkers: [], hitRings: [], screenShake: 0, shieldGlow: 0,
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 80
   });
 
@@ -318,7 +318,7 @@ export default function PeripheralThreatSweeperClient() {
       nextThreatId: 0,
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       successfulSweeps: 0, missedClicks: 0, breaches: 0, maxCombo: 0, totalActions: 0,
-      spawnTimer: 0, particles: [], hitMarkers: [], screenShake: 0, shieldGlow: 0,
+      spawnTimer: 0, particles: [], hitMarkers: [], hitRings: [], screenShake: 0, shieldGlow: 0,
       logicalWidth: w, logicalHeight: h, peakSpeed: 80
     };
 
@@ -410,7 +410,9 @@ export default function PeripheralThreatSweeperClient() {
           setUiLevel(Math.floor(eng.level));
 
           drillAudio.playHit();
-          createExplosion(tx, ty, t.type === 'fast' ? '#f97316' : t.type === 'wobble' ? '#a855f7' : '#ef4444');
+          const hitColor = t.type === 'fast' ? '#f97316' : t.type === 'wobble' ? '#a855f7' : (eng.combo >= 10 ? '#38bdf8' : '#ef4444');
+          createExplosion(tx, ty, hitColor);
+          eng.hitRings.push(createHitRing(tx, ty, 14, hitColor));
           eng.threats.splice(i, 1);
           return;
         }
@@ -575,6 +577,8 @@ export default function PeripheralThreatSweeperClient() {
       }
       ctx.globalAlpha = 1.0;
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
         const activeColor = pointerLocked ? '#10b981' : '#eab308';
@@ -642,13 +646,15 @@ export default function PeripheralThreatSweeperClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Peripheral Threat Sweeper
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
-                Peripheral Vision Test
-              </span>
+              <span data-seo-kw="1">{copy?.title || "Peripheral Threat Sweeper"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
-              Peripheral vision is what you can detect without looking directly at it. Detail falls away sharply from the centre of gaze, but attention can still be shifted to a peripheral location while the eyes stay put, and a valid cue to that location speeds responses up (Posner, 1980). A single distinguishing feature such as colour is found in roughly the same time however many distractors surround it, while a target needing two features combined has to be searched for (Treisman &amp; Gelade, 1980) &mdash; which is what makes some threats here easy to catch at the edge and others not.
+              {copy?.description || "Peripheral vision is what you can detect without looking directly at it. Detail falls away sharply from the centre of gaze, but attention can still be shifted to a peripheral location while the eyes stay put, and a valid cue to that location speeds responses up (Posner, 1980). A single distinguishing feature such as colour is found in roughly the same time however many distractors surround it, while a target needing two features combined has to be searched for (Treisman & Gelade, 1980) — which is what makes some threats here easy to catch at the edge and others not."}
             </p>
           </div>
         )}
@@ -657,19 +663,19 @@ export default function PeripheralThreatSweeperClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.score || 'Score'}</div>
               <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.time || 'Time'}</div>
               <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestScore || 'Best Score'}</div>
               <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{copy?.hudLabels?.bestCombo || 'Best Combo'}</div>
               <div className="text-lg sm:text-2xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -695,12 +701,12 @@ export default function PeripheralThreatSweeperClient() {
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.score || 'Score'}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
                 </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.time || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -750,8 +756,8 @@ export default function PeripheralThreatSweeperClient() {
             <FpsStartCard
               icon={Eye}
               accent="emerald"
-              title="Peripheral Threat Sweeper"
-              subtitle="Peripheral Vision & Shield Defense • Continuous Scaling"
+              title={copy?.title || "Peripheral Threat Sweeper"}
+              subtitle={copy?.subtitle || "Peripheral Vision & Shield Defense • Continuous Scaling"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -759,7 +765,7 @@ export default function PeripheralThreatSweeperClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.hudLabels?.getReady || "GET READY"} />
           )}
 
           {/* UNIVERSAL RESULT CARD */}
@@ -770,10 +776,10 @@ export default function PeripheralThreatSweeperClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Sweeps', value: analytics.successfulSweeps },
-                { label: 'Breaches', value: analytics.breaches },
-                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: copy?.resultLabels?.accuracy || copy?.hudLabels?.accuracy || 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: copy?.resultLabels?.sweeps || copy?.hudLabels?.sweeps || 'Sweeps', value: analytics.successfulSweeps },
+                { label: copy?.resultLabels?.breaches || copy?.hudLabels?.breaches || 'Breaches', value: analytics.breaches },
+                { label: copy?.resultLabels?.peakLevel || copy?.hudLabels?.peakLevel || 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -787,12 +793,12 @@ export default function PeripheralThreatSweeperClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -803,17 +809,18 @@ export default function PeripheralThreatSweeperClient() {
 
             <DrillAccordion
               id="about"
-              title="About Peripheral Threat Sweeper"
+              title={copy?.aboutTitle || "About Peripheral Threat Sweeper"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-4">
-                {ABOUT_SECTIONS.map((sec, idx) => {
-                  const IconComp = sec.icon;
+                {(copy?.aboutSections || ABOUT_SECTIONS).map((sec, idx) => {
+                  const icons = [Eye, Target, Shield, Activity];
+                  const IconComp = sec.icon || icons[idx % icons.length];
                   return (
                     <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <IconComp className="w-4 h-4 text-emerald-400 shrink-0" />
+                        {IconComp && <IconComp className="w-4 h-4 text-emerald-400 shrink-0" />}
                         <h3 className="text-sm font-bold text-white tracking-wide">{sec.title}</h3>
                       </div>
                       <h4 className="text-xs font-semibold text-slate-400 mb-2">{sec.subtitle}</h4>

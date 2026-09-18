@@ -1,6 +1,7 @@
-import ReactionSimulatorWrapper from './ReactionSimulatorWrapper';
+import ReactionSimulatorWrapper from './ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-game
@@ -30,6 +31,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-game',
+    languages: getAlternateLanguages('/drills/reaction-speed/reaction-game'),
   },
   robots: { index: true, follow: true },
   openGraph: {
@@ -90,34 +92,62 @@ const educationalSchema = {
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Vertical Reflexes & Reaction Speed",
-  "description": "Step-by-step instructions on improving your vertical tracking, interception speed, and hand-eye coordination.",
+  "name": "How to Play the Reaction Game",
+  "description": "Step-by-step instructions on intercepting dynamic targets and training neuromuscular speed.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
       "name": "Launch the Game",
-      "text": "Press Start Drill to initialize the Reaction Game in full screen."
+      "text": "Click or tap Start Drill to enter the reaction arena.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-game#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Track Falling Targets",
-      "text": "Keep your eyes active along the top edge and visually track incoming falling spheres as they accelerate downwards."
+      "name": "Track Incoming Targets",
+      "text": "Keep your gaze centered to detect falling circular targets the moment they appear.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-game#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "React and Click",
-      "text": "Click or tap the falling targets immediately before they escape the lower boundary. Be precise to prevent time deductions."
+      "name": "Intercept Targets Fast",
+      "text": "Click or tap targets high on screen to maximize time bonuses and preserve combo multipliers.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-game#step-3"
     },
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Intercept Speed Bursts",
-      "text": "At higher levels, prioritize micro-targets and speed bursts to keep your hit rate up and survive the countdown."
+      "name": "Review Reaction Stats",
+      "text": "Review your interception speed, hit rate, and highest achieved difficulty level at session end.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-game#step-4"
     }
   ]
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Reaction Game",
+  "alternateName": ["Falling Target Reaction Game", "Reaction Speed Game", "Reflex Game"],
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Kinetic interception reflex game testing vertical visual tracking and rapid motor reactions.",
+  "softwareVersion": "2.0"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Reaction Game - Kinetic Interception Reflex Training",
+  "url": "https://skilldrills.online/drills/reaction-speed/reaction-game",
+  "description": "Intercept accelerating falling targets to condition hand-eye coordination and reflex speed.",
+  "genre": ["Reflex Game", "Action", "Esports Training"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -326,6 +356,14 @@ export default function ReactionGamePage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(educationalSchema) }}
       />
       <script
@@ -336,7 +374,7 @@ export default function ReactionGamePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <ReactionSimulatorWrapper />
+      <ReactionSimulatorWrapper copy={{ title: 'Reaction Game' }} />
       <DrillGuide guide={reactionGameGuide} />
     </>
   );

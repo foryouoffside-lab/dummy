@@ -221,15 +221,33 @@ export default function ReactionTimeTestPreview() {
         ctx.fillRect(cx - barW / 2, cy + height * 0.18, barW * prog, barH);
 
         // Click Crosshair
-        const crosshairSize = 10;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.lineWidth = 1.5;
+        const chColor = '#00ff88';
+        ctx.strokeStyle = chColor;
+        ctx.fillStyle = chColor;
+
+        const chRadius = 11;
+        const gap = 4;
+        const tickLen = 11;
+
+        // Circle
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.moveTo(cx, cy - 4); ctx.lineTo(cx, cy - crosshairSize);
-        ctx.moveTo(cx, cy + 4); ctx.lineTo(cx, cy + crosshairSize);
-        ctx.moveTo(cx - 4, cy); ctx.lineTo(cx - crosshairSize, cy);
-        ctx.moveTo(cx + 4, cy); ctx.lineTo(cx + crosshairSize, cy);
+        ctx.arc(cx, cy, chRadius, 0, Math.PI * 2);
         ctx.stroke();
+
+        // 4 Cross lines with gap
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - tickLen); ctx.lineTo(cx, cy - gap);
+        ctx.moveTo(cx, cy + tickLen); ctx.lineTo(cx, cy + gap);
+        ctx.moveTo(cx - tickLen, cy); ctx.lineTo(cx - gap, cy);
+        ctx.moveTo(cx + tickLen, cy); ctx.lineTo(cx + gap, cy);
+        ctx.stroke();
+
+        // Center pip
+        ctx.beginPath();
+        ctx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+        ctx.fill();
 
         // Render Burst Particles
         for (let i = particles.length - 1; i >= 0; i--) {

@@ -28,15 +28,15 @@ export default function PrivacyPolicyPage() {
         <p className="text-[12px] text-slate-500 mb-8">Last updated: {LAST_UPDATED}</p>
 
         <Section title="Overview">
-          <p>SkillDrills ("we", "us") provides free training drills at skilldrills.online and a companion SkillDrills mobile app. This policy explains what information we collect across the website and the app, why we collect it, and how you can control or delete it.</p>
+          <p>SkillDrills (&quot;we&quot;, &quot;us&quot;) provides free training drills at skilldrills.online and a companion SkillDrills mobile app. This policy explains what information we collect across the website and the app, why we collect it, and how you can control or delete it.</p>
         </Section>
 
         <Section title="Information we collect">
-          <p><strong className="text-slate-300">Using our website.</strong> You can use skilldrills.online and play drills without creating an account. We use Vercel Analytics and Speed Insights to understand traffic and page performance — these are cookie-less and don't collect personally identifiable information.</p>
+          <p><strong className="text-slate-300">Using our website.</strong> You can use skilldrills.online and play drills without creating an account. We use Vercel Analytics and Speed Insights to understand traffic and page performance — these are cookie-less and don&apos;t collect personally identifiable information.</p>
           <p><strong className="text-slate-300">Account information (mobile app).</strong> Signing in to the SkillDrills app requires a Google account. We receive your name, email address, and profile photo from Google Sign-In to create your player profile.</p>
           <p><strong className="text-slate-300">Gameplay data (mobile app).</strong> Drill scores, streaks, XP/level progress, and daily challenge history are stored against your account so your progress is saved and can sync across sessions.</p>
           <p><strong className="text-slate-300">Diagnostic data (mobile app).</strong> We use Firebase Crashlytics to automatically collect crash reports and basic device information (device model, OS version, app version) so we can find and fix bugs. This data is not linked to your name or used for advertising.</p>
-          <p><strong className="text-slate-300">Usage analytics (mobile app).</strong> The app uses Firebase Analytics to understand which drills and features are actually used — screen views and events like completing a drill (drill, category, score). It doesn't use cookies or track you across other websites or apps, and isn't used for advertising.</p>
+          <p><strong className="text-slate-300">Usage analytics (mobile app).</strong> The app uses Firebase Analytics to understand which drills and features are actually used — screen views and events like completing a drill (drill, category, score). It doesn&apos;t use cookies or track you across other websites or apps, and isn&apos;t used for advertising.</p>
           <p><strong className="text-slate-300">Device preferences (mobile app).</strong> Settings like sound on/off are stored locally on your device only and are never sent to us.</p>
         </Section>
 
@@ -45,19 +45,19 @@ export default function PrivacyPolicyPage() {
         </Section>
 
         <Section title="Who we share data with">
-          <p>The app's data is stored using Firebase (Google Cloud) as our backend infrastructure provider, and diagnostic/usage data is processed by Firebase Crashlytics and Firebase Analytics as described above. The website's traffic and performance data is processed by Vercel. These providers process data on our behalf under their own security and data-processing terms — we do not sell or share your data with anyone else, including advertisers.</p>
+          <p>The app&apos;s data is stored using Firebase (Google Cloud) as our backend infrastructure provider, and diagnostic/usage data is processed by Firebase Crashlytics and Firebase Analytics as described above. The website&apos;s traffic and performance data is processed by Vercel. These providers process data on our behalf under their own security and data-processing terms — we do not sell or share your data with anyone else, including advertisers.</p>
         </Section>
 
         <Section title="What other players can see">
-          <p>If you use the mobile app's leaderboards and Arena, your <strong className="text-slate-300">display name and profile photo are visible to other players</strong> — that is how rankings and match-ups work. Your email address is never shown to other players and is not stored on your public player profile. If you would rather not be identifiable, choose a display name and photo that don't identify you personally.</p>
+          <p>If you use the mobile app&apos;s leaderboards and Arena, your <strong className="text-slate-300">display name and profile photo are visible to other players</strong> — that is how rankings and match-ups work. Your email address is never shown to other players and is not stored on your public player profile. If you would rather not be identifiable, choose a display name and photo that don&apos;t identify you personally.</p>
         </Section>
 
         <Section title="Data retention & deletion">
-          <p>We keep your app account data for as long as your account exists. You can permanently delete your account and all associated data at any time from <span className="text-slate-300">Progress → Delete Account &amp; Wipe Data</span> inside the app. If you no longer have the app installed, email <span className="text-slate-300">skilldrills.contact@gmail.com</span> from the address associated with your account and we'll delete your data within 30 days. Full instructions are on our <Link href="/delete-account" className="text-violet-400">account deletion page</Link>.</p>
+          <p>We keep your app account data for as long as your account exists. You can permanently delete your account and all associated data at any time from <span className="text-slate-300">Progress → Delete Account &amp; Wipe Data</span> inside the app. If you no longer have the app installed, email <span className="text-slate-300">skilldrills.contact@gmail.com</span> from the address associated with your account and we&apos;ll delete your data within 30 days. Full instructions are on our <Link href="/delete-account" className="text-violet-400">account deletion page</Link>.</p>
         </Section>
 
         <Section title="Children's privacy">
-          <p>SkillDrills is not directed at children under 13, and creating an app account requires a Google account. If we become aware that we've collected information from a child under 13 without appropriate consent, we will delete it — contact us below to request this.</p>
+          <p>SkillDrills is not directed at children under 13, and creating an app account requires a Google account. If we become aware that we&apos;ve collected information from a child under 13 without appropriate consent, we will delete it — contact us below to request this.</p>
         </Section>
 
         <Section title="Who is responsible for your data">
@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage() {
         <Section title="Why we are allowed to process your data (EEA & UK)">
           <p>If you are in the European Economic Area or the United Kingdom, the GDPR requires us to name a lawful basis for each use of your data:</p>
           <p><strong className="text-slate-300">Performance of a contract.</strong> Your account information, player profile, and gameplay progress are processed so we can actually provide the service you signed up for — saving your scores, ranking you, and matching you against other players.</p>
-          <p><strong className="text-slate-300">Legitimate interests.</strong> Crash reports, app usage analytics, and the website's cookie-less traffic and performance measurement are processed so we can keep the website and app working, fix bugs, and understand which drills people use. We have weighed this against your privacy: the data is not linked to your name and is never used for advertising or profiling.</p>
+          <p><strong className="text-slate-300">Legitimate interests.</strong> Crash reports, app usage analytics, and the website&apos;s cookie-less traffic and performance measurement are processed so we can keep the website and app working, fix bugs, and understand which drills people use. We have weighed this against your privacy: the data is not linked to your name and is never used for advertising or profiling.</p>
           <p><strong className="text-slate-300">Consent.</strong> Where consent is required for analytics in your country, we rely on the consent you give at that point, and you can withdraw it at any time.</p>
         </Section>
 
@@ -88,11 +88,11 @@ export default function PrivacyPolicyPage() {
         </Section>
 
         <Section title="Security">
-          <p>App sign-in is handled entirely by Google — we never see or store your password. Your data is protected using Firebase's standard authentication and access-control rules.</p>
+          <p>App sign-in is handled entirely by Google — we never see or store your password. Your data is protected using Firebase&apos;s standard authentication and access-control rules.</p>
         </Section>
 
         <Section title="Changes to this policy">
-          <p>If this policy changes, we'll update the date at the top of this page. Continued use of SkillDrills after a change means you accept the updated policy.</p>
+          <p>If this policy changes, we&apos;ll update the date at the top of this page. Continued use of SkillDrills after a change means you accept the updated policy.</p>
         </Section>
 
         <Section title="Contact us">

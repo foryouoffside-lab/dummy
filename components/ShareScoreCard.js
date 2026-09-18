@@ -1,7 +1,5 @@
 'use client';
 
-import { getPlayerName } from '../lib/leaderboard';
-
 /**
  * Generate a shareable score card image and share it via Web Share API
  */
@@ -211,9 +209,6 @@ export function generateSessionCard({
   // Stats — 2x2 grid
   const gridStats = (stats || []).slice(0, 4);
   const cols = gridStats.length > 2 ? 2 : gridStats.length;
-  const rows = Math.ceil(gridStats.length / 2);
-  const cellW = 480 / Math.max(cols, 1);
-  const startX = 300 - (240);
   const rowYs = [250, 320];
 
   gridStats.forEach((s, i) => {
@@ -264,15 +259,15 @@ export async function shareScoreCard(challengeUrl, canvas) {
           new ClipboardItem({ 'image/jpeg': blob })
         ]);
         alert('Score image copied to clipboard! Share it with friends.');
-      } catch (err) {
+      } catch {
         await navigator.clipboard.writeText(challengeUrl);
         alert('Link copied to clipboard!');
       }
     }
-  } catch (e) {
+  } catch {
     try {
       await navigator.clipboard.writeText(challengeUrl);
       alert('Link copied!');
-    } catch (err) {}
+    } catch {}
   }
 }

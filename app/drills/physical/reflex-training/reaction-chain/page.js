@@ -1,4 +1,4 @@
-import ReactionChainClient from './ReactionChainClient';
+import ReactionChainClient from './ReactionChainClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -224,6 +224,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Reaction Chain Trainer',
+  url: 'https://skilldrills.online/drills/physical/reflex-training/reaction-chain',
+  description: 'Train reaction speed, motor inhibition, and precision stopping. Intercept and arrest cursor momentum across sequential visual signals.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -235,24 +247,28 @@ const howToSchema = {
       position: 1,
       name: 'Engage the Drill',
       text: 'Click start to lock your cursor into the canvas field and prepare for high-speed node launches.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/reaction-chain#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Intercept Incoming Node',
       text: 'Track the incoming target trajectory and execute an open-loop ballistic flick to place your crosshair within its boundary.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/reaction-chain#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Arrest Cursor Momentum',
       text: 'Engage antagonist forearm muscles to bring your mouse velocity below 1.5 px/frame to complete the kinetic arrest (+50 PTS).',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/reaction-chain#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Chain Continuous Streaks',
       text: 'Rapidly transition to the next launch vector without overshoot errors to build and hold the maximum 3.0x multiplier.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/reaction-chain#step-4',
     },
   ],
 };
@@ -266,52 +282,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
+  benchmarks: {
     title: 'Reaction Chain & Motor Inhibition Benchmarks',
-    description: 'Empirical standards derived from horse-race response inhibition models (Logan et al. 1984), two-component motor control (Woodworth 1899), discrimination reaction chronometry (Donders 1868/1969), and speed-accuracy constraints (Fitts 1954). Evaluates total points, arrest success percentage, peak target velocity, and streak retention.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial band'],
+    headers: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial Band'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Kinetic Stopper',
-        stat: '20,000+ pts',
-        level: '95%+ Acc / 1500+ px/s',
-        accuracy: 'Grade S',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Precision Braking Master',
-        stat: '14,000–19,999 pts',
-        level: '88–94% Acc / 1200–1499 px/s',
-        accuracy: 'Grade A',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Kinetic Interceptor',
-        stat: '9,000–13,999 pts',
-        level: '80–87% Acc / 900–1199 px/s',
-        accuracy: 'Grade B',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Developing Stopper',
-        stat: '5,000–8,999 pts',
-        level: '70–79% Acc / 600–899 px/s',
-        accuracy: 'Grade C',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Inertia Vulnerable',
-        stat: '< 5,000 pts',
-        level: '< 70% Acc / < 600 px/s',
-        accuracy: 'Grade D',
-        percentile: 'Starting out',
-      },
+      ['Tier 1', 'Apex Kinetic Stopper', '20,000+ pts', '95%+ Acc / 1500+ px/s', 'Grade S', 'Top 5% (Elite)'],
+      ['Tier 2', 'Precision Braking Master', '14,000–19,999 pts', '88–94% Acc / 1200–1499 px/s', 'Grade A', 'Top 20% (Advanced)'],
+      ['Tier 3', 'Kinetic Interceptor', '9,000–13,999 pts', '80–87% Acc / 900–1199 px/s', 'Grade B', 'Top 50% (Competent)'],
+      ['Tier 4', 'Developing Stopper', '5,000–8,999 pts', '70–79% Acc / 600–899 px/s', 'Grade C', 'Top 75% (Developing)'],
+      ['Tier 5', 'Novice Inertia Vulnerable', '< 5,000 pts', '< 70% Acc / < 600 px/s', 'Grade D', 'Below Average (Novice)'],
     ],
+    note: 'Empirical standards derived from horse-race response inhibition models (Logan et al. 1984), two-component motor control (Woodworth 1899), discrimination reaction chronometry (Donders 1868/1969), and speed-accuracy constraints (Fitts 1954). Evaluates total points, arrest success percentage, peak target velocity, and streak retention.',
   },
   protocols: {
     title: 'How to train motor braking',
@@ -365,10 +346,15 @@ export default function ReactionChainPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <ReactionChainClient />
+      <ReactionChainClient copy={{ title: 'Reaction Chain Trainer', subtitle: 'Impulse Control Reflex Game & Stopping Drill' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

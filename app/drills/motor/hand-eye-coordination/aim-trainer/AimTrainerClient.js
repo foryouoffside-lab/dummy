@@ -18,7 +18,7 @@ import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -26,6 +26,7 @@ import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -95,7 +96,8 @@ const RULES_ITEMS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AimTrainerClient() {
+export default function AimTrainerClient({ copy = {} } = {}) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -138,7 +140,7 @@ export default function AimTrainerClient() {
     targets: [],
     score: 0, level: 1, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
     hits: 0, misses: 0, timeouts: 0, totalClicks: 0,
-    particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
   });
 
   const triggerFlash = useCallback(() => {
@@ -294,7 +296,7 @@ export default function AimTrainerClient() {
       targets: initTargets,
       score: 0, level: startLevel, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
       hits: 0, misses: 0, timeouts: 0, totalClicks: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     setIsFullscreen(true);
@@ -372,7 +374,9 @@ export default function AimTrainerClient() {
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
             drillAudio.playHit();
-            createExplosion(hitTgt.x, hitTgt.y, '#22c55e');
+            const hitColor = eRef.combo >= 10 ? '#38bdf8' : '#00ff88';
+            createExplosion(hitTgt.x, hitTgt.y, hitColor);
+            eRef.hitRings.push(createHitRing(hitTgt.x, hitTgt.y, hitTgt.radius, hitColor));
             createHitMarker(ch.x, ch.y);
             setUiScore(eRef.score);
 
@@ -529,6 +533,8 @@ export default function AimTrainerClient() {
         }
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -598,7 +604,7 @@ export default function AimTrainerClient() {
         navigator.share({ title: 'My Aim Trainer Elite Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
+        alert(t('aimTrainer.scoreCopied', 'Score card copied to clipboard!'));
       }
     }
   }, [uiScore, bestScore, analytics, isNewBest]);
@@ -611,8 +617,10 @@ export default function AimTrainerClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Aim Trainer Elite
-            </h1>
+            {copy?.h1Prefix || null}
+            <span data-seo-kw="1">{copy?.h1Keyword || copy?.title || t('aimTrainer.title', 'Aim Trainer Elite')}</span>
+            {copy?.h1Suffix || null}
+          </h1>
           </div>
         )}
 
@@ -620,19 +628,19 @@ export default function AimTrainerClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('aimTrainer.score', 'Score')}</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('aimTrainer.time', 'Time')}</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('aimTrainer.accuracy', 'Accuracy')}</div>
               <div className="text-lg sm:text-xl font-black text-green-400 tabular-nums">{analytics.accuracy}%</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('aimTrainer.bestScore', 'Best Score')}</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -658,11 +666,11 @@ export default function AimTrainerClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('aimTrainer.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('aimTrainer.time', 'Time')}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -713,8 +721,8 @@ export default function AimTrainerClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{t('aimTrainer.gamePaused', 'Game Paused')}</h2>
+                <p className="text-xs text-gray-300 font-medium">{t('aimTrainer.clickToResume', 'Click to resume — cursor lock will re-engage.')}</p>
               </div>
             </div>
           )}
@@ -730,8 +738,8 @@ export default function AimTrainerClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="emerald"
-              title="Aim Trainer Elite"
-              subtitle="Dynamic Moving Targets & Precision Click Timing • Endless Level Progression"
+              title={copy?.title || t('aimTrainer.title', 'Aim Trainer Elite')}
+              subtitle={copy?.subtitle || t('aimTrainer.subtitle', 'Dynamic Moving Targets & Precision Click Timing • Endless Level Progression')}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -739,7 +747,7 @@ export default function AimTrainerClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={t('aimTrainer.getReady', 'GET READY')} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -750,10 +758,10 @@ export default function AimTrainerClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.hits, label: "Target Hits" },
-                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: t('aimTrainer.accuracy', 'Accuracy') },
+                { value: analytics.hits, label: t('aimTrainer.targetHits', 'Target Hits') },
+                { value: `${analytics.bestCombo}x`, label: t('aimTrainer.maxCombo', 'Max Combo') },
+                { value: `Lv. ${analytics.levelReached}`, label: t('aimTrainer.peakLevel', 'Peak Level') },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -765,7 +773,7 @@ export default function AimTrainerClient() {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Acquire and click targets as quickly and accurately as possible before they expire.
+            {copy?.caption || t('aimTrainer.caption', 'Acquire and click targets as quickly and accurately as possible before they expire.')}
           </p>
         )}
 
@@ -774,12 +782,17 @@ export default function AimTrainerClient() {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={t('aimTrainer.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {[
+                  { title: t('aimTrainer.rule1Title', 'Target Hit'), text: t('aimTrainer.rule1Text', 'Acquire and click active moving targets before they disappear. Score +100 PTS × Combo (+0.6s) per hit.') },
+                  { title: t('aimTrainer.rule2Title', 'Continuous Combo'), text: t('aimTrainer.rule2Text', 'Chain successful target hits to build combo multiplier up to 3.0x max.') },
+                  { title: t('aimTrainer.rule3Title', 'Level Progression'), text: t('aimTrainer.rule3Text', 'Level up every 1750 PTS. Targets shrink, accelerate, and expire faster.') },
+                  { title: t('aimTrainer.rule4Title', 'Miss / Timeout'), text: t('aimTrainer.rule4Text', 'Missing shots or letting targets expire resets combo streak and deducts 0.8s when penalty is enabled.') },
+                ].map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -790,23 +803,23 @@ export default function AimTrainerClient() {
 
             <DrillAccordion
               id="about"
-              title="About Aim Trainer Elite"
+              title={t('aimTrainer.aboutTitle', 'About Aim Trainer Elite')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-emerald-400" /> What Is Aim Trainer Elite?
+                    <Target className="w-4 h-4 text-emerald-400" /> {t('aimTrainer.aboutHeading', 'What Is Aim Trainer Elite?')}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-slate-300">
-                    An aim trainer measures how quickly and how accurately you can move a mouse cursor onto a target and click it. Fitts&apos;s Law describes the trade-off it exposes: movement time grows with the logarithm of the distance to a target divided by that target&apos;s width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954; MacKenzie, 1992).
+                    {t('aimTrainer.aboutP1', "An aim trainer measures how quickly and how accurately you can move a mouse cursor onto a target and click it. Fitts's Law describes the trade-off it exposes: movement time grows with the logarithm of the distance to a target divided by that target's width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954; MacKenzie, 1992).")}
                   </p>
                   <p className="text-sm leading-relaxed mb-3 text-slate-300">
-                    <strong>Aim Trainer Elite</strong> is a dynamic target acquisition drill engineered to isolate and refine your visual-motor latency, micro-flick precision, and click timing under accelerating difficulty. Grounded in Fitts&apos;s Law and two-component motor control theory, targets dynamically shrink, accelerate, and expire across the canvas.
+                    {t('aimTrainer.aboutP2', "Aim Trainer Elite is a dynamic target acquisition drill engineered to isolate and refine your visual-motor latency, micro-flick precision, and click timing under accelerating difficulty. Grounded in Fitts's Law and two-component motor control theory, targets dynamically shrink, accelerate, and expire across the canvas.")}
                   </p>
                   <p className="text-sm leading-relaxed text-slate-400">
-                    By balancing rapid ballistic cursor propulsion with terminal deceleration control, players train muscle memory and eliminate panic-clicking under intense competitive conditions.
+                    {t('aimTrainer.aboutP3', "By balancing rapid ballistic cursor propulsion with terminal deceleration control, players train muscle memory and eliminate panic-clicking under intense competitive conditions.")}
                   </p>
                 </section>
 
@@ -814,23 +827,23 @@ export default function AimTrainerClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                      <h4 className="text-xs font-bold text-white">{t('aimTrainer.card1Title', 'Who Should Use This?')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Competitive tactical shooter players (Valorant, CS2, Apex Legends) and visual-motor athletes refining mouse precision.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('aimTrainer.card1Desc', 'Competitive tactical shooter players (Valorant, CS2, Apex Legends) and visual-motor athletes refining mouse precision.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
+                      <h4 className="text-xs font-bold text-white">{t('aimTrainer.card2Title', 'Skills Improved')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Target acquisition speed, micro-flick accuracy, ballistic impulse control, and click timing synchronization.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('aimTrainer.card2Desc', 'Target acquisition speed, micro-flick accuracy, ballistic impulse control, and click timing synchronization.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Fitts&apos;s Law Tuning</h4>
+                      <h4 className="text-xs font-bold text-white">{t('aimTrainer.card3Title', "Fitts's Law Tuning")}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Progressively trains high Index of Difficulty (ID) movements where target size contracts and distance scales.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('aimTrainer.card3Desc', 'Progressively trains high Index of Difficulty (ID) movements where target size contracts and distance scales.')}</p>
                   </div>
                 </div>
               </div>

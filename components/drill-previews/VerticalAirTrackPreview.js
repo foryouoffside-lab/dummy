@@ -31,6 +31,7 @@ export default function VerticalAirTrackPreview() {
             <span className="vat-reticle-dot" />
           </div>
 
+          <span className="vat-hit-ring" />
           <span className="vat-hitmarker">
             <i className="vat-hit-l1" />
             <i className="vat-hit-l2" />

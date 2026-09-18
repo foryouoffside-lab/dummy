@@ -22,6 +22,7 @@ import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -33,6 +34,7 @@ const ELITE_SCORE = 18000; // 6000 -> 18000 (3x)
 const TIME_PER_HIT = 0.6; // +0.6s per valid intercept
 const TIME_PENALTY = 0.8; // -0.8s on miss / target escape (opt-in gated)
 const STORAGE_KEY = 'skilldrills_reaction_simulator_v3';
+const TARGET_FILL_COLOR = '#ef4444';
 
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
@@ -77,7 +79,16 @@ type Particle = { x: number; y: number; vx: number; vy: number; color: string; l
 type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 type FallingTarget = { id: number; x: number; y: number; radius: number; vy: number; spawnTime: number };
 
-export default function ReactionSimulatorClient() {
+interface ReactionSimulatorClientProps {
+  copy?: {
+    title?: string;
+    subtitle?: string;
+    caption?: string;
+  };
+}
+
+export default function ReactionSimulatorClient({ copy }: ReactionSimulatorClientProps = {}) {
+  const { t, locale } = useTranslation();
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -385,7 +396,8 @@ export default function ReactionSimulatorClient() {
       setUiCombo(e.combo);
       drillAudio.playHit();
 
-      // Particles explosion (Tactical Rose / Red)
+      // Particles explosion (colored to match the target's own rendered body)
+      const hitColor = TARGET_FILL_COLOR;
       for (let i = 0; i < 10; i++) {
         const angle = Math.random() * Math.PI * 2;
         const spd = 2 + Math.random() * 4;
@@ -394,7 +406,7 @@ export default function ReactionSimulatorClient() {
           y: hitTarget.y,
           vx: Math.cos(angle) * spd,
           vy: Math.sin(angle) * spd,
-          color: '#ef4444',
+          color: hitColor,
           life: 1.0
         });
       }
@@ -407,7 +419,7 @@ export default function ReactionSimulatorClient() {
         maxR: hitTarget.radius * 2.6,
         life: 0.28,
         maxLife: 0.28,
-        color: '#ef4444'
+        color: hitColor
       });
 
       e.targets.splice(hitIndex, 1);
@@ -564,9 +576,9 @@ export default function ReactionSimulatorClient() {
 
         // Filled red body with subtle glow
         ctx.globalAlpha = 0.88;
-        ctx.shadowColor = '#ef4444';
+        ctx.shadowColor = TARGET_FILL_COLOR;
         ctx.shadowBlur = 14;
-        ctx.fillStyle = '#ef4444';
+        ctx.fillStyle = TARGET_FILL_COLOR;
         ctx.beginPath();
         ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
         ctx.fill();
@@ -675,7 +687,7 @@ export default function ReactionSimulatorClient() {
       {/* Mobile Orientation Alert */}
       {isMobile && isPortrait && (
         <div className="w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-300 flex items-center justify-center gap-2">
-          <span>Rotate to landscape mode for a wider reflex interception field.</span>
+          <span>{t('reactionGame.rotateLandscape', 'Rotate to landscape mode for a wider reflex interception field.')}</span>
         </div>
       )}
 
@@ -689,10 +701,10 @@ export default function ReactionSimulatorClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Reaction Game
+              <span data-seo-kw="1">{copy?.title || t('reactionGame.title', 'Reaction Game')}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              A typical adult reacts to a visual cue in 200&ndash;250&nbsp;ms (Kosinski, 2008). Intercepting a falling target adds tracking and aiming time on top of that, so scores here sit above a plain reaction time test.
+              {copy?.caption || t('reactionGame.caption', 'A typical adult reacts to a visual cue in 200–250 ms (Kosinski, 2008). Intercepting a falling target adds tracking and aiming time on top of that, so scores here sit above a plain reaction time test.')}
             </p>
           </div>
         )}
@@ -702,10 +714,10 @@ export default function ReactionSimulatorClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore, color: 'text-red-400' },
-              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Level', value: `L${uiLevel}`, color: 'text-indigo-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+              { label: t('reactionGame.score', 'Score'), value: uiScore, color: 'text-red-400' },
+              { label: t('reactionGame.time', 'Time'), value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: t('reactionGame.level', 'Level'), value: `L${uiLevel}`, color: 'text-indigo-400' },
+              { label: t('reactionGame.bestScore', 'Best Score'), value: bestScore, color: 'text-amber-400' },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -729,11 +741,11 @@ export default function ReactionSimulatorClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('reactionGame.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('reactionGame.timeLeft', 'Time Left')}</p>
                 <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -785,8 +797,8 @@ export default function ReactionSimulatorClient() {
             <FpsStartCard
               icon={Target}
               accent="red"
-              title="Reaction Game"
-              subtitle="Reflex Interception • Vertical Tracking"
+              title={copy?.title || t('reactionGame.title', 'Reaction Game')}
+              subtitle={copy?.subtitle || t('reactionGame.subtitle', 'Reflex Interception • Vertical Tracking')}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -794,7 +806,7 @@ export default function ReactionSimulatorClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={t('reactionGame.getReady', 'GET READY')} />
           )}
 
           {/* UNIVERSAL RESULT CARD */}
@@ -805,10 +817,10 @@ export default function ReactionSimulatorClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Avg Reaction', value: analytics.avgReactionTime, suffix: 'ms' },
-                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
-                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+                { label: t('reactionGame.accuracy', 'Accuracy'), value: analytics.accuracy, suffix: '%' },
+                { label: t('reactionGame.avgReaction', 'Avg Reaction'), value: analytics.avgReactionTime, suffix: 'ms' },
+                { label: t('reactionGame.peakLevel', 'Peak Level'), value: `Lv. ${analytics.finalLevel}` },
+                { label: t('reactionGame.maxCombo', 'Max Combo'), value: analytics.maxCombo, suffix: 'x' },
               ]}
               onPlayAgain={enterDrill}
               onShare={sharePage}
@@ -823,39 +835,39 @@ export default function ReactionSimulatorClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={t('reactionGame.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Intercept Falling Targets" highlight="+100 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
-                <RuleItem num="2" text="Combo & Heat System" highlight="Up to 3.0x Multiplier" result="Higher streaks spawn faster, tighter drops" />
-                <RuleItem num="3" text="Level Progression" highlight="Continuous Scaling" result="Targets speed up and shrink dynamically" />
+                <RuleItem num="1" text={t('reactionGame.rule1Title', 'Intercept Falling Targets')} highlight={t('reactionGame.rule1Highlight', '+100 PTS')} result={t('reactionGame.rule1Result', '× Combo × Level bonus (+0.6s clock per hit)')} />
+                <RuleItem num="2" text={t('reactionGame.rule2Title', 'Combo & Heat System')} highlight={t('reactionGame.rule2Highlight', 'Up to 3.0x Multiplier')} result={t('reactionGame.rule2Result', 'Higher streaks spawn faster, tighter drops')} />
+                <RuleItem num="3" text={t('reactionGame.rule3Title', 'Level Progression')} highlight={t('reactionGame.rule3Highlight', 'Continuous Scaling')} result={t('reactionGame.rule3Result', 'Targets speed up and shrink dynamically')} />
                 <RuleItem 
                   num="4" 
-                  text="Miss & Escape Rules" 
-                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
-                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
+                  text={t('reactionGame.rule4Title', 'Miss & Escape Rules')} 
+                  highlight={penaltyEnabled ? t('reactionGame.rule4Penalty', '-0.8s Penalty') : t('reactionGame.rule4Zero', 'Zero Penalties (Default)')} 
+                  result={penaltyEnabled ? t('reactionGame.rule4ResultPenalty', 'Deducts 0.8s & resets combo') : t('reactionGame.rule4ResultZero', 'Resets combo. Time penalty is opt-in via settings')} 
                 />
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Reaction Game"
+              title={t('reactionGame.aboutTitle', 'About Reaction Game')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-red-400" /> What Is Reflex Interception & Vertical Tracking Training?
+                    <Eye className="w-4 h-4 text-red-400" /> {t('reactionGame.aboutHeading', 'What Is Reflex Interception & Vertical Tracking Training?')}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Reaction Game</strong> (Reflex Interception Drill) isolates and conditions vertical visual tracking, fast-twitch motor responses, and rapid spatial interception. In tactical and arcade shooters like Apex Legends, Overwatch 2, Fortnite, and Halo, targets frequently drop from high ledges, jump pads, or vertical ziplines.
+                    {t('reactionGame.aboutP1', 'Reaction Game isolates and conditions vertical visual tracking, fast-twitch motor responses, and rapid spatial interception. In tactical shooters like Apex Legends, Overwatch 2, and Fortnite, targets frequently drop from high ledges or vertical ziplines.')}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Intercepting accelerating downward targets requires precise foveal pursuit and timing. Training vertical tracking reduces motor reaction delay, improves hand-eye synchronization, and helps you acquire airborne or falling opponents consistently.
+                    {t('reactionGame.aboutP2', 'Intercepting accelerating downward targets requires precise foveal pursuit and timing. Training vertical tracking reduces motor reaction delay and improves hand-eye synchronization.')}
                   </p>
                 </section>
 
@@ -863,23 +875,23 @@ export default function ReactionSimulatorClient() {
                   <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                      <h4 className="text-xs font-bold text-white">{t('reactionGame.card1Title', 'Who Should Use This?')}</h4>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">Gamers, esports athletes, and traditional sports competitors looking to sharpen vertical reflex speed and hand-eye reaction timing.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('reactionGame.card1Desc', 'Gamers, esports athletes, and traditional sports competitors looking to sharpen vertical reflex speed and hand-eye reaction timing.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Vertical Tracking Control</h4>
+                      <h4 className="text-xs font-bold text-white">{t('reactionGame.card2Title', 'Vertical Tracking Control')}</h4>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">Trains your eyes and mouse hand to follow accelerating downward trajectories smoothly without panic snapping or over-aiming.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('reactionGame.card2Desc', 'Trains your eyes and mouse hand to follow accelerating downward trajectories smoothly without panic snapping or over-aiming.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Fast-Twitch Interception</h4>
+                      <h4 className="text-xs font-bold text-white">{t('reactionGame.card3Title', 'Fast-Twitch Interception')}</h4>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">Conditioning fast-twitch motor responses allows you to click targets higher up the screen, maximizing score efficiency.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('reactionGame.card3Desc', 'Conditioning fast-twitch motor responses allows you to click targets higher up the screen, maximizing score efficiency.')}</p>
                   </div>
                 </div>
               </div>
@@ -895,13 +907,13 @@ export default function ReactionSimulatorClient() {
         {!isFullscreen && (
           <section className="mt-4">
             <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Reaction Speed Drills
+              {t('reactionGame.relatedTitle', 'Related Reaction Speed Drills')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {RELATED_DRILLS.map((drill) => (
                 <Link
                   key={drill.id}
-                  href={drill.href}
+                  href={locale && locale !== 'en' ? `/${locale}${drill.href}` : drill.href}
                   className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
                 >
                   <div>

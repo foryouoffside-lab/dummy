@@ -1,4 +1,4 @@
-import DragAndDropClient from './DragAndDropClient';
+import DragAndDropClient from './DragAndDropClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -24,7 +24,7 @@ import { pickSources } from '@/lib/drillSources';
 // ============================================================
 
 export const metadata = {
-  title: 'Drag and Drop Test – Free Mouse Control & Precision Drill',
+  title: 'Drag and Drop Test – Mouse Control Drill | SkillDrills',
   description: 'Train mouse dragging accuracy, cursor deceleration, and spatial release timing with this free online motor drill. Grounded in the Accot-Zhai Steering Law.',
   keywords: [
     'drag and drop test',
@@ -41,7 +41,7 @@ export const metadata = {
     'free mouse trainer',
   ],
   openGraph: {
-    title: 'Drag & Drop Mouse Trainer – Spatial Motor Precision Drill | SkillDrills',
+    title: 'Drag and Drop Test – Mouse Control Drill | SkillDrills',
     description: 'Train mouse dragging accuracy, cursor deceleration, and spatial release timing with this free online motor drill. Free, instant browser-based tool.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
@@ -50,7 +50,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Drag & Drop Mouse Trainer – Spatial Motor Precision Drill | SkillDrills',
+    title: 'Drag and Drop Test – Mouse Control Drill | SkillDrills',
     description: 'Train mouse dragging accuracy, cursor deceleration, and spatial release timing with this free online motor drill. Free, instant browser-based tool.',
   },
   robots: { index: true, follow: true },
@@ -69,44 +69,56 @@ const breadcrumbSchema = {
     { '@type': 'ListItem', position: 1, name: 'SkillDrills', item: 'https://skilldrills.online/' },
     { '@type': 'ListItem', position: 2, name: 'Motor Training', item: 'https://skilldrills.online/drills/motor' },
     { '@type': 'ListItem', position: 3, name: 'Hand-Eye Coordination', item: 'https://skilldrills.online/drills/motor/hand-eye-coordination' },
-    { '@type': 'ListItem', position: 4, name: 'Drag & Drop Mouse Trainer', item: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop' },
+    { '@type': 'ListItem', position: 4, name: 'Drag and Drop Mouse Trainer', item: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop' },
   ],
 };
 
 const softwareApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'Drag and Drop Test – Free Mouse Control & Precision Drill',
+  name: 'Drag and Drop Test – Free Mouse Control Drill',
   applicationCategory: 'HealthApplication',
   operatingSystem: 'All',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   description: 'Free browser-based drag and drop precision trainer. Refine mouse cursor deceleration, continuous spatial transport, and release timing with adaptive difficulty scaling.',
   url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
   publisher: { '@type': 'Organization', name: 'SkillDrills', url: 'https://skilldrills.online' },
-  dateModified: '2026-09-05',
+  dateModified: '2026-09-16',
 };
 
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Drag & Drop Mouse Trainer',
+  name: 'Drag and Drop Mouse Trainer',
   browserRequirements: 'Requires HTML5 Canvas, Pointer Lock API, and JavaScript',
   url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
   applicationCategory: 'EducationalApplication',
-  dateModified: '2026-09-05',
+  dateModified: '2026-09-16',
+};
+
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Drag and Drop Test – Mouse Control Drill',
+  url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
+  description: 'Train mouse dragging accuracy, cursor deceleration, and spatial release timing with this free online motor drill.',
+  genre: ['Precision Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
 };
 
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  dateModified: '2026-09-05',
+  dateModified: '2026-09-16',
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'What is the Drag & Drop Mouse Trainer and how does it test motor control?',
+      name: 'What is the Drag and Drop Mouse Trainer and how does it test motor control?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The Drag & Drop Mouse Trainer is an interactive sensorimotor drill designed to evaluate and train fine cursor steering, continuous spatial dragging accuracy, and release timing under time pressure. Users acquire a dynamic ball payload, transport it along an unconstrained spatial vector, and deposit it cleanly inside a moving container.',
+        text: 'The Drag and Drop Mouse Trainer is an interactive sensorimotor drill designed to evaluate and train fine cursor steering, continuous spatial dragging accuracy, and release timing under time pressure. Users acquire a dynamic payload orb, transport it along an unconstrained trajectory, and deposit it cleanly inside a moving container.',
       },
     },
     {
@@ -130,7 +142,7 @@ const faqSchema = {
       name: 'Why do players overshoot moving target containers during rapid dragging?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Overshooting occurs when the neuromuscular braking impulse is mistimed relative to the target container\'s velocity vector. Elliott et al. (2010) identified that deceleration requires antagonist muscle recruitment (e.g., extensor digitorum and forearm flexors) to arrest limb momentum. Excessive acceleration during the primary impulse phase overloads closed-loop feedback latency (~100–150 ms), causing release outside the container rim.',
+        text: 'Overshooting occurs when the neuromuscular braking impulse is mistimed relative to the target container velocity vector. Elliott et al. (2010) identified that deceleration requires antagonist muscle recruitment to arrest limb momentum. Excessive acceleration during the primary impulse phase overloads closed-loop feedback latency (~100–150 ms), causing release outside the container rim.',
       },
     },
     {
@@ -187,28 +199,36 @@ const faqSchema = {
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Train Mouse Drag and Drop Precision and Deceleration',
-  description: 'Master fine motor dragging control, cursor braking, and release timing using the SkillDrills Drag & Drop Mouse Trainer.',
+  name: 'How to Train Drag and Drop Mouse Precision',
+  description: 'Step-by-step training protocol for mastering cursor deceleration, spatial payload carrying, and boundary release timing.',
   step: [
     {
       '@type': 'HowToStep',
-      name: 'Acquire Payload Object',
-      text: 'Position your crosshair over the stationary blue ball payload and press down the primary mouse switch to engage dragging mode.',
+      position: 1,
+      name: 'Align Crosshair Over Pickup Node',
+      text: 'Position your mouse pointer directly over the source target orb highlighted on the arena canvas.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop#step-1'
     },
     {
       '@type': 'HowToStep',
-      name: 'Steer Along Optimal Vector',
-      text: 'Transport the payload across the canvas stage toward the moving bucket container, maintaining smooth acceleration and minimizing lateral trajectory wobble.',
+      position: 2,
+      name: 'Depress and Hold Primary Mouse Button',
+      text: 'Engage continuous isometric pressure on the left click switch to clamp the payload object.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop#step-2'
     },
     {
       '@type': 'HowToStep',
-      name: 'Decelerate and Match Velocity',
-      text: 'Apply antagonist forearm braking to decelerate the cursor as it nears the container boundary, compensating for the target\'s movement direction.',
+      position: 3,
+      name: 'Traverse the Steering Law Corridor',
+      text: 'Carry the dragged object smoothly across the screen toward the destination receptor zone, minimizing deviation from the center line.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop#step-3'
     },
     {
       '@type': 'HowToStep',
-      name: 'Release Cleanly Inside Target Boundary',
-      text: 'Release the mouse button cleanly while the payload is fully contained within the hollow bucket rim to score points and build your combo multiplier.',
+      position: 4,
+      name: 'Release Cleanly Within Destination Bounds',
+      text: 'Release the mouse button exactly when the object is concentric with the drop target to score maximum precision points.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop#step-4'
     },
   ],
 };
@@ -225,7 +245,7 @@ const guideProps = {
     ],
   },
   benchmarks: {
-    title: 'Empirical Dragging & Deceleration Performance Tiers',
+    title: 'Empirical Dragging and Deceleration Performance Tiers',
     caption: 'An editorial guide to reading your own result, not measured population norms — SkillDrills collects no aggregate data. The steering model follows Accot & Zhai (1997) and the pointing-vs-dragging comparison follows MacKenzie, Sellen & Buxton (1991); the band boundaries are the drill author\'s own judgement.',
     headers: ['Tier', 'Classification', 'Completion Rate / Combo', 'Mean Steering Time', 'Release Accuracy', 'Neuromuscular Profile'],
     rows: [
@@ -293,7 +313,7 @@ const guideProps = {
     ],
   },
   faqs: {
-    title: 'Frequently Asked Questions About Drag & Drop Motor Control',
+    title: 'Frequently Asked Questions About Drag and Drop Motor Control',
     items: faqSchema.mainEntity.map((q) => ({
       q: q.name,
       a: q.acceptedAnswer.text,
@@ -318,13 +338,17 @@ export default function DragAndDropPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DragAndDropClient />
+      <DragAndDropClient copy={{ title: "Drag and Drop Mouse Trainer" }} />
       <DrillGuide {...guideProps} />
     </>
   );

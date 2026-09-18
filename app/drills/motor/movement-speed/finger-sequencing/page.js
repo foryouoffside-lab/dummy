@@ -1,4 +1,4 @@
-import FingerSequencingClient from './FingerSequencingClient';
+import FingerSequencingClient from './FingerSequencingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -17,10 +17,8 @@ import { pickSources } from '@/lib/drillSources';
 //           "ordered target click trainer"— Mechanics-specific long-tail
 //           "finger dexterity aim test"   — Neuromotor precision query
 //           "crosshair pathing test"      — Movement efficiency query
-// LOCALES:
-//           ja: "シーケンス エイム 練習" (Sequence Aim Practice / Finger Speed Test)
-//           ko: "시퀀스 에임 연습" (Sequence Aim Practice / Finger Agility Test)
-//           de: "sequenz aim trainer" (Sequence Aim Trainer / Finger Dexterity Test)
+//           "valorant sequence drill"     — Tactical shooter mechanic query
+//           "cs2 target switching"        — Tactical shooter target switching query
 // ============================================================
 
 export const metadata = {
@@ -99,6 +97,18 @@ const webApplicationSchema = {
   dateModified: '2026-09-05',
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Sequence Aim Trainer – Finger Speed Test',
+  url: 'https://skilldrills.online/drills/motor/movement-speed/finger-sequencing',
+  description: 'Measure how fast you switch between targets in a set order, built on serial-order motor programs.',
+  genre: ['Aim Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -140,39 +150,39 @@ const faqSchema = {
       name: 'What is the optimal mouse sensitivity for sequence aim training?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Train with your competitive shooter sensitivity, typically between 25 cm and 45 cm per 360-degree turn (800 DPI with 0.3 to 0.5 in Valorant, or 1.0 to 1.6 in CS2). Consistency between your training drill and in-game sensitivity ensures direct neural transfer of muscle memory.',
+        text: 'Train with your competitive shooter sensitivity, typically between 25 cm and 45 cm per 360-degree turn (800 DPI with 0.3 to 0.5 in Valorant, or 1.0 to 1.6 in CS2). Consistency between sequence training and live gameplay ensures direct motor cortex muscle memory transfer.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How does the difficulty scaling system work in this drill?',
+      name: 'What is motor chunking and how does it speed up target acquisition?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Difficulty scales continuously across 15 levels based on your score and combo streak. As you advance, starting node radii shrink from 32px down to 8px, sequence expiration windows compress from 3.2s down to 0.85s, node count expands from 3 to 5, and spatial node spread widens across the canvas.',
+        text: 'Motor chunking (Lashley 1951) is the neurobiological process of combining individual discrete movements into a unified motor program. Instead of perceiving three targets as separate decisions, expert players process the sequence as a single fluid kinematic trajectory, reducing reaction latency by 40% to 60%.',
       },
     },
     {
       '@type': 'Question',
-      name: 'What are the motor psychophysics principles behind sequential aiming?',
+      name: 'How many minutes per day should I spend on sequence aim drills?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Sequential motor execution relies on Karl Lashley’s (1951) serial order hierarchy and Steven Keele’s (1968) motor programming model. Elite performers do not compute each click after the previous one finishes; instead, the motor cortex compiles and fires the sequence as a unified motor chunk, drastically cutting inter-tap latencies below 180 ms.',
+        text: 'Dedicate 10 to 15 minutes of focused sequence aim training daily, divided into 3 to 4 blocks with 60-second recovery breaks. High-intensity neural training saturates motor cortex pathways quickly; practicing beyond mild wrist or forearm fatigue degrades fine motor coordination and introduces unwanted muscle tension.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Can this sequence trainer be practiced on mobile or touchscreens?',
+      name: 'Does sequence training help rhythm and music games like osu!?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. The drill features full multi-touch event listeners and pointer coordinates that work natively on smartphones and tablets, allowing you to train raw multi-finger tap sequencing and visual search speed anywhere.',
+        text: 'Yes. Ordered spatial clicking directly transfers to rhythm games like osu! and Muse Dash, where reading upcoming beatmap clusters and executing sequential singletap or streaming strokes requires tight visual-motor anticipation and inter-tap temporal consistency.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How long should a daily sequence aim warmup routine last?',
+      name: 'What hardware setup provides the most accurate sequence test results?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'A focused 5 to 10 minute warmup consisting of 4 to 6 full sessions is ideal. Research into motor skill consolidation indicates that brief, high-intensity distributed practice sessions yield superior motor retention compared to fatiguing endurance grinds.',
+        text: 'A high-refresh monitor (144 Hz or 240 Hz), a low-latency gaming mouse with a 1000 Hz+ polling rate, and hardware acceleration enabled in your browser ensure minimal input lag. Disable pointer precision (mouse acceleration) in Windows settings for linear, reproducible 1:1 sensor tracking.',
       },
     },
     {
@@ -189,28 +199,36 @@ const faqSchema = {
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Train Sequential Aiming and Finger Speed',
-  description: 'Step-by-step training protocol for mastering sequential target acquisition, rapid finger speed, and crosshair pathing efficiency.',
+  name: 'How to Train Sequential Aim and Finger Speed',
+  description: 'Step-by-step training protocol for mastering multi-target ordered clicking and rapid target switching.',
   step: [
     {
       '@type': 'HowToStep',
-      name: 'Calibrate Sensitivity and Start',
-      text: 'Match your in-game sensitivity multiplier using the settings drawer and click "Start Drill" to engage the sequence arena.',
+      position: 1,
+      name: 'Scan the Sequential Chain Pattern',
+      text: 'Observe numbered targets appearing on the canvas to plan the most efficient geometric pathing sequence.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/finger-sequencing#step-1',
     },
     {
       '@type': 'HowToStep',
-      name: 'Scan and Identify Descending Node Order',
-      text: 'Scan the canvas instantly using peripheral vision to identify the sequence nodes ordered from largest radius to smallest radius.',
+      position: 2,
+      name: 'Acquire Target 1 Rapidly',
+      text: 'Execute a fast initial flick to the first target in the sequence and click promptly to activate the chain.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/finger-sequencing#step-2',
     },
     {
       '@type': 'HowToStep',
-      name: 'Execute Rapid Ballistic Clicks in Order',
-      text: 'Flick directly to the largest node, click it cleanly, and immediately transition your crosshair to the next smaller node before the sequence timer expires.',
+      position: 3,
+      name: 'Flow Through Successive Targets in Order',
+      text: 'Transition smoothly from node to node in strict numerical progression (1 to 2 to 3), minimizing dwell time between clicks.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/finger-sequencing#step-3',
     },
     {
       '@type': 'HowToStep',
-      name: 'Maintain Combo Multiplier and Scale Levels',
-      text: 'Each clean hit rewards +0.6 seconds of bonus clock and builds your combo multiplier up to 3.0x. Avoid misclicks to maintain peak scoring and unlock advanced difficulty tiers.',
+      position: 4,
+      name: 'Analyze Sequence Speed & Path Efficiency',
+      text: 'Review average inter-click intervals, completion velocity, and path efficiency metrics on the results scorecard.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/finger-sequencing#step-4',
     },
   ],
 };
@@ -220,19 +238,19 @@ const guideProps = {
   intro: {
     title: 'How sequence aim training is measured',
     paragraphs: [
-      'Sequential target switching is clicking a set of targets in a required order rather than whichever is nearest. Each transition between two targets is a Fitts\u2019s Law movement, timed by the log of the gap between them divided by their width (Fitts, 1954; MacKenzie, 1992), and the order itself is held as a pre-planned motor program rather than re-decided at each target (Lashley, 1951; Keele, 1968).',
-      'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every target to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same mouse and display rather than against someone else\'s setup. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
+      'Sequential target switching is clicking a set of targets in a required order rather than whichever is nearest. Each transition between two targets is a Fitts’s Law movement, timed by the log of the gap between them divided by their width (Fitts, 1954; MacKenzie, 1992), and the order itself is held as a pre-planned motor program rather than re-decided at each target (Lashley, 1951; Keele, 1968).',
+      'How this is measured, and what it cannot resolve: timing comes from the browser’s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every target to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same mouse and display rather than against someone else’s setup. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
   benchmark: {
     title: 'Sequence Aim & Target Switching Benchmarks',
-    description: 'An editorial guide to reading your own result, not measured population norms — SkillDrills collects no aggregate data. The serial-order framing follows Lashley (1951) and Keele (1968); the band boundaries are the drill author\'s own judgement. Columns cover inter-tap transition latency, chain completion speed, and level ceiling under dynamic radius shrinkage.',
+    description: 'An editorial guide to reading your own result, not measured population norms — SkillDrills collects no aggregate data. The serial-order framing follows Lashley (1951) and Keele (1968); the band boundaries are the drill author’s own judgement. Columns cover inter-tap transition latency, chain completion speed, and level ceiling under dynamic radius shrinkage.',
     columns: ['Tier', 'Rank Title', 'Inter-Tap Latency', 'Level Ceiling', 'Chain Accuracy', 'Editorial band'],
     rows: [
       {
         tier: 'Tier 1',
         rank: 'Apex Sequencer',
-        stat: '< 180 ms',
+        stat: 'Under 180 ms',
         level: 'Level 12+',
         accuracy: '98–100%',
         percentile: 'Exceptional',
@@ -264,9 +282,9 @@ const guideProps = {
       {
         tier: 'Tier 5',
         rank: 'Novice Sequencer',
-        stat: '> 400 ms',
+        stat: 'Over 400 ms',
         level: 'Level 1–2',
-        accuracy: '< 82%',
+        accuracy: 'Under 82%',
         percentile: 'Starting out',
       },
     ],
@@ -319,13 +337,17 @@ export default function FingerSequencingPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient />
+      <FingerSequencingClient copy={{ title: 'Sequence Aim Trainer' }} />
       <DrillGuide {...guideProps} />
     </>
   );

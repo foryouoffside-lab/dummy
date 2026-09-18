@@ -46,7 +46,7 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-export default function ObjectLocationClient() {
+export default function ObjectLocationClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -452,9 +452,13 @@ export default function ObjectLocationClient() {
         {/* Title */}
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Object Location Memory Test</h1>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              {copy?.h1Prefix || null}
+              <span data-seo-kw="1">{copy?.h1Keyword || "Object Location Memory Test"}</span>
+              {copy?.h1Suffix || null}
+            </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Object-location memory is remembering what was where. Eals and Silverman (1994) measured it with object arrays much like this one, and it runs into the same ceiling of about four items as other visual working memory tasks (Luck &amp; Vogel, 1997).
+              {copy?.subtitle || "Object-location memory is remembering what was where. Eals and Silverman (1994) measured it with object arrays much like this one, and it runs into the same ceiling of about four items as other visual working memory tasks (Luck & Lockhart, 1997)."}
             </p>
           </div>
         )}
@@ -463,10 +467,10 @@ export default function ObjectLocationClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: uiScore, color: "text-emerald-400" },
-              { label: "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: "Level", val: `Lv. ${level}`, color: "text-indigo-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statScore || "Score", val: uiScore, color: "text-emerald-400" },
+              { label: copy?.statTime || "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: copy?.statLevel || "Level", val: `${copy?.levelPrefix || "Lv."} ${level}`, color: "text-indigo-400" },
+              { label: copy?.statBestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -490,12 +494,12 @@ export default function ObjectLocationClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -545,7 +549,7 @@ export default function ObjectLocationClient() {
                   <div className="mb-1.5 flex flex-col items-center justify-center shrink-0 animate-in fade-in duration-200">
                     <div className="px-3.5 py-1 rounded-xl bg-white/[0.04] border border-white/10">
                       <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                        MEMORIZE OBJECT LOCATIONS
+                        {copy?.memorizePrompt || "MEMORIZE OBJECT LOCATIONS"}
                       </span>
                     </div>
                   </div>
@@ -556,7 +560,7 @@ export default function ObjectLocationClient() {
                   <div className="mb-1.5 flex flex-col items-center justify-center shrink-0 animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex items-center gap-2 px-3.5 py-1 rounded-xl bg-cyan-950/60 border border-cyan-500/40">
                       <span className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> TARGET:
+                        <MapPin className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> {copy?.targetPrompt || "TARGET:"}
                       </span>
                       <span className="text-2xl sm:text-3xl">
                         {targetObject}
@@ -623,8 +627,8 @@ export default function ObjectLocationClient() {
             <FpsStartCard
               icon={MapPin}
               accent="emerald"
-              title="Object Location Pro"
-              subtitle="Spatial Object Memory • Location Recall"
+              title={copy?.startTitle || "Object Location Pro"}
+              subtitle={copy?.startSubtitle || "Spatial Object Memory • Location Recall"}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -632,7 +636,7 @@ export default function ObjectLocationClient() {
 
           {/* COUNTDOWN OVERLAY (3-2-1-GO) */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.countdownSubtitle || "GET READY"} />
           )}
 
           {/* END SCREEN (GAME OVER) */}
@@ -643,7 +647,7 @@ export default function ObjectLocationClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.newBest || "NEW BEST"}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade?.color || 'text-emerald-400'}`}>
@@ -655,7 +659,7 @@ export default function ObjectLocationClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.pointsLabel || "Points"}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -665,15 +669,15 @@ export default function ObjectLocationClient() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statAccuracy || "Accuracy"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lvl {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-sm sm:text-base font-black text-white">{copy?.levelPrefix || "Lv."} {analytics.finalLevel}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statPeakLevel || "Peak Level"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.perfectHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Perfects</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statPerfects || "Perfects"}</p>
                   </div>
                 </div>
 
@@ -683,7 +687,7 @@ export default function ObjectLocationClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.btnPlayAgain || "Play Again"}
                   </button>
                   <button 
                     onClick={shareScore} 
@@ -712,22 +716,26 @@ export default function ObjectLocationClient() {
           <div className="[&>div]:!mt-0">
           <DrillAccordion
             id="rules"
-            title="Drill Instructions & Scoring System"
+            title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
             isOpen={openAccordion === 'rules'}
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Memorize Positions & Find Target" highlight="+150 PTS" result="Level Up (+1 Obj)" />
-              <DrillRuleItem num="2" text="Level Progression" highlight="Grid 3x3 → 7x7" result="Difficulty naturally scales" />
-              <DrillRuleItem num="3" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
-              <DrillRuleItem num="4" text="Difficulty Never Drops" highlight="Stays at Current Level" result="A miss just replays the round" />
+              {(copy?.rulesItems || [
+                { num: "1", text: "Memorize Positions & Find Target", highlight: "+150 PTS", result: "Level Up (+1 Obj)" },
+                { num: "2", text: "Level Progression", highlight: "Grid 3x3 → 7x7", result: "Difficulty naturally scales" },
+                { num: "3", text: "Miss / Timeout", highlight: "Zero Penalties", result: "No score or time loss" },
+                { num: "4", text: "Difficulty Never Drops", highlight: "Stays at Current Level", result: "A miss just replays the round" }
+              ]).map((r, i) => (
+                <DrillRuleItem key={i} num={r.num} text={r.text} highlight={r.highlight} result={r.result} />
+              ))}
             </div>
           </DrillAccordion>
 
           {/* ACCORDION 2: ABOUT OBJECT LOCATION PRO */}
           <DrillAccordion
             id="about"
-            title="About Object Location Pro"
+            title={copy?.aboutTitle || "About Object Location Pro"}
             isOpen={openAccordion === 'about'}
             onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
           >

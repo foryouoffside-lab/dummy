@@ -1,0 +1,182 @@
+{
+  "category": "memory",
+  "category_name": "Memory Training",
+  "completed_count": 7,
+  "total_count": 7,
+  "remaining_count": 0,
+  "completed_drills": [
+    {
+      "id": "memory/short-term-memory/color-sequence",
+      "drill_number": 77,
+      "memory_index": 1,
+      "category": "memory",
+      "subfolder": "short-term-memory",
+      "name": "Color Memory Game / Simon Sequence Test",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "color memory game",
+        "de": "senso spiel online",
+        "ko": "사이먼 게임 온라인",
+        "ja": "サイモンゲーム オンライン",
+        "pt": "jogo da memoria online",
+        "es": "juego de simon dice online",
+        "fr": "jeu simon en ligne gratuit"
+      },
+      "page_titles": {
+        "en": "Color Memory Game – Simon Sequence Test | SkillDrills",
+        "de": "Senso Spiel Online – Farben Reihenfolge merken | SkillDrills",
+        "ko": "사이먼 게임 – 온라인 색깔 순서 기억력 테스트 | SkillDrills",
+        "ja": "サイモンゲーム – 無料オンライン色と順番の記憶力テスト | SkillDrills",
+        "pt": "Jogo da Memória Online – Sequência de Cores | SkillDrills",
+        "es": "Juego Simón Online – Memoria de Colores | SkillDrills",
+        "fr": "Jeu Simon en Ligne – Mémoire des Couleurs | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (Code 0, 619 static routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "memory/short-term-memory/digit-span",
+      "drill_number": 78,
+      "memory_index": 2,
+      "category": "memory",
+      "subfolder": "short-term-memory",
+      "name": "Digit Span Memory Test / Number Recall",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "digit span test",
+        "de": "zahlenspanne test",
+        "ko": "숫자 기억력 테스트",
+        "ja": "数唱課題",
+        "pt": "teste de digitos",
+        "es": "test de digitos",
+        "fr": "test d empan mnemonique"
+      },
+      "page_titles": {
+        "en": "Digit Span Memory Test – Number Recall | SkillDrills",
+        "de": "Zahlenspannen-Test Online – Digit Span | SkillDrills",
+        "ko": "숫자 기억력 테스트・디지트 스팬 – 작업기억 용량 측정 | SkillDrills",
+        "ja": "数唱テスト・デジットスパン – 音韻ループ・数字記憶測定 | SkillDrills",
+        "pt": "Teste de Dígitos Online – Span de Memória | SkillDrills",
+        "es": "Test de Dígitos Online – Amplitud de Memoria | SkillDrills",
+        "fr": "Test d Empan de Chiffres – Mémoire Numérique | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS (Code 0, 620 static routes)",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": 79,
+      "name": "Word Recall Test",
+      "slug": "memory/short-term-memory/word-recall",
+      "category": "memory",
+      "subcategory": "short-term-memory",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/memory/03_word-recall.md"
+    },
+    {
+      "id": 80,
+      "name": "Visual Memory Test (Grid Memorization)",
+      "slug": "memory/spatial-memory/grid-memorization",
+      "category": "memory",
+      "subcategory": "spatial-memory",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/memory/04_grid-memorization.md"
+    },
+    {
+      "id": 81,
+      "name": "Object Location Memory Test",
+      "slug": "memory/spatial-memory/object-location",
+      "category": "memory",
+      "subcategory": "spatial-memory",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/memory/05_object-location.md"
+    },
+    {
+      "id": 82,
+      "name": "Path Tracing Memory Test (Corsi Block-Tapping)",
+      "slug": "memory/spatial-memory/path-tracing",
+      "category": "memory",
+      "subcategory": "spatial-memory",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/memory/06_path-tracing.md"
+    },
+    {
+      "id": 83,
+      "name": "N-Back Working Memory Test",
+      "slug": "memory/working-memory/n-back",
+      "category": "memory",
+      "subcategory": "working-memory",
+      "locales_completed": [
+        "en",
+        "de",
+        "ko",
+        "ja",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/memory/07_n-back.md"
+    }
+  ],
+  "category_status": "100% COMPLETE"
+}

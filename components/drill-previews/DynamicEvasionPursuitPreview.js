@@ -294,45 +294,39 @@ export default function DynamicEvasionPursuitPreview() {
       ctx.fill();
 
       ctx.restore();
-
       if (prefersReducedMotion) {
         return;
       }
 
-      // --- Reactive Ocular Pursuit Reticle ---
+      // --- Tactical Crosshair (matching FPS drill exact crosshair geometry) ---
       ctx.save();
-      const chLen = 7;
-      const chGap = 3;
+      const chColor = '#38bdf8';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      // 4 crosshair ticks
-      ctx.moveTo(rx - chGap - chLen, ry);
-      ctx.lineTo(rx - chGap, ry);
-      ctx.moveTo(rx + chGap, ry);
-      ctx.lineTo(rx + chGap + chLen, ry);
-      ctx.moveTo(rx, ry - chGap - chLen);
-      ctx.lineTo(rx, ry - chGap);
-      ctx.moveTo(rx, ry + chGap);
-      ctx.lineTo(rx, ry + chGap + chLen);
+      ctx.arc(rx, ry, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Outer targeting circle
-      ctx.globalAlpha = 0.55;
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1;
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.arc(rx, ry, 11, 0, Math.PI * 2);
+      ctx.moveTo(rx, ry - tickLen); ctx.lineTo(rx, ry - gap);
+      ctx.moveTo(rx, ry + tickLen); ctx.lineTo(rx, ry + gap);
+      ctx.moveTo(rx - tickLen, ry); ctx.lineTo(rx - gap, ry);
+      ctx.moveTo(rx + tickLen, ry); ctx.lineTo(rx + gap, ry);
       ctx.stroke();
 
-      // Center targeting pip
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle = '#ffffff';
+      // Center pip
       ctx.beginPath();
-      ctx.arc(rx, ry, 1.2, 0, Math.PI * 2);
+      ctx.arc(rx, ry, 1.8, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.restore();
 
       animId = requestAnimationFrame(renderFrame);

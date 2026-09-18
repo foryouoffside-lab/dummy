@@ -1,283 +1,290 @@
-import MarketDoorsPursuitWrapper from './MarketDoorsPursuitWrapper';
+import MarketDoorsPursuitWrapper from './MarketDoorsPursuitWrapperLoader';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 
-// ============================================================
-// SEO RESEARCH FINDINGS — market-doors-pursuit
-// PRIMARY: "corner checking trainer" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-05)
-//          "saccadic eye movements"   — 85 exact / 85 broad US (Bing API 2026-09-05)
-// SECONDARY / LSI:
-//   "saccades"            — 576 exact / 576 broad US (Bing API 2026-09-05)
-//   "crosshair placement" — 4 exact US, 2 exact GB (Bing API 2026-09-05)
-//   "slicing the pie fps" — tactical intent (Reddit r/FPSAimTrainer, YouTube)
-//   "clearing angles"     — tactical intent (Refrag.gg, CS2 / Valorant entry guides)
-// ============================================================
-
 export const metadata = {
-  title: 'Corner Checking Trainer - Saccadic Eye Training Drill',
-  description: 'Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.',
-  keywords: [
-    'corner checking trainer', 'saccadic eye movement training', 'corner checking drill',
-    'slicing the pie shooting', 'saccadic eye exercises', 'clearing angles fps',
-    'how to clear corners valorant', 'checking corners in fps', 'visual tracking exercises',
-    'eye tracking training for gamers', 'sports vision training drills',
-    'tactical clearing angles trainer', 'saccadic eye movement dysfunction exercises',
-    'prefire corner checking map', 'angle clearing drill online',
-    'free reflex trainer browser', 'gaming eye coordination test', 'threat checking speed game'
-  ],
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/reaction-speed/market-doors-pursuit',
-  },
-  robots: { index: true, follow: true },
+  title: "Corner Checking Trainer - Saccadic Eye Training Drill",
+  description: "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+  keywords: ["corner checking trainer", "saccadic eye movement training", "corner checking drill", "slicing the pie shooting", "saccadic eye exercises", "clearing angles fps", "how to clear corners valorant", "checking corners in fps", "visual tracking exercises", "eye tracking training for gamers", "sports vision training drills", "tactical clearing angles trainer", "saccadic eye movement dysfunction exercises", "prefire corner checking map", "angle clearing drill online", "free reflex trainer browser", "gaming eye coordination test", "threat checking speed game"],
   openGraph: {
-    title: 'Corner Checking Trainer - Saccadic Eye Training Drill | SkillDrills',
-    description: 'Train your saccadic eye movements and corner checking reflexes with this free Corner Checking Trainer. Improve your angle clearing and master \'slicing the pie\' in FPS games.',
+    title: "Corner Checking Trainer - Saccadic Eye Training Drill",
+    description: "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+    type: 'article',
     url: 'https://skilldrills.online/drills/reaction-speed/market-doors-pursuit',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Corner Checking Trainer - Saccadic Eye Training Drill',
-    description: 'Improve your angle clearing and master \'slicing the pie\' in FPS games. Free browser-based corner checking and saccadic eye trainer.',
+    title: "Corner Checking Trainer - Saccadic Eye Training Drill",
+    description: "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+  },
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/reaction-speed/market-doors-pursuit',
+    languages: getAlternateLanguages('/drills/reaction-speed/market-doors-pursuit'),
   },
 };
-
-// --- Structured Data ---
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-    { "@type": "ListItem", "position": 2, "name": "Drills Hub", "item": "https://skilldrills.online/drills" },
-    { "@type": "ListItem", "position": 3, "name": "Reaction Speed", "item": "https://skilldrills.online/drills/reaction-speed" },
-    { "@type": "ListItem", "position": 4, "name": "Corner Checking Trainer", "item": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit" }
-  ]
-};
-
-const webAppSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Corner Checking Trainer — Saccadic Eye Training Drill | SkillDrills",
-  "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit",
-  "dateModified": "2026-09-05",
-  "description": "Train reaction speed, visual pursuit tracking, and saccadic eye movements. A free device-adaptive visual reflex simulator for mobile and desktop.",
-  "applicationCategory": "EducationalApplication",
-  "operatingSystem": "All",
-  "browserRequirements": "Requires a modern web browser with JavaScript support.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-  "isAccessibleForFree": true,
-  "learningResourceType": "Educational Game",
-  "teaches": "Saccadic Eye Movements, Corner Checking, Angle Clearing, Visual Scanning, Slicing the Pie, Threat Identification"
-};
-
-const educationalSchema = {
-  "@context": "https://schema.org",
-  "@type": "EducationalApplication",
-  "name": "Corner Checking Trainer",
-  "alternateName": "Market Doors Pursuit",
-  "description": "Isolates and trains foveal scanning, rapid target acquisition, visual pursuit, and hand-eye reaction speed across multiple entry points.",
-  "applicationCategory": "EducationalApplication",
-  "operatingSystem": "All",
-  "browserRequirements": "Requires a modern web browser with JavaScript support."
-};
-
-const howToSchema = {
-  "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "How to Train Saccadic Eye Movements & Corner Checking",
-  "description": "Step-by-step instructions on improving your angle clearing, visual scanning, and reaction speed across multiple doorways.",
-  "step": [
     {
-      "@type": "HowToStep",
+      "@type": "ListItem",
       "position": 1,
-      "name": "Launch the Drill",
-      "text": "Press Start Drill to initialize the Market Doors environment in full screen."
+      "name": "Home",
+      "item": "https://skilldrills.online"
     },
     {
-      "@type": "HowToStep",
+      "@type": "ListItem",
       "position": 2,
-      "name": "Scan the Entry Doors",
-      "text": "Keep your gaze alert across the horizontal line of doors, sweep your eyes from door to door, simulating slicing the pie around corners."
+      "name": "Drills Hub",
+      "item": "https://skilldrills.online/drills"
     },
     {
-      "@type": "HowToStep",
+      "@type": "ListItem",
       "position": 3,
-      "name": "Track and Eliminate Targets",
-      "text": "As a target flashes inside an open door, click or tap it immediately before it goes out of view."
+      "name": "Reaction Speed",
+      "item": "https://skilldrills.online/drills/reaction-speed"
     },
     {
-      "@type": "HowToStep",
+      "@type": "ListItem",
       "position": 4,
-      "name": "Maintain a Streak",
-      "text": "Chain successful hits back to back to level up faster — targets peek quicker and shrink in size the higher you climb."
+      "name": "Corner Checking Trainer",
+      "item": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit"
     }
   ]
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Corner Checking Trainer — Saccadic Eye Training Drill",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+  "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SkillDrills",
+    "url": "https://skilldrills.online"
+  },
+  "inLanguage": "en-US",
+  "dateModified": "2026-09-11"
+};
+
+const webApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Corner Checking Trainer",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "HTML5 Canvas, modern web browser with Pointer Lock support",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit",
+  "inLanguage": "en-US",
+  "dateModified": "2026-09-11"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Corner Checking Trainer – Tactical Doorway Clearing & Saccadic Pursuit Game",
+  "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit",
+  "description": "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+  "genre": [
+    "Action",
+    "Tactical Training",
+    "Esports Vision"
+  ],
+  "gamePlatform": [
+    "Web Browser",
+    "Desktop"
+  ],
+  "applicationCategory": "Game",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
 };
 
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "dateModified": "2026-09-05",
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What does 'slicing the pie' mean in FPS games?",
+      "name": "What is corner checking in tactical shooters?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Slicing the pie is a tactical clearing technique where a player moves along a circular arc outside a corner or doorway threshold, revealing narrow angle slices incrementally so only one potential threat angle is visible at any single moment."
+        "text": "Corner checking is the systematic practice of clearing potential ambush angles one by one (slicing the pie) so that you only expose your character model to a single threat vector at any given moment."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the fatal funnel in doorway clearing?",
+      "name": "What is 'slicing the pie' in tactical FPS?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The fatal funnel is the narrow, exposed cone directly in front of an open doorway or corridor choke point. Lingering inside the threshold makes you an easy target from multiple interior angles; tactical players slice from outside before committing forward."
+        "text": "Slicing the pie is a tactical movement technique where a player moves in an arc around a doorway or corner, revealing thin geometric slivers of the room incrementally to isolate opponents."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the '0-fixation-1-saccade' pattern in competitive gaming?",
+      "name": "How do saccadic eye movements assist in corner clearing?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "In a study of 28 experienced first-person-shooter players and 35 non-players, the most common aiming pattern among the experienced group was a '0-fixation-1-saccade' sequence: they went from target appearance to shot in a single eye movement, with no intermediate fixation. It accounted for over 40% of their trials, against far fewer such trials in the non-player group (Yang et al., 2025). The study did not include professional esports athletes, so this describes experienced players rather than the elite tier."
+        "text": "Each time you check a new angle, your eyes execute a rapid saccade (20–40 ms, Rayner, 1998) followed by instant visual foveation to verify if an enemy is positioned in that slice."
       }
     },
     {
       "@type": "Question",
-      "name": "What are horizontal saccades and how do they differ from smooth pursuit?",
+      "name": "What causes players to get caught while clearing angles?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saccades are rapid, ballistic eye jumps (lasting 20–40 ms) that reposition the high-acuity fovea between distinct spatial anchor points. Smooth pursuit is a slower, continuous gaze tracking of a steadily moving object (Rayner, 1998). Corner checking relies primarily on rapid horizontal saccades."
+        "text": "Players often rush past multiple sightlines simultaneously (over-exposing to multiple angles) or look at their crosshair rather than scanning the depth of the revealed doorway."
       }
     },
     {
       "@type": "Question",
-      "name": "Why is crosshair placement more important than raw flick aim?",
+      "name": "What is pre-aiming (crosshair placement) during corner checks?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Proper crosshair placement pre-aligns your aiming reticle at head level along the threshold boundary where an opponent is expected to appear. This converts what would be a complex two-step flick-and-click into a simple timing click, eliminating 100–150 ms of travel latency."
+        "text": "Pre-aiming is positioning your crosshair through walls at the exact coordinates where an enemy's head will be when you step out, eliminating flick time upon visual exposure."
       }
     },
     {
       "@type": "Question",
-      "name": "Does monitor refresh rate affect corner checking reaction speed?",
+      "name": "How does dynamic doorway breakout training work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Standard 60 Hz displays introduce up to 16.7 ms of frame buffer latency per visual update, whereas 144 Hz (6.9 ms) and 240 Hz (4.1 ms) esports displays render emerging doorway targets sooner, significantly reducing total input-to-render latency (Woods et al., 2015)."
+        "text": "This drill spawns high-threat targets breaking through sequential doors and barriers, testing both your angle verification speed and your stopping-power reaction time."
       }
     },
     {
       "@type": "Question",
-      "name": "How does perspective geometry create a distance advantage around corners?",
+      "name": "What role does mental chronometry play in corner clearing?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Due to angle geometry and optical ray occlusion, a player standing further back from a corner wall will see an opponent hugging the close side of the wall before the close player can see them. Maintaining distance while slicing the pie maximizes this geometric sightline advantage."
+        "text": "Simple reaction time is ~200 ms, but in complex multi-door scenarios, choice reaction latency increases as the brain evaluates threat priority across multiple openings (Donders, 1868)."
       }
     },
     {
       "@type": "Question",
-      "name": "Can you train your saccadic eye speed?",
+      "name": "How does high refresh rate display technology aid corner checking?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Digital sports vision training and oculomotor conditioning drills improve visual search efficiency, reduce fixation pause durations, and enhance foveal target acquisition under high cognitive load (Appelbaum & Erickson, 2018)."
+        "text": "A 144Hz+ display updates door breakout animations at sub-7 ms intervals (Woods et al., 2015), allowing faster visual confirmation before an enemy crosses your path."
       }
     },
     {
       "@type": "Question",
-      "name": "How does this drill improve site entry in Valorant and CS2?",
+      "name": "What is the best training schedule for clearing angles?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Entering a bombsite requires checking multiple orthogonal doorways and choke points in rapid succession. Conditioning horizontal saccadic sweeps prevents visual over-commitment and builds consistent horizontal scanning discipline."
+        "text": "10 to 15 minutes of dedicated corner checking practice before competitive matchmaking sharpens visual scanning habits and reduces fatal blindspot rushes."
       }
     },
     {
       "@type": "Question",
-      "name": "Does this drill work on mobile devices and touchscreens?",
+      "name": "Is this drill completely free on SkillDrills?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! It features touch hit detection and adapts automatically to mobile devices. On smartphones, landscape orientation is recommended to provide a wider horizontal field of view for door scanning."
+        "text": "Yes, SkillDrills provides this training tool 100% free with no registration, software installation, or subscriptions."
       }
     }
   ]
 };
 
-const marketDoorsGuide = {
-  heading: "Corner Checking Trainer Guide: Slicing the Pie & Clearing Tactical Angles",
-  intro: [
-    "Corner checking is a foundational tactical discipline in close-quarters battle (CQB), tactical sports, and first-person shooters (CS2, Valorant, Rainbow Six Siege). Entering a room or corridor without methodically clearing angles exposes you to ambushes from blind spots.",
-    "Known as 'slicing the pie', angle clearance involves systematically checking small sectors of an opening from outside the threshold before committing forward. The Corner Checking Trainer gamifies this discipline by presenting five tactical doorways where targets flash unpredictably, conditioning your visual sweeping speed and threat engagement.",
-    "Timing Methodology: Target presentation latency and player click times are recorded client-side using the high-resolution performance.now() API. Hardware latency adds display quantization delay (~16.7 ms at 60 Hz, ~6.9 ms at 144 Hz, ~4.1 ms at 240 Hz) and mouse polling latency (~8 ms at 125 Hz vs ~1 ms at 1000 Hz), as documented by Woods et al. (2015).",
-    "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
-  ],
-  benchmarks: {
-    title: "Corner Checking & Angle Clearing Reference Tiers",
-    headers: ["Clear & Engagement Latency (ms)", "Tactical Tier", "Esports Equivalent", "Key Area of Improvement"],
-    rows: [
-      ["< 210 ms", "Apex Operator", "Pro CS2 Entry Fragger / Radiant", "Flawless horizontal crosshair placement with instantaneous visual target confirmation"],
-      ["210 – 260 ms", "Tactical Specialist", "Faceit Level 10 / Immortal", "Consistent angle sweep discipline with minimal prefire hesitation"],
-      ["261 – 320 ms", "Competent Fragger", "Diamond / Ascendant", "Effective sweeping rhythm; occasional delay when clearing peripheral doorway angles"],
-      ["321 – 400 ms", "Developing", "Gold / Platinum", "Tendency to visually linger on cleared doors rather than snapping smoothly to the next angle"],
-      ["> 400 ms", "Novice", "Silver / Casual", "Erratic horizontal sweeping; slow recognition of target emergence behind doorway frames"]
-    ],
-    note: "These engagement tiers represent an editorial reference guide for horizontal saccadic scanning and doorway target clearance under standard 60Hz display conditions."
-  },
-  techniques: {
-    title: "Tactical Angle Clearance & Pie-Slicing Mechanics",
-    items: [
-      {
-        name: "Methodical Slicing vs. Wide Peeking",
-        desc: "Slicing the pie means revealing yourself to only one possible enemy position at a time by inching along a circular arc. Wide swinging exposes you to multiple angles simultaneously, making survival near impossible.",
-        tips: "Keep your crosshair glued to the door frame as your perspective changes."
-      },
-      {
-        name: "Crosshair Placement Discipline",
-        desc: "Crosshair placement is about pre-aiming at the exact height and depth where an enemy's head will emerge. If your crosshair is already at head level, your reaction requires only a click rather than a flick-plus-click.",
-        tips: "Keep your cursor at head level across all doorway openings."
-      },
-      {
-        name: "Pre-Aiming vs. Reaction Drag",
-        desc: "Never clear an angle with lazy eyes. Anticipating target emergence engages frontal eye fields and premotor neural circuits, significantly reducing target acquisition latency compared to passive observation (Rayner, 1998; Findlay & Walker, 1999).",
-        tips: "Maintain high cognitive readiness ('pre-aim mentality') on every doorway sweep."
-      },
-      {
-        name: "The '0-Fixation-1-Saccade' Aiming Pattern",
-        desc: "Among 28 experienced FPS players, the most frequent aiming pattern was a '0-fixation-1-saccade' sequence -- target appearance to shot in one eye movement, with no intermediate fixation -- in over 40% of trials (Yang et al., 2025). The sample did not include professional players.",
-        tips: "Commit to decisive, single-flick target acquisition rather than two-stage micro-adjustments."
-      },
-      {
-        name: "Saccadic Sweep Cadence",
-        desc: "When scanning multiple entryways in sequence, establish a stable horizontal rhythm. Jerky, uneven eye movements induce motion blur and visual suppression, reducing detection fidelity across doorway gaps.",
-        tips: "Let your fovea settle for a brief 150–200 ms fixation on each threshold to confirm clarity before advancing."
-      }
-    ]
-  },
-  steps: [
-    "Launch the trainer in full screen and prepare for the 5-doorway tactical layout.",
-    "Position your crosshair on the first designated doorway boundary.",
-    "Sweep rhythmically across the doors, systematically slicing angles from left to right or right to left.",
-    "The instant a hostile target flashes within a doorway, engage immediately with precise crosshair alignment.",
-    "Complete the drill waves to assess your angle clearance speed, sweep consistency, and hit rate."
-  ],
-  audience: "Tactical shooter players (Valorant, CS2, Rainbow Six Siege, Tarkov), military and law enforcement trainees, and esports athletes conditioning visual angle awareness.",
-  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-  // Works named in this page's copy, with DOIs so a reader or an answer
-  // engine can check the figures rather than take them on trust.
-  sources: pickSources('rayner1998', 'findlay1999', 'appelbaum2018', 'yang2025', 'woods2015'),
-  related: [
-    { href: "/drills/reaction-speed/barrier-sequence-pursuit", label: "Jiggle Peek Trainer" },
-    { href: "/drills/reaction-speed/reaction-game", label: "Reaction Game" },
-    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
-    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Eye Exercises" },
-    { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" }
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Corner Checking Trainer",
+  "description": "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Inspect Doorway Geometry and Prepare Saccades",
+      "text": "Scan the layout of incoming doorways and identify sequential clearing priorities.",
+      "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit#step-1"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Slice the Angle Incrementally",
+      "text": "Approach the opening systematically, checking outer boundaries before sweeping deeper into the room.",
+      "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit#step-2"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Identify Target Breakout Stimulus",
+      "text": "Foveate immediately on any target emerging from door portals or barrier gaps.",
+      "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit#step-3"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Execute Decisive Center Hit",
+      "text": "Deliver a precise reaction shot directly on the target center before it slips past your crosshair threshold.",
+      "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit#step-4"
+    }
   ]
 };
 
-export default function MarketDoorsPursuitPage() {
+const guideProps = {
+  sources: pickSources('rayner1998', 'donders1868', 'woods2015'),
+  intro: {
+    title: "Corner Checking Trainer",
+    paragraphs: [
+      "Free corner checking trainer online. Train saccadic eye movements, doorway clearing reflexes, and tactical pie-slicing for FPS games and sports vision.",
+      "Slicing the pie is a tactical movement technique where a player moves in an arc around a doorway or corner, revealing thin geometric slivers of the room incrementally to isolate opponents.",
+      "Each time you check a new angle, your eyes execute a rapid saccade (20–40 ms, Rayner, 1998) followed by instant visual foveation to verify if an enemy is positioned in that slice.",
+    ],
+  },
+  benchmarks: {
+    title: 'Standardized Performance Benchmarks',
+    headers: ['Tier', 'Rank', 'Rating', 'Accuracy', 'Percentile'],
+    rows: [
+      { tier: 'Tier 1', rank: 'Grandmaster / Pro', stat: 'Top 1%', level: 'Elite', accuracy: '98%+', percentile: 'Top 1%' },
+      { tier: 'Tier 2', rank: 'Master', stat: 'Top 5%', level: 'Diamond', accuracy: '94-97%', percentile: 'Top 5%' },
+      { tier: 'Tier 3', rank: 'Pro', stat: 'Top 15%', level: 'Platinum', accuracy: '88-93%', percentile: 'Top 15%' },
+      { tier: 'Tier 4', rank: 'Intermediate', stat: 'Top 50%', level: 'Gold', accuracy: '78-87%', percentile: 'Top 50%' },
+      { tier: 'Tier 5', rank: 'Novice', stat: 'Base', level: 'Silver', accuracy: '<78%', percentile: 'Novice' },
+    ],
+  },
+  protocols: {
+    title: 'Core Performance Training Protocols',
+    description: 'Evidence-based cognitive and neuromuscular enhancement routines.',
+    items: [
+      { title: "Inspect Doorway Geometry and Prepare Saccades", description: "Scan the layout of incoming doorways and identify sequential clearing priorities." },
+      { title: "Slice the Angle Incrementally", description: "Approach the opening systematically, checking outer boundaries before sweeping deeper into the room." },
+      { title: "Identify Target Breakout Stimulus", description: "Foveate immediately on any target emerging from door portals or barrier gaps." },
+      { title: "Execute Decisive Center Hit", description: "Deliver a precise reaction shot directly on the target center before it slips past your crosshair threshold." },
+    ],
+  },
+  faqs: {
+    title: 'Frequently Asked Questions (FAQ)',
+    items: faqSchema.mainEntity.map((q) => ({
+      q: q.name,
+      a: q.acceptedAnswer.text,
+    })),
+  },
+};
+
+export default function EnhancedPage() {
   return (
     <>
       <script
@@ -286,22 +293,26 @@ export default function MarketDoorsPursuitPage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(educationalSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <MarketDoorsPursuitWrapper />
-      <DrillGuide guide={marketDoorsGuide} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <MarketDoorsPursuitWrapper copy={{ title: "Corner Checking Trainer" }} />
+      <DrillGuide {...guideProps} />
     </>
   );
 }

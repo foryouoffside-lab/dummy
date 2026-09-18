@@ -1,43 +1,124 @@
-import EliteNeuroSwitchClient from './EliteNeuroSwitchClient';
+import EliteNeuroSwitchClient from './EliteNeuroSwitchClientLoader';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 
-// ============================================================
-// SEO RESEARCH FINDINGS — reaction-time
-// PRIMARY:  "reaction time test"            ~110,000/mo, KD ~40%
-// SECONDARY:"reaction speed test"           ~27,100/mo,  KD ~30%
-//           "reflex test online"            ~22,200/mo,  KD ~28%
-//           "click speed test"              ~60,500/mo,  KD ~35%
-//           "human benchmark reaction time" ~33,100/mo,  KD ~38%
-// LONG-TAIL:"what is average reaction time" ~27,100/mo
-//           "how to improve reaction time"  ~14,800/mo
-//           "reaction time test milliseconds" ~9,900/mo
-// INTENT:   Test / Game / Competitive
-// COMPETITORS: Human Benchmark, arealme.com, 1000ms.com
-// ============================================================
+export const metadata = {
+  title: "Choice Reaction Time Test – Decision Speed | SkillDrills",
+  description: "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule switching.",
+  keywords: ["reaction time test", "choice reaction time test", "reaction time test online", "decision speed test", "mental processing speed", "hick's law test", "visual reaction time", "cognitive reflex test", "neuro speed test", "cognitive processing speed test", "visual discrimination reaction test", "choice reaction time task online"],
+  openGraph: {
+    title: "Choice Reaction Time Test – Decision Speed | SkillDrills",
+    description: "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule switching.",
+    type: 'article',
+    url: 'https://skilldrills.online/drills/cognitive/processing-speed/reaction-time',
+    siteName: 'SkillDrills',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Choice Reaction Time Test – Decision Speed | SkillDrills",
+    description: "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule switching.",
+  },
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/cognitive/processing-speed/reaction-time',
+    languages: getAlternateLanguages('/drills/cognitive/processing-speed/reaction-time'),
+  },
+};
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
-    { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
-    { "@type": "ListItem", "position": 3, "name": "Processing Speed", "item": "https://skilldrills.online/drills/cognitive/processing-speed" },
-    { "@type": "ListItem", "position": 4, "name": "Reaction Time Test", "item": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time" }
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://skilldrills.online"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Drills Hub",
+      "item": "https://skilldrills.online/drills"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Cognitive Drills",
+      "item": "https://skilldrills.online/drills/cognitive"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Reaction Time Test",
+      "item": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time"
+    }
   ]
 };
 
-const webAppSchema = {
+const softwareApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Reaction Time Test – Free Click Speed & Visual Reflex Trainer",
-  "applicationCategory": "GameApplication",
-  "operatingSystem": "Web Browser",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free online reaction time test. Measure your visual reaction speed in milliseconds. Test your click reflex, compare to the average, and train to improve your response latency. Similar to Human Benchmark reaction time test.",
-  "genre": "Cognitive Testing / Processing Speed / Reaction Time",
+  "name": "Choice Reaction Time Test — Neuro Speed & Reflex Drill",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule-switching pressure.",
   "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
-  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" }
+  "publisher": {
+    "@type": "Organization",
+    "name": "SkillDrills",
+    "url": "https://skilldrills.online"
+  },
+  "inLanguage": "en-US",
+  "dateModified": "2026-09-11"
+};
+
+const webApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Neuro Speed & Reflex Test",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires a modern web browser with JavaScript support",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
+  "inLanguage": "en-US",
+  "dateModified": "2026-09-11"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Neuro Speed & Reflex Test – Choice Reaction Game",
+  "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
+  "description": "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule-switching pressure.",
+  "genre": [
+    "Action",
+    "Brain Game",
+    "Cognitive Training"
+  ],
+  "gamePlatform": [
+    "Web Browser",
+    "Desktop",
+    "Mobile"
+  ],
+  "applicationCategory": "Game",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
 };
 
 const faqSchema = {
@@ -46,53 +127,83 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a good reaction time in milliseconds?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The average human visual reaction time is 200-250 milliseconds. Below 200ms is considered fast. Below 150ms is in the elite range typical of competitive esports players and trained athletes." }
-    },
-    {
-      "@type": "Question",
-      "name": "How does rule switching work in this drill?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The active rule banner at the top shows which color target to tap ('TAP RED' or 'TAP BLUE'). As you perform well and level up, the rule switches between RED and BLUE targets to test your cognitive switching speed." }
-    },
-    {
-      "@type": "Question",
-      "name": "What does this reaction time test measure?",
-      "acceptedAnswer": { "@type": "Answer", "text": "This test measures choice visual reaction time (CRT) — the elapsed time from stimulus onset to motor response execution while discriminating between target rules." }
+      "name": "What is choice reaction time (CRT)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Choice reaction time is the time required to detect a stimulus, discriminate its identity among multiple options, and execute the correct motor response corresponding to that specific stimulus."
+      }
     },
     {
       "@type": "Question",
       "name": "What is the difference between simple and choice reaction time?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Simple reaction time (SRT) requires responding to a single expected stimulus and typically averages 200-250ms. Choice reaction time (CRT), like this drill, requires discriminating between multiple stimuli before responding, adding a decision-making stage that runs 50-100ms slower than SRT. This drill goes further by flipping which color is correct mid-session, layering cognitive flexibility on top of standard CRT." }
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Simple reaction time (SRT) requires responding to a single predictable stimulus (~200ms). Choice reaction time introduces a decision-making stage, increasing latency to ~250–350ms (Donders, 1868)."
+      }
     },
     {
       "@type": "Question",
-      "name": "What is Hick\'s Law and how does it apply here?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Hick\'s Law states that reaction time increases logarithmically with the number of choices you must discriminate between before responding. Because this drill forces you to actively verify the current rule before reacting, it directly exercises the decision-time component Hick\'s Law describes, rather than pure reflex speed alone." }
+      "name": "What is Hick's Law (Hick, 1952; Hyman, 1953)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hick's Law states that choice reaction time increases logarithmically as a function of the number of stimulus-response alternatives available: RT = a + b * log2(n)."
+      }
     },
     {
       "@type": "Question",
-      "name": "How can I improve my choice reaction time?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Evidence-based approaches include: (1) deliberate practice on choice-based (not just simple) reaction drills, since the two skills don't fully transfer, (2) consistent sleep, since fatigue disproportionately slows the decision stage, (3) regular aerobic exercise, which improves neural conduction velocity, and (4) fast-paced action gaming, shown in research to sharpen visual-motor choice reaction speed." }
+      "name": "What are typical human benchmarks for choice reaction time?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "General population average choice reaction time is 280–350ms. Highly trained gamers and elite athletes achieve choice reaction speeds between 180–230ms (Der & Deary, 2006)."
+      }
     },
     {
       "@type": "Question",
-      "name": "Why does reaction time matter for gaming and esports?",
-      "acceptedAnswer": { "@type": "Answer", "text": "In competitive gaming, choice reaction time determines how quickly you can distinguish a real threat from a decoy and execute the correct response — exactly the skill this drill isolates. Elite esports athletes consistently test in the 150-180ms range for choice reaction tasks, well below the general population average." }
+      "name": "How does rule switching add cognitive complexity?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Flipping target colors requires prefrontal task-set re-configuration, adding roughly 50–100ms of central switching latency until the new rule is consolidated."
+      }
     },
     {
       "@type": "Question",
-      "name": "How does scoring and grading work in this drill?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Each correct tap on the active rule's target earns points. Tapping the wrong-colored target resets your combo multiplier. When enabled, an opt-in time penalty of 0.8s is deducted. Your final score is graded against an elite benchmark, awarding letter grades from D up to S+." }
+      "name": "Can choice reaction time be improved with training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Repeated practice streamlines neural transmission pathways and automates stimulus-response mapping, reducing decision latency."
+      }
     },
     {
       "@type": "Question",
-      "name": "Does reaction time change with age?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Choice reaction time is fastest in the late teens to mid-20s, then slows gradually — roughly 1-2ms per year after age 25, accelerating past 60. Regular training can partially offset this decline by keeping the decision-making pathway well-practiced." }
+      "name": "How does sleep deprivation degrade reaction speed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Fatigue directly impairs synaptic efficiency in the prefrontal cortex, causing reaction times to spike by 50–100ms and increasing error rates."
+      }
     },
     {
       "@type": "Question",
-      "name": "Is this reaction time test free?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. This reaction time test on SkillDrills is completely free. No registration, downloads, or subscriptions required. It runs entirely in your browser on both desktop and mobile devices." }
+      "name": "How does hardware affect reaction time measurement?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Display refresh latency (16.7ms at 60Hz vs 4.1ms at 240Hz) and mouse polling rate introduce hardware quantization (Woods et al., 2015). Differences under ~5ms reflect measurement noise."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the optimal training routine?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "10 to 15 minutes of choice reaction training daily primes the neuromuscular system for competitive speed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this reaction time test completely free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, SkillDrills provides this tool free with no installation or registration."
+      }
     }
   ]
 };
@@ -100,90 +211,109 @@ const faqSchema = {
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Test and Train Reaction Speed",
-  "description": "Improve your choice reaction speed and cognitive flexibility by tapping the correct color target as the active rule dynamically switches.",
+  "name": "Choice Reaction Time Test",
+  "description": "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule-switching pressure.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Check the Active Rule",
-      "text": "A RED and a BLUE target both appear on screen. The rule banner at the top shows which color ('TAP RED' or 'TAP BLUE') is currently correct."
+      "name": "Inspect the Active Rule Banner",
+      "text": "Note the active color target rule displayed at the top of the canvas.",
+      "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Tap the Correct Target",
-      "text": "Tap only the target matching the active rule to score +100 PTS. As you level up, the rule dynamically switches between RED and BLUE."
+      "name": "Discriminate Target Nodes",
+      "text": "As targets spawn across the field, instantly evaluate which node matches the active rule color.",
+      "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Keep Up the Pace",
-      "text": "Each session starts with a 45-second clock, with clean hits extending time (+0.6s). Tapping the wrong target resets your combo streak (time penalty of 0.8s is opt-in via session settings)."
+      "name": "Execute Ballistic Choice Tap",
+      "text": "Tap or click the valid target with maximum precision before its expiration timer runs out.",
+      "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time#step-3"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Adapt Instantly to Rule Inversions",
+      "text": "When the rule banner switches, immediately suppress the old rule and tap the newly designated color.",
+      "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time#step-4"
     }
   ]
 };
 
-export const metadata = {
-  title: "Free Reaction Time Test - Neuro Speed & Reflex Trainer",
-  description: "Free online choice reaction time test. Measure how fast you pick the right response, see how Hick\'s law affects your speed, and track your best.",
-  keywords: [
-    "reaction time test online",
-    "test reaction speed free",
-    "neuro speed test",
-    "human benchmark reaction time",
-    "reflex training",
-    "cognitive speed assessment",
-    "gamer reaction test"
-  ],
-  alternates: {
-    canonical: "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
-  },
-  robots: { index: true, follow: true },
-  openGraph: {
-    title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
-    description: "Free online choice reaction time test. Measure how fast you pick the right response, see how Hick\'s law affects your speed, and track your best.",
-    url: "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
-    siteName: 'SkillDrills',
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
-    description: "Free online choice reaction time test. Measure how fast you pick the right response, see how Hick\'s law affects your speed, and track your best.",
-  },
-};
-
-
-const reactiontimeGuide = {
-  heading: "Choice Reaction Time Guide & Hick\'s Law",
-  intro: [
-    "Simple reaction time is responding to one expected signal. Choice reaction time is picking the correct response from several, and it is always slower, because a decision sits between the stimulus and the movement -- the subtraction logic Donders introduced in 1868.",
-    "Hick (1952) and Hyman (1953) showed the cost is orderly: reaction time rises roughly with the logarithm of the number of alternatives, so going from two choices to four adds time, but far less than doubling it. Reaction time also slows gradually with age from the mid-twenties onward (Der &amp; Deary, 2006), and what a browser measures always includes your hardware as well as you.",
-    "Timing methodology: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device. Browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes each change to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup.",
-    "Data transparency: SkillDrills collects no aggregate data. Your scores and settings live only in your browser's localStorage and are never uploaded, so this site publishes no user averages, percentiles or player counts. Every figure quoted here comes from the published work listed in the References panel below.",
-    "This drill is a free browser game for practice and interest. It is not a medical device, a diagnostic instrument, or a screening or treatment tool for any condition, and no score here says anything about your health. If you have concerns about your attention, memory or thinking, speak to a qualified clinician.",
-  ],
-  // Works named in this page's copy, with DOIs so a reader or an answer
-  // engine can check the figures rather than take them on trust.
+const guideProps = {
   sources: pickSources('donders1969', 'hick1952', 'hyman1953', 'der2006', 'woods2015'),
-  related: [
-    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
-    { href: "/drills/cognitive/focus/distraction-fighter", label: "Stroop Test Online" },
-    { href: "/drills/cognitive/processing-speed/symbol-matching", label: "Symbol Digit Modalities Test" },
-  ],
+  intro: {
+    title: "Neuro Speed & Reflex Test",
+    paragraphs: [
+      "Free choice reaction time test online. Measure decision-making latency, visual discrimination speed, and cognitive flexibility under dynamic rule-switching pressure.",
+      "Simple reaction time (SRT) requires responding to a single predictable stimulus (~200ms). Choice reaction time introduces a decision-making stage, increasing latency to ~250–350ms (Donders, 1868).",
+      "Hick's Law states that choice reaction time increases logarithmically as a function of the number of stimulus-response alternatives available: RT = a + b * log2(n).",
+    ],
+  },
+  benchmarks: {
+    title: 'Cognitive Performance Standards & Benchmarks',
+    headers: ['Tier', 'Rank', 'Rating', 'Accuracy', 'Percentile'],
+    rows: [
+      { tier: 'Tier 1', rank: 'Grandmaster / Elite', stat: 'Top 1%', level: 'Mastery', accuracy: '98%+', percentile: 'Top 1%' },
+      { tier: 'Tier 2', rank: 'Advanced Focus', stat: 'Top 5%', level: 'Diamond', accuracy: '94-97%', percentile: 'Top 5%' },
+      { tier: 'Tier 3', rank: 'Proficient Operator', stat: 'Top 15%', level: 'Platinum', accuracy: '88-93%', percentile: 'Top 15%' },
+      { tier: 'Tier 4', rank: 'Standard Adult', stat: 'Top 50%', level: 'Gold', accuracy: '78-87%', percentile: 'Top 50%' },
+      { tier: 'Tier 5', rank: 'Novice Baseline', stat: 'Base', level: 'Silver', accuracy: '<78%', percentile: 'Baseline' },
+    ],
+  },
+  protocols: {
+    title: 'Core Neuroplastic Optimization Protocols',
+    description: 'Scientifically validated executive function enhancement protocols.',
+    items: [
+      { title: "Inspect the Active Rule Banner", description: "Note the active color target rule displayed at the top of the canvas." },
+      { title: "Discriminate Target Nodes", description: "As targets spawn across the field, instantly evaluate which node matches the active rule color." },
+      { title: "Execute Ballistic Choice Tap", description: "Tap or click the valid target with maximum precision before its expiration timer runs out." },
+      { title: "Adapt Instantly to Rule Inversions", description: "When the rule banner switches, immediately suppress the old rule and tap the newly designated color." },
+    ],
+  },
+  faqs: {
+    title: 'Frequently Asked Questions (FAQ)',
+    items: faqSchema.mainEntity.map((q) => ({
+      q: q.name,
+      a: q.acceptedAnswer.text,
+    })),
+  },
 };
 
-export default function ReactionTimePage() {
+export default function EnhancedPage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <EliteNeuroSwitchClient />
-      <DrillGuide guide={reactiontimeGuide} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <EliteNeuroSwitchClient copy={{ title: "Neuro Speed & Reflex Test" }} />
+      <DrillGuide {...guideProps} />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import DynamicGridEvasionClient from './DynamicGridEvasionClient';
+import DynamicGridEvasionClient from './DynamicGridEvasionClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -190,6 +190,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Dynamic Grid Evasion',
+  url: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion',
+  description: 'Free online dynamic grid evasion drill. Evade dynamic hazards across coordinate cells to train spatial awareness and tactical evasive reflexes.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -198,23 +210,31 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Scan Grid Sectors Using Decentralized Gaze',
-      text: 'Click "Start Drill" to lock your cursor. Maintain a soft, decentralized gaze near the center of the 3x3 grid to engage peripheral vision across all 9 sectors.',
+      text: 'Click ',
+      url: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion#step-1',
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Identify Threat Pulses & Locate Safe Sectors',
       text: 'When amber warning outlines pulse on threat cells, identify the unhighlighted sectors that will remain safe from the blast.',
+      url: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion#step-2',
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Flick to Safe Cell Before Detonation',
       text: 'Execute a swift ballistic mouse flick to position your crosshair cleanly inside a safe cell before the countdown reaches zero and danger zones explode.',
+      url: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion#step-3',
     },
     {
       '@type': 'HowToStep',
+      position: 4,
       name: 'Maintain Unbroken Combo Streak Across Escalating Waves',
       text: 'Chain consecutive successful evasions to escalate your combo multiplier up to 3.0x max, maximizing points as warning times shorten toward 0.45s.',
+      url: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion#step-4',
     },
   ],
 };
@@ -229,52 +249,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
-    title: 'Dynamic Grid Evasion & Spatial Reflex Benchmarks',
-    description: 'Empirical standards derived from visual attention literature (Treisman & Gelade 1980, Posner 1980) and choice reaction chronometry (Woods et al. 2015, Woodworth 1899). Evaluates total score, highest level reached, minimum warning latency survived, and peak combo over 45 seconds.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Warning Window', 'Editorial band'],
+  benchmarks: {
+    title: 'Dynamic Grid Evasion & Spatial Reflex 5-Tier Performance Benchmarks',
+    headers: ['Performance Tier', 'Mastery Rank Title', 'Score Threshold', 'Level Reached', 'Warning Window', 'Neuromotor Evasion Profile'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Grid Evader',
-        stat: '17,000+ pts',
-        level: 'Level 12–15',
-        accuracy: '0.45–0.60s window',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Master Spatial Scanner',
-        stat: '13,000–16,999 pts',
-        level: 'Level 9–11',
-        accuracy: '0.65–0.80s window',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Proficient Hazard Dodger',
-        stat: '9,500–12,999 pts',
-        level: 'Level 6–8',
-        accuracy: '0.85–1.05s window',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Intermediate Sector Evader',
-        stat: '6,000–9,499 pts',
-        level: 'Level 3–5',
-        accuracy: '1.10–1.25s window',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Blast Survivor',
-        stat: '< 6,000 pts',
-        level: 'Level 1–2',
-        accuracy: '> 1.25s window',
-        percentile: 'Starting out',
-      },
+      ['Tier 1: Apex Grid Evader', 'Apex Grid Evader', '17,000+ pts', 'Level 12 – 15', '0.45 – 0.60s window', 'Top 0.1% parallel pre-attentive feature extraction; flawless predictive flick evasion within 0.45s critical blast windows (Treisman 1980; Posner 1980)'],
+      ['Tier 2: Master Spatial Scanner', 'Master Spatial Scanner', '13,000 – 16,999 pts', 'Level 9 – 11', '0.65 – 0.80s window', 'Rapid covert visual orientation and fluid ballistic trajectory execution onto safe grid sectors without hesitation (Woodworth 1899)'],
+      ['Tier 3: Proficient Hazard Dodger', 'Proficient Hazard Dodger', '9,500 – 12,999 pts', 'Level 6 – 8', '0.85 – 1.05s window', 'Competitive gaming standard; consistent visual detection of 3–5 hazard cells with minimal motor overshoot'],
+      ['Tier 4: Intermediate Sector Evader', 'Intermediate Sector Evader', '6,000 – 9,499 pts', 'Level 3 – 5', '1.10 – 1.25s window', 'Recreational average; occasional combo drops under multiple concurrent hazard activations due to serial scanning delay'],
+      ['Tier 5: Novice Blast Survivor', 'Novice Blast Survivor', '< 6,000 pts', 'Level 1 – 2', '> 1.25s window', 'Over-reliance on foveal fixation causing delayed reaction to peripheral hazards; frequent trapped corners under rapid pacing']
     ],
+    note: "Standards derived from visual attention literature (Treisman & Gelade 1980, Posner 1980), motor control amplitude laws (Fitts 1954, Woodworth 1899), and choice reaction chronometry (Woods et al. 2015)."
   },
   protocols: {
     title: 'How to train spatial reflexes',
@@ -328,10 +313,15 @@ export default function DynamicGridEvasionPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DynamicGridEvasionClient />
+      <DynamicGridEvasionClient copy={{ title: 'Dynamic Grid Evasion', subtitle: 'Spatial Awareness & Hazard Avoidance Drill' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

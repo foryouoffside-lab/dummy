@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function SpatialShiftPursuitClient() {
+export default function SpatialShiftPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -420,13 +420,13 @@ export default function SpatialShiftPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Spatial Shift Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Adaptive Eye Tracking Drill
+              <span data-seo-kw="1">{copy?.title || "Spatial Shift Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Adaptive Eye Tracking Drill"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Adaptive eye tracking drills train the ocular motor system to rapidly re-acquire targets following sudden spatial velocity shifts (Robinson, 1965; Rashbass, 1961). Interleaving ballistic catch-up saccades with immediate velocity gain re-synchronization conditions cerebellar plasticity and minimizes tracking recovery latencies (Krauzlis, 2004; Kahlon & Lisberger, 1996). Pursuit only tracks accurately to roughly 30&deg;/s (Krauzlis, 2004), so each sudden displacement is re-acquired by a saccade before smooth tracking restarts.
+              {copy?.description || "Adaptive eye tracking drills train the ocular motor system to rapidly re-acquire targets following sudden spatial velocity shifts (Robinson, 1965; Rashbass, 1961). Interleaving ballistic catch-up saccades with immediate velocity gain re-synchronization conditions cerebellar plasticity and minimizes tracking recovery latencies (Krauzlis, 2004; Kahlon & Lisberger, 1996). Pursuit only tracks accurately to roughly 30°/s (Krauzlis, 2004), so each sudden displacement is re-acquired by a saccade before smooth tracking restarts."}
             </p>
           </div>
         )}

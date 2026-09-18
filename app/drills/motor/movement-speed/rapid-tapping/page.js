@@ -1,4 +1,4 @@
-import RapidTappingClient from './RapidTappingClient';
+import RapidTappingClient from './RapidTappingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -25,7 +25,7 @@ import { pickSources } from '@/lib/drillSources';
 // ============================================================
 
 export const metadata = {
-  title: 'CPS Test – Free Click Speed Test & Clicks Per Second Trainer',
+  title: 'CPS Test – Free Click Speed & Clicks Per Second Test',
   description: 'Free online CPS test. Test your clicks per second, burst tapping velocity, jitter and butterfly clicking, and forearm endurance over a 45-second session.',
   keywords: [
     'cps test',
@@ -99,6 +99,18 @@ const webApplicationSchema = {
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
   dateModified: '2026-09-05',
+};
+
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'CPS Test – Free Click Speed Test & Clicks Per Second Trainer',
+  url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
+  description: 'Free online CPS test measuring clicks per second, burst tapping velocity, jitter and butterfly clicking.',
+  genre: ['Clicker Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
 };
 
 const faqSchema = {
@@ -196,23 +208,31 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Prepare Grip and Position Cursor',
       text: 'Rest your wrist comfortably on your mousepad. Align your index finger over the primary mouse button and position the crosshair within the arena.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping#step-1'
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Initiate 45-Second Sprint',
       text: 'Click "Start Drill" and tap the target ball as rapidly as possible during the 3-2-1 countdown to establish an immediate high CPS baseline.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping#step-2'
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Counter Dynamic Ball Decay',
       text: 'Each click expands the target ball radius. Maintain a rapid rhythm as the ball decay rate accelerates to prevent it from shrinking to zero.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping#step-3'
     },
     {
       '@type': 'HowToStep',
+      position: 4,
       name: 'Analyze Average CPS and Peak Burst',
       text: 'Review your average CPS, peak click burst and total clicks on the completion scorecard, and compare them with your own earlier runs on the same mouse and display.',
+      url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping#step-4'
     },
   ],
 };
@@ -266,8 +286,8 @@ const guideProps = {
       {
         tier: 'Tier 5',
         rank: 'Novice Tapper',
-        stat: '< 6.0 CPS',
-        level: '< 7.5 CPS',
+        stat: 'Under 6.0 CPS',
+        level: 'Under 7.5 CPS',
         accuracy: 'Untrained Single Finger',
         percentile: 'Starting out',
       },
@@ -318,6 +338,10 @@ export default function RapidTappingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"

@@ -20,7 +20,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -183,7 +183,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function ProFlickClient() {
+export default function ProFlickClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -320,10 +320,6 @@ export default function ProFlickClient() {
 
   const createHitMarker = (x, y) => {
     engine.current.hitMarkers.push({ x, y, life: 1.0 });
-  };
-
-  const createHitRing = (x, y, radius, color) => {
-    engine.current.hitRings.push({ x, y, radius, life: 1.0, color });
   };
 
   // End Game Management
@@ -496,7 +492,7 @@ export default function ProFlickClient() {
 
               drillAudio.playHit();
               createExplosion(tgt.x, tgt.y, TARGET_COLOR);
-              createHitRing(tgt.x, tgt.y, tgt.radius, TARGET_COLOR);
+              eRef.hitRings.push(createHitRing(tgt.x, tgt.y, tgt.radius, TARGET_COLOR));
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -665,19 +661,7 @@ export default function ProFlickClient() {
         ctx.beginPath(); ctx.arc(tgt.x, tgt.y, tgt.radius + 4 + (Math.max(0, lifePercent) * 10), 0, Math.PI * 2); ctx.stroke();
       }
 
-      for (let i = e.hitRings.length - 1; i >= 0; i--) {
-        const hr = e.hitRings[i];
-        hr.life -= dt * 3.2;
-        if (hr.life <= 0) { e.hitRings.splice(i, 1); continue; }
-        const grown = hr.radius + (1 - hr.life) * 26;
-        ctx.globalAlpha = hr.life * 0.8;
-        ctx.strokeStyle = hr.color;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(hr.x, hr.y, grown, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1.0;
+      drawHitRings(ctx, e.hitRings, dt);
 
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
@@ -738,7 +722,7 @@ export default function ProFlickClient() {
         bestCombo: analytics.maxCombo,
         rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
-        drillName: 'Pro Flick Trainer',
+        drillName: copy?.h1Keyword || 'Pro Flick Trainer',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
@@ -763,7 +747,8 @@ export default function ProFlickClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Flick Shot Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Flick Shot Trainer"}</span>
+              {copy?.h1Suffix || ""}
             </h1>
           </div>
         )}
@@ -772,12 +757,12 @@ export default function ProFlickClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore },
-              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-blue-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
-            ].map((card) => (
-              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+              { label: copy?.statScore || "Score", value: uiScore },
+              { label: copy?.statTime || "Time", value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || "Accuracy", value: `${accuracy}%`, color: 'text-blue-400' },
+              { label: copy?.statBestScore || "Best Score", value: bestScore, color: 'text-amber-400' },
+            ].map((card, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
                 <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
               </div>
@@ -805,11 +790,11 @@ export default function ProFlickClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -828,7 +813,7 @@ export default function ProFlickClient() {
                   });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Miss Flash"
+                title={copy?.toggleFlash || "Toggle Miss Flash"}
               >
                 {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
               </button>
@@ -842,7 +827,7 @@ export default function ProFlickClient() {
                   });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Sound"
+                title={copy?.toggleSound || "Toggle Sound"}
               >
                 {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
@@ -860,8 +845,8 @@ export default function ProFlickClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -869,16 +854,16 @@ export default function ProFlickClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
           {gameState === 'start' && (
             <FpsStartCard
-              icon={Crosshair}
+              icon={Target}
               accent="emerald"
-              title="Pro Flick Trainer"
-              subtitle="Macro Flicking & Target Acquisition • Endless Levels"
+              title={copy?.startTitle || "Pro Flick Trainer"}
+              subtitle={copy?.startSubtitle || "Macro Flicking & Target Acquisition • Endless Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -886,7 +871,7 @@ export default function ProFlickClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — universal card, shared by every drill */}
@@ -897,10 +882,10 @@ export default function ProFlickClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: '%', label: 'Accuracy' },
-                { value: analytics.avgFlickMs, suffix: 'ms', label: 'Avg Flick' },
-                { value: `${analytics.maxCombo}x`, label: 'Max Combo' },
-                { value: `Lv. ${analytics.finalLevel}`, label: 'Peak Level' },
+                { value: analytics.accuracy, suffix: '%', label: copy?.statAccuracy || 'Accuracy' },
+                { value: analytics.avgFlickMs, suffix: 'ms', label: copy?.statAvgFlick || 'Avg Flick' },
+                { value: `${analytics.maxCombo}x`, label: copy?.statMaxCombo || 'Max Combo' },
+                { value: `Lv. ${analytics.finalLevel}`, label: copy?.statPeakLevel || 'Peak Level' },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -913,7 +898,7 @@ export default function ProFlickClient() {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Snap to and click spawning targets across the screen before their shrinking timer ring expires.
+            {copy?.stageCaption || "Snap to and click spawning targets across the screen before their shrinking timer ring expires."}
           </p>
         )}
 
@@ -922,12 +907,12 @@ export default function ProFlickClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
@@ -935,17 +920,17 @@ export default function ProFlickClient() {
 
             <DrillAccordion
               id="about"
-              title="About Pro Flick Trainer"
+              title={copy?.aboutTitle || "About Pro Flick Trainer"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-red-400" /> What Is Flick Aim Training?
+                    <Crosshair className="w-4 h-4 text-red-400" /> {copy?.aboutHeading || "What Is Flick Aim Training?"}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    A flick is one ballistic mouse movement onto a target you have already seen. Its duration scales with the distance moved and the size of the target (Fitts, 1954), and most flicks end in a smaller corrective submovement rather than landing clean (Elliott et al., 2010).
+                    {copy?.aboutText || "A flick is one ballistic mouse movement onto a target you have already seen. Its duration scales with the distance moved and the size of the target (Fitts, 1954), and most flicks end in a smaller corrective submovement rather than landing clean (Elliott et al., 2010)."}
                   </p>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? 'mb-3' : ''}`}>{para}</p>
@@ -979,33 +964,6 @@ export default function ProFlickClient() {
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

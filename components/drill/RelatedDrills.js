@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
-import { DRILLS } from '@/lib/drillsRegistry';
+import { DRILLS } from '@/lib/drillsNav';
 import { getRelatedDrills } from '@/lib/relatedDrills';
-import { DRILL_SEO, getDrillSeo } from '@/lib/drillSeo';
+import { getDrillSeo } from '@/lib/drillSeo';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { stripLocale, hasLocalizedRoute } from '@/lib/i18n/locales';
 import { getLocalizedDrill } from '@/lib/i18n/drillNames';
@@ -51,10 +52,8 @@ export default function RelatedDrills() {
   const { locale, localizeHref } = useTranslation();
   const cleanPath = stripLocale(pathname || '');
   const drill = DRILLS.find((d) => d.href === cleanPath);
-  if (!drill) return null;
-
-  const related = getRelatedDrills(drill.href, 6);
-  if (related.length === 0) return null;
+  const related = useMemo(() => (drill ? getRelatedDrills(drill.href, 6) : []), [drill]);
+  if (!drill || related.length === 0) return null;
 
   const hub = CATEGORY_HUB[drill.category];
   const localizedSelfSeo = getDrillSeo(drill.href, locale);

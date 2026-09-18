@@ -19,7 +19,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -95,7 +95,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function AwarenessDrillClient() {
+export default function AwarenessDrillClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -138,7 +138,7 @@ export default function AwarenessDrillClient() {
     target: { active: false, x: 0, y: 0, radius: 30, age: 0, spawnTime: 0, ttl: 1200, drift: 0, vx: 1 },
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION, nextSpawnTime: 0,
     successfulHits: 0, missedClicks: 0, idleClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
-    particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
   });
 
   const triggerFlash = useCallback(() => {
@@ -326,7 +326,7 @@ export default function AwarenessDrillClient() {
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       nextSpawnTime: performance.now() + 500, successfulHits: 0, missedClicks: 0,
       idleClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     setIsFullscreen(true);
@@ -422,7 +422,9 @@ export default function AwarenessDrillClient() {
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
               drillAudio.playHit();
-              createExplosion(tgt.x, tgt.y, '#00ff88');
+              const hitColor = eRef.combo >= 10 ? '#5eead4' : '#00ff88';
+              createExplosion(tgt.x, tgt.y, hitColor);
+              eRef.hitRings.push(createHitRing(tgt.x, tgt.y, tgt.radius, hitColor));
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -607,6 +609,8 @@ export default function AwarenessDrillClient() {
         drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, true);
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -692,7 +696,8 @@ export default function AwarenessDrillClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              180° Awareness Pro
+              <span data-seo-kw="1">{copy?.h1Keyword || "180° Aim Trainer"}</span>
+              {copy?.h1Suffix !== undefined ? copy.h1Suffix : " — Snap Turn Awareness"}
             </h1>
           </div>
         )}
@@ -701,10 +706,10 @@ export default function AwarenessDrillClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore },
-              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-blue-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+              { label: copy?.statScore || 'Score', value: uiScore },
+              { label: copy?.statTime || 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || 'Accuracy', value: `${accuracy}%`, color: 'text-blue-400' },
+              { label: copy?.statBestScore || 'Best Score', value: bestScore, color: 'text-amber-400' },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -789,8 +794,8 @@ export default function AwarenessDrillClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -806,8 +811,8 @@ export default function AwarenessDrillClient() {
             <FpsStartCard
               icon={Target}
               accent="emerald"
-              title="180° Awareness Pro"
-              subtitle="Hardware Raw Input • Endless Level Progression"
+              title={copy?.startTitle || "180° Awareness Pro"}
+              subtitle={copy?.startSubtitle || "Hardware Raw Input • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -815,7 +820,7 @@ export default function AwarenessDrillClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — universal card, shared by every drill */}
@@ -842,7 +847,7 @@ export default function AwarenessDrillClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Spot and snap to targets spawning at extreme screen edges before they expire.
+            {copy?.stageCaption || "Spot and snap to targets spawning at extreme screen edges before they expire."}
           </p>
         )}
 
@@ -851,12 +856,12 @@ export default function AwarenessDrillClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -867,23 +872,23 @@ export default function AwarenessDrillClient() {
 
             <DrillAccordion
               id="about"
-              title="About 180° Awareness Pro"
+              title={copy?.aboutTitle || "About 180° Awareness Pro"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-red-400" /> What Is 180° Awareness Training?
+                    <Brain className="w-4 h-4 text-red-400" /> {copy?.aboutHeading || "What Is 180° Awareness Training?"}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    A 180&deg; turn is the longest mouse movement in a shooter. Under Fitts&rsquo;s law the time it takes scales with how far you move and how small the target is (Fitts, 1954) &mdash; so most of the cost is not the turn itself, it is reacquiring the target once you land.
+                    {copy?.aboutText1 || "A 180° turn is the longest mouse movement in a shooter. Under Fitts's law the time it takes scales with how far you move and how small the target is (Fitts, 1954) — so most of the cost is not the turn itself, it is reacquiring the target once you land."}
                   </p>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>180° Awareness Pro</strong> isolates and exercises your ability to process visual information outside of your immediate focal point. Unlike standard aim trainers that prioritize micro-corrections, this awareness drill challenges spatial coordinate sweeps, forcing you to detect targets and execute rapid 180-degree turnarounds.
+                    {copy?.aboutText2 || "180° Awareness Pro isolates and exercises your ability to process visual information outside of your immediate focal point. Unlike standard aim trainers that prioritize micro-corrections, this awareness drill challenges spatial coordinate sweeps, forcing you to detect targets and execute rapid 180-degree turnarounds."}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    By consistently performing situational awareness training, players map their physical mouse pad space to the game engine's virtual space, enabling accurate blind flicks and rapid threat responses in tactical shooters like CS2 and Valorant. Fast clicks before target expiration condition you to react to stimuli immediately, lowering baseline mechanical hesitation while building large-angle flick consistency.
+                    {copy?.aboutText3 || "By consistently performing situational awareness training, players map their physical mouse pad space to the game engine's virtual space, enabling accurate blind flicks and rapid threat responses in tactical shooters like CS2 and Valorant. Fast clicks before target expiration condition you to react to stimuli immediately, lowering baseline mechanical hesitation while building large-angle flick consistency."}
                   </p>
                 </section>
 
@@ -915,32 +920,7 @@ export default function AwarenessDrillClient() {
           </div>
         )}
 
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+
 
         {/* ── FOOTER ── */}
         {!isFullscreen && <DrillFooter />}

@@ -1,9 +1,9 @@
-import InstantResponseClient from './InstantResponseClient';
+import InstantResponseClient from './InstantResponseClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "FPS Reaction Time Test — Gaming Reflex Trainer | SkillDrills",
+  title: "FPS Reaction Time Test – Gaming Reflex Speed | SkillDrills",
   description: "Measure and train visual reaction time, click reflex speed, and stimulus response latency for competitive FPS gaming with raw pointer lock precision.",
   keywords: [
     "fps reaction time test",
@@ -24,18 +24,19 @@ export const metadata = {
     "instant response drill",
     "trigger finger speed test",
     "visual reaction time gaming",
-    "FPS 反応速度 テスト",
-    "FPS 반응속도 테스트"
+    "fps stimulus response drill",
+    "competitive reaction time test"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/instant-response",
+    languages: getAlternateLanguages('/drills/fps/instant-response'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "FPS Reaction Time Test — Gaming Reflex Trainer | SkillDrills",
+    title: "FPS Reaction Time Test – Gaming Reflex Speed | SkillDrills",
     description: "Measure and train visual reaction time, click reflex speed, and stimulus response latency for competitive FPS gaming with raw pointer lock precision.",
     url: "https://skilldrills.online/drills/fps/instant-response",
     siteName: 'SkillDrills',
@@ -44,7 +45,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "FPS Reaction Time Test — Gaming Reflex Trainer | SkillDrills",
+    title: "FPS Reaction Time Test – Gaming Reflex Speed | SkillDrills",
     description: "Measure and train visual reaction time, click reflex speed, and stimulus response latency for competitive FPS gaming with raw pointer lock precision.",
   },
 };
@@ -58,6 +59,22 @@ export default function InstantResponsePage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "FPS Reaction Time Test", "item": "https://skilldrills.online/drills/fps/instant-response" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "FPS Reaction Time Test",
+    "url": "https://skilldrills.online/drills/fps/instant-response",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser-based FPS reaction time test measuring visual reflex latency, trigger finger speed, and anti-pre-fire discipline with raw pointer lock."
   };
 
   const softwareSchema = {
@@ -189,21 +206,25 @@ export default function InstantResponsePage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Align In-Game Sensitivity",
         "text": "Configure the sensitivity converter in Session Settings to mirror your primary game's 1:1 hardware coordinate mapping."
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Engage Raw Pointer Lock",
         "text": "Click 'Start Drill' to lock the system cursor and bypass OS mouse acceleration curves."
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Anchor Visual Gaze",
         "text": "Fixate your visual attention centrally on the trigger reticle while maintaining relaxed forearm muscle tension."
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Click on Verified Stimulus",
         "text": "Click the left mouse button immediately upon color flash onset, resisting pre-firing impulses on feints to maximize reaction chronometry."
       }
@@ -288,6 +309,10 @@ export default function InstantResponsePage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -298,7 +323,12 @@ export default function InstantResponsePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <InstantResponseClient />
+      <InstantResponseClient
+        copy={{
+          h1Keyword: "FPS Reaction Time Test",
+          h1Suffix: " — Gaming Reflex Trainer"
+        }}
+      />
       <DrillGuide guide={instantResponseGuide} />
     </>
   );

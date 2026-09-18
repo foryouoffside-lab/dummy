@@ -336,23 +336,26 @@ export default function GoNoGoPreview() {
         ctx.restore();
       }
 
-      // 8. Tactical Clicker / Crosshair Reticle with Inhibitory Mode Indicator
+      // 8. Tactical Crosshair Reticle (matching FPS drill exact crosshair geometry)
       ctx.save();
-      const reticleR = 14 * reticle.clickScale;
       const isHolding = reticle.inhibitPulse > 0.05;
-
-      ctx.strokeStyle = isHolding
-        ? `rgba(245, 158, 11, ${0.75 + reticle.inhibitPulse * 0.25})` // Amber inhibitor lock
+      const chColor = isHolding
+        ? `rgba(245, 158, 11, ${0.85 + reticle.inhibitPulse * 0.15})`
         : state === 'hit'
-        ? 'rgba(16, 185, 129, 0.95)'
-        : 'rgba(56, 189, 248, 0.85)';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = isHolding ? '#f59e0b' : state === 'hit' ? '#10b981' : '#38bdf8';
-      ctx.shadowBlur = state === 'hit' ? 10 : isHolding ? 8 : 4;
+        ? '#10b981'
+        : '#38bdf8';
 
-      // Reticle Circle
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
+
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(reticle.x, reticle.y, reticleR, 0, Math.PI * 2);
+      ctx.arc(reticle.x, reticle.y, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
       // Outer Inhibitor Guard Ring (shown when holding on NO-GO)
@@ -360,33 +363,25 @@ export default function GoNoGoPreview() {
         ctx.save();
         ctx.strokeStyle = `rgba(245, 158, 11, ${reticle.inhibitPulse * 0.6})`;
         ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.arc(reticle.x, reticle.y, reticleR + 5, 0, Math.PI * 2);
+        ctx.arc(reticle.x, reticle.y, chRadius + 5, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
 
-      // 4 Cardinal Ticks
-      const tickLen = 5;
+      // 4 Cross lines with gap (inward from ring to gap)
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      // Top
-      ctx.moveTo(reticle.x, reticle.y - reticleR);
-      ctx.lineTo(reticle.x, reticle.y - reticleR - tickLen);
-      // Bottom
-      ctx.moveTo(reticle.x, reticle.y + reticleR);
-      ctx.lineTo(reticle.x, reticle.y + reticleR + tickLen);
-      // Left
-      ctx.moveTo(reticle.x - reticleR, reticle.y);
-      ctx.lineTo(reticle.x - reticleR - tickLen, reticle.y);
-      // Right
-      ctx.moveTo(reticle.x + reticleR, reticle.y);
-      ctx.lineTo(reticle.x + reticleR + tickLen, reticle.y);
+      ctx.moveTo(reticle.x, reticle.y - tickLen); ctx.lineTo(reticle.x, reticle.y - gap);
+      ctx.moveTo(reticle.x, reticle.y + tickLen); ctx.lineTo(reticle.x, reticle.y + gap);
+      ctx.moveTo(reticle.x - tickLen, reticle.y); ctx.lineTo(reticle.x - gap, reticle.y);
+      ctx.moveTo(reticle.x + tickLen, reticle.y); ctx.lineTo(reticle.x + gap, reticle.y);
       ctx.stroke();
 
       // Central Pip
-      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(reticle.x, reticle.y, 2, 0, Math.PI * 2);
+      ctx.arc(reticle.x, reticle.y, 1.8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();

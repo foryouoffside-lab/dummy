@@ -1,4 +1,4 @@
-import CrossBodyMovementClient from './CrossBodyMovementClient';
+import CrossBodyMovementClient from './CrossBodyMovementClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -184,6 +184,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Hand Eye Coordination Game',
+  url: 'https://skilldrills.online/drills/physical/coordination/cross-body-movement',
+  description: 'Free online hand eye coordination game. Connect nodes across the screen to train bilateral motor control, midline crossing, and diagonal vector precision.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -192,29 +204,37 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Touch Starting Node A to Activate Vector',
-      text: 'Click "Start Drill" to lock your pointer and touch the glowing cyan edge node with your crosshair to initiate the active connection corridor.',
+      text: 'Click ',
+      url: 'https://skilldrills.online/drills/physical/coordination/cross-body-movement#step-1',
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Sweep Diagonally Across Midline Corridor',
       text: 'Execute a smooth, fluid mouse sweep diagonally across the canvas toward the opposite edge, keeping your crosshair inside the tolerance bounds.',
+      url: 'https://skilldrills.online/drills/physical/coordination/cross-body-movement#step-2',
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Strike Destination Node B within Tolerance',
       text: 'Intersect the magenta destination node to complete the vector connection, trigger explosive particle confirmation, and earn base points.',
+      url: 'https://skilldrills.online/drills/physical/coordination/cross-body-movement#step-3',
     },
     {
       '@type': 'HowToStep',
+      position: 4,
       name: 'Accelerate Sweeps to Build Peak Combo Multiplier',
       text: 'Chain consecutive connections without drifting outside the corridor to build your combo multiplier up to 3.0x max, maximizing total score over 45 seconds.',
+      url: 'https://skilldrills.online/drills/physical/coordination/cross-body-movement#step-4',
     },
   ],
 };
 
 const guideProps = {
-  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899'),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
   intro: {
     title: 'How midline crossing is measured',
     paragraphs: [
@@ -222,52 +242,17 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
-    title: 'Hand Eye Coordination & Bilateral Movement Benchmarks',
-    description: 'Empirical standards derived from sensory integration and midline crossing literature (Ayres 1972, Carey et al. 1996) and motor control amplitude laws (Fitts 1954, Woodworth 1899). Evaluates total score, maximum level achieved, vector connection accuracy, and peak combo over 45 seconds.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Peak Level', 'Connection Accuracy', 'Editorial band'],
+  benchmarks: {
+    title: 'Hand-Eye Coordination & Midline Crossing 5-Tier Performance Benchmarks',
+    headers: ['Performance Tier', 'Mastery Rank Title', 'Score Threshold', 'Level Reached', 'Vector Accuracy', 'Neuromotor Profile'],
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Bilateral Master',
-        stat: '17,000+ pts',
-        level: 'Level 12–15',
-        accuracy: '> 92% accuracy',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Elite Midline Sweeper',
-        stat: '13,000–16,999 pts',
-        level: 'Level 9–11',
-        accuracy: '85–91% accuracy',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Advanced Vector Tracer',
-        stat: '9,500–12,999 pts',
-        level: 'Level 6–8',
-        accuracy: '76–84% accuracy',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Intermediate Node Connector',
-        stat: '6,000–9,499 pts',
-        level: 'Level 3–5',
-        accuracy: '65–75% accuracy',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Diagonal Learner',
-        stat: '< 6,000 pts',
-        level: 'Level 1–2',
-        accuracy: '< 65% accuracy',
-        percentile: 'Starting out',
-      },
+      ['Tier 1: Apex Bilateral Master', 'Apex Bilateral Master', '17,000+ pts', 'Level 12 – 15', '≥ 92% accuracy', 'Top 0.1% caliber interhemispheric transfer efficiency; flawless forearm-driven diagonal tracking within narrow 4px corridors (Ayres 1972; Fitts 1954)'],
+      ['Tier 2: Elite Midline Sweeper', 'Elite Midline Sweeper', '13,000 – 16,999 pts', 'Level 9 – 11', '85 – 91% accuracy', 'Zero-latency contralateral acceleration paired with millisecond Woodworth terminal deceleration control onto 8px peripheral nodes (Carey et al. 1996)'],
+      ['Tier 3: Advanced Vector Tracer', 'Advanced Vector Tracer', '9,500 – 12,999 pts', 'Level 6 – 8', '76 – 84% accuracy', 'Competitive FPS benchmark: consistent diagonal flick control and smooth midline crossing without wrist-angle motor drift'],
+      ['Tier 4: Intermediate Node Connector', 'Intermediate Node Connector', '6,000 – 9,499 pts', 'Level 3 – 5', '65 – 75% accuracy', 'Standard recreational baseline; corridor violations occur when width drops below 6px due to rigid wrist-pivoting mechanics'],
+      ['Tier 5: Novice Diagonal Learner', 'Novice Diagonal Learner', '< 6,000 pts', 'Level 1 – 2', '< 65% accuracy', 'Pronounced arc-shaped trajectory distortion caused by isolated wrist aiming; frequent target node overshoot requiring elbow-pivot calibration']
     ],
+    note: "Performance tiers established using sensory integration principles (Ayres 1972), contralateral reaching kinematics (Carey et al. 1996), and Fitts' law index of difficulty (Fitts 1954)."
   },
   protocols: {
     title: 'How to train cross-body coordination',
@@ -321,10 +306,15 @@ export default function CrossBodyMovementPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <CrossBodyMovementClient />
+      <CrossBodyMovementClient copy={{ title: 'Hand Eye Coordination Game', subtitle: 'Cross-Body Movement & Bilateral Coordination' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

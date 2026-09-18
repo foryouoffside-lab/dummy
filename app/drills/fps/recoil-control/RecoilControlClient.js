@@ -20,7 +20,7 @@ import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -120,7 +120,7 @@ const RELATED_DRILLS = [
   { id: "pro-smooth-pursuit", name: "Pro Smooth Pursuit", cat: "FPS Tracking", desc: "Train continuous target velocity matching.", href: "/drills/fps/pro-smooth-pursuit" }
 ];
 
-export default function RecoilControlClient() {
+export default function RecoilControlClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -171,7 +171,7 @@ export default function RecoilControlClient() {
     ammo: 30, isReloading: false, shotCountInSpray: 0, lastShotTime: 0,
     hitsThisMagazine: 0,
     totalShots: 0, headshots: 0, chestHits: 0, limbHits: 0, disciplineFailures: 0, maxCombo: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
 
@@ -353,7 +353,7 @@ export default function RecoilControlClient() {
       ammo: 30, isReloading: false, shotCountInSpray: 0, lastShotTime: 0,
       hitsThisMagazine: 0,
       totalShots: 0, headshots: 0, chestHits: 0, limbHits: 0, disciplineFailures: 0, maxCombo: 0,
-      particles: [], hitMarkers: [], screenShake: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h
     };
 
@@ -613,7 +613,10 @@ export default function RecoilControlClient() {
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
               drillAudio.playHit();
-              createExplosion(bulletX, bulletY, hitZone === 'head' ? '#ef4444' : '#f59e0b');
+              const zoneColor = hitZone === 'head' ? '#ef4444' : '#f59e0b';
+              const zoneRadius = hitZone === 'head' ? rHead : hitZone === 'chest' ? rChest : rLimb;
+              createExplosion(bulletX, bulletY, zoneColor);
+              e.hitRings.push(createHitRing(bulletX, bulletY, zoneRadius, zoneColor));
               createHitMarker(bulletX, bulletY);
               setUiScore(e.score);
 
@@ -695,6 +698,8 @@ export default function RecoilControlClient() {
         if (p.life <= 0) { e.particles.splice(i, 1); continue; }
         ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
       }
+
+      drawHitRings(ctx, e.hitRings, dt);
 
       // Render Hit Markers
       ctx.lineWidth = 2.0;
@@ -786,8 +791,17 @@ export default function RecoilControlClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Recoil Control Trainer
+              {copy?.h1Prefix || null}
+              <span data-seo-kw="1">{copy?.h1Keyword || "Recoil Control"}</span>
+              {copy?.h1Suffix || " Trainer"}
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              {copy?.caption || (
+                <>
+                  Recoil control is a learned open-loop motor program: the spray pattern is fixed, so you can run the counter-movement without waiting to see where the bullets land. Motor output gets more variable as a movement gets faster and more forceful (Schmidt et al., 1979), which is why a smooth pull-down repeats better than a hard one.
+                </>
+              )}
+            </p>
           </div>
         )}
 
@@ -795,10 +809,10 @@ export default function RecoilControlClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore },
-              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white" },
-              { label: 'Accuracy', value: `${accuracy}%`, color: "text-red-400" },
-              { label: 'Best Score', value: bestScore, color: "text-amber-400" },
+              { label: copy?.statScore || 'Score', value: uiScore },
+              { label: copy?.statTime || 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white" },
+              { label: copy?.statAccuracy || 'Accuracy', value: `${accuracy}%`, color: "text-red-400" },
+              { label: copy?.statBest || 'Best Score', value: bestScore, color: "text-amber-400" },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -828,17 +842,17 @@ export default function RecoilControlClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || 'Score'}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
               <div className="absolute bottom-4 left-4 z-30 pointer-events-none flex items-center gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Ammo</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statAmmo || 'Ammo'}</p>
                 <p className={`text-lg font-bold font-mono tabular-nums ${uiIsReloading ? "text-yellow-400 animate-pulse" : uiAmmo <= 5 ? "text-red-400" : "text-white"}`}>
-                  {uiIsReloading ? "RELOADING..." : `${uiAmmo} / 30`}
+                  {uiIsReloading ? (copy?.statReloading || "RELOADING...") : `${uiAmmo} / 30`}
                 </p>
               </div>
             </>
@@ -889,8 +903,8 @@ export default function RecoilControlClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedPrompt || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -906,8 +920,9 @@ export default function RecoilControlClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="redOrange"
-              title="Recoil Control Pro"
-              subtitle="Weapon Spray Patterns & Motor Compensation • Endless Level Progression"
+              title={copy?.startTitle || "Recoil Control Pro"}
+              subtitle={copy?.startSubtitle || "Weapon Spray Patterns & Motor Compensation • Endless Level Progression"}
+              startButtonText={copy?.startButtonText}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -915,7 +930,7 @@ export default function RecoilControlClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -926,11 +941,14 @@ export default function RecoilControlClient() {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.headshots, label: "Headshots" },
-                { value: `${analytics.maxCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.finalLevel}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || "Accuracy" },
+                { value: analytics.headshots, label: copy?.statHeadshots || "Headshots" },
+                { value: `${analytics.maxCombo}x`, label: copy?.statMaxCombo || "Max Combo" },
+                { value: `Lv. ${analytics.finalLevel}`, label: copy?.statPeakLevel || "Peak Level" },
               ]}
+              playAgainText={copy?.playAgainText}
+              shareText={copy?.shareText}
+              exitText={copy?.exitText}
               onPlayAgain={enterDrill}
               onShare={shareScore}
               onExit={handleExitDrill}
@@ -941,7 +959,7 @@ export default function RecoilControlClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Counter weapon spray patterns with smooth mouse pull-down to keep full-auto bursts locked on target.
+            {copy?.bottomCaption || "Counter weapon spray patterns with smooth mouse pull-down to keep full-auto bursts locked on target."}
           </p>
         )}
 
@@ -950,12 +968,12 @@ export default function RecoilControlClient() {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
                     <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{item.num}</div>
                     <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -973,29 +991,29 @@ export default function RecoilControlClient() {
 
             <DrillAccordion
               id="about"
-              title="About Recoil Control Trainer"
+              title={copy?.aboutTitle || "About Recoil Control Trainer"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
                   <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-red-400" /> Why Recoil Control Matters
+                    <Crosshair className="w-4 h-4 text-red-400" /> {copy?.whyMattersTitle || "Why Recoil Control Matters"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300 mb-3">
-                    Recoil control is a learned open-loop motor program: the spray pattern is fixed, so you can run the counter-movement without waiting to see where the bullets land. Motor output gets more variable as a movement gets faster and more forceful (Schmidt et al., 1979), which is why a smooth pull-down repeats better than a hard one.
+                    {copy?.whyMattersLead || "Recoil control is a learned open-loop motor program: the spray pattern is fixed, so you can run the counter-movement without waiting to see where the bullets land. Motor output gets more variable as a movement gets faster and more forceful (Schmidt et al., 1979), which is why a smooth pull-down repeats better than a hard one."}
                   </p>
-                  {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                  {(copy?.aboutIntro || ABOUT_INTRO).map((para, i, arr) => (
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < arr.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {ABOUT_CARDS.map((card, i) => (
+                  {(copy?.aboutCards || ABOUT_CARDS).map((card, i) => (
                     <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
-                          <card.icon className="w-3.5 h-3.5 text-white" />
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-blue-600'} flex items-center justify-center`}>
+                          {card.icon ? <card.icon className="w-3.5 h-3.5 text-white" /> : <Crosshair className="w-3.5 h-3.5 text-white" />}
                         </div>
                         <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
@@ -1004,10 +1022,10 @@ export default function RecoilControlClient() {
                   ))}
                 </div>
 
-                {ABOUT_SECTIONS.map((section, i) => (
+                {(copy?.aboutSections || ABOUT_SECTIONS).map((section, i) => (
                   <section key={i}>
                     <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                      <section.icon className="w-4 h-4 text-red-400" /> {section.title}
+                      {section.icon ? <section.icon className="w-4 h-4 text-red-400" /> : <Eye className="w-4 h-4 text-red-400" />} {section.title}
                     </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
@@ -1017,33 +1035,6 @@ export default function RecoilControlClient() {
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

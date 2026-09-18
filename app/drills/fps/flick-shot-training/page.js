@@ -1,9 +1,9 @@
-import ProFlickClient from './ProFlickClient';
+import ProFlickClient from './ProFlickClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Flick Shot Trainer - Snap Aim Practice | SkillDrills",
+  title: "Flick Shot Trainer – Snap Aim Practice | SkillDrills",
   description: "Train your snap aim and muscle memory with our online Flick Shot Trainer. Perfect for Valorant, CS2, and Apex Legends players looking to improve speed.",
   keywords: [
     "flick shot trainer",
@@ -25,13 +25,14 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/flick-shot-training",
+    languages: getAlternateLanguages('/drills/fps/flick-shot-training'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Flick Shot Trainer - Snap Aim Practice | SkillDrills",
+    title: "Flick Shot Trainer – Snap Aim Practice | SkillDrills",
     description: "Train your snap aim and muscle memory with our online Flick Shot Trainer. Perfect for Valorant, CS2, and Apex Legends players looking to improve speed.",
     url: "https://skilldrills.online/drills/fps/flick-shot-training",
     siteName: 'SkillDrills',
@@ -40,7 +41,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Flick Shot Trainer - Snap Aim Practice | SkillDrills",
+    title: "Flick Shot Trainer – Snap Aim Practice | SkillDrills",
     description: "Train your snap aim and muscle memory with our online Flick Shot Trainer. Perfect for Valorant, CS2, and Apex Legends players looking to improve speed.",
   },
 };
@@ -54,6 +55,22 @@ export default function FlickShotPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Pro Flick Trainer", "item": "https://skilldrills.online/drills/fps/flick-shot-training" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Flick Shot Trainer",
+    "url": "https://skilldrills.online/drills/fps/flick-shot-training",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS flick shot aim trainer. Train snap aim, ballistic muscle memory, and micro-corrections with shrinking target rings."
   };
 
   const softwareSchema = {
@@ -184,18 +201,27 @@ export default function FlickShotPage() {
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Reset to Center",
-        "text": "Bring your crosshair back to the neutral center area. Maintain a relaxed grip on your mouse."
+        "position": 1,
+        "name": "Calibrate Hardware Sensitivity & Reset",
+        "text": "Bring your crosshair back to the neutral center area while matching your competitive in-game eDPI to preserve 1:1 muscle memory."
       },
       {
         "@type": "HowToStep",
-        "name": "Spot the Spawned Target",
-        "text": "Locate the target that spawns randomly inside your field of view."
+        "position": 2,
+        "name": "Maintain Soft Gaze & Spot Spawned Target",
+        "text": "Anchor a relaxed ocular fixation near center and use peripheral vision to detect the high-contrast target spawn instantly."
       },
       {
         "@type": "HowToStep",
-        "name": "Flick and Click",
-        "text": "In a single, continuous acceleration curve, snap your mouse to the target center and click immediately."
+        "position": 3,
+        "name": "Execute Ballistic Flick and Click",
+        "text": "In a single explosive acceleration curve, snap your mouse onto the target center and click before the timer ring collapses."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Apply Mechanical Braking & Pad Deceleration",
+        "text": "Engage downward palm and fingertip friction on your mousepad at the terminal phase of the flick to eliminate overshooting."
       }
     ]
   };
@@ -265,7 +291,6 @@ export default function FlickShotPage() {
     ]
   };
 
-
   return (
     <>
       <script
@@ -275,6 +300,10 @@ export default function FlickShotPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
       <script
         type="application/ld+json"
@@ -288,7 +317,12 @@ export default function FlickShotPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <ProFlickClient />
+      <ProFlickClient
+        copy={{
+          h1Keyword: "Flick Shot Trainer",
+          h1Suffix: " - Snap Aim Practice"
+        }}
+      />
       <DrillGuide guide={flickGuide} />
     </>
   );

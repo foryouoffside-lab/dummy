@@ -363,17 +363,20 @@ export default function SpeedDrillPreview() {
 
       const retColor = state.phase === 'hit' ? '#10b981' : '#eab308';
       ctx.strokeStyle = retColor;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = retColor;
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.arc(0, 0, 11, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.fillStyle = retColor;
 
-      // Cardinal ticks with gap
-      ctx.lineWidth = 1.5;
+      const chRadius = 11;
       const gap = 4;
       const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, 0, chRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
       ctx.moveTo(0, -tickLen); ctx.lineTo(0, -gap);
       ctx.moveTo(0, tickLen); ctx.lineTo(0, gap);
@@ -381,12 +384,9 @@ export default function SpeedDrillPreview() {
       ctx.moveTo(tickLen, 0); ctx.lineTo(gap, 0);
       ctx.stroke();
 
-      // White laser center dot
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 4;
+      // Center laser dot
       ctx.beginPath();
-      ctx.arc(0, 0, 2, 0, Math.PI * 2);
+      ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();

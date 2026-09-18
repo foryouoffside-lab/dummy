@@ -42,6 +42,7 @@ export default function TargetPrioritizationPreview() {
             <span className="tp-orb tp-orb-red" />
             <span className="tp-core" />
           </div>
+          <span className="tp-hit-ring" />
           <span className="tp-hitmarker">
             <i className="tp-hit-l1" />
             <i className="tp-hit-l2" />

@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function DynamicEvasionPursuitClient() {
+export default function DynamicEvasionPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -422,13 +422,13 @@ export default function DynamicEvasionPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Dynamic Evasion Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Reactive Eye Tracking Drill
+              <span data-seo-kw="1">{copy?.title || "Dynamic Evasion Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Reactive Eye Tracking Drill"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Dynamic evasion pursuit exercises your ability to re-acquire visual targets executing abrupt directional vector turns without warning (Rashbass, 1961). Because the sudden direction cut breaks smooth pursuit velocity matching, your oculomotor system must immediately fire a corrective catch-up saccade and re-establish continuous foveal tracking (Bahill et al., 1980; Krauzlis, 2004). Because pursuit only tracks accurately to roughly 30&deg;/s, an abrupt cut leaves the eye behind and forces a corrective saccade before smooth tracking can resume (Krauzlis, 2004).
+              {copy?.description || "Dynamic evasion pursuit exercises your ability to re-acquire visual targets executing abrupt directional vector turns without warning (Rashbass, 1961). Because the sudden direction cut breaks smooth pursuit velocity matching, your oculomotor system must immediately fire a corrective catch-up saccade and re-establish continuous foveal tracking (Bahill et al., 1980; Krauzlis, 2004). Because pursuit only tracks accurately to roughly 30°/s, an abrupt cut leaves the eye behind and forces a corrective saccade before smooth tracking can resume (Krauzlis, 2004)."}
             </p>
           </div>
         )}

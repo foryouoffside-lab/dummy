@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ChevronRight } from 'lucide-react';
-import { DRILLS } from '@/lib/drillsRegistry';
+import { DRILLS } from '@/lib/drillsNav';
 
 // Visible breadcrumb nav for leaf drill pages only (HQ > Drills > Category > Drill).
 // Hub pages already render their own hand-rolled breadcrumb (e.g. FPSHubClient.js),

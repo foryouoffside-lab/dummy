@@ -1,9 +1,10 @@
-import NBackClient from './NBackClient';
+import NBackClient from './NBackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: 'N-Back Test - Free Working Memory Training Game',
+  title: 'N-Back Test – Working Memory Training Game | SkillDrills',
   description: 'Free N-back working memory test. Track whether the current letter matches the one n steps back at 2-back, 3-back and beyond.',
   keywords: [
     'n-back test',
@@ -41,6 +42,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/memory/working-memory/n-back',
+    languages: getAlternateLanguages('/drills/memory/working-memory/n-back'),
   },
 };
 
@@ -187,29 +189,52 @@ export default function NBackPage() {
     "step": [
       {
         "@type": "HowToStep",
-        "position": 1,
+      "position": 1,
+      "url": "https://skilldrills.online/drills/memory/working-memory/n-back#step-1",
+        
         "name": "Sub-Vocalize the Target Window as a Sliding Queue",
         "text": "Mentally recite the active N-letter sequence in forward chronological order. Keep an internal sliding buffer (e.g., holding 'A-T-M' at 3-back)."
       },
       {
         "@type": "HowToStep",
-        "position": 2,
+      "position": 2,
+      "url": "https://skilldrills.online/drills/memory/working-memory/n-back#step-2",
+        
         "name": "Compare Current Stimulus to the Nth Prior Item",
         "text": "When a new stimulus appears, immediately match it against the oldest item in your active buffer (the item presented exactly N steps ago)."
       },
       {
         "@type": "HowToStep",
-        "position": 3,
+      "position": 3,
+      "url": "https://skilldrills.online/drills/memory/working-memory/n-back#step-3",
+        
         "name": "Eject the Oldest Item and Append the Newest Item",
         "text": "Execute an immediate mental update: discard the oldest verified item from focal memory and append the current item to the front of your mental queue."
       },
       {
         "@type": "HowToStep",
-        "position": 4,
+      "position": 4,
+      "url": "https://skilldrills.online/drills/memory/working-memory/n-back#step-4",
+        
         "name": "Maintain Consistent Attentional Rhythm Without Lapsing",
         "text": "Pace your breathing and avoid lingering on missed judgments. In continuous stream tasks, dwelling on a mistake causes cascading loss of subsequent buffer positions."
       }
     ]
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "N-Back Test – Working Memory Training Game",
+    "url": "https://skilldrills.online/drills/memory/working-memory/n-back",
+    "description": "Continuous information updating and working memory assessment at 2-back, 3-back, and beyond.",
+    "dateModified": "2026-09-11",
+    "gamePlatform": "Web Browser",
+    "genre": ["Cognitive Training", "Working Memory", "N-Back Test", "Brain Training"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   };
 
   return (
@@ -228,6 +253,10 @@ export default function NBackPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
@@ -235,7 +264,12 @@ export default function NBackPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <NBackClient />
+      <NBackClient
+        copy={{
+          h1Keyword: "N-Back Test",
+          h1Suffix: " – Free Working Memory Training Game",
+        }}
+      />
 
       <DrillGuide
         lead={[

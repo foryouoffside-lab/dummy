@@ -21,7 +21,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
@@ -141,7 +141,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function MicroCorrectionClient() {
+export default function MicroCorrectionClient({ copy = null }) {
   const [gameState, setGameState] = useState('start'); // start | countdown | playing | gameOver
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -190,7 +190,7 @@ export default function MicroCorrectionClient() {
     level: 1, score: 0, timeLeft: DRILL_DURATION,
     totalClicks: 0, successfulHits: 0, missedClicks: 0, timeouts: 0, totalCycles: 0,
     combo: 0, bestCombo: 0, precisionScores: [], correctionTimes: [], totalMicroClicks: 0, microHits: 0,
-    microSpawnTime: 0, particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 0, logicalHeight: 0
+    microSpawnTime: 0, particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: 0, logicalHeight: 0
   });
 
   useEffect(() => {
@@ -365,7 +365,7 @@ export default function MicroCorrectionClient() {
       level: startLevel, score: 0, timeLeft: DRILL_DURATION,
       totalClicks: 0, successfulHits: 0, missedClicks: 0, timeouts: 0, totalCycles: 0,
       combo: 0, bestCombo: 0, precisionScores: [], correctionTimes: [], totalMicroClicks: 0, microHits: 0,
-      microSpawnTime: 0, particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      microSpawnTime: 0, particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     spawnAnchor(w, h, startLevel, 0);
@@ -459,6 +459,7 @@ export default function MicroCorrectionClient() {
 
               drillAudio.playHit();
               createExplosion(eRef.anchor.x, eRef.anchor.y, '#5eead4');
+              eRef.hitRings.push(createHitRing(eRef.anchor.x, eRef.anchor.y, eRef.anchor.radius, '#5eead4'));
               createHitMarker(ch.x, ch.y);
 
               eRef.microSpawnTime = now;
@@ -507,6 +508,7 @@ export default function MicroCorrectionClient() {
 
               drillAudio.playHit();
               createExplosion(eRef.micro.x, eRef.micro.y, '#00ff88');
+              eRef.hitRings.push(createHitRing(eRef.micro.x, eRef.micro.y, eRef.micro.radius, '#00ff88'));
               createHitMarker(ch.x, ch.y);
 
               spawnAnchor(eRef.logicalWidth, eRef.logicalHeight, eRef.level, eRef.combo);
@@ -676,6 +678,8 @@ export default function MicroCorrectionClient() {
         }
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -735,7 +739,7 @@ export default function MicroCorrectionClient() {
         bestCombo: analytics.bestCombo,
         rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
-        drillName: 'Micro-Correction Aim',
+        drillName: copy?.h1Keyword || 'Micro-Correction Aim',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
@@ -758,7 +762,8 @@ export default function MicroCorrectionClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Micro-Correction Aim Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Micro-Correction Aim Trainer"}</span>
+              {copy?.h1Suffix || ""}
             </h1>
           </div>
         )}
@@ -767,12 +772,12 @@ export default function MicroCorrectionClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: score },
-              { label: 'Time', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-cyan-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
-            ].map((card) => (
-              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+              { label: copy?.statScore || "Score", value: score },
+              { label: copy?.statTime || "Time", value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || "Accuracy", value: `${accuracy}%`, color: 'text-cyan-400' },
+              { label: copy?.statBestScore || "Best Score", value: bestScore, color: 'text-amber-400' },
+            ].map((card, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
                 <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
               </div>
@@ -800,11 +805,11 @@ export default function MicroCorrectionClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{score}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
@@ -823,7 +828,7 @@ export default function MicroCorrectionClient() {
                   });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Miss Flash"
+                title={copy?.toggleFlash || "Toggle Miss Flash"}
               >
                 {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
               </button>
@@ -837,7 +842,7 @@ export default function MicroCorrectionClient() {
                   });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Sound"
+                title={copy?.toggleSound || "Toggle Sound"}
               >
                 {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
@@ -855,8 +860,8 @@ export default function MicroCorrectionClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -872,8 +877,8 @@ export default function MicroCorrectionClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="cyan"
-              title="Micro-Correction Aim Trainer"
-              subtitle="Hardware Raw Input • Endless Level Progression"
+              title={copy?.startTitle || "Micro-Correction Aim Trainer"}
+              subtitle={copy?.startSubtitle || "Hardware Raw Input • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -881,7 +886,7 @@ export default function MicroCorrectionClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -892,10 +897,10 @@ export default function MicroCorrectionClient() {
               score={score}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.avgCorrectionTime, suffix: "ms", label: "Avg Correction" },
-                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || "Accuracy" },
+                { value: analytics.avgCorrectionTime, suffix: "ms", label: copy?.statAvgCorrection || "Avg Correction" },
+                { value: `${analytics.bestCombo}x`, label: copy?.statMaxCombo || "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: copy?.statPeakLevel || "Peak Level" },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareDrillLink}
@@ -907,7 +912,7 @@ export default function MicroCorrectionClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Click the anchor target then instantly adjust your crosshair to hit the small micro-target.
+            {copy?.stageCaption || "Click the anchor target then instantly adjust your crosshair to hit the small micro-target."}
           </p>
         )}
 
@@ -916,12 +921,12 @@ export default function MicroCorrectionClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
@@ -929,17 +934,17 @@ export default function MicroCorrectionClient() {
 
             <DrillAccordion
               id="about"
-              title="About Micro-Correction Aim Trainer"
+              title={copy?.aboutTitle || "About Micro-Correction Aim Trainer"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-cyan-400" /> What Is Micro-Correction Aiming?
+                    <Crosshair className="w-4 h-4 text-cyan-400" /> {copy?.aboutHeading || "What Is Micro-Correction Aiming?"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300 mb-3">
-                    Most aimed movements are not one motion but two: a fast ballistic launch, then a slower corrective submovement near the target &mdash; the two-component pattern Woodworth described in 1899 and Meyer et al. (1988) later formalised. This drill trains the second half, where accuracy is actually decided.
+                    {copy?.aboutText || "Most aimed movements are not one motion but two: a fast ballistic launch, then a slower corrective submovement near the target — the two-component pattern Woodworth described in 1899 and Meyer et al. (1988) later formalised. This drill trains the second half, where accuracy is actually decided."}
                   </p>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
@@ -973,33 +978,6 @@ export default function MicroCorrectionClient() {
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 

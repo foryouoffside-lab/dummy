@@ -215,7 +215,7 @@ function coerceGuide(guide) {
   };
 }
 
-export default function DrillGuide({ guide, ...flat }) {
+export default function DrillGuide({ guide = null, ...flat }) {
   const [open, setOpen] = useState(null);
   // Accept both the `guide={...}` object form and the flat prop form.
   guide = coerceGuide(guide ?? normalizeFlatGuide(flat));
@@ -233,8 +233,15 @@ export default function DrillGuide({ guide, ...flat }) {
     related,
   } = guide;
   // `overview: { title, paragraphs }` is an accepted alias for heading/intro.
-  const heading = guide.heading ?? overview?.title;
-  const intro = guide.intro ?? overview?.paragraphs;
+  const heading = guide.heading ?? overview?.title ?? (typeof guide.intro === 'object' && !Array.isArray(guide.intro) ? guide.intro?.title : undefined);
+  const rawIntro = guide.intro ?? overview?.paragraphs;
+  const intro = Array.isArray(rawIntro)
+    ? rawIntro
+    : typeof rawIntro === 'string'
+    ? [rawIntro]
+    : Array.isArray(rawIntro?.paragraphs)
+    ? rawIntro.paragraphs
+    : undefined;
   const eyebrow = guide.eyebrow;
   const children = guide.children;
   const toggle = (id) => setOpen((cur) => (cur === id ? null : id));

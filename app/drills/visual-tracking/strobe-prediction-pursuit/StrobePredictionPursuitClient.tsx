@@ -41,7 +41,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function StrobePredictionPursuitClient() {
+export default function StrobePredictionPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -417,13 +417,13 @@ export default function StrobePredictionPursuitClient() {
         {!isFullscreen && (
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Strobe Prediction Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Strobe Vision Training Drill
+              <span data-seo-kw="1">{copy?.title || "Strobe Prediction Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                {copy?.subtitle || "Strobe Vision Training Drill"}
               </span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Strobe prediction pursuit conditions visual extrapolation and predictive gaze tracking by intermittently occluding a moving target in cyclic dark phases. By compelling the brain to maintain ocular pursuit across sensory interruptions, this drill strengthens forward cerebellar kinetic models and improves anticipatory timing (Appelbaum et al., 2011; Bennett et al., 2007). Here the target is hidden for one third of every strobe cycle (60 frames visible, 30 dark). When a tracked target is briefly occluded the eyes do not stop: velocity decays during the blank and re-accelerates before it reappears (Bennett et al., 2007).
+              {copy?.description || "Strobe prediction pursuit conditions visual extrapolation and predictive gaze tracking by intermittently occluding a moving target in cyclic dark phases. By compelling the brain to maintain ocular pursuit across sensory interruptions, this drill strengthens forward cerebellar kinetic models and improves anticipatory timing (Appelbaum et al., 2011; Bennett et al., 2007). Here the target is hidden for one third of every strobe cycle (60 frames visible, 30 dark). When a tracked target is briefly occluded the eyes do not stop: velocity decays during the blank and re-accelerates before it reappears (Bennett et al., 2007)."}
             </p>
           </div>
         )}

@@ -1,0 +1,453 @@
+{
+  "category": "visual-tracking",
+  "category_name": "Visual Tracking",
+  "completed_count": 15,
+  "total_count": 15,
+  "remaining_count": 0,
+  "completed_drills": [
+    {
+      "id": "visual-tracking/constant-slow-pursuit",
+      "drill_number": 54,
+      "visual_tracking_index": 1,
+      "category": "visual-tracking",
+      "name": "Constant Slow Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "smooth pursuit eye exercise",
+        "ko": "안구 운동 훈련",
+        "ja": "追従眼球運動 トレーニング",
+        "de": "Augenfolgebewegung Training",
+        "pt": "treino de movimento ocular",
+        "es": "entrenamiento de movimientos oculares",
+        "fr": "entrainement mouvements oculaires"
+      },
+      "titles": {
+        "en": "Smooth Pursuit Eye Exercise – Slow Pursuit | SkillDrills",
+        "ko": "안구 운동 훈련 – 저속 스무스 퍼슈트 시각 추적 | SkillDrills",
+        "ja": "追従眼球運動トレーニング・低速視覚追従 – 滑動性眼球運動＆リサージュ視線安定性測定 | SkillDrills",
+        "de": "Augenfolgebewegung Training – Smooth Pursuit | SkillDrills",
+        "pt": "Treino de Movimento Ocular – Perseguição Suave | SkillDrills",
+        "es": "Movimientos Oculares – Seguimiento Suave | SkillDrills",
+        "fr": "Mouvements Oculaires – Poursuite Visuelle | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/directional-chaos-pursuit",
+      "drill_number": 55,
+      "visual_tracking_index": 2,
+      "category": "visual-tracking",
+      "name": "Directional Chaos Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "directional chaos pursuit",
+        "ko": "불규칙 안구 추적 훈련",
+        "ja": "不規則 追従性眼球運動",
+        "de": "chaotische augenfolgebewegungen",
+        "pt": "rastreamento ocular caótico",
+        "es": "seguimiento ocular caótico",
+        "fr": "poursuite visuelle chaotique"
+      },
+      "titles": {
+        "en": "Erratic Motion Eye Drill – Chaos Pursuit | SkillDrills",
+        "ko": "불규칙 안구 추적 훈련・카오스 방향 전환 테스트 – 사케드 회복 & 반응형 동체시력 | SkillDrills",
+        "ja": "不規則方向追従トレーニング・カオス動体視力テスト – サッケードリカバリー＆反応型眼球運動 | SkillDrills",
+        "de": "Chaotische Augenfolgebewegung – Chaos Pursuit | SkillDrills",
+        "pt": "Rastreamento Ocular Caótico – Chaos Pursuit | SkillDrills",
+        "es": "Seguimiento Ocular Caótico – Chaos Pursuit | SkillDrills",
+        "fr": "Poursuite Oculaire Chaotique – Chaos Pursuit | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/dynamic-evasion-pursuit",
+      "drill_number": 56,
+      "visual_tracking_index": 3,
+      "category": "visual-tracking",
+      "name": "Dynamic Evasion Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "dynamic evasion pursuit",
+        "ko": "회피 표적 추적 훈련",
+        "ja": "回避 追従 トレーニング",
+        "de": "reaktives tracking training",
+        "pt": "rastreamento de alvo evasivo",
+        "es": "seguimiento de objetivos evasivos",
+        "fr": "poursuite de cible évasive"
+      },
+      "titles": {
+        "en": "Reactive Eye Tracking Drill – Evasion Pursuit | SkillDrills",
+        "ko": "회피 표적 추적 훈련・동체시력 에임 테스트 – 급선회 타깃 재포착 | SkillDrills",
+        "ja": "標的回避追従トレーニング・動体視力テスト – 急旋回ターゲット再捕捉 | SkillDrills",
+        "de": "Reaktives Tracking Training – Evasion Pursuit | SkillDrills",
+        "pt": "Rastreamento de Alvo Evasivo – Evasion Pursuit | SkillDrills",
+        "es": "Seguimiento Ocular Evasivo – Evasion Pursuit | SkillDrills",
+        "fr": "Poursuite de Cible Évasive – Evasion Pursuit | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/ghosting-suppress-pursuit",
+      "drill_number": 57,
+      "visual_tracking_index": 4,
+      "category": "visual-tracking",
+      "name": "Ghosting Suppress Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "ghosting suppress pursuit",
+        "ko": "잔상 억제 시선 고정 훈련",
+        "ja": "残像 抑制 トレーニング",
+        "de": "fixationsstabilitaet sehtraining",
+        "pt": "supressão de imagens residuais",
+        "es": "estabilidad de fijación ocular",
+        "fr": "stabilité de fixation oculaire"
+      },
+      "titles": {
+        "en": "Eye Fixation Stability Training – Ghosting | SkillDrills",
+        "ko": "잔상 억제 시선 고정 훈련・동체시력 테스트 – 모션 스미어 억제 | SkillDrills",
+        "ja": "残像抑制固視トレーニング・動体視力視線安定性テスト – 中心窩ロック＆モーションスミア抑制 | SkillDrills",
+        "de": "Fixationsstabilität Sehtraining – Ghosting | SkillDrills",
+        "pt": "Estabilidade de Fixação Ocular – Ghosting | SkillDrills",
+        "es": "Estabilidad de Fijación Ocular – Ghosting | SkillDrills",
+        "fr": "Stabilité de Fixation Oculaire – Ghosting | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/infinity-pursuit",
+      "drill_number": 58,
+      "visual_tracking_index": 5,
+      "category": "visual-tracking",
+      "name": "Infinity Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "infinity pursuit",
+        "ko": "8자 안구 운동",
+        "ja": "8の字 眼球運動",
+        "de": "liegende acht augentraining",
+        "pt": "exercício ocular do oito deitado",
+        "es": "ejercicio ocular del ocho tumbado",
+        "fr": "exercice oculaire du huit couché"
+      },
+      "titles": {
+        "en": "Figure-8 Eye Exercise – Infinity Pursuit | SkillDrills",
+        "ko": "8자 안구 운동 훈련・인피니티 시각 추적 – 정중선 교차 원활추종 | SkillDrills",
+        "ja": "8の字眼球運動トレーニング・インフィニティ追従テスト – 両眼協調＆正中線交差 | SkillDrills",
+        "de": "Liegende Acht Augentraining – Infinity | SkillDrills",
+        "pt": "Exercício Ocular do Oito Deitado – Infinity | SkillDrills",
+        "es": "Ejercicio Ocular del Ocho Tumbado – Infinity | SkillDrills",
+        "fr": "Exercice Oculaire du Huit Couché – Infinity | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/momentum-teleport-pursuit",
+      "drill_number": 59,
+      "visual_tracking_index": 6,
+      "category": "visual-tracking",
+      "name": "Momentum Teleport Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "teleport tracking drill",
+        "ko": "순간이동 에임 연습",
+        "ja": "テレポート エイム 練習",
+        "de": "sprungziel tracking training",
+        "pt": "rastreamento de alvo teleportado",
+        "es": "seguimiento de blanco teletransportado",
+        "fr": "poursuite oculaire cible teleportee"
+      },
+      "titles": {
+        "en": "Teleport Gaze Tracking Drill – Momentum | SkillDrills",
+        "ko": "순간이동 에임 연습・타겟 재포착 안구 추적 테스트 – 도약 안구운동 & 관성 추종 | SkillDrills",
+        "ja": "テレポート追従エイムトレーニング・サッケード再捕捉テスト – 瞬間移動標的捕捉＆慣性追従 | SkillDrills",
+        "de": "Sprungziel Tracking Training – Momentum | SkillDrills",
+        "pt": "Rastreamento de Alvo Teleportado – Momentum | SkillDrills",
+        "es": "Seguimiento de Blanco Teletransportado – SkillDrills",
+        "fr": "Poursuite de Cible Téléportée – Momentum | SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/peripheral-ping-pursuit",
+      "drill_number": 60,
+      "visual_tracking_index": 7,
+      "category": "visual-tracking",
+      "name": "Peripheral Ping Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "peripheral vision training drill",
+        "ko": "주변시 훈련",
+        "ja": "周辺視野 トレーニング",
+        "de": "peripheres sehen trainieren",
+        "pt": "treino de visão periférica",
+        "es": "entrenamiento de visión periférica",
+        "fr": "entraînement vision périphérique"
+      },
+      "titles": {
+        "en": "Peripheral Vision Training – Ping Pursuit | SkillDrills",
+        "ko": "주변시 핑 추적 훈련・중심시 주변시 통합 테스트 – 시야 확장・잠재적 주의력 | SkillDrills",
+        "ja": "周辺視野ピン追従トレーニング・中心視周辺視統合テスト – 視野拡大＆潜在的空間注意 | SkillDrills",
+        "de": "Peripheres Sehen Training – Ping Pursuit | SkillDrills",
+        "pt": "Treino de Visão Periférica – Ping Pursuit | SkillDrills",
+        "es": "Entrenamiento de Visión Periférica – SkillDrills",
+        "fr": "Entraînement Vision Périphérique – SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/predictive-pursuit",
+      "drill_number": 61,
+      "visual_tracking_index": 8,
+      "category": "visual-tracking",
+      "name": "Predictive Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "predictive eye tracking drill",
+        "ko": "예측 에임 연습",
+        "ja": "偏差エイム 練習",
+        "de": "prädiktives tracking training",
+        "pt": "rastreamento visual preditivo",
+        "es": "seguimiento ocular predictivo",
+        "fr": "poursuite oculaire prédictive"
+      },
+      "titles": {
+        "en": "Predictive Eye Tracking Drill – Pursuit | SkillDrills",
+        "ko": "예측 에임 연습・가림 궤적 예측 추적 – 예측성 원활추종 | SkillDrills",
+        "ja": "偏差エイム練習・遮蔽軌道予測テスト – 予測性追従眼球運動＆先読み動体視力 | SkillDrills",
+        "de": "Prädiktives Tracking Training – Predictive | SkillDrills",
+        "pt": "Rastreamento Visual Preditivo – SkillDrills",
+        "es": "Seguimiento Ocular Predictivo – SkillDrills",
+        "fr": "Poursuite Oculaire Prédictive – SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    "visual-tracking/sine-wave-pursuit",
+    "visual-tracking/spatial-shift-pursuit",
+    "visual-tracking/split-screen-tracking",
+    "visual-tracking/staircase-step",
+    {
+      "id": "visual-tracking/strobe-prediction-pursuit",
+      "drill_number": 66,
+      "visual_tracking_index": 13,
+      "category": "visual-tracking",
+      "name": "Strobe Prediction Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "strobe prediction pursuit",
+        "de": "Strobe-Augentraining",
+        "ko": "스트로브 동체시력 훈련",
+        "ja": "ストロボ動体視力トレーニング",
+        "pt": "treino de visão estroboscópica",
+        "es": "entrenamiento de visión estroboscópica",
+        "fr": "entraînement vision stroboscopique"
+      },
+      "page_titles": {
+        "en": "Strobe Prediction Pursuit – Vision Training | SkillDrills",
+        "de": "Strobe-Augentraining – Antizipation | SkillDrills",
+        "ko": "스트로브 동체시력 훈련・점멸 가림 궤적 예측 테스트 | SkillDrills",
+        "ja": "ストロボ動体視力トレーニング・点滅遮蔽予測テスト | SkillDrills",
+        "pt": "Treino de Visão Estroboscópica – SkillDrills",
+        "es": "Visión Estroboscópica y Predicción – SkillDrills",
+        "fr": "Vision Stroboscopique et Prédiction – SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/triangular-pursuit",
+      "drill_number": 67,
+      "visual_tracking_index": 14,
+      "category": "visual-tracking",
+      "name": "Triangular Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "triangular pursuit",
+        "de": "dreieckige blickverfolgung uebung",
+        "ko": "삼각형 안구 추적 훈련",
+        "ja": "三角形 追従眼球運動 練習",
+        "pt": "rastreamento ocular triangular",
+        "es": "seguimiento ocular triangular",
+        "fr": "poursuite visuelle triangulaire"
+      },
+      "page_titles": {
+        "en": "Triangular Pursuit Eye Tracking – Vision Drill | SkillDrills",
+        "de": "Dreieckige Blickverfolgung – Polygon-Training | SkillDrills",
+        "ko": "삼각형 안구 추적 훈련・다각형 에임 정밀도 테스트 | SkillDrills",
+        "ja": "三角形追従眼球運動テスト・多角形エイム練習 | SkillDrills",
+        "pt": "Rastreamento Ocular Triangular – SkillDrills",
+        "es": "Seguimiento Ocular Triangular – SkillDrills",
+        "fr": "Poursuite Oculaire Triangulaire – SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    },
+    {
+      "id": "visual-tracking/zig-zag-path-pursuit",
+      "drill_number": 68,
+      "visual_tracking_index": 15,
+      "category": "visual-tracking",
+      "name": "Zig-Zag Path Pursuit",
+      "locales_completed": [
+        "en",
+        "ko",
+        "ja",
+        "de",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verified_date": "2026-09-16",
+      "primary_keywords": {
+        "en": "zig-zag path pursuit",
+        "de": "zickzack blickverfolgung uebung",
+        "ko": "지그재그 안구 추적 훈련",
+        "ja": "ジグザグ 追従眼球運動 練習",
+        "pt": "rastreamento visual em zigue-zague",
+        "es": "seguimiento ocular en zigzag",
+        "fr": "poursuite visuelle en zigzag"
+      },
+      "page_titles": {
+        "en": "Zig-Zag Path Pursuit – Eye Tracking Drill | SkillDrills",
+        "de": "Zickzack-Blickverfolgung – Zickzack-Tracking | SkillDrills",
+        "ko": "지그재그 안구 추적 훈련・급반전 에임 정밀도 테스트 | SkillDrills",
+        "ja": "ジグザグ追従眼球運動テスト・急反転エイム練習 | SkillDrills",
+        "pt": "Rastreamento em Zigue-Zague – SkillDrills",
+        "es": "Seguimiento Ocular en Zigzag – SkillDrills",
+        "fr": "Poursuite Visuelle en Zigzag – SkillDrills"
+      },
+      "audit_results": {
+        "level1_ast": "PASS",
+        "level2_build": "PASS",
+        "level3_html": "PASS (All 7 locales verified, 8 hreflangs reciprocal, 6 schemas, benchmarks)"
+      }
+    }
+  ]
+}

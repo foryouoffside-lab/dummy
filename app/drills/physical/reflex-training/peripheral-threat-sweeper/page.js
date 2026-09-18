@@ -1,4 +1,4 @@
-import PeripheralThreatSweeperClient from './PeripheralThreatSweeperClient';
+import PeripheralThreatSweeperClient from './PeripheralThreatSweeperClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -223,6 +223,18 @@ const faqSchema = {
   ],
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Peripheral Threat Sweeper',
+  url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper',
+  description: 'Free online peripheral vision test. Train spatial awareness, useful field of view (UFOV), and radial threat detection.',
+  genre: ['Action', 'Brain Game', 'Reflex Game', 'Coordination'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -235,24 +247,28 @@ const howToSchema = {
       position: 1,
       name: 'Anchor Central Foveal Gaze',
       text: 'Maintain primary visual focus on the central core shield. Resist the instinct to chase every individual radial angle with ocular saccades.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper#step-1',
     },
     {
       '@type': 'HowToStep',
       position: 2,
       name: 'Detect Parafoveal Threat Incursion',
       text: 'Use retinal rod sensitivity to detect high-contrast movement at outer canvas boundaries. Allow pre-attentive feature maps to compute the approaching trajectory.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper#step-2',
     },
     {
       '@type': 'HowToStep',
       position: 3,
       name: 'Execute Rapid Ballistic Interception',
       text: 'Flick your cursor laterally or vertically to click the target before it penetrates the central shield perimeter, securing +0.6s time extensions.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper#step-3',
     },
     {
       '@type': 'HowToStep',
       position: 4,
       name: 'Expand Field of View & Chain Combos',
       text: 'Immediately re-center your cursor posture after each hit, keeping your peripheral scanning active across all 360 degrees to sustain unbroken streaks up to 3.0x.',
+      url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper#step-4',
     },
   ],
 };
@@ -267,52 +283,28 @@ const guideProps = {
       'How this is measured, and what it cannot resolve: timing comes from the browser\'s performance.now() clock, which is deliberately coarsened to roughly 1 ms as a Spectre mitigation, and the display quantizes every event to its own refresh interval — about 16.7 ms at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz against about 1 ms at 1000 Hz. Treat any difference under about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else\'s. SkillDrills stores every score in your browser and collects no aggregate data, so nothing here is a population norm.',
     ],
   },
-  benchmark: {
+  benchmarks: {
+
     title: 'Peripheral Threat Sweeper & Vision Benchmarks',
-    description: 'Empirical standards derived from covert visual orienting psychophysics (Posner 1980), feature integration theory (Treisman & Gelade 1980), and reaction chronometry bounds (Woods et al. 2015). Evaluates total points, sweep accuracy, peak threat velocity survived, and streak maintenance.',
-    columns: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial band'],
+
+    headers: ['Tier', 'Rank Title', 'Score Benchmark', 'Accuracy & Velocity', 'Grade', 'Editorial band'],
+
     rows: [
-      {
-        tier: 'Tier 1',
-        rank: 'Apex Peripheral Guardian',
-        stat: '24,000+ pts',
-        level: '90%+ Acc / 450+ px/s',
-        accuracy: 'Grade S',
-        percentile: 'Exceptional',
-      },
-      {
-        tier: 'Tier 2',
-        rank: 'Precision Radial Sweeper',
-        stat: '17,000–23,999 pts',
-        level: '82–89% Acc / 350–449 px/s',
-        accuracy: 'Grade A',
-        percentile: 'Advanced',
-      },
-      {
-        tier: 'Tier 3',
-        rank: 'Skilled Field Defender',
-        stat: '11,000–16,999 pts',
-        level: '74–81% Acc / 250–349 px/s',
-        accuracy: 'Grade B',
-        percentile: 'Strong',
-      },
-      {
-        tier: 'Tier 4',
-        rank: 'Developing Parafoveal Tracker',
-        stat: '6,000–10,999 pts',
-        level: '65–73% Acc / 160–249 px/s',
-        accuracy: 'Grade C',
-        percentile: 'Typical',
-      },
-      {
-        tier: 'Tier 5',
-        rank: 'Novice Tunnel Vision Vulnerable',
-        stat: '< 6,000 pts',
-        level: '< 65% Acc / < 160 px/s',
-        accuracy: 'Grade D',
-        percentile: 'Starting out',
-      },
+
+      ['Tier 1', 'Apex Peripheral Guardian', '24,000+ pts', '90%+ Acc / 450+ px/s', 'Grade S', 'Exceptional'],
+
+      ['Tier 2', 'Precision Radial Sweeper', '17,000–23,999 pts', '82–89% Acc / 350–449 px/s', 'Grade A', 'Advanced'],
+
+      ['Tier 3', 'Skilled Field Defender', '11,000–16,999 pts', '74–81% Acc / 250–349 px/s', 'Grade B', 'Strong'],
+
+      ['Tier 4', 'Developing Parafoveal Tracker', '6,000–10,999 pts', '65–73% Acc / 160–249 px/s', 'Grade C', 'Typical'],
+
+      ['Tier 5', 'Novice Tunnel Vision Vulnerable', '< 6,000 pts', '< 65% Acc / < 160 px/s', 'Grade D', 'Starting out'],
+
     ],
+
+    note: 'Empirical standards derived from covert visual orienting psychophysics (Posner 1980), feature integration theory (Treisman & Gelade 1980), and reaction chronometry bounds (Woods et al. 2015). Evaluates total points, sweep accuracy, peak threat velocity survived, and streak maintenance.',
+
   },
   protocols: {
     title: 'How to train peripheral vision',
@@ -366,10 +358,15 @@ export default function PeripheralThreatSweeperPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <PeripheralThreatSweeperClient />
+      <PeripheralThreatSweeperClient copy={{ title: 'Peripheral Threat Sweeper', subtitle: 'Peripheral Vision Test & Radial Awareness Drill' }} />
       <DrillGuide {...guideProps} />
+      
     </>
   );
 }

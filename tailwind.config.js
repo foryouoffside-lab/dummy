@@ -15,8 +15,8 @@ module.exports = {
           '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"',
         ],
         mono: [
-          'var(--font-jetbrains-mono)',
-          'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', '"Liberation Mono"', 'monospace',
+          'var(--font-inter)',
+          'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Arial', 'sans-serif',
         ],
       },
       colors: {

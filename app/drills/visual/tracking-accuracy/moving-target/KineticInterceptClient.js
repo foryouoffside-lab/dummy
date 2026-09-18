@@ -64,7 +64,7 @@ const getLevelConfig = (level, combo = 0) => {
   };
 };
 
-export default function KineticInterceptClient() {
+export default function KineticInterceptClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -552,7 +552,7 @@ export default function KineticInterceptClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Moving Target Intercept Test
+              <span data-seo-kw="1">{copy?.title || "Moving Target Intercept Test"}</span>
             </h1>
             <p className="text-sm text-slate-400 mt-1 leading-relaxed">
               Smooth pursuit is the eye movement that follows a target moving steadily across your field of view, as opposed to the jumps the eye makes between stationary points. Pursuit stays accurate up to roughly 30&deg;/s; past that the eye falls behind and has to catch up with saccades (Krauzlis, 2004; Rashbass, 1961). Intercepting a moving target adds a second problem on top: aiming where it is going rather than where it is.

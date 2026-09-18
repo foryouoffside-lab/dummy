@@ -43,7 +43,7 @@ export default function LanguageSwitcher() {
     try {
       localStorage.setItem('skilldrills_locale', newLocale);
       document.cookie = `skilldrills_locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-    } catch (e) {}
+    } catch {}
 
     // Only 11 routes are localized, so this resolves to the nearest localized
     // ancestor -- switching language on a drill page used to land on a 404.

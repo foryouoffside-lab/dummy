@@ -60,6 +60,7 @@ export default function JumpSequencePreview() {
         vy: 0,
       },
       particles: [],
+      hitRings: [],
       screenShake: 0,
     };
 
@@ -79,6 +80,14 @@ export default function JumpSequencePreview() {
           color: colors[Math.floor(Math.random() * colors.length)],
         });
       }
+
+      state.hitRings.push({
+        x,
+        y,
+        r: state.target.r,
+        life: 1.0,
+        color: '#10b981',
+      });
     };
 
     const spawnChargeParticles = (x, y) => {
@@ -308,6 +317,15 @@ export default function JumpSequencePreview() {
         }
       }
 
+      for (let i = state.hitRings.length - 1; i >= 0; i--) {
+        const hr = state.hitRings[i];
+        hr.r += dt * 45;
+        hr.life -= dt * 3.2;
+        if (hr.life <= 0) {
+          state.hitRings.splice(i, 1);
+        }
+      }
+
       // Screen shake decay
       let shakeX = 0;
       let shakeY = 0;
@@ -398,6 +416,17 @@ export default function JumpSequencePreview() {
         ctx.restore();
       }
 
+      for (const hr of state.hitRings) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, hr.life * 0.8);
+        ctx.strokeStyle = hr.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(hr.x, hr.y, hr.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       // Player Dot
       // Hover detection matching client: !isJumping && !isCharging && hypot < p.radius + 18
       const isHovering =
@@ -454,6 +483,12 @@ export default function JumpSequencePreview() {
       ctx.moveTo(ch.x + tickLen, ch.y);
       ctx.lineTo(ch.x + gap, ch.y);
       ctx.stroke();
+
+      // Center pip
+      ctx.fillStyle = crosshairColor;
+      ctx.beginPath();
+      ctx.arc(ch.x, ch.y, 1.8, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
 
       ctx.restore();

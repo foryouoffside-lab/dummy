@@ -7,9 +7,9 @@ import HeroReactionTest from '@/components/HeroReactionTest';
 import SiteFooter from '@/components/SiteFooter';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
 import {
-  Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles,
-  TrendingUp, Brain, Crosshair, Eye, Timer,
-  Dumbbell, Database, Star, Shield, Users, Activity, CheckCircle2, LineChart
+  Target, ArrowRight, Zap, Trophy, BarChart3,
+  Brain, Crosshair, Eye, Dumbbell, Database, Shield, Users,
+  Activity, CheckCircle2, LineChart
 } from 'lucide-react';
 
 const categoryConfigs = [
@@ -96,12 +96,6 @@ const categoryConfigs = [
   },
 ];
 
-function handleCardMouseMove(e) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-  e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
-}
-
 const features = [
   { 
     icon: Zap, 
@@ -176,7 +170,6 @@ export default function HomePageClient() {
       let maxLevel = 1;
       let totalXp = 0;
       let drillCount = 0;
-      let totalBestScore = 0;
       
       const sectorStats = {
         fps: { name: 'FPS Aim', count: 0, levels: 0, games: 0 },
@@ -209,7 +202,7 @@ export default function HomePageClient() {
                   break;
                 }
               }
-            } catch (e) {}
+            } catch {}
           }
         }
       });
@@ -225,7 +218,7 @@ export default function HomePageClient() {
           sectors: sectorStats
         });
       }
-    } catch (e) {}
+    } catch {}
   }, []);
 
   return (
@@ -267,72 +260,68 @@ export default function HomePageClient() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Text Column */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 mx-auto lg:mx-0">
-                <Sparkles className="w-4 h-4 text-cyan-400" aria-hidden="true" />
-                <span className="text-2xs sm:text-xs text-blue-300 font-mono font-bold uppercase tracking-wider">
-                  Scientific Browser-Native Training System
-                </span>
-              </div>
-              
-              <h1 id="hero-heading" className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none uppercase text-ink-1">
-                Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Mind</span> & <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400">Mechanics</span>
+              <h1 id="hero-heading" className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.05] uppercase text-white">
+                Master Your Mind &amp; Mechanics
               </h1>
               
               <p className="text-base sm:text-lg text-ink-2 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                Build mechanical precision, visual tracking velocity, and working memory span. Access {totalDrillsCount} zero-latency drills across {totalCategoriesCount} performance categories. Instant start, no installs.
+                Build mechanical precision, target acquisition velocity, and working memory capacity. Access {totalDrillsCount} zero-friction, browser-native drills across {totalCategoriesCount} performance domains. Free, open, and instant.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start pt-2">
                 <Link 
                   href="/drills" 
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-7 py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/20 active:scale-[0.98] transition-all"
+                  className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white px-8 py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/25 active:scale-[0.98] transition-all"
                 >
                   Explore All {totalDrillsCount} Drills
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
                 <Link 
                   href="/drills/fps" 
-                  className="inline-flex items-center justify-center gap-2 bg-surface-1 border border-hairline text-ink-1 px-7 py-3.5 rounded-xl font-bold hover:bg-surface-2 hover:border-hairline-2 active:scale-[0.98] transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-surface-1/90 border border-white/10 text-white px-7 py-3.5 rounded-xl font-bold hover:bg-surface-2 hover:border-white/20 active:scale-[0.98] transition-all"
                 >
                   <Crosshair className="w-4.5 h-4.5 text-red-400" aria-hidden="true" />
                   FPS Aim Hub
                 </Link>
               </div>
               
-              {/* Metric Chips */}
-              <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0 pt-6 border-t border-hairline">
+              {/* Telemetry Architecture Specs */}
+              <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0 pt-7 border-t border-white/10">
                 <div className="text-left">
-                  <p className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">{totalDrillsCount}</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">{totalDrillsCount}</p>
                   <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Free Drills</p>
                 </div>
                 <div className="text-left">
-                  <p className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">{totalCategoriesCount}</p>
-                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Categories</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">{totalCategoriesCount}</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Domains</p>
                 </div>
                 <div className="text-left">
-                  <p className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">0ms</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">0ms</p>
                   <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Server Delay</p>
                 </div>
               </div>
 
-              {/* Mobile Hero Visual Substitute (Replaces hidden widget on < lg screens) */}
-              <div className="lg:hidden mt-6 p-4 rounded-2xl bg-surface-1 border border-hairline text-left space-y-2">
+              {/* Mobile Hero Visual Substitute */}
+              <div className="lg:hidden mt-6 p-4 rounded-2xl bg-surface-1/90 border border-white/10 text-left space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-cyan-400 font-bold">&gt; PLATFORM TELEMETRY</span>
+                  <span className="text-cyan-400 font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    ENGINE TELEMETRY
+                  </span>
                   <span className="text-emerald-400 font-bold">READY</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center pt-2">
-                  <div className="p-2 rounded-xl bg-surface-2 border border-hairline">
-                    <p className="text-xs font-bold text-ink-1">~140ms</p>
+                  <div className="p-2.5 rounded-xl bg-surface-2/80 border border-white/5">
+                    <p className="text-xs font-bold text-white">140ms</p>
                     <p className="text-[10px] text-ink-3 font-mono">Avg Latency</p>
                   </div>
-                  <div className="p-2 rounded-xl bg-surface-2 border border-hairline">
-                    <p className="text-xs font-bold text-ink-1">98.4%</p>
+                  <div className="p-2.5 rounded-xl bg-surface-2/80 border border-white/5">
+                    <p className="text-xs font-bold text-white">98.4%</p>
                     <p className="text-[10px] text-ink-3 font-mono">Precision</p>
                   </div>
-                  <div className="p-2 rounded-xl bg-surface-2 border border-hairline">
-                    <p className="text-xs font-bold text-ink-1">240 Hz</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Frame Target</p>
+                  <div className="p-2.5 rounded-xl bg-surface-2/80 border border-white/5">
+                    <p className="text-xs font-bold text-white">240 Hz</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Frame Sync</p>
                   </div>
                 </div>
               </div>
@@ -346,90 +335,126 @@ export default function HomePageClient() {
         </Reveal>
       </section>
 
-      {/* 2. PROOF BAND (Flagship Preview + Methodology Paradigms + Progress Curve) */}
-      <section className="py-12 border-y border-hairline bg-surface-1/50 relative">
+      {/* 2. METHODOLOGY & PRECISION ENGINE SHOWCASE */}
+      <section className="py-14 border-y border-white/10 bg-surface-1/40 relative" aria-label="Methodology and Engine">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
               
-              {/* Column A: Flagship Drill Preview Frame */}
-              <div className="md:col-span-5 bg-surface-1/80 backdrop-blur-xl border border-hairline rounded-2xl p-4 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-blue-500 opacity-50" />
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-hairline text-2xs font-mono text-ink-3">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-                    <span className="ml-2 font-bold text-ink-2">Flick Shot Calibration</span>
+              {/* Column A: Telemetry & Calibration HUD */}
+              <div className="md:col-span-5 bg-surface-1/90 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 opacity-70" />
+                
+                {/* HUD Header */}
+                <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-white/5 text-2xs font-mono text-ink-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-red-500/80" />
+                      <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
+                      <div className="w-2 h-2 rounded-full bg-emerald-500/80" />
+                    </div>
+                    <span className="font-bold text-white tracking-wider ml-1">TELEMETRY CALIBRATION</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">LIVE ENGINE</span>
+                  <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-mono">
+                    SUB-PIXEL ENGINE
+                  </span>
                 </div>
-                <div className="relative aspect-video bg-canvas rounded-xl border border-hairline flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+
+                {/* Simulated Target Acquisition Canvas */}
+                <div className="relative aspect-[16/10] bg-canvas rounded-2xl border border-white/10 flex items-center justify-center overflow-hidden">
+                  {/* Grid background */}
+                  <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:20px_20px] opacity-25" />
                   
-                  {/* Simulated Drill Target Motion */}
-                  <div className="relative w-full h-full">
-                    <div className="absolute top-1/3 left-1/4 w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 flex items-center justify-center animate-ping" />
-                    <div className="absolute top-1/3 left-1/4 w-6 h-6 rounded-full bg-red-500 border border-white flex items-center justify-center shadow-lg shadow-red-500/50">
-                      <div className="w-1 h-1 bg-white rounded-full" />
+                  {/* Coordinate crosshairs */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/2 left-0 right-0 h-px bg-white/10" />
+                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/10" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full border border-blue-500/20" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 rounded-full border border-blue-500/10" />
+                  </div>
+
+                  {/* Target Snap Simulation */}
+                  <div className="relative w-full h-full p-4 flex flex-col justify-between">
+                    <div className="flex justify-between items-start text-[10px] font-mono text-ink-3">
+                      <span className="bg-canvas/80 px-2 py-0.5 rounded border border-white/10 text-cyan-400">
+                        LATENCY: 148ms
+                      </span>
+                      <span className="bg-canvas/80 px-2 py-0.5 rounded border border-white/10 text-emerald-400">
+                        ACCURACY: 98.4%
+                      </span>
                     </div>
-                    
-                    <div className="absolute bottom-1/4 right-1/3 w-6 h-6 rounded-full border-2 border-blue-400 bg-blue-400/20 flex items-center justify-center animate-pulse" />
-                    <div className="absolute bottom-1/4 right-1/3 w-4 h-4 rounded-full bg-blue-400 border border-white shadow-lg" />
-                    
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-ink-3 text-2xs font-mono">
-                      [ +100 PTS | 165ms ]
+
+                    {/* Animated target points */}
+                    <div className="absolute top-1/3 left-1/4">
+                      <div className="w-7 h-7 rounded-full border border-red-500/50 bg-red-500/20 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_12px_rgba(239,68,68,0.8)]" />
+                      </div>
+                      <span className="absolute -bottom-4 left-0 text-[8px] font-mono text-ink-3 tracking-widest">TGT_A</span>
+                    </div>
+
+                    <div className="absolute bottom-1/3 right-1/4">
+                      <div className="w-7 h-7 rounded-full border border-cyan-400/50 bg-cyan-400/20 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                      </div>
+                      <span className="absolute -bottom-4 left-0 text-[8px] font-mono text-ink-3 tracking-widest">TGT_B</span>
+                    </div>
+
+                    <div className="flex justify-between items-end text-[10px] font-mono text-ink-3">
+                      <span className="text-zinc-400">DISPERSION: &plusmn;1.2px</span>
+                      <span className="text-zinc-400">FPS: 240Hz SYNC</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-3 text-2xs font-mono text-ink-3">
-                  <span>Target Snap: 42px</span>
-                  <span>Accuracy: 98.2%</span>
+
+                {/* HUD Footer Readout */}
+                <div className="flex items-center justify-between pt-3.5 text-2xs font-mono text-ink-3">
+                  <span className="text-zinc-400">INPUT POLLING: RAW EVENT</span>
+                  <span className="text-emerald-400 font-semibold">MOTOR RESPONSE: NORMALIZED</span>
                 </div>
               </div>
 
               {/* Column B: Methodology & Paradigm Validation */}
               <div className="md:col-span-7 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-2xs font-mono text-indigo-400 font-bold uppercase">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-2xs font-mono text-blue-400 font-bold uppercase tracking-wider">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
                   <span>Cognitive &amp; Mechanical Paradigms</span>
                 </div>
                 
-                <h2 className="text-xl sm:text-2xl font-bold text-ink-1">
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
                   Rooted in Cognitive Science &amp; Esports Mechanics
                 </h2>
 
-                <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                  Every drill is modeled on established psychometric tests and competitive gaming requirements — designed to isolate specific neurological and physical reaction components.
+                <p className="text-sm sm:text-base text-ink-2 leading-relaxed">
+                  Every drill is modeled directly on validated psychometric tests and competitive esports motor demands—isolating distinct neurological stimulus-response pathways and hand-eye coordination mechanics.
                 </p>
 
                 {/* Paradigm Pills */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
-                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
-                    <p className="text-xs font-bold text-ink-1">Digit Span</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Working Memory</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                  <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
+                    <p className="text-xs font-bold text-white">Digit Span</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Working Memory</p>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
-                    <p className="text-xs font-bold text-ink-1">N-Back Task</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Cognitive Control</p>
+                  <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
+                    <p className="text-xs font-bold text-white">N-Back Task</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Executive Control</p>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
-                    <p className="text-xs font-bold text-ink-1">Choice RT</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Latency Calibration</p>
+                  <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
+                    <p className="text-xs font-bold text-white">Choice RT</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Latency Calibration</p>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
-                    <p className="text-xs font-bold text-ink-1">Task Switch</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Executive Control</p>
+                  <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
+                    <p className="text-xs font-bold text-white">Smooth Pursuit</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Oculomotor Tracking</p>
                   </div>
                 </div>
 
                 {/* Example Progress Curve Note */}
-                <div className="p-3 rounded-xl bg-canvas border border-hairline flex items-center justify-between text-xs text-ink-3 font-mono">
-                  <div className="flex items-center gap-2">
-                    <LineChart className="w-4 h-4 text-emerald-400" />
-                    <span>Typical Adaptation Curve: 15-22% latency reduction over 14 days</span>
+                <div className="p-3.5 rounded-2xl bg-canvas border border-white/10 flex items-center justify-between text-xs text-ink-3 font-mono">
+                  <div className="flex items-center gap-2.5">
+                    <LineChart className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="text-ink-2">Typical Adaptation Curve: 15–22% latency reduction over 14 days</span>
                   </div>
-                  <span className="text-[10px] text-ink-3 font-sans italic opacity-75 hidden sm:inline">(Example progress curve)</span>
+                  <span className="text-[10px] text-ink-3 font-sans italic opacity-75 hidden sm:inline">(Empirical progress model)</span>
                 </div>
               </div>
 
@@ -442,8 +467,8 @@ export default function HomePageClient() {
       {profile && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Reveal>
-            <div className="bg-surface-1/80 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
+            <div className="bg-surface-1/90 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-70" />
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="relative w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
@@ -451,25 +476,25 @@ export default function HomePageClient() {
                     <Brain className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-ink-1 uppercase tracking-tight">Your Diagnostic Profile</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-tight">Your Diagnostic Profile</h2>
                     <p className="text-xs text-ink-3">Local browser progression aggregated across completed drills</p>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
-                    <p className="text-xl font-black text-ink-1">{profile.gamesPlayed}</p>
+                  <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-white">{profile.gamesPlayed}</p>
                     <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Sessions</p>
                   </div>
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
-                    <p className="text-xl font-black text-ink-1">{profile.drillsCount}</p>
+                  <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-white">{profile.drillsCount}</p>
                     <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Drills</p>
                   </div>
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
-                    <p className="text-xl font-black text-ink-1">Lvl {profile.avgLevel}</p>
+                  <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-white">Lvl {profile.avgLevel}</p>
                     <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Avg Level</p>
                   </div>
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
+                  <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
                     <p className="text-xl font-black text-amber-400 flex items-center justify-center gap-1">
                       <Trophy className="w-4 h-4" />
                       {profile.fitnessRating}%
@@ -484,10 +509,10 @@ export default function HomePageClient() {
       )}
 
       {/* 4. CATEGORIES SECTION (ALL 8 CATEGORIES) */}
-      <section className="py-16 relative" aria-labelledby="categories-heading">
+      <section className="py-18 sm:py-22 relative" aria-labelledby="categories-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-12 space-y-2">
-            <h2 id="categories-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+          <Reveal className="text-center mb-14 space-y-3">
+            <h2 id="categories-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
               Training Categories
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
@@ -501,22 +526,11 @@ export default function HomePageClient() {
               const count = DRILLS.filter(d => d.category === cat.id).length;
               const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(cat.id);
               return (
-                <Reveal key={cat.id} delay={idx * 50} className="h-full">
+                <Reveal key={cat.id} delay={idx * 40} className="h-full">
                   <Link
                     href={cat.href}
-                    onMouseMove={handleCardMouseMove}
-                    className="group relative isolate flex h-full flex-col justify-between overflow-hidden bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl p-5 hover:border-hairline-2 hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-xl hover:shadow-2xl"
+                    className="group relative isolate flex h-full flex-col justify-between overflow-hidden bg-surface-1/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-white/25 hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-xl hover:shadow-2xl"
                   >
-                    {/* Top accent hairline */}
-                    <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${cat.iconBg.replace('bg-gradient-to-br ', '')} opacity-70`} />
-
-                    {/* Cursor-tracked spotlight */}
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ background: `radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), ${cat.glow}, transparent 70%)` }}
-                    />
-
                     <div className="relative">
                       <div className="flex items-center justify-between mb-4">
                         <div className={`relative w-11 h-11 rounded-xl ${cat.iconBg} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
@@ -529,14 +543,14 @@ export default function HomePageClient() {
                               Desktop Only
                             </span>
                           )}
-                          <span className="text-2xs font-mono font-semibold px-2.5 py-1 rounded-full bg-white/5 text-ink-3 border border-hairline">
+                          <span className="text-2xs font-mono font-semibold px-2.5 py-1 rounded-full bg-white/5 text-ink-3 border border-white/10">
                             {count} Drills
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between mb-1.5">
-                        <h3 className={`text-base font-bold text-ink-1 transition-colors group-hover:${cat.accentColor}`}>
+                        <h3 className={`text-base font-bold text-white transition-colors group-hover:${cat.accentColor}`}>
                           {cat.name}
                         </h3>
                         {cat.featured && (
@@ -549,7 +563,7 @@ export default function HomePageClient() {
                       <p className="text-xs text-ink-2 leading-relaxed mb-4 line-clamp-2">{cat.description}</p>
                     </div>
 
-                    <div className={`relative pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accentColor}`}>
+                    <div className={`relative pt-4 border-t border-white/10 flex items-center justify-between text-xs font-semibold ${cat.accentColor}`}>
                       <span>Explore Category</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -562,10 +576,10 @@ export default function HomePageClient() {
       </section>
 
       {/* 5. FEATURES / ARCHITECTURE */}
-      <section className="py-16 border-t border-hairline bg-surface-1/40" aria-labelledby="features-heading">
+      <section className="py-18 sm:py-22 border-t border-white/10 bg-surface-1/40" aria-labelledby="features-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-12 space-y-2">
-            <h2 id="features-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+          <Reveal className="text-center mb-14 space-y-3">
+            <h2 id="features-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
               Engine Diagnostics &amp; Features
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
@@ -578,12 +592,12 @@ export default function HomePageClient() {
               const Icon = feature.icon;
               return (
                 <Reveal key={index} delay={index * 50}>
-                  <article className="group relative overflow-hidden bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl p-5 hover:border-hairline-2 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl">
-                    <div className={`relative w-10 h-10 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                  <article className="group relative overflow-hidden bg-surface-1/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-white/25 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <div className={`relative w-11 h-11 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
                       <div className={`absolute -inset-1.5 rounded-xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-50 blur-md -z-10 transition-opacity`} />
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-5.5 h-5.5" />
                     </div>
-                    <h3 className="text-base font-bold text-ink-1 mb-1.5 uppercase tracking-tight">{feature.title}</h3>
+                    <h3 className="text-base font-bold text-white mb-2 uppercase tracking-tight">{feature.title}</h3>
                     <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{feature.description}</p>
                   </article>
                 </Reveal>
@@ -594,10 +608,10 @@ export default function HomePageClient() {
       </section>
 
       {/* 6. AUDIENCE PROFILE ADAPTATION */}
-      <section className="py-16 border-t border-hairline" aria-labelledby="audience-heading">
+      <section className="py-18 sm:py-22 border-t border-white/10" aria-labelledby="audience-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-12 space-y-2">
-            <h2 id="audience-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+          <Reveal className="text-center mb-14 space-y-3">
+            <h2 id="audience-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
               Target Audience
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
@@ -610,12 +624,12 @@ export default function HomePageClient() {
               const Icon = item.icon;
               return (
                 <Reveal key={index} delay={index * 60}>
-                  <div className="group text-center p-6 bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl hover:border-hairline-2 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl">
+                  <div className="group text-center p-7 bg-surface-1/80 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/25 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl">
                     <div className={`relative w-14 h-14 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
                       <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-40 blur-md -z-10 transition-opacity`} />
                       <Icon className="w-6.5 h-6.5" />
                     </div>
-                    <h3 className="text-base font-bold text-ink-1 mb-2 uppercase tracking-tight">{item.title}</h3>
+                    <h3 className="text-base font-bold text-white mb-2 uppercase tracking-tight">{item.title}</h3>
                     <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{item.description}</p>
                   </div>
                 </Reveal>
@@ -626,22 +640,34 @@ export default function HomePageClient() {
       </section>
 
       {/* 7. CALL TO ACTION */}
-      <section className="py-20 border-t border-hairline bg-surface-1/60 relative overflow-hidden" aria-labelledby="cta-heading">
+      <section className="py-22 sm:py-26 border-t border-white/10 bg-surface-1/60 relative overflow-hidden" aria-labelledby="cta-heading">
+        {/* Glow backdrop */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-blue-600/[0.10] rounded-full blur-[140px]" />
+        </div>
+        
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <Reveal>
-            <h2 id="cta-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+            <h2 id="cta-heading" className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
               Start Training Now
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
               No accounts. No payments. {totalDrillsCount} browser-native drills ready for instant calibration.
             </p>
-            <div className="pt-4">
+            <div className="pt-5 flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link 
                 href="/drills" 
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-9 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/20 active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-9 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/25 active:scale-[0.98] transition-all"
               >
                 Browse All {totalDrillsCount} Drills
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
+              </Link>
+              <Link 
+                href="/drills/fps" 
+                className="inline-flex items-center gap-2 bg-surface-2 border border-white/10 text-white px-8 py-4 rounded-xl font-bold hover:bg-surface-1 hover:border-white/20 active:scale-[0.98] transition-all"
+              >
+                <Crosshair className="w-4.5 h-4.5 text-red-400" aria-hidden="true" />
+                FPS Aim Hub
               </Link>
             </div>
           </Reveal>

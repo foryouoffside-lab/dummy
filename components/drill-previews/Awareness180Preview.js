@@ -29,6 +29,7 @@ export default function Awareness180Preview() {
             <span className="aw180-sheen" />
             <span className="aw180-core" />
           </div>
+          <span className="aw180-hit-ring" />
           <span className="aw180-hitmarker">
             <i className="aw180-hit-l1" />
             <i className="aw180-hit-l2" />
@@ -45,6 +46,7 @@ export default function Awareness180Preview() {
             <span className="aw180-sheen" />
             <span className="aw180-core" />
           </div>
+          <span className="aw180-hit-ring" />
           <span className="aw180-hitmarker">
             <i className="aw180-hit-l1" />
             <i className="aw180-hit-l2" />

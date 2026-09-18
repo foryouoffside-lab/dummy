@@ -1,9 +1,10 @@
-import GridMemorizationClient from './GridMemorizationClient';
+import GridMemorizationClient from './GridMemorizationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: 'Visual Memory Test - Free Grid Pattern Memory Game',
+  title: 'Visual Memory Test – Grid Pattern Memory Game | SkillDrills',
   description: 'Free visual memory test. Memorise grid patterns on expanding boards and track your visual memory span. No sign-up, plays in your browser.',
   keywords: [
     'visual memory test',
@@ -41,6 +42,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/memory/spatial-memory/grid-memorization',
+    languages: getAlternateLanguages('/drills/memory/spatial-memory/grid-memorization'),
   },
 };
 
@@ -90,6 +92,31 @@ export default function GridMemorizationPage() {
     },
     "isAccessibleForFree": true,
     "dateModified": "2026-09-05"
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Visual Memory Test (Grid Memorization)",
+    "description": "Interactive spatial working memory assessment testing matrix visual recall, shape chunking, and visuospatial storage capacity.",
+    "url": "https://skilldrills.online/drills/memory/spatial-memory/grid-memorization",
+    "genre": ["Memory Game", "Cognitive Training", "Brain Game"],
+    "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "value": 1
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "SkillDrills"
+    }
   };
 
   const faqSchema = {
@@ -187,25 +214,33 @@ export default function GridMemorizationPage() {
     "step": [
       {
         "@type": "HowToStep",
-        "position": 1,
+      "position": 1,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/grid-memorization#step-1",
+        
         "name": "Anchor Central Gaze",
         "text": "Fixate your eyes at the center of the grid prior to pattern illumination to exploit parafoveal vision across the entire matrix."
       },
       {
         "@type": "HowToStep",
-        "position": 2,
+      "position": 2,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/grid-memorization#step-2",
+        
         "name": "Execute Gestalt Shape Chunking",
         "text": "Group lit cells into geometric clusters (corners, lines, blocks) rather than trying to memorize isolated coordinates."
       },
       {
         "@type": "HowToStep",
-        "position": 3,
+      "position": 3,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/grid-memorization#step-3",
+        
         "name": "Engage Motor-Spatial Tracing",
         "text": "Mentally trace a continuous line through the highlighted cells during the 1.5-second exposure window to prime motor recall."
       },
       {
         "@type": "HowToStep",
-        "position": 4,
+      "position": 4,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/grid-memorization#step-4",
+        
         "name": "Systematic Matrix Reconstruction",
         "text": "Click the recognized shape clusters first, then fill in isolated peripheral cells before the visual trace fades."
       }
@@ -296,13 +331,22 @@ export default function GridMemorizationPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <GridMemorizationClient />
+      <GridMemorizationClient
+        copy={{
+          h1Keyword: "Visual Memory Test",
+          h1Suffix: " – Free Grid Pattern Memory Game"
+        }}
+      />
       <DrillGuide guide={gridGuide} />
     </>
   );

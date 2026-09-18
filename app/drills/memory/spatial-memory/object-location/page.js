@@ -1,9 +1,10 @@
-import ObjectLocationClient from './ObjectLocationClient';
+import ObjectLocationClient from './ObjectLocationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: 'Object Location Memory Test - Free Spatial Recall',
+  title: 'Object Location Memory Test – Spatial Recall | SkillDrills',
   description: 'Free object location memory test. Remember what was where on expanding grids and measure your spatial position recall.',
   keywords: [
     'object location memory test',
@@ -25,6 +26,11 @@ export const metadata = {
     'spatial cognitive mapping',
     'visual object location test'
   ],
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/memory/spatial-memory/object-location',
+    languages: getAlternateLanguages('/drills/memory/spatial-memory/object-location'),
+  },
+  robots: { index: true, follow: true },
   openGraph: {
     title: 'Object Location Memory Test - Free Spatial Recall',
     description: 'Assess and strengthen spatial position memory with the Object Location Memory Test. Memorize object placements on expanding 3x3 to 7x7 matrices in 1.5s and retrieve target coordinates.',
@@ -37,10 +43,6 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Object Location Memory Test - Free Spatial Recall',
     description: 'Assess and strengthen spatial position memory with the Object Location Memory Test. Memorize object placements on expanding 3x3 to 7x7 matrices in 1.5s and retrieve target coordinates.',
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/memory/spatial-memory/object-location',
   },
 };
 
@@ -90,6 +92,28 @@ export default function ObjectLocationPage() {
     },
     "isAccessibleForFree": true,
     "dateModified": "2026-09-05"
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Object Location Memory Test",
+    "description": "Interactive spatial position assessment testing visual object-location feature binding, spatial mapping, and matrix position recall.",
+    "url": "https://skilldrills.online/drills/memory/spatial-memory/object-location",
+    "genre": ["Memory Game", "Cognitive Training", "Spatial Memory"],
+    "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "value": 1
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
   };
 
   const faqSchema = {
@@ -187,25 +211,33 @@ export default function ObjectLocationPage() {
     "step": [
       {
         "@type": "HowToStep",
-        "position": 1,
+      "position": 1,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/object-location#step-1",
+        
         "name": "Scan Grid Quadrants",
         "text": "Immediately partition the grid into 4 sectors (top-left, top-right, bottom-left, bottom-right) as the objects appear."
       },
       {
         "@type": "HowToStep",
-        "position": 2,
+      "position": 2,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/object-location#step-2",
+        
         "name": "Anchor to Landmarks",
         "text": "Bind each object's identity to fixed landmarks such as corners, edges, or the center cell."
       },
       {
         "@type": "HowToStep",
-        "position": 3,
+      "position": 3,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/object-location#step-3",
+        
         "name": "Form Semantic-Spatial Pairs",
         "text": "Create quick verbal or visual associations linking the object's identity with its position (e.g. 'star in top-right corner')."
       },
       {
         "@type": "HowToStep",
-        "position": 4,
+      "position": 4,
+      "url": "https://skilldrills.online/drills/memory/spatial-memory/object-location#step-4",
+        
         "name": "Execute Precise Target Localization",
         "text": "When prompted with the target icon, mentally query your landmark map and tap the exact recalled cell."
       }
@@ -296,13 +328,22 @@ export default function ObjectLocationPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <ObjectLocationClient />
+      <ObjectLocationClient
+        copy={{
+          h1Keyword: "Object Location Memory Test",
+          h1Suffix: " - Free Spatial Recall"
+        }}
+      />
       <DrillGuide guide={objectLocationGuide} />
     </>
   );

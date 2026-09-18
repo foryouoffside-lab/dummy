@@ -350,34 +350,32 @@ export default function RapidTappingPreview() {
       // Professional FPS Gaming Reticle Cursor (matching client exact reticle geometry)
       const px = state.cursor.x;
       const py = state.cursor.y;
+      const chColor = primaryColor;
 
       ctx.save();
-      ctx.shadowColor = primaryColor;
-      ctx.shadowBlur = 5;
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      const gap = 3.5;
-      const len = 6;
-      ctx.strokeStyle = primaryColor;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
       ctx.lineWidth = 1.6;
-      ctx.lineCap = 'round';
-
-      // 4 Cross lines
       ctx.beginPath();
-      ctx.moveTo(px, py - gap); ctx.lineTo(px, py - gap - len);
-      ctx.moveTo(px, py + gap); ctx.lineTo(px, py + gap + len);
-      ctx.moveTo(px - gap, py); ctx.lineTo(px - gap - len, py);
-      ctx.moveTo(px + gap, py); ctx.lineTo(px + gap + len, py);
+      ctx.arc(px, py, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Outer faint ring
-      ctx.strokeStyle = isLow ? 'rgba(239, 68, 68, 0.45)' : 'rgba(217, 70, 239, 0.45)';
-      ctx.lineWidth = 1;
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.arc(px, py, 11, 0, Math.PI * 2);
+      ctx.moveTo(px, py - tickLen); ctx.lineTo(px, py - gap);
+      ctx.moveTo(px, py + tickLen); ctx.lineTo(px, py + gap);
+      ctx.moveTo(px - tickLen, py); ctx.lineTo(px - gap, py);
+      ctx.moveTo(px + tickLen, py); ctx.lineTo(px + gap, py);
       ctx.stroke();
 
       // Center pip
-      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(px, py, 1.8, 0, Math.PI * 2);
       ctx.fill();

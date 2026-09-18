@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function InfinityPursuitClient() {
+export default function InfinityPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -384,13 +384,13 @@ export default function InfinityPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Infinity Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Figure-8 Eye Tracking Exercise
+              <span data-seo-kw="1">{copy?.title || "Infinity Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Figure-8 Eye Tracking Exercise"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Figure-8 eye tracking conditions multi-axial smooth pursuit by guiding gaze continuously across intersecting horizontal and vertical planes (Barnes, 2008). Following the smooth curvature of the Lemniscate loop trains coordinated extraocular muscle synergies, minimizing catch-up saccades and stabilizing foveal focus (Robinson, 1965; Leigh & Zee, 2015). Pursuit tracks accurately up to roughly 30&deg;/s in any direction, so the curve exposes whichever axis your gain drops on first (Krauzlis, 2004).
+              {copy?.description || "Figure-8 eye tracking conditions multi-axial smooth pursuit by guiding gaze continuously across intersecting horizontal and vertical planes (Barnes, 2008). Following the smooth curvature of the Lemniscate loop trains coordinated extraocular muscle synergies, minimizing catch-up saccades and stabilizing foveal focus (Robinson, 1965; Leigh & Zee, 2015). Pursuit tracks accurately up to roughly 30°/s in any direction, so the curve exposes whichever axis your gain drops on first (Krauzlis, 2004)."}
             </p>
           </div>
         )}

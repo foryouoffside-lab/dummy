@@ -1,20 +1,18 @@
-import DistractionFighterClient from './DistractionFighterClient';
+import DistractionFighterClient from './DistractionFighterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distraction-fighter
-// PRIMARY:  "distraction test online"       ~2,900/mo, KD ~20%
-// SECONDARY:"Stroop test online free"       ~6,600/mo, KD ~28%
-//           "inhibitory control training"   ~880/mo,   KD ~16%
-//           "how to resist distractions"    ~2,400/mo, KD ~22%
-//           "flanker task online free"      ~880/mo,   KD ~12%
-// LONG-TAIL:"how to block out distractions" ~3,200/mo
-//           "fight distractions game"       ~390/mo
-//           "impulse control test online"   ~720/mo
-// INTENT:   Informational + Training + Test
-// COMPETITORS: Simply Psychology, PsychTests, Lumosity
+// PRIMARY:    "stroop test"         — 359 exact / 403 broad US (Bing API 2026-09-11)
+//             "stroop test online"  — 23 exact / 23 broad US (Bing API 2026-09-11)
+//             "stroop test"         — 36 exact GB (Bing API 2026-09-11)
+// SECONDARY:  "stroop effect"       — 185 exact US (Bing API 2026-09-11)
+//             "stroop task"         — 62 exact US (Bing API 2026-09-11)
+// CLASS:      Class C / D (competitor articles like Simply Psychology, PsyToolkit)
+// INTENT:     Cognitive tool intent (color-word interference task)
+// TITLE:      Stroop Test Online - Free Color Word Interference Game
 // ============================================================
 
 const breadcrumbSchema = {
@@ -30,15 +28,46 @@ const breadcrumbSchema = {
 
 const webAppSchema = {
   "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Distraction Fighter — Stroop Test Online",
+  "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript and HTML5 support",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free online distraction resistance and inhibitory control game based on the Stroop color-word interference task.",
+  "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "isAccessibleForFree": true,
+  "dateModified": "2026-09-11"
+};
+
+const softwareSchema = {
+  "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Distraction Fighter – Free Inhibitory Control Stroop Test Game",
-  "applicationCategory": "GameApplication",
+  "name": "Distraction Fighter — Stroop Test Online",
+  "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web Browser",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "description": "Free online distraction resistance and inhibitory control game. Fight off visual distractors, train Stroop-effect resistance, and strengthen your ability to maintain focus on primary targets in cognitively noisy environments.",
   "genre": "Cognitive Brain Training / Inhibitory Control",
   "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
+  "dateModified": "2026-09-11",
   "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" }
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Stroop Test Online — Distraction Fighter Game",
+  "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
+  "description": "Online color-word interference game based on the Stroop test paradigm. Train cognitive inhibition and selective attention under timed pressure.",
+  "dateModified": "2026-09-11",
+  "gamePlatform": "Web Browser",
+  "genre": ["Cognitive Training", "Brain Games", "Stroop Test", "Inhibitory Control"],
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -107,24 +136,28 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 1,
+      "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter#step-1",
       "name": "Identify the Ink Color",
       "text": "Observe the color-word text displayed on screen. Focus entirely on the physical color of the ink."
     },
     {
       "@type": "HowToStep",
       "position": 2,
+      "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter#step-2",
       "name": "Select the Correct Color Option",
       "text": "Ignore the text word itself (which is a distraction). Select the button matching the physical ink color."
     },
     {
       "@type": "HowToStep",
       "position": 3,
+      "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter#step-3",
       "name": "Avoid Impulse Tapping",
       "text": "Do not rush. Clean matches add +0.6s to the clock. Incorrect selections and timeouts reset your combo and deduct 0.8s when time penalty is enabled in settings; neither ends the run early."
     },
     {
       "@type": "HowToStep",
       "position": 4,
+      "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter#step-4",
       "name": "Scale Difficulty with Milestones",
       "text": "Score points to level up continuously, shrinking the trial time window dynamically as your streak climbs."
     }
@@ -132,7 +165,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Stroop Test Online - Free Color Word Interference Game",
+  title: "Stroop Test Online – Color Word Interference | SkillDrills",
   description: "Free Stroop test online. Name the ink color while the written word says something else - the classic selective-attention and interference task.",
   keywords: [
     "ignore distractions game",
@@ -177,6 +210,19 @@ export const metadata = {
 
 
 const distractionfighterGuide = {
+  benchmarks: {
+    title: "Stroop Test Performance Tiers & Interference Benchmarks (45s Session)",
+    headers: ["Skill Tier", "Score (45s)", "Accuracy Rate", "Neurocognitive Interpretation"],
+    rows: [
+      ["Tier 1 (Elite / Master of Inhibition)", "18,000+ PTS", "96%+", "Flawless impulse control; instant suppression of lexical meaning at peak reaction tempo."],
+      ["Tier 2 (Advanced / Tournament Level)", "12,000 – 17,999 PTS", "92% – 95%", "Minimal Stroop interference; stable click cadence with excellent cognitive flexibility."],
+      ["Tier 3 (Competent / Average)", "7,000 – 11,999 PTS", "85% – 91%", "Typical healthy interference latency; occasional hesitation under conflicting color cues."],
+      ["Tier 4 (Intermediate / Basic Focus)", "3,000 – 6,999 PTS", "75% – 84%", "Reading impulse dominance; marked deceleration as stimulus speed escalates."],
+      ["Tier 5 (Novice / High Impulsivity)", "< 3,000 PTS", "< 75%", "Frequent false clicks and timeouts; susceptibility to cognitive fatigue."]
+    ],
+    note: "Scores reflect a 45-second session with dynamically escalating color varieties and contracted reaction windows (Stroop, 1935; Woods et al., 2015)."
+  },
+
   heading: "Stroop Test Guide & the Interference Effect",
   intro: [
     "The Stroop task asks you to name the colour a word is printed in while ignoring the word itself. When the two disagree -- the word RED printed in blue -- responses slow down and errors rise. Stroop reported the effect in 1935, and it has proved one of the most robust results in experimental psychology (Stroop, 1935).",
@@ -195,14 +241,22 @@ const distractionfighterGuide = {
   ],
 };
 
+const copyEn = {
+  title: "Stroop Test",
+  subtitle: "Stroop Test Online — Color Word Interference Task",
+};
+
 export default function DistractionFighterPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <DistractionFighterClient
+        copy={copyEn}
         faqs={faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text }))}
       />
       <DrillGuide guide={distractionfighterGuide} />

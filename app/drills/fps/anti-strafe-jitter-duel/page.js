@@ -1,9 +1,9 @@
-import AntiStrafeJitterClient from './AntiStrafeJitterClient';
+import AntiStrafeJitterClient from './AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Anti-Strafe Jitter Trainer - Reactive Tracking Aim",
+    title: "Anti-Strafe Jitter Trainer – Reactive Aim | SkillDrills",
   description: "Free anti-strafe jitter trainer. Train reactive tracking and micro-corrections against fast ADAD strafes for Apex, Overwatch 2 and Warzone.",
   keywords: [
     "anti strafe jitter trainer",
@@ -26,13 +26,14 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
+    languages: getAlternateLanguages('/drills/fps/anti-strafe-jitter-duel'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Anti-Strafe Jitter Trainer - Reactive Tracking Aim",
+      title: "Anti-Strafe Jitter Trainer – Reactive Aim | SkillDrills",
     description: "Train reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking for competitive games like Apex Legends, Overwatch 2 & Warzone with raw pointer lock.",
     url: "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
     siteName: 'SkillDrills',
@@ -41,7 +42,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Anti-Strafe Jitter Trainer - Reactive Tracking Aim",
+      title: "Anti-Strafe Jitter Trainer – Reactive Aim | SkillDrills",
     description: "Train reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking for competitive games like Apex Legends, Overwatch 2 & Warzone with raw pointer lock.",
   },
 };
@@ -55,6 +56,22 @@ export default function AntiStrafeJitterPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Anti-Strafe Jitter Trainer", "item": "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Anti-Strafe Jitter Trainer",
+    "url": "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser-based anti-strafe jitter aim trainer. Master reactive tracking against high-frequency ADAD strafes for Apex Legends and Overwatch 2."
   };
 
   const softwareSchema = {
@@ -186,18 +203,27 @@ export default function AntiStrafeJitterPage() {
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Calibrate Sensitivity",
-        "text": "Match your in-game sensitivity using the Universal Sensitivity Selector to ensure 1:1 muscle memory transfer."
+        "position": 1,
+        "name": "Calibrate Game Sensitivity",
+        "text": "Match your in-game sensitivity in Session Settings to mirror your 1:1 hardware coordinate mapping."
       },
       {
         "@type": "HowToStep",
-        "name": "Lock Foveal Focus on Target",
-        "text": "Maintain visual gaze directly on the target sphere rather than your crosshair to process velocity changes automatically."
+        "position": 2,
+        "name": "Engage Raw Pointer Lock",
+        "text": "Click 'Start Drill' to lock the system cursor and eliminate browser mouse acceleration curves."
       },
       {
         "@type": "HowToStep",
+        "position": 3,
+        "name": "Lock Foveal Gaze on Target Sphere",
+        "text": "Maintain visual attention directly on the target sphere rather than your crosshair to read direction shifts automatically."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
         "name": "Execute Relaxed Micro-Reversals",
-        "text": "Keep your grip tension low and reverse direction smoothly as the target jitters, avoiding violent over-flicks."
+        "text": "Keep your grip tension loose and reverse direction smoothly with wrist and fingertips as the target jitters, avoiding violent over-flicks."
       }
     ]
   };
@@ -280,6 +306,10 @@ export default function AntiStrafeJitterPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -290,7 +320,12 @@ export default function AntiStrafeJitterPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <AntiStrafeJitterClient />
+      <AntiStrafeJitterClient
+        copy={{
+          h1Keyword: "Anti-Strafe Jitter Trainer",
+          h1Suffix: " - Reactive Tracking Aim"
+        }}
+      />
       <DrillGuide guide={antiStrafeGuide} />
     </>
   );

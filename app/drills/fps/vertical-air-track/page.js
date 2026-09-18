@@ -1,36 +1,35 @@
-import VerticalAirTrackClient from './VerticalAirTrackClient';
+import VerticalAirTrackClient from './VerticalAirTrackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Vertical Aim Trainer | SkillDrills",
+  title: 'Vertical Aim Trainer – Y-Axis Air Tracking | SkillDrills',
   description: "Free vertical aim trainer. Track targets on the Y-axis and predict falling arcs for airborne fights in Apex Legends, Overwatch 2 and Halo Infinite.",
   keywords: [
-    "vertical aim trainer",
-    "vertical aim training",
-    "vertical tracking trainer",
-    "y axis aim trainer",
-    "y axis mouse control drill",
-    "aerial target tracking",
-    "popcorn tracking aim practice",
-    "air tracking trainer",
-    "apex legends vertical aim",
-    "overwatch air tracking",
-    "parabolic arc tracking drill",
-    "airborne target tracking fps",
-    "free vertical aim trainer",
-    "垂直 エイム 練習",
-    "수직 에임 연습"
+    'vertical aim trainer',
+    'vertical aim training',
+    'vertical tracking trainer',
+    'y axis aim trainer',
+    'y axis mouse control drill',
+    'aerial target tracking',
+    'popcorn tracking aim practice',
+    'air tracking trainer',
+    'apex legends vertical aim',
+    'overwatch air tracking',
+    'parabolic arc tracking drill',
+    'free vertical aim trainer'
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/vertical-air-track",
+    languages: getAlternateLanguages('/drills/fps/vertical-air-track'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Vertical Aim Trainer | SkillDrills",
+    title: 'Vertical Aim Trainer – Y-Axis Air Tracking | SkillDrills',
     description: "Improve your Y-axis mouse control, aerial target tracking, and parabolic arc prediction with our free Vertical Aim Trainer for Apex Legends, Overwatch 2, and Halo Infinite.",
     url: "https://skilldrills.online/drills/fps/vertical-air-track",
     siteName: 'SkillDrills',
@@ -39,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Vertical Aim Trainer | SkillDrills",
+    title: 'Vertical Aim Trainer – Y-Axis Air Tracking | SkillDrills',
     description: "Improve your Y-axis mouse control, aerial target tracking, and parabolic arc prediction with our free Vertical Aim Trainer for Apex Legends, Overwatch 2, and Halo Infinite.",
   },
 };
@@ -61,7 +60,7 @@ export default function VerticalAirTrackPage() {
     "name": "Vertical Aim Trainer",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
-    "dateModified": "2026-09-05",
+    "dateModified": "2026-09-11",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "description": "A free browser FPS drill training vertical aim, aerial target tracking, Y-axis mouse control, and jump shot prediction for Apex Legends, Overwatch 2, and Halo Infinite.",
     "genre": "FPS Training / Vertical & Aerial Tracking",
@@ -73,13 +72,26 @@ export default function VerticalAirTrackPage() {
     }
   };
 
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Vertical Aim Trainer",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Web Browser",
+    "dateModified": "2026-09-11",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "browserRequirements": "Requires Pointer Lock API, JavaScript, HTML5 Canvas",
+    "description": "A free browser FPS drill training vertical aim, aerial target tracking, Y-axis mouse control, and jump shot prediction for Apex Legends, Overwatch 2, and Halo Infinite.",
+    "url": "https://skilldrills.online/drills/fps/vertical-air-track"
+  };
+
   const videoGameSchema = {
     "@context": "https://schema.org",
     "@type": "VideoGame",
     "name": "Vertical Aim Trainer",
     "url": "https://skilldrills.online/drills/fps/vertical-air-track",
     "description": "A free browser FPS drill training vertical aim, aerial target tracking, Y-axis mouse control, and jump shot prediction for Apex Legends, Overwatch 2, and Halo Infinite.",
-    "dateModified": "2026-09-05",
+    "dateModified": "2026-09-11",
     "gamePlatform": "Web Browser",
     "genre": ["FPS Training", "Aim Trainer", "Vertical Tracking"],
     "playMode": "SinglePlayer",
@@ -91,7 +103,7 @@ export default function VerticalAirTrackPage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "dateModified": "2026-09-05",
+    "dateModified": "2026-09-11",
     "mainEntity": [
       {
         "@type": "Question",
@@ -181,21 +193,34 @@ export default function VerticalAirTrackPage() {
     "@type": "HowTo",
     "name": "How to Train Vertical Y-Axis Tracking",
     "description": "Step-by-step instructions to train aerial tracking, parabolic arc prediction, and vertical mouse control.",
-    "step": [
+        "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Center Reticle and Engage Pointer Lock",
-        "text": "Calibrate your sensitivity, lock the mouse cursor to the canvas, and rest your forearm comfortably on the mouse pad."
+        "text": "Calibrate your sensitivity, lock the mouse cursor to the canvas, and rest your forearm comfortably on the mouse pad.",
+        "url": "https://skilldrills.online/drills/fps/vertical-air-track#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Match Parabolic Ascent and Apex Velocity",
-        "text": "Track the rising aerial target smoothly, anticipating deceleration at the apex of the jump arc where relative velocity drops."
+        "text": "Track the rising aerial target smoothly, anticipating deceleration at the apex of the jump arc where relative velocity drops.",
+        "url": "https://skilldrills.online/drills/fps/vertical-air-track#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Execute Smooth Gravitational Pull-Downs",
-        "text": "When the target accelerates downward under gravity, draw the mouse straight down with relaxed wrist extension without horizontal jitter."
+        "text": "When the target accelerates downward under gravity, draw the mouse straight down with relaxed wrist extension without horizontal jitter.",
+        "url": "https://skilldrills.online/drills/fps/vertical-air-track#step-3"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Accelerate Ground Interception and Reset Reticle",
+        "text": "Sustain tracking contact as the target accelerates toward the floor, eliminating bounce drift and recentering for the subsequent launch.",
+        "url": "https://skilldrills.online/drills/fps/vertical-air-track#step-4"
       }
     ]
   };
@@ -255,8 +280,6 @@ export default function VerticalAirTrackPage() {
     ],
     audience: "Competitive FPS players in Apex Legends, Overwatch 2, Halo Infinite, and Destiny 2 seeking elite Y-axis mouse control, effortless aerial beam tracking, and mastery of jump-pad and elevator peek engagements.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-    // Works named in this page's copy, with DOIs so a reader or an answer
-    // engine can check the figures rather than take them on trust.
     sources: pickSources('woods2015', 'krauzlis2004', 'fitts1954', 'rashbass1961', 'land2000'),
     related: [
       { href: "/drills/fps/pro-smooth-pursuit", label: "Smooth Pursuit Aim Trainer" },
@@ -279,6 +302,10 @@ export default function VerticalAirTrackPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -289,7 +316,12 @@ export default function VerticalAirTrackPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <VerticalAirTrackClient />
+      <VerticalAirTrackClient
+        copy={{
+          h1Keyword: "Vertical Aim Trainer",
+          h1Suffix: " - Free Airborne Tracking Drill"
+        }}
+      />
       <DrillGuide guide={verticalAirTrackGuide} />
     </>
   );

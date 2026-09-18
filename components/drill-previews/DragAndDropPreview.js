@@ -63,6 +63,7 @@ export default function DragAndDropPreview() {
       },
       particles: [],
       hitMarkers: [],
+      hitRings: [],
       screenShake: 0,
     };
 
@@ -233,6 +234,7 @@ export default function DragAndDropPreview() {
           state.screenShake = 3.5;
 
           spawnExplosion(b.x, b.y);
+          state.hitRings.push({ x: b.x, y: b.y, r: b.r, life: 1.0, color: '#38bdf8' });
           state.hitMarkers.push({ x: b.x, y: b.y, life: 1.0 });
         }
       } else if (state.phase === 'drop') {
@@ -261,6 +263,15 @@ export default function DragAndDropPreview() {
         hm.life -= dt * 4.2;
         if (hm.life <= 0) {
           state.hitMarkers.splice(i, 1);
+        }
+      }
+
+      for (let i = state.hitRings.length - 1; i >= 0; i--) {
+        const hr = state.hitRings[i];
+        hr.r += dt * 45;
+        hr.life -= dt * 3.2;
+        if (hr.life <= 0) {
+          state.hitRings.splice(i, 1);
         }
       }
 
@@ -369,6 +380,17 @@ export default function DragAndDropPreview() {
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+      }
+
+      for (const hr of state.hitRings) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, hr.life * 0.8);
+        ctx.strokeStyle = hr.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(hr.x, hr.y, hr.r, 0, Math.PI * 2);
+        ctx.stroke();
         ctx.restore();
       }
 

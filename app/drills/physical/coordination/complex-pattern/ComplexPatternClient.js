@@ -15,7 +15,7 @@ import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -104,7 +104,7 @@ const getLevelConfig = (level, combo = 0) => {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function ComplexPatternClient() {
+export default function ComplexPatternClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -150,7 +150,7 @@ export default function ComplexPatternClient() {
     phase: 'memorize', // 'memorize' | 'draw' | 'result'
     phaseTimer: 0,
     patternsCompleted: 0, misses: 0, totalAccuracySum: 0, totalAttempts: 0,
-    particles: [], screenShake: 0,
+    particles: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 100
   });
 
@@ -380,6 +380,7 @@ export default function ComplexPatternClient() {
       if (e.targetPattern.length > 0) {
         const lastP = e.targetPattern[e.targetPattern.length - 1];
         createExplosion(lastP.x, lastP.y, '#10b981');
+        e.hitRings.push(createHitRing(lastP.x, lastP.y, 14, '#10b981'));
       }
 
       triggerFlash('green');
@@ -468,7 +469,7 @@ export default function ComplexPatternClient() {
       score: 0, level: startLevel, combo: 1.0, streak: 0, bestStreak: 0, timeLeft: DRILL_DURATION,
       targetPattern: [], userDrawing: [], isDrawing: false, phase: 'memorize', phaseTimer: 0,
       patternsCompleted: 0, misses: 0, totalAccuracySum: 0, totalAttempts: 0,
-      particles: [], screenShake: 0,
+      particles: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h, peakSpeed: getLevelConfig(startLevel, 0).requiredAccuracy
     };
 
@@ -752,6 +753,8 @@ export default function ComplexPatternClient() {
       }
       ctx.globalAlpha = 1.0;
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.restore();
       if (gameState !== 'gameOver') {
         animationRef.current = requestAnimationFrame(loop);
@@ -799,7 +802,12 @@ export default function ComplexPatternClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Pattern memory game
+              <span data-seo-kw="1">{copy?.title || "Pattern Memory Game"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
             </h1>
             <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
               A pattern memory game asks you to hold a route in mind and then reproduce it. Spatial layouts are held in a limited, separate store from verbal material &mdash; the visuospatial sketchpad of working memory (Baddeley &amp; Hitch, 1974) &mdash; and estimates of how much fits in it cluster around four items rather than the seven often quoted (Cowan, 2001). This drill scales to 8 waypoints over a 45-second session, so the later patterns are deliberately past most people&apos;s span.
@@ -902,8 +910,8 @@ export default function ComplexPatternClient() {
             <FpsStartCard
               icon={GitBranch}
               accent="purple"
-              title="Pattern Memory Game"
-              subtitle="Spatial Working Memory & Vector Tracing • 15 Levels"
+              title={copy?.title || "Pattern Memory Game"}
+              subtitle={copy?.subtitle || "Spatial Working Memory & Vector Tracing • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -911,7 +919,7 @@ export default function ComplexPatternClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.hudLabels?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN */}
@@ -919,7 +927,7 @@ export default function ComplexPatternClient() {
             <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
               
               {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(168,85,247,.12), transparent 70%)' }}>
+              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(147,51,234,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
                     NEW BEST
@@ -934,7 +942,7 @@ export default function ComplexPatternClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.hudLabels?.points || 'Points'}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -944,19 +952,19 @@ export default function ComplexPatternClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.accuracy || 'Avg Accuracy'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.sequencesCleared}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Traced</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.traced || 'Traced'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.missedSequences}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Missed</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.missed || 'Missed'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.hudLabels?.peakLevel || 'Peak Level'}</p>
                   </div>
                 </div>
 
@@ -966,7 +974,7 @@ export default function ComplexPatternClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.hudLabels?.playAgain || 'Play Again'}
                   </button>
                   <button 
                     onClick={shareScore} 
@@ -994,12 +1002,12 @@ export default function ComplexPatternClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rules || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -1010,21 +1018,27 @@ export default function ComplexPatternClient() {
 
             <DrillAccordion
               id="about"
-              title="About Pattern Memory Game"
+              title={copy?.aboutTitle || "About Pattern Memory Game"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <GitBranch className="w-4 h-4 text-purple-400" /> Spatial Working Memory &amp; Multi-Node Path Tracing
+                    <GitBranch className="w-4 h-4 text-purple-400" /> {copy?.aboutHeading || "Spatial Working Memory & Multi-Node Path Tracing"}
                   </h3>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    The <strong>Pattern Memory Game</strong> tests spatial working memory, visual geometry retention, and fine motor vector reproduction under time pressure. Players study multi-node geometric paths flashed briefly on canvas and reproduce them accurately from memory.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    Grounded in Alan Baddeley&apos;s (1974) visuospatial sketchpad model and Nelson Cowan&apos;s (2001) working memory capacity research, the drill stresses cognitive buffering limits. As difficulty rises to Level 15+, node counts scale from 3 up to 8 waypoints while memorization flash durations shorten to 0.6 seconds, training serial motor chunking (Lashley 1951) and precise trajectory execution (Woodworth 1899).
-                  </p>
+                  {copy?.aboutText ? (
+                    <p className="text-sm leading-relaxed text-gray-300">{copy.aboutText}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        The <strong>Pattern Memory Game</strong> tests spatial working memory, visual geometry retention, and fine motor vector reproduction under time pressure. Players study multi-node geometric paths flashed briefly on canvas and reproduce them accurately from memory.
+                      </p>
+                      <p className="text-sm leading-relaxed text-gray-300">
+                        Grounded in Alan Baddeley&apos;s (1974) visuospatial sketchpad model and Nelson Cowan&apos;s (2001) working memory capacity research, the drill stresses cognitive buffering limits. As difficulty rises to Level 15+, node counts scale from 3 up to 8 waypoints while memorization flash durations shorten to 0.6 seconds, training serial motor chunking (Lashley 1951) and precise trajectory execution (Woodworth 1899).
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

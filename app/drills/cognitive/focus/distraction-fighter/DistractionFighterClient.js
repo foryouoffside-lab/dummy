@@ -22,6 +22,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -105,7 +106,18 @@ const RELATED_DRILLS = [
   { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" }
 ];
 
-export default function DistractionFighterClient({ faqs }) {
+const COLOR_TRANSLATIONS = {
+  ja: { Red: '赤', Blue: '青', Green: '緑', Yellow: '黄', Purple: '紫', Orange: '橙' },
+  de: { Red: 'Rot', Blue: 'Blau', Green: 'Grün', Yellow: 'Gelb', Purple: 'Lila', Orange: 'Orange' },
+  ko: { Red: '빨강', Blue: '파랑', Green: '초록', Yellow: '노랑', Purple: '보라', Orange: '주황' },
+};
+
+export default function DistractionFighterClient({ faqs, copy }) {
+  const { t, locale } = useTranslation();
+
+  const getColorLabel = (colorName) => {
+    return COLOR_TRANSLATIONS[locale]?.[colorName] || colorName;
+  };
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -478,8 +490,14 @@ export default function DistractionFighterClient({ faqs }) {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Stroop Test
+              {copy?.title || t('distractionFighter.title', 'Stroop Test')}
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                {copy?.subtitle || t('distractionFighter.subtitle', 'Color Word Interference Task')}
+              </span>
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              {copy?.caption || t('distractionFighter.caption', "Name the ink color while ignoring the word's meaning. The interference between automatic reading and color identification measures cognitive inhibition strength (Stroop, 1935).")}
+            </p>
           </div>
         )}
 
@@ -487,10 +505,10 @@ export default function DistractionFighterClient({ faqs }) {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore, tone: 'text-rose-400' },
-              { label: 'Time', value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Level', value: `L${uiLevel}`, tone: 'text-indigo-400' },
-              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+              { label: t('distractionFighter.score', 'Score'), value: uiScore, tone: 'text-rose-400' },
+              { label: t('distractionFighter.time', 'Time'), value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: t('distractionFighter.level', 'Level'), value: `L${uiLevel}`, tone: 'text-indigo-400' },
+              { label: t('distractionFighter.bestScore', 'Best Score'), value: bestScore, tone: 'text-amber-400' },
             ].map((s) => (
               <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
                 <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
@@ -516,14 +534,14 @@ export default function DistractionFighterClient({ faqs }) {
               {/* Score - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('distractionFighter.score', 'Score')}</p>
                   <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
                 </div>
               </div>
 
               {/* Time Remaining - Top Right */}
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{t('distractionFighter.timeLeft', 'Time Left')}</p>
                 <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -573,7 +591,7 @@ export default function DistractionFighterClient({ faqs }) {
               <div className="flex-1 flex flex-col items-center justify-center z-20">
                 <div className="text-center">
                   <span className="text-6xl sm:text-7xl font-black tracking-wider select-none" style={{ color: COLOR_STYLES[currentPrompt.inkName]?.hex || '#ffffff' }}>
-                    {currentPrompt.textName}
+                    {getColorLabel(currentPrompt.textName)}
                   </span>
                 </div>
               </div>
@@ -587,7 +605,7 @@ export default function DistractionFighterClient({ faqs }) {
                     onPointerDown={(e) => handleOptionClick(colName, e)}
                     className="py-3.5 sm:py-4 rounded-xl bg-black/60 border border-white/10 hover:border-white/30 text-white font-bold text-xs sm:text-sm uppercase tracking-wide cursor-pointer active:scale-95 transition-transform flex items-center justify-center"
                   >
-                    {colName}
+                    {getColorLabel(colName)}
                   </button>
                 ))}
               </div>
@@ -599,8 +617,8 @@ export default function DistractionFighterClient({ faqs }) {
             <FpsStartCard
               icon={ShieldCheck}
               accent="red"
-              title="Distraction Fighter"
-              subtitle="Stroop Interference • Executive Focus"
+              title={copy?.title || t('distractionFighter.startTitle', 'Distraction Fighter')}
+              subtitle={copy?.subtitle || t('distractionFighter.startSubtitle', 'Stroop Interference • Executive Focus')}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -608,7 +626,7 @@ export default function DistractionFighterClient({ faqs }) {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={t('distractionFighter.getReady', 'GET READY')} />
           )}
 
           {/* UNIVERSAL RESULT CARD */}
@@ -619,10 +637,10 @@ export default function DistractionFighterClient({ faqs }) {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Hits', value: analytics.successfulHits },
-                { label: 'Misses', value: analytics.mistakes },
-                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: t('distractionFighter.accuracy', 'Accuracy'), value: analytics.accuracy, suffix: '%' },
+                { label: t('distractionFighter.hits', 'Hits'), value: analytics.successfulHits },
+                { label: t('distractionFighter.misses', 'Misses'), value: analytics.mistakes },
+                { label: t('distractionFighter.peakLevel', 'Peak Level'), value: `Lv. ${analytics.finalLevel}` },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareResult}
@@ -635,7 +653,7 @@ export default function DistractionFighterClient({ faqs }) {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Select the button matching the ink color while ignoring the conflicting word meaning.
+            {t('distractionFighter.stageCaption', 'Select the button matching the ink color while ignoring the conflicting word meaning.')}
           </p>
         )}
 
@@ -644,12 +662,17 @@ export default function DistractionFighterClient({ faqs }) {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={t('distractionFighter.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                {RULES_ITEMS.map((item, i) => (
+                {[
+                  { title: t('distractionFighter.rule1Title', 'Stroop Effect Challenge'), text: t('distractionFighter.rule1Text', "A color word flashes on screen (e.g. 'BLUE'), printed in a conflicting ink color (e.g. RED ink).") },
+                  { title: t('distractionFighter.rule2Title', 'Target Selection Rule'), text: t('distractionFighter.rule2Text', "Tap the button matching the INK COLOR (e.g., tap Red), ignoring the semantic word meaning (+100 PTS × Combo × Level multiplier, +0.6s).") },
+                  { title: t('distractionFighter.rule3Title', 'Wrong Selections'), text: t('distractionFighter.rule3Text', "A wrong selection resets your combo (and deducts time if penalties are on). Nothing ends the run early — you play until the clock reaches zero.") },
+                  { title: t('distractionFighter.rule4Title', 'Streak & Penalty Rules'), text: t('distractionFighter.rule4Text', "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings.") },
+                ].map((item, i) => (
                   <div key={i} className="bg-[#0d0d18] p-4 rounded-xl border border-white/5">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
@@ -660,7 +683,7 @@ export default function DistractionFighterClient({ faqs }) {
 
             <DrillAccordion
               id="about"
-              title="About Distraction Fighter"
+              title={t('distractionFighter.aboutTitle', 'About Distraction Fighter')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -668,35 +691,35 @@ export default function DistractionFighterClient({ faqs }) {
                 <section>
                   <div className="space-y-4">
                     <p className="text-sm leading-relaxed text-gray-400">
-                      The Stroop effect is the delay you get naming the ink colour of a word that spells a different colour. Stroop first measured it in 1935, and it is one of the most reliable findings in psychology &mdash; the interference shows up in essentially every healthy adult (Stroop, 1935; MacLeod, 1991).
+                      {locale === 'ja' ? 'ストループ効果とは、文字の意味とインクの色が異なる単語を提示された際、インク色の命名に遅延が生じる現象です。J.R.ストループが1935年に報告して以来、実験心理学で最も堅牢かつ再現性の高い認知的知見の一つとされています（Stroop, 1935; MacLeod, 1991）。' : 'The Stroop effect is the delay you get naming the ink colour of a word that spells a different colour. Stroop first measured it in 1935, and it is one of the most reliable findings in psychology — the interference shows up in essentially every healthy adult (Stroop, 1935; MacLeod, 1991).'}
                     </p>
-                    {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                      <p key={i} className="text-sm leading-relaxed text-gray-400">{para}</p>
-                    ))}
+                    <p className="text-sm leading-relaxed text-gray-400">
+                      {locale === 'ja' ? '人間にとって文字の読解は高度に自動化された処理です。色名単語が異なるインク色で提示された場合、前頭前野（DLPFC）や前帯状皮質（ACC）が「単語を読んでしまう自動的な衝動」を強力に能動抑制（Inhibition）しなければなりません。' : 'Reading is an automated implicit cognitive process. When a color word is printed in a non-matching ink color, your brain\'s anterior cingulate cortex and dorsolateral prefrontal cortex must actively suppress the word meaning to report the ink color.'}
+                    </p>
                   </div>
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h5 className="text-xs font-bold text-white">{t('distractionFighter.card1Title', 'Who Should Use This?')}</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Open-office workers fighting visual and auditory noise, students building single-task discipline, and anyone who wants to strengthen impulse control against notifications.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('distractionFighter.card1Desc', 'Open-office workers fighting visual and auditory noise, students building single-task discipline, and anyone who wants to strengthen impulse control against notifications.')}</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h5 className="text-xs font-bold text-white">{t('distractionFighter.card2Title', 'Skills Improved')}</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Stroop interference resistance, cognitive inhibition, top-down attentional control, and resistance to the automatic orienting reflex.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('distractionFighter.card2Desc', 'Stroop interference resistance, cognitive inhibition, top-down attentional control, and resistance to the automatic orienting reflex.')}</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Brain className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Inhibitory Control</h5>
+                      <h5 className="text-xs font-bold text-white">{t('distractionFighter.card3Title', 'Inhibitory Control')}</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Suppress the automatic urge to read the word and tap its semantic color — success means isolating raw ink-color perception under time pressure.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{t('distractionFighter.card3Desc', 'Suppress the automatic urge to read the word and tap its semantic color — success means isolating raw ink-color perception under time pressure.')}</p>
                   </div>
                 </div>
               </div>
@@ -724,13 +747,13 @@ export default function DistractionFighterClient({ faqs }) {
         {!isFullscreen && (
           <section className="mt-4">
             <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Cognitive Drills
+              {t('distractionFighter.relatedTitle', 'Related Cognitive Drills')}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {RELATED_DRILLS.map((drill) => (
                 <Link
                   key={drill.id}
-                  href={drill.href}
+                  href={locale && locale !== 'en' ? `/${locale}${drill.href}` : drill.href}
                   className="group bg-[#0c0c16] border border-white/5 hover:border-rose-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
                 >
                   <div>

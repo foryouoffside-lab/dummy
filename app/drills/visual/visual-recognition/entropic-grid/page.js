@@ -1,4 +1,4 @@
-import EntropicGridClient from './EntropicGridClient';
+import EntropicGridClient from './EntropicGridClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -185,30 +185,52 @@ const faqSchema = {
   ]
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Entropic Grid Visual Search",
+  "url": "https://skilldrills.online/drills/visual/visual-recognition/entropic-grid",
+  "description": "Free entropic grid visual search test. Scan high-density dynamic noise matrices to rapidly detect target codes under shifting visual clutter.",
+  "genre": ["Action", "Brain Game", "Visual Search"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Visual Search Speed with Entropic Grid Drill",
-  "description": "Improve your selective attention and visual scanning speed using our free online Entropic Grid concentration test.",
+  "name": "How to Train Visual Scanning in High-Entropy Grids",
+  "description": "Step-by-step instructions to train visual recognition speed and distractor filtering using our Entropic Grid drill.",
   "dateModified": "2026-09-05",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Note the Target Code",
-      "text": "Observe the 2-character target code displayed prominently at the top of the grid."
+      "name": "Identify the Target Character Pair",
+      "text": "Examine the active 2-character target code displayed in the top HUD and prime your visual template for its features.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/entropic-grid#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Scan the 100-Cell Matrix",
-      "text": "Systematically scan the 10x10 matrix while filtering out stochastic background character shifts."
+      "name": "Deploy Serpentine Quadrant Sweeps",
+      "text": "Partition the 100-cell grid into quadrants and sweep systematically across rows to minimize redundant saccades.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/entropic-grid#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Click Matching Targets",
-      "text": "Click target cells immediately upon recognition to level up and advance difficulty before the 45-second timer expires."
+      "name": "Suppress Peripheral Entropy Regeneration",
+      "text": "Filter out background cell regeneration pulses and rely on parafoveal shape matching to locate candidate matches.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/entropic-grid#step-3"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Acquire Target and Re-index on Code Swap",
+      "text": "Tap the matching cell immediately to score points, and instantly update your memory buffer when the target code swaps.",
+      "url": "https://skilldrills.online/drills/visual/visual-recognition/entropic-grid#step-4"
     }
   ]
 };
@@ -223,7 +245,8 @@ export default function EntropicGridPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <EntropicGridClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <EntropicGridClient copy={{ title: "Entropic Grid Visual Search" }} />
       <DrillGuide
         eyebrow="Visual Cognition & Attention Psychophysics"
         title="The Science of Visual Search, Perceptual Load & Distractor Filtering"

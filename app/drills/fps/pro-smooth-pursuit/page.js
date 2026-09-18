@@ -1,9 +1,9 @@
-import ProSmoothPursuitClient from './ProSmoothPursuitClient';
+import ProSmoothPursuitClient from './ProSmoothPursuitClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Smooth Pursuit Aim Trainer — Curve Tracking | SkillDrills",
+  title: "Smooth Pursuit Aim Trainer – Curve Tracking | SkillDrills",
   description: "Free smooth pursuit aim trainer. Train continuous target tracking and velocity matching against high-mobility targets in Apex and Overwatch 2.",
   keywords: [
     "smooth pursuit aim trainer",
@@ -17,27 +17,18 @@ export const metadata = {
     "high ttk smooth pursuit drill",
     "free smooth pursuit aim trainer",
     "visual pursuit tracking drill",
-    "foveal vision aim trainer",
-    "jitter free tracking aim",
-    "fps smooth pursuit practice",
-    "valorant tracking practice",
-    "cs2 curve pursuit trainer",
-    "the finals tracking drill",
-    "continuous curve tracking aim",
-    "anti jitter aim drill",
-    "foveal gaze leading aim",
-    "スムーズ パシュート エイム",
-    "스무스 퍼슈트"
+    "foveal vision aim trainer"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/pro-smooth-pursuit",
+    languages: getAlternateLanguages('/drills/fps/pro-smooth-pursuit'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Smooth Pursuit Aim Trainer — Curve Tracking | SkillDrills",
+    title: "Smooth Pursuit Aim Trainer – Curve Tracking | SkillDrills",
     description: "Master continuous smooth pursuit, harmonic Lissajous curve tracking, and forearm motor stabilization for high-TTK FPS games like Apex Legends and Overwatch 2.",
     url: "https://skilldrills.online/drills/fps/pro-smooth-pursuit",
     siteName: 'SkillDrills',
@@ -46,7 +37,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Smooth Pursuit Aim Trainer — Curve Tracking | SkillDrills",
+    title: "Smooth Pursuit Aim Trainer – Curve Tracking | SkillDrills",
     description: "Master continuous smooth pursuit, harmonic Lissajous curve tracking, and forearm motor stabilization for high-TTK FPS games like Apex Legends and Overwatch 2.",
   },
 };
@@ -60,6 +51,22 @@ export default function ProSmoothPursuitPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Smooth Pursuit Aim Trainer", "item": "https://skilldrills.online/drills/fps/pro-smooth-pursuit" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Smooth Pursuit Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS drill training smooth pursuit aiming, harmonic Lissajous curve reading, and forearm motor stabilization for competitive games."
   };
 
   const softwareSchema = {
@@ -191,23 +198,31 @@ export default function ProSmoothPursuitPage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Configure Game Sensitivity",
-        "text": "Adjust your DPI, primary game, and sensitivity in Session Settings to preserve 1:1 hardware coordinates."
+        "text": "Adjust your DPI, primary game, and sensitivity in Session Settings to preserve 1:1 hardware coordinates.",
+        "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Engage Raw Pointer Lock",
-        "text": "Click 'Start Drill' to enter fullscreen mode and lock the system cursor to bypass OS mouse acceleration."
+        "text": "Click 'Start Drill' to enter fullscreen mode and lock the system cursor to bypass OS mouse acceleration.",
+        "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Fixate Foveal Gaze on Target Model",
-        "text": "Focus your eyes directly on the leading edge of the moving target rather than watching your crosshair."
+        "text": "Focus your eyes directly on the leading edge of the moving target rather than watching your crosshair.",
+        "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Match Continuous Curve Velocity",
-        "text": "Glide your mouse with relaxed forearm pressure, matching target speed and phase through harmonic direction shifts."
+        "text": "Glide your mouse with relaxed forearm pressure, matching target speed and phase through harmonic direction shifts.",
+        "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit#step-4"
       }
     ]
   };
@@ -271,41 +286,36 @@ export default function ProSmoothPursuitPage() {
     // engine can check the figures rather than take them on trust.
     sources: pickSources('woods2015', 'krauzlis2004', 'green2003', 'rashbass1961', 'land2000'),
     related: [
-      { href: "/drills/fps/fps-tracking-trainer", label: "FPS Tracking Speed Trainer" },
+      { href: "/drills/fps/anti-zigzag-movement-trainer", label: "Anti-Zigzag Aim Trainer" },
       { href: "/drills/fps/anti-strafe-jitter-duel", label: "Anti-Strafe Jitter Trainer" },
-      { href: "/drills/fps/flow-state", label: "Flow State Trainer" },
+      { href: "/drills/fps/fps-tracking-trainer", label: "FPS Tracking Trainer" },
       { href: "/drills/fps/flick-shot-training", label: "Flick Shot Trainer" },
-      { href: "/drills/fps/micro-correction-precision", label: "Micro-Correction Aim Trainer" }
+      { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" }
     ]
   };
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* VideoGame Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
-
-      {/* FAQPage Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
@@ -317,4 +327,3 @@ export default function ProSmoothPursuitPage() {
     </>
   );
 }
-

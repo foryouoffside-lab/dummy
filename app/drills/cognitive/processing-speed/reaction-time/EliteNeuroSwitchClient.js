@@ -94,7 +94,7 @@ const RELATED_DRILLS = [
   { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" }
 ];
 
-export default function EliteNeuroSwitchClient() {
+export default function EliteNeuroSwitchClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -489,7 +489,7 @@ export default function EliteNeuroSwitchClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Neuro Speed &amp; Reflex Test
+              <span data-seo-kw="1">{copy?.title || "Neuro Speed & Reflex Test"}</span>
             </h1>
           </div>
         )}

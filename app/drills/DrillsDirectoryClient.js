@@ -3,28 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Target, Sparkles, Database, ChevronRight, Activity, Zap,
-  ShieldCheck, MousePointerClick, Timer, Infinity as InfinityIcon
+  Target, Zap, Activity, ShieldCheck, MousePointerClick, ArrowRight
 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import DrillGlobalSettings from '@/components/drill/DrillGlobalSettings';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
-import { SITE_CATEGORIES, getCategoryCount, getCategorySampleNames } from '@/lib/siteCategories';
+import { SITE_CATEGORIES, getCategoryCount, getCategoryDrills } from '@/lib/siteCategories';
 import { useTranslation } from '@/lib/i18n/useTranslation';
-
-// Categories come from lib/siteCategories.js — the same list the home page and
-// footer render, so a new category or a renamed one only has to be edited once.
-
-
-const goalsList = [
-  { id: 'all', label: 'All Categories', icon: InfinityIcon },
-  { id: 'new', label: 'New Here', icon: Sparkles },
-  { id: 'aim', label: 'Improve My Aim', icon: Target },
-  { id: 'react', label: 'React Faster', icon: Zap },
-  { id: 'remember', label: 'Remember More', icon: Database },
-  { id: '5min', label: 'Just 5 Minutes', icon: Timer },
-];
 
 const trustStrip = [
   { icon: ShieldCheck, label: 'No sign-up, ever' },
@@ -32,15 +18,8 @@ const trustStrip = [
   { icon: Activity, label: '100% runs in your browser' },
 ];
 
-function handleCardMouseMove(e) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-  e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
-}
-
-export default function DrillsDirectoryClient() {
+export default function DrillsDirectoryClient({ faqs = [] }) {
   const { t, localizeHref } = useTranslation();
-  const [selectedGoal, setSelectedGoal] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
 
   const totalDrills = DRILLS.length;
@@ -63,16 +42,6 @@ export default function DrillsDirectoryClient() {
         return aDesktopOnly ? 1 : -1;
       })
     : SITE_CATEGORIES;
-
-  // Re-sort categories based on selected goal
-  const sortedCategories = [...baseCategories].sort((a, b) => {
-    if (selectedGoal === 'all') return 0;
-    const aMatch = a.goals.includes(selectedGoal);
-    const bMatch = b.goals.includes(selectedGoal);
-    if (aMatch && !bMatch) return -1;
-    if (!aMatch && bMatch) return 1;
-    return 0;
-  });
 
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-hidden flex flex-col justify-between">
@@ -101,15 +70,11 @@ export default function DrillsDirectoryClient() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 relative z-10 w-full flex-1">
 
         {/* Hero Banner */}
-        <Reveal className="text-center max-w-3xl mx-auto mb-10 space-y-5">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-blue-400 font-bold uppercase tracking-wider shadow-[0_0_20px_-6px_rgba(59,130,246,0.5)]">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span>Complete Training Hub Directory</span>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-            {t('directory.h1Prefix', 'Free')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">{t('directory.h1Highlight', 'Online Drills')}</span>
+        <Reveal className="text-center max-w-3xl mx-auto mb-14 space-y-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white uppercase tracking-tight leading-tight">
+            {t('directory.h1Prefix', 'Free')} {t('directory.h1Highlight', 'Online Drills')}
           </h1>
-          <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-ink-2 leading-relaxed max-w-2xl mx-auto">
             {totalDrills} {t('directory.subtitle', 'free training drills across 8 categories. No sign-up, no installs, instant start.')}
           </p>
 
@@ -127,103 +92,118 @@ export default function DrillsDirectoryClient() {
           </div>
         </Reveal>
 
-        {/* Goal Picker Pills Bar (Horizontal scrollable on mobile) */}
-        <Reveal className="mb-12">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none justify-start sm:justify-center">
-            <span className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-wider shrink-0 mr-1 hidden sm:inline">
-              Filter Goal:
-            </span>
-            {goalsList.map((goal) => {
-              const isSelected = selectedGoal === goal.id;
-              const GoalIcon = goal.icon;
-              return (
-                <button
-                  key={goal.id}
-                  type="button"
-                  onClick={() => setSelectedGoal(goal.id)}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 border ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-400/50 shadow-lg shadow-blue-500/25'
-                      : 'bg-surface-1/80 backdrop-blur text-ink-2 border-hairline hover:border-hairline-2 hover:text-ink-1 hover:bg-surface-2'
-                  }`}
-                >
-                  <GoalIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-ink-3'}`} />
-                  {goal.label}
-                </button>
-              );
-            })}
-          </div>
-        </Reveal>
-
-        {/* Category Cards Grid */}
+        {/* Category Cards Grid (Styled per Image 3 Reference) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {sortedCategories.map((cat, idx) => {
+          {baseCategories.map((cat, idx) => {
             const Icon = cat.icon;
-            const isMatch = selectedGoal === 'all' || cat.goals.includes(selectedGoal);
             const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(cat.cat);
             const catTitle = t('sectors.' + cat.cat + '.title', cat.name);
             const catHref = localizeHref(cat.href);
             const drillCount = getCategoryCount(cat.cat);
+            const sampleDrills = getCategoryDrills(cat.cat).slice(0, 2);
 
             return (
               <Reveal key={cat.cat} delay={idx * 40} className="h-full">
-                <Link
-                  href={catHref}
-                  onMouseMove={handleCardMouseMove}
-                  className={`group relative isolate flex h-full flex-col justify-between overflow-hidden rounded-3xl border bg-surface-1/70 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1.5 shadow-xl ${cat.ring} hover:shadow-2xl ${
-                    isMatch ? 'border-hairline hover:border-hairline-2 opacity-100' : 'border-hairline/50 opacity-55 hover:opacity-90'
-                  }`}
+                <div
+                  className="group relative isolate flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-[#0c0f1d]/90 backdrop-blur-xl p-6 sm:p-7 transition-all duration-300 hover:border-white/25 hover:-translate-y-1.5 shadow-xl hover:shadow-2xl"
                 >
-                  {/* Cursor-tracked spotlight */}
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: `radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), ${cat.glow}, transparent 70%)` }}
-                  />
-
                   <div className="relative">
-                    <div className="flex items-center gap-3.5 min-w-0 mb-4">
-                      <div className={`shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white group-hover:scale-105 transition-transform duration-300`}>
-                        <Icon className="w-6 h-6" />
+                    {/* Top Row: Squircle icon left, drill count badge right */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300 shrink-0`}>
+                        <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-br ${cat.color} opacity-40 blur-md -z-10 group-hover:opacity-70 transition-opacity`} />
+                        <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
                       </div>
-                      <div className="min-w-0">
-                        <h2 className="text-lg font-bold text-ink-1 truncate">{catTitle}</h2>
-                        <p className="text-xs text-ink-3 truncate mt-0.5">{cat.tagline}</p>
-                      </div>
-                      {isDesktopOnly && (
-                        <span className="ml-auto shrink-0 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                          Desktop
+
+                      <div className="flex items-center gap-1.5">
+                        {isDesktopOnly && (
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                            Desktop
+                          </span>
+                        )}
+                        <span className="px-3.5 py-1 rounded-full text-xs font-semibold text-white/90 bg-white/5 border border-white/15">
+                          {drillCount} Drills
                         </span>
-                      )}
+                      </div>
                     </div>
 
-                    <p className="text-sm text-ink-2 leading-relaxed mb-4">{cat.blurb}</p>
+                    {/* Category Title & Tagline */}
+                    <div className="mb-4">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                        {catTitle}
+                      </h2>
+                      <p className="text-sm text-zinc-400 font-normal mt-1 leading-snug">
+                        {cat.tagline || cat.blurb}
+                      </p>
+                    </div>
 
-                    {/* Real drill names, so the card answers "what is in here?"
-                        without costing a click. */}
-                    <ul className="space-y-1.5 text-xs text-ink-3 font-mono">
-                      {getCategorySampleNames(cat.cat, 3).map((name) => (
-                        <li key={name} className="truncate">— {name}</li>
-                      ))}
-                      {drillCount > 3 && (
-                        <li className="text-ink-3/70">+ {drillCount - 3} more</li>
-                      )}
-                    </ul>
+                    {/* 3 Drill Preview Capsules */}
+                    <div className="space-y-2.5 my-4">
+                      {sampleDrills.map((drill, itemIdx) => {
+                        const RowIcon = itemIdx === 0 ? Zap : itemIdx === 1 ? Target : Activity;
+                        return (
+                          <Link
+                            key={drill.id || itemIdx}
+                            href={localizeHref(drill.href)}
+                            className="flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-xl bg-surface-2/60 hover:bg-surface-2 border border-white/5 hover:border-white/15 transition-all group/item"
+                          >
+                            <RowIcon className={`w-4 h-4 ${cat.accent} shrink-0`} />
+                            <span className="text-sm font-medium text-zinc-200 group-hover/item:text-white truncate">
+                              {drill.name}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className={`relative mt-5 pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accent}`}>
-                    <span>{t('home.viewHub', 'Enter hub')} · {drillCount} drills</span>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {/* Full Width Gradient Button */}
+                  <div className="relative pt-2">
+                    <Link
+                      href={catHref}
+                      className={`w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r ${cat.color} hover:brightness-110 active:scale-[0.98] text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg transition-all mt-2`}
+                    >
+                      <span>Explore {drillCount} Drills</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
-                </Link>
+                </div>
               </Reveal>
             );
           })}
         </div>
 
-        {/* Session preferences live below the categories. They matter to people
-            who already train here; they were previously the second thing a
-            first-time visitor saw, ahead of the drills themselves. */}
+        {/* Frequently Asked Questions (SEO / AEO / GEO) */}
+        {faqs?.length > 0 && (
+          <Reveal className="mb-14">
+            <div className="rounded-3xl bg-[#0c0f1d]/90 border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center gap-2 mb-6">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                  {t('home.faqTitle', 'Frequently Asked Questions')}
+                </h2>
+              </div>
+
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {faqs.map((f, i) => (
+                  <div key={i} className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 flex flex-col justify-start">
+                    <dt className="font-bold text-white text-sm font-sans flex items-start gap-2.5">
+                      <span className="text-emerald-400 font-mono text-xs font-bold shrink-0 mt-0.5">
+                        Q{i + 1}.
+                      </span>
+                      <span>{f.q}</span>
+                    </dt>
+                    <dd className="mt-2.5 text-xs text-zinc-400 leading-relaxed pl-6 font-sans">
+                      {f.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Session preferences */}
         <Reveal className="max-w-2xl mx-auto pb-4">
           <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-ink-3 mb-3 text-center">
             Session preferences
@@ -236,3 +216,4 @@ export default function DrillsDirectoryClient() {
     </div>
   );
 }
+

@@ -78,8 +78,22 @@ export default function HeroReactionTest() {
   }[phase];
 
   return (
-    <div className="bg-surface-1 border border-hairline rounded-3xl p-6 shadow-2xl">
-      {/* Reaction circle */}
+    <div className="bg-surface-1/90 border border-white/10 rounded-3xl p-6 sm:p-7 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+      {/* Top ambient accent glow */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 opacity-60" />
+
+      {/* Cockpit header */}
+      <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/5 text-2xs font-mono text-ink-3">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="font-bold text-ink-2 tracking-wider uppercase">Latency Telemetry</span>
+        </div>
+        <span className="px-2 py-0.5 rounded-full bg-white/5 text-ink-3 border border-white/10 uppercase tracking-widest text-[10px]">
+          Live Module
+        </span>
+      </div>
+
+      {/* Reaction circle button */}
       <button
         type="button"
         onClick={handleCircle}
@@ -90,15 +104,15 @@ export default function HeroReactionTest() {
               ? 'Wait for the circle to turn green'
               : 'Start the reaction test'
         }
-        className={`relative aspect-square w-full max-w-[300px] mx-auto flex flex-col items-center justify-center rounded-full border-2 transition-colors duration-100 select-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${circleStyles[phase]}`}
+        className={`relative aspect-square w-full max-w-[280px] mx-auto flex flex-col items-center justify-center rounded-full border-2 transition-all duration-150 select-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 active:scale-[0.98] ${circleStyles[phase]}`}
       >
-        <div className="absolute inset-4 rounded-full border border-white/5" />
+        <div className="absolute inset-3 rounded-full border border-white/10 pointer-events-none" />
         <span
-          className={`font-black tracking-tight tabular-nums ${phase === 'result' ? 'text-5xl' : 'text-2xl'}`}
+          className={`font-black tracking-tight tabular-nums transition-transform ${phase === 'result' ? 'text-5xl text-white' : 'text-2xl text-white'}`}
         >
           {headline}
         </span>
-        <span className="mt-2 px-4 text-2xs font-mono uppercase tracking-widest opacity-80">
+        <span className="mt-2 px-4 text-2xs font-mono uppercase tracking-widest text-ink-2">
           {subline}
         </span>
       </button>
@@ -108,22 +122,22 @@ export default function HeroReactionTest() {
       </p>
 
       {/* Readout + retry */}
-      <div className="mt-5 bg-canvas/90 rounded-xl border border-hairline p-4 flex items-center gap-4">
+      <div className="mt-6 bg-canvas/90 rounded-2xl border border-white/10 p-4 flex items-center gap-4">
         <div className="flex-1 font-mono text-2xs space-y-2 text-ink-3 min-w-0">
           <p className="flex justify-between gap-2">
-            <span className="text-cyan-400">&gt; LAST:</span>
+            <span className="text-cyan-400 font-semibold">&gt; LAST:</span>
             <span className="text-emerald-400 font-bold tabular-nums">
               {reaction !== null ? `${reaction} ms` : '—'}
             </span>
           </p>
           <p className="flex justify-between gap-2">
-            <span className="text-cyan-400">&gt; BEST:</span>
-            <span className="text-ink-1 font-bold tabular-nums">
+            <span className="text-cyan-400 font-semibold">&gt; BEST:</span>
+            <span className="text-white font-bold tabular-nums">
               {best !== null ? `${best} ms` : '—'}
             </span>
           </p>
           <p className="flex justify-between gap-2">
-            <span className="text-cyan-400">&gt; ATTEMPTS:</span>
+            <span className="text-cyan-400 font-semibold">&gt; ATTEMPTS:</span>
             <span className="text-cyan-300 font-bold tabular-nums">{attempts}</span>
           </p>
         </div>
@@ -131,13 +145,12 @@ export default function HeroReactionTest() {
         <button
           type="button"
           onClick={arm}
-          className="shrink-0 inline-flex items-center gap-2 bg-surface-2 border border-hairline text-ink-1 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-surface-1 hover:border-hairline-2 active:scale-[0.98] transition-all"
+          className="shrink-0 inline-flex items-center gap-2 bg-surface-2 border border-white/10 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-surface-1 hover:border-white/20 active:scale-[0.98] transition-all"
         >
-          <RotateCcw className="w-4 h-4" aria-hidden="true" />
-          Retry
+          <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+          Reset
         </button>
       </div>
-
     </div>
   );
 }

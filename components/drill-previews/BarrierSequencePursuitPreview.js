@@ -448,28 +448,32 @@ export default function BarrierSequencePursuitPreview() {
       ctx.save();
       const chX = crosshair.x;
       const chY = crosshair.y;
-      const chLen = 7;
-      const chGap = 3;
+      const chColor = '#10b981';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      // 4 crosshair ticks
-      ctx.moveTo(chX - chGap - chLen, chY);
-      ctx.lineTo(chX - chGap, chY);
-      ctx.moveTo(chX + chGap, chY);
-      ctx.lineTo(chX + chGap + chLen, chY);
-      ctx.moveTo(chX, chY - chGap - chLen);
-      ctx.lineTo(chX, chY - chGap);
-      ctx.moveTo(chX, chY + chGap);
-      ctx.lineTo(chX, chY + chGap + chLen);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
       ctx.stroke();
 
       // Center targeting pip
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(chX, chY, 1.2, 0, Math.PI * 2);
+      ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();

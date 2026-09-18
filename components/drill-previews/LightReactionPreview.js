@@ -73,7 +73,6 @@ export default function LightReactionPreview() {
     let state = 'waiting';
     let stateTimer = 0;
     let waitDuration = 1.3; // Random wait before flash
-    let flashDuration = 0.22;
     let particles = [];
     let shockwaves = [];
     let reticle = { x: 0, y: 0, targetX: 0, targetY: 0, clickScale: 1.0 };
@@ -306,40 +305,34 @@ export default function LightReactionPreview() {
         ctx.restore();
       }
 
-      // 8. Tactical Clicker / Crosshair Reticle
+      // 8. Tactical Crosshair Reticle (matching FPS drill exact crosshair geometry)
       ctx.save();
-      const reticleR = 14 * reticle.clickScale;
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = '#38bdf8';
-      ctx.shadowBlur = state === 'hit' ? 10 : 4;
+      const chColor = state === 'hit' ? '#10b981' : '#38bdf8';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      // Reticle Circle
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(reticle.x, reticle.y, reticleR, 0, Math.PI * 2);
+      ctx.arc(reticle.x, reticle.y, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 4 Cardinal Ticks
-      const tickLen = 5;
+      // 4 Cross lines with gap (inward from ring to gap)
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      // Top
-      ctx.moveTo(reticle.x, reticle.y - reticleR);
-      ctx.lineTo(reticle.x, reticle.y - reticleR - tickLen);
-      // Bottom
-      ctx.moveTo(reticle.x, reticle.y + reticleR);
-      ctx.lineTo(reticle.x, reticle.y + reticleR + tickLen);
-      // Left
-      ctx.moveTo(reticle.x - reticleR, reticle.y);
-      ctx.lineTo(reticle.x - reticleR - tickLen, reticle.y);
-      // Right
-      ctx.moveTo(reticle.x + reticleR, reticle.y);
-      ctx.lineTo(reticle.x + reticleR + tickLen, reticle.y);
+      ctx.moveTo(reticle.x, reticle.y - tickLen); ctx.lineTo(reticle.x, reticle.y - gap);
+      ctx.moveTo(reticle.x, reticle.y + tickLen); ctx.lineTo(reticle.x, reticle.y + gap);
+      ctx.moveTo(reticle.x - tickLen, reticle.y); ctx.lineTo(reticle.x - gap, reticle.y);
+      ctx.moveTo(reticle.x + tickLen, reticle.y); ctx.lineTo(reticle.x + gap, reticle.y);
       ctx.stroke();
 
       // Central Aim Pip
-      ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(reticle.x, reticle.y, 2, 0, Math.PI * 2);
+      ctx.arc(reticle.x, reticle.y, 1.8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();

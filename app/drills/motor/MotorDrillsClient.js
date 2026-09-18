@@ -66,6 +66,13 @@ const MOTOR_METADATA = {
     skills: ['Key Speed', 'Spatial Layout'],
     icon: Keyboard,
   },
+  'keyboard-tester': {
+    discipline: 'speed',
+    disciplineName: 'Movement Speed',
+    focus: 'Key Switch & NKRO Verification',
+    skills: ['Key Actuation', 'Hardware Audit'],
+    icon: Keyboard,
+  },
   'rapid-tapping': {
     discipline: 'speed',
     disciplineName: 'Movement Speed',
@@ -342,8 +349,8 @@ export default function MotorDrillsClient({ faqs = [] }) {
           <div className="bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <Layers className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
-                Motor Training Domains
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                {t('hubs.motor.domainsHeading', 'Motor Training Domains')}
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -360,16 +367,16 @@ export default function MotorDrillsClient({ faqs = [] }) {
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-ink-1">
-                            {cat.name}
+                          <h3 className="text-sm font-semibold tracking-tight text-ink-1">
+                            {t(`disciplines.${cat.id}`, cat.name)}
                           </h3>
-                          <span className="text-[10px] font-mono text-emerald-400">
-                            {cat.drills.length} {cat.drills.length === 1 ? 'Drill' : 'Drills'}
+                          <span className="text-xs font-medium text-emerald-400">
+                            {cat.drills.length} {t('ui.drills', cat.drills.length === 1 ? 'Drill' : 'Drills')}
                           </span>
                         </div>
                       </div>
                       <p className="text-xs text-ink-2 leading-relaxed mb-4">
-                        {cat.description}
+                        {t(`disciplines.${cat.id}Desc`, cat.description)}
                       </p>
                     </div>
 
@@ -384,12 +391,12 @@ export default function MotorDrillsClient({ faqs = [] }) {
                           <Link
                             key={drill.href}
                             href={href}
-                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-emerald-500/10 border border-hairline hover:border-emerald-500/30 transition-all text-xs"
+                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-emerald-500/10 border border-hairline hover:border-emerald-500/30 transition-all text-sm"
                           >
                             <span className="font-medium text-ink-1 group-hover/item:text-emerald-300 transition-colors truncate pr-2">
                               {localized.name}
                             </span>
-                            <span className="text-[10px] font-mono text-ink-3 group-hover/item:text-emerald-400 shrink-0 flex items-center gap-1">
+                            <span className="text-xs font-medium text-ink-3 group-hover/item:text-emerald-400 shrink-0 flex items-center gap-1">
                               {drill.duration}
                               <ChevronRight className="w-3 h-3 transition-transform group-hover/item:translate-x-0.5" />
                             </span>
@@ -409,8 +416,8 @@ export default function MotorDrillsClient({ faqs = [] }) {
           <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <Sparkles className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
-                Kinematics &amp; Motor Performance Specifications
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                {t('hubs.motor.specsHeading', 'Engine & Hardware Optimization')}
               </h2>
             </div>
 
@@ -419,11 +426,11 @@ export default function MotorDrillsClient({ faqs = [] }) {
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
                   <MousePointer className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-1 mb-1.5">
-                  Sub-Pixel Path Smoothing
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  {t('hubs.motor.spec1Title', 'Sub-Pixel Path Smoothing')}
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
-                  Continuous coordinate sampling trains involuntary micro-tremor suppression and stabilizes fine mouse corridors for surgical cursor guidance.
+                  {t('hubs.motor.spec1Desc', 'Continuous coordinate sampling trains involuntary micro-tremor suppression and stabilizes fine mouse corridors for surgical cursor guidance.')}
                 </p>
               </div>
 
@@ -431,11 +438,11 @@ export default function MotorDrillsClient({ faqs = [] }) {
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
                   <Gauge className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-1 mb-1.5">
-                  Click Cadence &amp; CPS Sampling
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  {t('hubs.motor.spec2Title', 'Click Cadence & CPS Sampling')}
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
-                  High-frequency down/up actuation detection records peak click-per-second thresholds and maintains steady endurance without finger cramping.
+                  {t('hubs.motor.spec2Desc', 'High-frequency down/up actuation detection records peak click-per-second thresholds and maintains steady endurance without finger cramping.')}
                 </p>
               </div>
 
@@ -443,11 +450,11 @@ export default function MotorDrillsClient({ faqs = [] }) {
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
                   <Activity className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-1 mb-1.5">
-                  Visuomotor Synchronization
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  {t('hubs.motor.spec3Title', 'Visuomotor Synchronization')}
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
-                  Tightens neuromuscular feedback loops bridging instantaneous visual target identification directly with rapid motor execution.
+                  {t('hubs.motor.spec3Desc', 'Tightens neuromuscular feedback loops bridging instantaneous visual target identification directly with rapid motor execution.')}
                 </p>
               </div>
             </div>
@@ -460,7 +467,7 @@ export default function MotorDrillsClient({ faqs = [] }) {
             <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+                <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                   {t('home.faqTitle', 'Frequently Asked Questions')}
                 </h2>
               </div>

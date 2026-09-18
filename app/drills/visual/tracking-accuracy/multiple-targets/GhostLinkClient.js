@@ -61,7 +61,7 @@ class GameErrorBoundary extends React.Component {
           <div className="text-center p-6 max-w-sm">
             <AlertTriangle className="w-12 h-12 text-purple-500 mx-auto mb-4 animate-pulse" />
             <h3 className="text-white text-lg font-bold mb-2">Memory Engine Desync</h3>
-            <p className="text-gray-400 text-sm mb-4">The visual engine encountered a frame error. Let's reboot the runtime.</p>
+            <p className="text-gray-400 text-sm mb-4">The visual engine encountered a frame error. Let&apos;s reboot the runtime.</p>
             <button onClick={() => { this.setState({ hasError: false }); window.location.reload(); }} className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors shadow-[0_0_15px_rgba(168,85,247,0.4)]">Restart Sequence</button>
           </div>
         </div>
@@ -74,7 +74,7 @@ class GameErrorBoundary extends React.Component {
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
-export default function GhostLinkClient() {
+export default function GhostLinkClient({ copy } = {}) {
   // === UI State ===
   const [openAccordion, setOpenAccordion] = useState(null);
 
@@ -640,7 +640,7 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Multiple Object Tracking Test
+              <span data-seo-kw="1">{copy?.title || "Multiple Object Tracking Test"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               A multiple object tracking (MOT) test asks you to follow several moving targets among identical moving distractors, then identify them at the end. Most people can track about four or five independent targets at once, and accuracy falls away sharply beyond that (Pylyshyn &amp; Storm, 1988). The limit is attentional rather than optical &mdash; the eyes cannot fixate five things at once, so the tracking is done by attention split across locations (Cavanagh &amp; Alvarez, 2005).

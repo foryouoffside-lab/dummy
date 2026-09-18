@@ -272,36 +272,38 @@ export default function SineWavePursuitPreview() {
       ctx.fill();
       ctx.restore();
 
-      // 8. Smooth Pursuit Reticle
+      // 8. Tactical Crosshair (matching FPS drill exact crosshair geometry)
+      const chX = crosshair.x;
+      const chY = crosshair.y;
+      const chColor = '#38bdf8';
+
       ctx.save();
-      const reticleR = targetRadius + 9;
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.75)';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = '#38bdf8';
-      ctx.shadowBlur = 6;
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      // Reticle Circle
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(crosshair.x, crosshair.y, reticleR, 0, Math.PI * 2);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 4 Cardinal tick marks
-      const tickLen = 6;
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      // Top
-      ctx.moveTo(crosshair.x, crosshair.y - reticleR);
-      ctx.lineTo(crosshair.x, crosshair.y - reticleR - tickLen);
-      // Bottom
-      ctx.moveTo(crosshair.x, crosshair.y + reticleR);
-      ctx.lineTo(crosshair.x, crosshair.y + reticleR + tickLen);
-      // Left
-      ctx.moveTo(crosshair.x - reticleR, crosshair.y);
-      ctx.lineTo(crosshair.x - reticleR - tickLen, crosshair.y);
-      // Right
-      ctx.moveTo(crosshair.x + reticleR, crosshair.y);
-      ctx.lineTo(crosshair.x + reticleR + tickLen, crosshair.y);
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
       ctx.stroke();
 
+      // Center pip
+      ctx.beginPath();
+      ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
 
       if (!prefersReducedMotion) {

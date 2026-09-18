@@ -17,7 +17,7 @@ import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawTacticalTarget } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -61,7 +61,7 @@ const RULES_ITEMS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function ReactionChainClient() {
+export default function ReactionChainClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -118,6 +118,7 @@ export default function ReactionChainClient() {
     misses: 0,
     totalAttempts: 0,
     totalFrames: 0,
+    hitRings: [],
     screenShake: 0,
     logicalWidth: 800,
     logicalHeight: 450
@@ -247,6 +248,19 @@ export default function ReactionChainClient() {
     let pts = e.basePoints * e.combo;
     e.score += Math.floor(pts);
 
+    const arrestedNode = e.nodes[nodeIndex];
+    if (arrestedNode) {
+      const speedIntensity = Math.min(1, (e.baseSpeed - 600) / 1000);
+      let nodeColor = '#10b981';
+      if (speedIntensity > 0.5) {
+        const g = Math.floor(255 * (1 - speedIntensity));
+        nodeColor = `rgb(255, ${g}, 0)`;
+      } else if (e.combo >= 10) {
+        nodeColor = '#38bdf8';
+      }
+      e.hitRings.push(createHitRing(arrestedNode.x, arrestedNode.y, arrestedNode.r, nodeColor));
+    }
+
     e.nodes.splice(nodeIndex, 1);
 
     drillAudio.playHit();
@@ -364,6 +378,7 @@ export default function ReactionChainClient() {
       misses: 0,
       totalAttempts: 0,
       totalFrames: 0,
+      hitRings: [],
       screenShake: 0,
       logicalWidth: w,
       logicalHeight: h
@@ -599,6 +614,8 @@ export default function ReactionChainClient() {
         ctx.stroke();
       });
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       // CROSSHAIR DRAWING (WITHOUT GLOW)
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
@@ -693,15 +710,20 @@ export default function ReactionChainClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Reaction chain
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              <span data-seo-kw="1">{copy?.title || "Reaction Chain Trainer"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
+            </h1>
               <span className="text-[11px] font-semibold text-emerald-400/90 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full" data-seo-kw="1">
-                Impulse Control Reflex Game
+                {copy?.badge || "Impulse Control Reflex Game"}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Stopping a fast movement exactly on a target is harder than starting one. Going and stopping behave like a race between two independent processes, and whichever finishes first determines whether the action is completed or cancelled (Logan &amp; Cowan, 1984). A rapid aimed movement also arrives in two parts — a ballistic impulse covering most of the distance, then a slower visually guided correction (Woodworth, 1899) — so overshooting costs far more time than setting off slightly slower.
+              {copy?.description || "Stopping a fast movement exactly on a target is harder than starting one. Going and stopping behave like a race between two independent processes, and whichever finishes first determines whether the action is completed or cancelled (Logan & Cowan, 1984). A rapid aimed movement also arrives in two parts — a ballistic impulse covering most of the distance, then a slower visually guided correction (Woodworth, 1899) — so overshooting costs far more time than setting off slightly slower."}
             </p>
           </div>
         )}
@@ -710,19 +732,19 @@ export default function ReactionChainClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.score || "Score"}</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.time || "Time"}</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.accuracy || "Accuracy"}</div>
               <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{accuracy}%</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.bestScore || "Best Score"}</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -748,11 +770,11 @@ export default function ReactionChainClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.score || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.time || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -803,8 +825,8 @@ export default function ReactionChainClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pauseTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pauseSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -820,8 +842,8 @@ export default function ReactionChainClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="emerald"
-              title="Reaction Chain"
-              subtitle="Impulse Arrest & Motor Inhibition • 15 Levels"
+              title={copy?.title || "Reaction Chain"}
+              subtitle={copy?.subtitle || "Impulse Arrest & Motor Inhibition • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -829,7 +851,7 @@ export default function ReactionChainClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.hudLabels?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN */}
@@ -840,7 +862,7 @@ export default function ReactionChainClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.resultLabels?.newBest || "NEW BEST"}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
@@ -852,7 +874,7 @@ export default function ReactionChainClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.resultLabels?.points || "Points"}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -862,19 +884,19 @@ export default function ReactionChainClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.accuracy || "Accuracy"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.arrests}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Total Arrests</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.totalArrests || "Total Arrests"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo.toFixed(1)}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.maxCombo || "Max Combo"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.peakLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.peakLevel || "Peak Level"}</p>
                   </div>
                 </div>
 
@@ -884,7 +906,7 @@ export default function ReactionChainClient() {
                     onClick={enterDrill}
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.resultLabels?.playAgain || "Play Again"}
                   </button>
                   <button
                     onClick={shareScore}
@@ -913,12 +935,12 @@ export default function ReactionChainClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                       <Target className="w-4 h-4 text-emerald-400" />
@@ -932,7 +954,7 @@ export default function ReactionChainClient() {
 
             <DrillAccordion
               id="about"
-              title="About Reaction Chain (Impulse Arrest Reflex Drill)"
+              title={copy?.aboutTitle || "About Reaction Chain (Impulse Arrest Reflex Drill)"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -940,38 +962,54 @@ export default function ReactionChainClient() {
                 <section>
                   <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-emerald-400" />
-                    Kinetic Braking & Response Inhibition Neurophysiology
+                    {copy?.aboutSections?.[0]?.title || "Kinetic Braking & Response Inhibition Neurophysiology"}
                   </h3>
                   <p className="text-xs sm:text-sm leading-relaxed mb-3 text-gray-300">
-                    Reaction Chain isolates and trains your motor deceleration capacity and response inhibition. Instead of simply clicking moving targets, you must steer your crosshair to intercept incoming nodes and force your antagonist forearm muscles to arrest cursor momentum completely within the node perimeter.
+                    {copy?.aboutSections?.[0]?.content || "Reaction Chain isolates and trains your motor deceleration capacity and response inhibition. Instead of simply clicking moving targets, you must steer your crosshair to intercept incoming nodes and force your antagonist forearm muscles to arrest cursor momentum completely within the node perimeter."}
                   </p>
                   <p className="text-xs sm:text-sm leading-relaxed text-gray-300">
-                    By consistently conditioning kinetic arrests, players rewire the subthalamic nucleus and motor cortex to execute rapid motor braking (Logan et al. 1984). This eradicates lazy over-flicking and builds razor-sharp first-shot stabilization in tactical shooters like Counter-Strike 2 and Valorant.
+                    {copy?.aboutSections?.[1]?.content || "By consistently conditioning kinetic arrests, players rewire the subthalamic nucleus and motor cortex to execute rapid motor braking (Logan et al. 1984). This eradicates lazy over-flicking and builds razor-sharp first-shot stabilization in tactical shooters like Counter-Strike 2 and Valorant."}
                   </p>
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-lg bg-blue-600/30 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-blue-400" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Athletes</h4>
-                    </div>
-                    <p className="text-[11px] text-gray-300 leading-relaxed">FPS players seeking to eliminate over-flicking, and athletes requiring rapid neuromuscular motor arrest.</p>
-                  </div>
-                  <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-lg bg-emerald-600/30 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-emerald-400" /></div>
-                      <h4 className="text-xs font-bold text-white">Conditioned Skills</h4>
-                    </div>
-                    <p className="text-[11px] text-gray-300 leading-relaxed">Precision deceleration, kinetic friction control, stop-signal inhibition, and spatial interception.</p>
-                  </div>
-                  <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-lg bg-purple-600/30 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-purple-400" /></div>
-                      <h4 className="text-xs font-bold text-white">Kinetic Braking</h4>
-                    </div>
-                    <p className="text-[11px] text-gray-300 leading-relaxed">Intercept nodes up to 1,800 px/s and halt within 1.5 px/frame to build multipliers up to 3.0x.</p>
-                  </div>
+                  {copy?.aboutCards ? (
+                    copy.aboutCards.map((card, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className={`w-6 h-6 rounded-lg ${card.bgClass || 'bg-blue-600/30'} flex items-center justify-center`}>
+                            {idx === 0 ? <Users className={`w-3.5 h-3.5 ${card.iconClass || 'text-blue-400'}`} /> : idx === 1 ? <TrendingUp className={`w-3.5 h-3.5 ${card.iconClass || 'text-emerald-400'}`} /> : <Zap className={`w-3.5 h-3.5 ${card.iconClass || 'text-purple-400'}`} />}
+                          </div>
+                          <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                        </div>
+                        <p className="text-[11px] text-gray-300 leading-relaxed">{card.desc}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-6 h-6 rounded-lg bg-blue-600/30 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-blue-400" /></div>
+                          <h4 className="text-xs font-bold text-white">Target Athletes</h4>
+                        </div>
+                        <p className="text-[11px] text-gray-300 leading-relaxed">FPS players seeking to eliminate over-flicking, and athletes requiring rapid neuromuscular motor arrest.</p>
+                      </div>
+                      <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-6 h-6 rounded-lg bg-emerald-600/30 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-emerald-400" /></div>
+                          <h4 className="text-xs font-bold text-white">Conditioned Skills</h4>
+                        </div>
+                        <p className="text-[11px] text-gray-300 leading-relaxed">Precision deceleration, kinetic friction control, stop-signal inhibition, and spatial interception.</p>
+                      </div>
+                      <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-6 h-6 rounded-lg bg-purple-600/30 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-purple-400" /></div>
+                          <h4 className="text-xs font-bold text-white">Kinetic Braking</h4>
+                        </div>
+                        <p className="text-[11px] text-gray-300 leading-relaxed">Intercept nodes up to 1,800 px/s and halt within 1.5 px/frame to build multipliers up to 3.0x.</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </DrillAccordion>

@@ -21,6 +21,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const DRILL_DURATION = 45; // 45 seconds duration
 const ELITE_SCORE = 1300; // Target score for S+ rating (rebalanced after combo removal)
@@ -62,7 +63,8 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-export default function ColorSequenceClient() {
+export default function ColorSequenceClient({ copy = null }) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -455,8 +457,14 @@ export default function ColorSequenceClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Color Memory Game
+              {copy?.title || t('colorSequence.title', 'Color Memory Game')}
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                {copy?.subtitle || t('colorSequence.subtitle', 'Simon Game Online & Visual Working Memory Sequence Test')}
+              </span>
             </h1>
+            <p className="text-xs text-slate-400 leading-relaxed -mt-0.5">
+              {copy?.caption || t('colorSequence.caption', 'Watch and reproduce the flashing color pattern in the correct order as sequences grow longer.')}
+            </p>
           </div>
         )}
 
@@ -464,10 +472,10 @@ export default function ColorSequenceClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: uiScore, color: "text-purple-400" },
-              { label: "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: "Level", val: `Lv. ${level}`, color: "text-indigo-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statScore || t('colorSequence.score', 'Score'), val: uiScore, color: "text-purple-400" },
+              { label: copy?.statTime || t('colorSequence.time', 'Time'), val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: copy?.statLevel || t('colorSequence.level', 'Level'), val: `Lv. ${level}`, color: "text-indigo-400" },
+              { label: copy?.statBestScore || t('colorSequence.bestScore', 'Best Score'), val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -574,7 +582,7 @@ export default function ColorSequenceClient() {
               {phase === 'result' && (
                 <div className="flex flex-col items-center justify-center h-full animate-in fade-in duration-100">
                   <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-purple-500 animate-spin mb-2" />
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Evaluating...</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{copy?.evaluating || 'Evaluating...'}</span>
                 </div>
               )}
 
@@ -582,7 +590,7 @@ export default function ColorSequenceClient() {
               {phase === 'input' && (
                 <div className="w-full max-w-sm sm:max-w-md my-auto flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-200">
                   <p className="text-xs sm:text-sm font-bold tracking-wider uppercase text-purple-400 mb-4 text-center">
-                    Tap Sequence in Order ({userSequence.length} / {sequence.length})
+                    {copy?.tapPrompt || 'Tap Sequence in Order'} ({userSequence.length} / {sequence.length})
                   </p>
                   <div className="w-full grid grid-cols-3 gap-3 sm:gap-4 px-2">
                     {COLORS.map((color) => (
@@ -609,8 +617,8 @@ export default function ColorSequenceClient() {
             <FpsStartCard
               icon={Brain}
               accent="purple"
-              title="Color Sequence Pro"
-              subtitle="Visual Short-Term Memory • Sequence Recall"
+              title={copy?.startCardTitle || "Color Sequence Pro"}
+              subtitle={copy?.startCardSubtitle || "Visual Short-Term Memory • Sequence Recall"}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -618,7 +626,7 @@ export default function ColorSequenceClient() {
 
           {/* COUNTDOWN OVERLAY (3-2-1-GO) */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN (GAME OVER) */}
@@ -629,7 +637,7 @@ export default function ColorSequenceClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(168,85,247,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.newBest || 'NEW BEST'}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade?.color || 'text-purple-400'}`}>
@@ -641,7 +649,7 @@ export default function ColorSequenceClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.points || 'Points'}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -651,15 +659,15 @@ export default function ColorSequenceClient() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statAccuracy || 'Accuracy'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statPeakLevel || 'Peak Level'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.perfectHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Perfects</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statPerfects || 'Perfects'}</p>
                   </div>
                 </div>
 
@@ -669,19 +677,19 @@ export default function ColorSequenceClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.playAgain || 'Play Again'}
                   </button>
                   <button 
                     onClick={shareScore} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
+                    title={copy?.shareTitle || "Share Score"}
                   >
                     <Share2 className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Drill & Return"
+                    title={copy?.exitTitle || "Exit Drill & Return"}
                   >
                     <ArrowLeft className="w-4 h-4 text-red-400" />
                   </button>
@@ -696,7 +704,7 @@ export default function ColorSequenceClient() {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Watch and reproduce the flashing color pattern in the correct order as sequences grow longer.
+            {copy?.bottomCaption || copy?.caption || 'Watch and reproduce the flashing color pattern in the correct order as sequences grow longer.'}
           </p>
         )}
 
@@ -705,63 +713,87 @@ export default function ColorSequenceClient() {
           <div className="[&>div]:!mt-0">
           <DrillAccordion
             id="rules"
-            title="Drill Instructions & Scoring System"
+            title={copy?.rulesTitle || t('colorSequence.rulesTitle', 'Drill Instructions & Scoring System')}
             isOpen={openAccordion === 'rules'}
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Sequence Recall" highlight="+100 PTS" result="Recreate flashing color sequence in exact order" />
-              <DrillRuleItem num="2" text="Level Bonus" highlight="+10% PTS per Level" result="Longer sequences = more points" />
-              <DrillRuleItem num="3" text="Miss / Timeout" highlight="-1 Level" result="No score or time loss" />
-              <DrillRuleItem num="4" text="Adaptive Difficulty" highlight="Rises & Falls" result="Sequence length tracks your skill" />
+              <DrillRuleItem num="1" text={copy?.rule1Text || "Sequence Recall"} highlight={copy?.rule1Highlight || "+100 PTS"} result={copy?.rule1Result || "Recreate flashing color sequence in exact order"} />
+              <DrillRuleItem num="2" text={copy?.rule2Text || "Level Bonus"} highlight={copy?.rule2Highlight || "+10% PTS per Level"} result={copy?.rule2Result || "Longer sequences = more points"} />
+              <DrillRuleItem num="3" text={copy?.rule3Text || "Miss / Timeout"} highlight={copy?.rule3Highlight || "-1 Level"} result={copy?.rule3Result || "No score or time loss"} />
+              <DrillRuleItem num="4" text={copy?.rule4Text || "Adaptive Difficulty"} highlight={copy?.rule4Highlight || "Rises & Falls"} result={copy?.rule4Result || "Sequence length tracks your skill"} />
             </div>
           </DrillAccordion>
 
           {/* ACCORDION 2: ABOUT COLOR SEQUENCE PRO */}
           <DrillAccordion
             id="about"
-            title="About Color Sequence Pro"
+            title={copy?.aboutTitle || t('colorSequence.aboutTitle', 'About Color Sequence Pro')}
             isOpen={openAccordion === 'about'}
             onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
           >
             <div className="space-y-8">
               <section>
                 <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                  <Brain className="w-4 h-4 text-purple-400" /> What Is Visual Memory Training?
+                  <Brain className="w-4 h-4 text-purple-400" /> {copy?.overviewTitle || 'What Is Visual Memory Training?'}
                 </h3>
                 <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                  Visual working memory holds only about four simple items at a time, and that ceiling is set by the number of objects rather than how complex each one is (Luck &amp; Vogel, 1997; Cowan, 2001). A lengthening colour sequence walks you straight into that limit.
+                  {copy?.overviewLead || 'Visual working memory holds only about four simple items at a time, and that ceiling is set by the number of objects rather than how complex each one is (Luck & Vogel, 1997; Cowan, 2001). A lengthening colour sequence walks you straight into that limit.'}
                 </p>
-                <p className="text-sm leading-relaxed mb-3">
-                  <strong>Visual Memory Training</strong> isolates and exercises your ability to encode, hold, and manipulate short-term visual patterns. The <strong>Color Sequence drill</strong> presents progressive color strings, challenging your visual working memory capacity and recall speed.
-                </p>
-                <p className="text-sm leading-relaxed">
-                  By practicing <strong>pattern sequence recall</strong>, you strengthen memory chunking strategies and improve focus under time pressure.
-                </p>
+                {copy?.aboutIntro ? (
+                  copy.aboutIntro.map((para, i) => (
+                    <p key={i} className="text-sm leading-relaxed mb-3 text-gray-300">{para}</p>
+                  ))
+                ) : (
+                  <>
+                    <p className="text-sm leading-relaxed mb-3">
+                      <strong>Visual Memory Training</strong> isolates and exercises your ability to encode, hold, and manipulate short-term visual patterns. The <strong>Color Sequence drill</strong> presents progressive color strings, challenging your visual working memory capacity and recall speed.
+                    </p>
+                    <p className="text-sm leading-relaxed">
+                      By practicing <strong>pattern sequence recall</strong>, you strengthen memory chunking strategies and improve focus under time pressure.
+                    </p>
+                  </>
+                )}
               </section>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                    <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
-                  </div>
-                  <p className="text-xs text-gray-300 leading-relaxed">Students enhancing study retention, adults looking to boost working memory capacity, and gamers building fast visual pattern processing.</p>
-                </div>
-                <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                    <h4 className="text-xs font-bold text-white">Skills Improved</h4>
-                  </div>
-                  <p className="text-xs text-gray-300 leading-relaxed">Short-term visual recall, working memory span, sequential pattern encoding, and attentional focus.</p>
-                </div>
-                <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                    <h4 className="text-xs font-bold text-white">Working Memory Chunking</h4>
-                  </div>
-                  <p className="text-xs text-gray-300 leading-relaxed">Group colors into sub-sequences (e.g. Red-Blue pair) to bypass standard short-term capacity limits and reach higher levels.</p>
-                </div>
+                {copy?.aboutCards ? (
+                  copy.aboutCards.map((card, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={`w-7 h-7 rounded-lg ${i === 0 ? 'bg-blue-600' : i === 1 ? 'bg-purple-600' : 'bg-orange-600'} flex items-center justify-center`}>
+                          {i === 0 ? <Users className="w-3.5 h-3.5 text-white" /> : i === 1 ? <TrendingUp className="w-3.5 h-3.5 text-white" /> : <Zap className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Students enhancing study retention, adults looking to boost working memory capacity, and gamers building fast visual pattern processing.</p>
+                    </div>
+                    <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Skills Improved</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Short-term visual recall, working memory span, sequential pattern encoding, and attentional focus.</p>
+                    </div>
+                    <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Working Memory Chunking</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Group colors into sub-sequences (e.g. Red-Blue pair) to bypass standard short-term capacity limits and reach higher levels.</p>
+                    </div>
+                  </>
+                )}
               </div>
 
             </div>

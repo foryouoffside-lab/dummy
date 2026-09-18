@@ -1,4 +1,4 @@
-import PrecisionFlickShotClient from './PrecisionFlickShotClient';
+import PrecisionFlickShotClient from './PrecisionFlickShotClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -25,7 +25,7 @@ import { pickSources } from '@/lib/drillSources';
 // ============================================================
 
 export const metadata = {
-  title: 'Mouse Accuracy Test – Free Precision Flick Shot Trainer',
+  title: 'Mouse Accuracy Test – Precision Flick Shot | SkillDrills',
   description: 'Free mouse accuracy test. Measure flick precision, target acquisition time and bulls-eye hit rate against the two-phase model of rapid aimed movement.',
   keywords: [
     'mouse accuracy test',
@@ -43,7 +43,7 @@ export const metadata = {
     'free flick trainer',
   ],
   openGraph: {
-    title: 'Mouse Accuracy Test – Free Precision Flick Shot Trainer | SkillDrills',
+    title: 'Mouse Accuracy Test – Precision Flick Shot | SkillDrills',
     description: 'Test mouse flick accuracy, target acquisition latency, and bulls-eye center precision with this free online flick trainer. Free, instant browser-based tool.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot',
@@ -52,7 +52,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mouse Accuracy Test – Free Precision Flick Shot Trainer | SkillDrills',
+    title: 'Mouse Accuracy Test – Precision Flick Shot | SkillDrills',
     description: 'Test mouse flick accuracy, target acquisition latency, and bulls-eye center precision with this free online flick trainer. Free, instant browser-based tool.',
   },
   robots: { index: true, follow: true },
@@ -78,14 +78,14 @@ const breadcrumbSchema = {
 const softwareApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'Mouse Accuracy Test – Free Precision Flick Shot Trainer',
+  name: 'Mouse Accuracy Test – Precision Flick Shot Trainer',
   applicationCategory: 'HealthApplication',
   operatingSystem: 'All',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   description: 'Free browser-based flick aim trainer and mouse accuracy test. Test ballistic snapping velocity, center bulls-eye precision, and deceleration control with dynamic level progression.',
   url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot',
   publisher: { '@type': 'Organization', name: 'SkillDrills', url: 'https://skilldrills.online' },
-  dateModified: '2026-09-05',
+  dateModified: '2026-09-16',
 };
 
 const webApplicationSchema = {
@@ -95,13 +95,25 @@ const webApplicationSchema = {
   browserRequirements: 'Requires HTML5 Canvas, Pointer Lock API, and JavaScript',
   url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot',
   applicationCategory: 'EducationalApplication',
-  dateModified: '2026-09-05',
+  dateModified: '2026-09-16',
+};
+
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Mouse Accuracy Test – Precision Flick Shot Trainer',
+  url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot',
+  description: 'Measure flick precision, target acquisition latency, and bulls-eye accuracy against the two-phase model of rapid aimed movement.',
+  genre: ['Shooting Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
 };
 
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  dateModified: '2026-09-05',
+  dateModified: '2026-09-16',
   mainEntity: [
     {
       '@type': 'Question',
@@ -132,7 +144,7 @@ const faqSchema = {
       name: 'Why do players over-flick or under-flick targets in tactical shooters?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Over-flicking occurs when antagonist braking muscle groups (e.g., extensor carpi radialis) fail to arrest limb momentum before the target boundary. Under-flicking occurs when players decelerate prematurely due to visual uncertainty. Consistent training under fixed sensitivity calibrates open-loop ballistic motor programs.',
+        text: 'Over-flicking occurs when antagonist braking muscle groups fail to arrest limb momentum before the target boundary. Under-flicking occurs when players decelerate prematurely due to visual uncertainty. Consistent training under fixed sensitivity calibrates open-loop ballistic motor programs.',
       },
     },
     {
@@ -172,7 +184,7 @@ const faqSchema = {
       name: 'What hardware optimizations improve flick shot responsiveness?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Use a high-refresh monitor (144 Hz or higher) to minimize display quantization delays (Woods et al., 2015), disable Windows Enhance Pointer Precision to guarantee 1:1 raw input mapping, and select an ultra-lightweight gaming mouse (< 65g) to reduce physical limb inertia.',
+        text: 'Use a high-refresh monitor (144 Hz or higher) to minimize display quantization delays (Woods et al., 2015), disable Windows Enhance Pointer Precision to guarantee 1:1 raw input mapping, and select an ultra-lightweight gaming mouse (under 65g) to reduce physical limb inertia.',
       },
     },
     {
@@ -194,23 +206,31 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      position: 1,
       name: 'Calibrate Crosshair and Sensitivity',
       text: 'Match your mouse sensitivity to your primary competitive title in Session Settings and center your vision on the stage crosshair.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot#step-1'
     },
     {
       '@type': 'HowToStep',
+      position: 2,
       name: 'Identify and Prioritize Spawning Target',
       text: 'Scan the canvas for target emergence, evaluating decay rings to engage the target closest to expiration first.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot#step-2'
     },
     {
       '@type': 'HowToStep',
+      position: 3,
       name: 'Execute Single-Impulse Ballistic Flick',
       text: 'Snap your mouse directly toward the target center in a single swift motion, avoiding jerky multi-step micro-corrections.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot#step-3'
     },
     {
       '@type': 'HowToStep',
-      name: 'Click Bulls-eye Core and Re-center',
-      text: 'Actuate the primary switch cleanly over the inner 8-pixel core to earn maximum points (+200 PTS) and immediately acquire the next target.',
+      position: 4,
+      name: 'Brake Firmly and Eliminate Residual Drift',
+      text: 'Recruit antagonist wrist muscles to arrest mouse momentum dead on the bulls-eye before clicking to guarantee center-mass registration.',
+      url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot#step-4'
     },
   ],
 };
@@ -228,7 +248,7 @@ const guideProps = {
     ],
   },
   benchmarks: {
-    title: 'Empirical Flick Shot & Mouse Accuracy Performance Tiers',
+    title: 'Empirical Flick Shot and Mouse Accuracy Performance Tiers',
     caption: 'An editorial guide to reading your own result, not measured population norms — SkillDrills collects no aggregate data. The two-phase movement model follows Woodworth (1899) and Meyer et al. (1988); the band boundaries are the drill author\'s own judgement.',
     headers: ['Tier', 'Classification', 'Level / Combo Streak', 'Mean Acquisition Latency', 'Click Accuracy', 'Bulls-eye Ratio', 'Neuromuscular Profile'],
     rows: [
@@ -301,7 +321,7 @@ const guideProps = {
     ],
   },
   faqs: {
-    title: 'Frequently Asked Questions About Flick Aiming & Accuracy',
+    title: 'Frequently Asked Questions About Flick Aiming and Accuracy',
     items: faqSchema.mainEntity.map((q) => ({
       q: q.name,
       a: q.acceptedAnswer.text,
@@ -326,13 +346,17 @@ export default function PrecisionFlickShotPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <PrecisionFlickShotClient />
+      <PrecisionFlickShotClient copy={{ title: "Mouse Accuracy Test" }} />
       <DrillGuide {...guideProps} />
     </>
   );

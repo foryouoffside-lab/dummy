@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Search, X, Menu, ChevronRight } from 'lucide-react';
 import { searchDrills } from '@/lib/searchDrills';
-import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsNav';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 

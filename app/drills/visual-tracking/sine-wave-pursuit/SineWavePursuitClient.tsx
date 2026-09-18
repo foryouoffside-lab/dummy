@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function SineWavePursuitClient() {
+export default function SineWavePursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -395,13 +395,13 @@ export default function SineWavePursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Sine Wave Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Smooth Pursuit Eye Training
+              <span data-seo-kw="1">{copy?.title || "Sine Wave Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Smooth Pursuit Eye Training"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Smooth pursuit eye training along continuous sinusoidal waveforms conditions ocular velocity gain and stabilizes harmonic tracking across reversal points (Robinson, 1965; Rashbass, 1961). Tracking periodic oscillations engages cerebellar forward models to eliminate visual sensory feedback lag, maintaining unbroken foveal centering (Stark et al., 1962; Bahill et al., 1980). Pursuit gain &mdash; eye velocity divided by target velocity &mdash; sits close to 1.0 for slow targets and falls away as speed rises, leaving the eye trailing the target (Robinson, 1965).
+              {copy?.description || "Smooth pursuit eye training along continuous sinusoidal waveforms conditions ocular velocity gain and stabilizes harmonic tracking across reversal points (Robinson, 1965; Rashbass, 1961). Tracking periodic oscillations engages cerebellar forward models to eliminate visual sensory feedback lag, maintaining unbroken foveal centering (Stark et al., 1962; Bahill et al., 1980). Pursuit gain — eye velocity divided by target velocity — sits close to 1.0 for slow targets and falls away as speed rises, leaving the eye trailing the target (Robinson, 1965)."}
             </p>
           </div>
         )}

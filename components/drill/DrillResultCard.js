@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from 'react';
 import { RefreshCw, Share2, LogOut, Copy, Check, MessageSquare, Download, X } from 'lucide-react';
-import { toPng, toBlob } from 'html-to-image';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const ACCENTS = {
@@ -46,6 +45,7 @@ export default function DrillResultCard({
     if (!cardRef.current) return;
     setIsExporting(true);
     try {
+      const { toBlob } = await import('html-to-image');
       const blob = await toBlob(cardRef.current, { cacheBust: true, pixelRatio: 2 });
       if (blob && navigator.clipboard && window.ClipboardItem) {
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
@@ -66,6 +66,7 @@ export default function DrillResultCard({
     if (!cardRef.current) return;
     setIsExporting(true);
     try {
+      const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 2 });
       const link = document.createElement('a');
       link.download = `SkillDrills-Score-${score}.png`;

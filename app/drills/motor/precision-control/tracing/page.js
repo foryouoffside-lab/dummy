@@ -1,4 +1,4 @@
-import TracingClient from './TracingClient';
+import TracingClient from './TracingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -101,6 +101,18 @@ const webApplicationSchema = {
   dateModified: '2026-09-05',
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Mouse Tracing Game – Wave Tracking & Precision Drill',
+  url: 'https://skilldrills.online/drills/motor/precision-control/tracing',
+  description: 'Follow a moving wave with your cursor to train smooth pursuit tracking and fine cursor control.',
+  genre: ['Tracking Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
+};
+
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -191,28 +203,36 @@ const faqSchema = {
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Train Smooth Pursuit Mouse Tracing & Flow State',
-  description: 'Step-by-step training protocol for mastering continuous cursor wave tracking, maintaining flow integrity, and dampening motor jitter.',
+  name: 'How to Train Mouse Tracing and Smooth Tracking Precision',
+  description: 'Step-by-step training protocol for developing continuous smooth pursuit and eliminating corrective micro-jitter.',
   step: [
     {
       '@type': 'HowToStep',
-      name: 'Align Cursor on Wave Starting Filament',
-      text: 'Click "Start Drill" and align your crosshair on the illuminated wave filament during the 3-2-1 countdown to begin tracking immediately.',
+      position: 1,
+      name: 'Place Pointer on the Filament Origin',
+      text: 'Hover your cursor over the highlighted origin point of the sinus wave before the trial clock activates.',
+      url: 'https://skilldrills.online/drills/motor/precision-control/tracing#step-1'
     },
     {
       '@type': 'HowToStep',
-      name: 'Match Wave Velocity and Vertical Curvature',
-      text: 'Smoothly modulate your horizontal and vertical mouse gliding speed to stay locked within the 22-pixel glowing corridor.',
+      position: 2,
+      name: 'Match Wave Velocity and Trajectory',
+      text: 'Glide your mouse steadily along the undulating curve as it flows across the screen, matching its exact speed.',
+      url: 'https://skilldrills.online/drills/motor/precision-control/tracing#step-2'
     },
     {
       '@type': 'HowToStep',
-      name: 'Execute Immediate Catch-Up Re-Centering',
-      text: 'If your cursor slips off-path, snap back to the moving wave without pausing to preserve your streak multiplier and flow integrity meter.',
+      position: 3,
+      name: 'Suppress Saccadic Micro-Jitter',
+      text: 'Relax grip tension and maintain continuous smooth pursuit eye tracking to prevent falling off the line.',
+      url: 'https://skilldrills.online/drills/motor/precision-control/tracing#step-3'
     },
     {
       '@type': 'HowToStep',
-      name: 'Sustain Flow State as Scroll Velocity Ramps',
-      text: 'Maintain relaxed arm mechanics as the wave scrolls faster and vertical crests amplify toward the final 10 seconds of the session.',
+      position: 4,
+      name: 'Review Flow Integrity & Smoothness Score',
+      text: 'Check your flow integrity percentage, on-target dwell ratio, and steering stability across all frequency bands.',
+      url: 'https://skilldrills.online/drills/motor/precision-control/tracing#step-4'
     },
   ],
 };
@@ -320,13 +340,17 @@ export default function TracingPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <TracingClient />
+      <TracingClient copy={{ title: "Mouse Tracing Game" }} />
       <DrillGuide {...guideProps} />
     </>
   );

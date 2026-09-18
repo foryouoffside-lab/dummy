@@ -1,4 +1,4 @@
-import AutoPursuitClient from './AutoPursuitClient';
+import AutoPursuitClient from './AutoPursuitClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -185,6 +185,18 @@ const faqSchema = {
   ]
 };
 
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Smooth Pursuit Tracker",
+  "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker",
+  "description": "Free smooth pursuit eye tracking drill online. Follow dynamic moving targets smoothly to train ocular motor gain and gaze holding stability.",
+  "genre": ["Action", "Eye Tracking", "Aim Trainer"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+};
+
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
@@ -195,20 +207,30 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Start the Trial",
-      "text": "Click START to spawn the target orb in the center of the tracking canvas."
+      "name": "Anchor Foveal Gaze on the Center Reticle",
+      "text": "Click START to spawn the target orb in the center of the tracking canvas and lock your visual focus on it.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Follow the Target",
-      "text": "Hover your mouse cursor or position your touch input directly over the moving target orb."
+      "name": "Align Cursor with the Dynamic Target Orb",
+      "text": "Hover your mouse cursor or touch input directly over the moving target orb to establish tracking contact.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Maintain Contact",
-      "text": "Keep your cursor locked inside the moving target as it changes direction and accelerates to compound your score."
+      "name": "Sustain Continuous Closed-Loop Tracking",
+      "text": "Keep your cursor locked inside the moving target as it smoothly changes trajectory across the screen.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker#step-3"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Absorb Velocity Acceleration and Trajectory Switches",
+      "text": "As your tracking streak builds, adapt to escalating speeds and avoid catch-up saccades to maximize score.",
+      "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker#step-4"
     }
   ]
 };
@@ -223,7 +245,8 @@ export default function AutoPursuitPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <AutoPursuitClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }} />
+      <AutoPursuitClient copy={{ title: "Smooth Pursuit Tracker" }} />
       <DrillGuide
         eyebrow="Ocular Motor Psychophysics & Gaze Dynamics"
         title="The Science of Smooth Pursuit Eye Tracking & Kinetic Gaze Holding"

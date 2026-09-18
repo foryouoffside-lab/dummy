@@ -24,6 +24,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const DRILL_DURATION = 45; // 45 seconds duration
 const POINTS_PERFECT = 150;
@@ -48,7 +49,8 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-export default function DistanceJudgmentClient() {
+export default function DistanceJudgmentClient({ copy = null }) {
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -499,7 +501,8 @@ export default function DistanceJudgmentClient() {
   }, [clearGameTimeouts, endGame, startNextApproach]);
 
   const shareScore = useCallback(async () => {
-    const url = 'https://skilldrills.online/drills/visual/depth-perception/distance-judgment';
+    const url = typeof window !== 'undefined' ? window.location.href : 'https://skilldrills.online/drills/visual/depth-perception/distance-judgment';
+    const drillName = copy?.shareDrillName || 'Depth Perception Test';
     try {
       const canvas = generateShareCard({
         score: uiScore,
@@ -507,20 +510,22 @@ export default function DistanceJudgmentClient() {
         accuracy: analytics.accuracy,
         rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
-        drillName: 'Distance Judgment Pro',
+        drillName,
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Peak Level: Lvl ${analytics.finalLevel}) on Distance Judgment Pro! Accuracy: ${analytics.accuracy}%. Train stereoscopic depth perception at skilldrills.online!`;
+      const text = copy?.shareText
+        ? copy.shareText.replace('{score}', uiScore).replace('{level}', analytics.finalLevel).replace('{accuracy}', analytics.accuracy)
+        : `🎯 I scored ${uiScore} PTS (Peak Level: Lvl ${analytics.finalLevel}) on ${drillName}! Accuracy: ${analytics.accuracy}%. Train stereoscopic depth perception at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'My Depth Score', text, url }).catch(() => {});
+        navigator.share({ title: copy?.shareTitle || 'My Depth Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
+        alert(copy?.copiedAlert || 'Score card copied to clipboard!');
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, bestScore, analytics, isNewBest, copy]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -529,11 +534,14 @@ export default function DistanceJudgmentClient() {
         {/* Title — left-aligned sentence-case H1 and 2-sentence definition snippet */}
         {!isFullscreen && (
           <div className="flex flex-col">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
-              Distance Judgment Depth Perception Test
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">
+              {copy?.title || "Depth Perception Test"}
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                {copy?.subtitle || "Distance Judgment & Visual Intercept Lab"}
+              </span>
             </h1>
             <p className="text-sm text-slate-400 mb-4 leading-relaxed">
-              Depth perception is judging how far away things are and in what order. Two cues carry most of it: binocular disparity, the small difference between the images from your two eyes — which random-dot stereograms showed is enough on its own, with no other cue present, to produce a sense of depth (Julesz, 1971) — and optical expansion, the rate at which an approaching object&apos;s image grows on the retina, which specifies time-to-contact without your needing to know the object&apos;s size or speed (Lee, 1976; Regan &amp; Beverley, 1978). A flat monitor removes the first cue, so a browser test measures the second: this drill times your judgement of expansion and intercept, not your stereo acuity, which needs the two-rod apparatus Howard (1919) described.
+              {copy?.caption || "Depth perception is judging how far away things are and in what order. Two cues carry most of it: binocular disparity, the small difference between the images from your two eyes — which random-dot stereograms showed is enough on its own, with no other cue present, to produce a sense of depth (Julesz, 1971) — and optical expansion, the rate at which an approaching object's image grows on the retina, which specifies time-to-contact without your needing to know the object's size or speed (Lee, 1976; Regan & Beverley, 1978). A flat monitor removes the first cue, so a browser test measures the second: this drill times your judgement of expansion and intercept, not your stereo acuity, which needs the two-rod apparatus Howard (1919) described."}
             </p>
           </div>
         )}
@@ -542,21 +550,21 @@ export default function DistanceJudgmentClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.statScore || "Score"}</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.statTime || "Time"}</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.statLevel || "Level"}</div>
               <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{level}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.statBestScore || "Best Score"}</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -576,12 +584,12 @@ export default function DistanceJudgmentClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -637,8 +645,9 @@ export default function DistanceJudgmentClient() {
             <FpsStartCard
               icon={Eye}
               accent="cyan"
-              title="Distance Judgment Pro"
-              subtitle="3D Stereoscopic Intercept • Depth Estimation"
+              title={copy?.startTitle || "Distance Judgment Pro"}
+              subtitle={copy?.startSubtitle || "3D Stereoscopic Intercept • Depth Estimation"}
+              startButtonText={copy?.startBtn || "Start Drill"}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -646,7 +655,7 @@ export default function DistanceJudgmentClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN (GAME OVER WITH RESULT GRADE) */}
@@ -657,7 +666,7 @@ export default function DistanceJudgmentClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.newBest || "NEW BEST"}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
@@ -669,7 +678,7 @@ export default function DistanceJudgmentClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore.toLocaleString()}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.statPoints || "Points"}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -679,15 +688,15 @@ export default function DistanceJudgmentClient() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statAccuracy || "Accuracy"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lvl {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statPeakLevel || "Peak Level"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.perfectHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Intercepts</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statIntercepts || "Intercepts"}</p>
                   </div>
                 </div>
 
@@ -698,13 +707,13 @@ export default function DistanceJudgmentClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5 relative z-50 pointer-events-auto"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.playAgain || "Play Again"}
                   </button>
                   <button 
                     type="button"
                     onClick={shareScore} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform relative z-50 pointer-events-auto" 
-                    title="Share Score"
+                    title={copy?.shareScore || "Share Score"}
                   >
                     <Share2 className="w-4 h-4" />
                   </button>
@@ -712,7 +721,7 @@ export default function DistanceJudgmentClient() {
                     type="button"
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform relative z-50 pointer-events-auto" 
-                    title="Return to Options"
+                    title={copy?.returnOptions || "Return to Options"}
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>
@@ -729,62 +738,94 @@ export default function DistanceJudgmentClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Perfect Intercept Match" highlight="+150 PTS" result="<5% Depth Error" />
-                <DrillRuleItem num="2" text="Close Intercept Match" highlight="+100 PTS" result="<12% Depth Error" />
-                <DrillRuleItem num="3" text="Accelerating Approach" highlight="Faster Speeds" result="Sphere velocity increases with level" />
-                <DrillRuleItem num="4" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
+                <DrillRuleItem num="1" text={copy?.rule1Text || "Perfect Intercept Match"} highlight={copy?.rule1Highlight || "+150 PTS"} result={copy?.rule1Result || "<5% Depth Error"} />
+                <DrillRuleItem num="2" text={copy?.rule2Text || "Close Intercept Match"} highlight={copy?.rule2Highlight || "+100 PTS"} result={copy?.rule2Result || "<12% Depth Error"} />
+                <DrillRuleItem num="3" text={copy?.rule3Text || "Accelerating Approach"} highlight={copy?.rule3Highlight || "Faster Speeds"} result={copy?.rule3Result || "Sphere velocity increases with level"} />
+                <DrillRuleItem num="4" text={copy?.rule4Text || "Miss / Timeout"} highlight={copy?.rule4Highlight || "Zero Penalties"} result={copy?.rule4Result || "No score or time loss"} />
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Distance Judgment Pro"
+              title={copy?.aboutTitle || "About Distance Judgment Pro"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-cyan-400" /> What Is Distance Judgment Training?
-                  </h3>
-                  <p className="text-sm leading-relaxed mb-3">
-                    <strong>Distance Judgment Training</strong> develops binocular stereoscopic depth perception and visual intercept timing. The drill projects a 3D sphere along a deep visual tunnel toward a target depth plane.
-                  </p>
-                  <p className="text-sm leading-relaxed">
-                    By training your visual cortex to calculate looming velocity and relative depth cues under accelerating speeds, you enhance spatial awareness and intercept precision.
-                  </p>
-                </section>
+              {copy?.aboutCards ? (
+                <div className="space-y-8">
+                  <section>
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-cyan-400" /> {copy.overviewTitle}
+                    </h3>
+                    <p className="text-sm leading-relaxed mb-3">{copy.overviewLead}</p>
+                    {copy.overviewBody && <p className="text-sm leading-relaxed">{copy.overviewBody}</p>}
+                  </section>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {copy.aboutCards.map((card, i) => (
+                      <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-blue-600'} flex items-center justify-center`}>
+                            <Target className="w-3.5 h-3.5 text-white" />
+                          </div>
+                          <h4 className="text-xs font-bold text-white">{card.title}</h4>
+                        </div>
+                        <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {copy.aboutSections?.map((sec, i) => (
+                    <section key={i}>
+                      <h4 className="text-sm font-bold text-white mb-1.5">{sec.title}</h4>
+                      {sec.paragraphs.map((p, j) => (
+                        <p key={j} className="text-xs text-gray-300 leading-relaxed mb-2 last:mb-0">{p}</p>
+                      ))}
+                    </section>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  <section>
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-cyan-400" /> What Is Distance Judgment Training?
+                    </h3>
+                    <p className="text-sm leading-relaxed mb-3">
+                      <strong>Distance Judgment Training</strong> develops binocular stereoscopic depth perception and visual intercept timing. The drill projects a 3D sphere along a deep visual tunnel toward a target depth plane.
+                    </p>
+                    <p className="text-sm leading-relaxed">
+                      By training your visual cortex to calculate looming velocity and relative depth cues under accelerating speeds, you enhance spatial awareness and intercept precision.
+                    </p>
+                  </section>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Athletes in intercept sports (baseball, tennis, esports), pilots, drivers, and cognitive vision training enthusiasts.</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Athletes in intercept sports (baseball, tennis, esports), pilots, drivers, and cognitive vision training enthusiasts.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
+                    <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Skills Improved</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">3D depth perception, looming velocity estimation, visual motor intercept timing, and spatial anticipation.</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">3D depth perception, looming velocity estimation, visual motor intercept timing, and spatial anticipation.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Depth Calibration</h4>
+                    <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Depth Calibration</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Track the expanding sphere shadow against the target depth ring to time your intercept tap accurately.</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Track the expanding sphere shadow against the target depth ring to time your intercept tap accurately.</p>
                   </div>
                 </div>
-
-              </div>
+              )}
             </DrillAccordion>
           </div>
         )}

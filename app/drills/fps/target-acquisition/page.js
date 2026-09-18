@@ -1,9 +1,9 @@
-import TargetAcquisitionClient from './TargetAcquisitionClient';
+import TargetAcquisitionClient from './TargetAcquisitionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Target Acquisition Aim Trainer - First Shot Precision",
+  title: "Target Acquisition Aim Trainer – Precision | SkillDrills",
   description: "Free target acquisition aim trainer. Train visual target detection, threat discrimination and first-shot flick accuracy under time pressure.",
   keywords: [
     "target acquisition aim trainer",
@@ -17,21 +17,18 @@ export const metadata = {
     "Valorant target priority drill",
     "how to find enemies faster in fps",
     "fast target acquisition fps",
-    "visual discrimination training for gamers",
-    "target recognition speed",
-    "free browser target acquisition trainer",
-    "ターゲット捕捉 エイム",
-    "타겟 획득 에임"
+    "visual discrimination training for gamers"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/target-acquisition",
+    languages: getAlternateLanguages('/drills/fps/target-acquisition'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Target Acquisition Aim Trainer - First Shot Precision",
+    title: "Target Acquisition Aim Trainer – Precision | SkillDrills",
     description: "Master visual target acquisition speed, feature contrast discrimination, and first-shot flick accuracy for competitive tactical FPS shooters like Valorant, CS2, and Apex Legends.",
     url: "https://skilldrills.online/drills/fps/target-acquisition",
     siteName: 'SkillDrills',
@@ -40,7 +37,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Target Acquisition Aim Trainer - First Shot Precision",
+    title: "Target Acquisition Aim Trainer – Precision | SkillDrills",
     description: "Master visual target acquisition speed, feature contrast discrimination, and first-shot flick accuracy for competitive tactical FPS shooters like Valorant, CS2, and Apex Legends.",
   },
 };
@@ -54,6 +51,22 @@ export default function TargetAcquisitionPage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Target Acquisition", "item": "https://skilldrills.online/drills/fps/target-acquisition" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Target Acquisition Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/target-acquisition",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser FPS drill training visual target identification speed, threat recognition, and first-shot accuracy for competitive FPS games."
   };
 
   const softwareSchema = {
@@ -185,21 +198,25 @@ export default function TargetAcquisitionPage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Calibrate Raw Input Sensitivity",
         "text": "Configure matching sensitivity and DPI in Session Settings to preserve 1:1 hardware coordinates."
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Maintain Preattentive Soft Gaze",
         "text": "Center your gaze with relaxed ocular attention, using peripheral vision to detect target cluster presentation."
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Discriminate High-Priority Target Contrast",
         "text": "Identify the brightest target in the cluster instantly without serial scanning through individual elements."
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Execute Ballistic Flick with Pad Braking",
         "text": "Snap directly to the verified target centroid and click to fire, using mouse pad friction to eliminate overflicking."
       }
@@ -285,6 +302,10 @@ export default function TargetAcquisitionPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
@@ -295,7 +316,12 @@ export default function TargetAcquisitionPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <TargetAcquisitionClient />
+      <TargetAcquisitionClient
+        copy={{
+          h1Keyword: "Target Acquisition Aim Trainer",
+          h1Suffix: " - First Shot Precision"
+        }}
+      />
       <DrillGuide guide={targetAcquisitionGuide} />
     </>
   );

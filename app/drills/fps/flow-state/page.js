@@ -1,9 +1,9 @@
-import FlowStateClient from './FlowInductionClient';
+import FlowStateClient from './FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
-
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
-  title: "Flow State Trainer — Focus & Aim | SkillDrills",
+  title: "Flow State Aim Trainer – Focus and Tracking | SkillDrills",
   description: "Free flow state aim trainer. Hold difficulty at your skill level to sustain focus and smooth tracking along continuous curves. No sign-up.",
   keywords: [
     "flow state aim trainer",
@@ -23,19 +23,18 @@ export const metadata = {
     "how to improve focus for valorant",
     "flow state aim routine",
     "bezier curve flow tracking",
-    "apex legends flow trainer",
-    "フロー状態 エイム",
-    "몰입 상태 에임"
+    "apex legends flow trainer"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/flow-state",
+    languages: getAlternateLanguages('/drills/fps/flow-state'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Flow State Trainer — Focus & Aim | SkillDrills",
+    title: "Flow State Aim Trainer – Focus and Tracking | SkillDrills",
     description: "Induce psychological flow state, build sustained attention endurance, and master smooth pursuit tracking for FPS gaming and deep work with raw pointer lock.",
     url: "https://skilldrills.online/drills/fps/flow-state",
     siteName: 'SkillDrills',
@@ -44,7 +43,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Flow State Trainer — Focus & Aim | SkillDrills",
+    title: "Flow State Aim Trainer – Focus and Tracking | SkillDrills",
     description: "Induce psychological flow state, build sustained attention endurance, and master smooth pursuit tracking for FPS gaming and deep work with raw pointer lock.",
   },
 };
@@ -58,6 +57,22 @@ export default function FlowStatePage() {
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
       { "@type": "ListItem", "position": 3, "name": "Flow State Trainer", "item": "https://skilldrills.online/drills/fps/flow-state" }
     ]
+  };
+
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Flow State Trainer",
+    "url": "https://skilldrills.online/drills/fps/flow-state",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "A free browser-based flow state aim trainer. Induce deep focus, transient hypofrontality, and smooth pursuit tracking for FPS gaming."
   };
 
   const softwareSchema = {
@@ -189,23 +204,31 @@ export default function FlowStatePage() {
     "step": [
       {
         "@type": "HowToStep",
+        "position": 1,
         "name": "Adjust Sensitivity",
-        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your primary game."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your primary game.",
+        "url": "https://skilldrills.online/drills/fps/flow-state#step-1"
       },
       {
         "@type": "HowToStep",
+        "position": 2,
         "name": "Engage Raw Pointer Lock",
-        "text": "Click 'Start Drill' to enter fullscreen mode with raw Pointer Lock API input and zero browser acceleration."
+        "text": "Click 'Start Drill' to enter fullscreen mode with raw Pointer Lock API input and zero browser acceleration.",
+        "url": "https://skilldrills.online/drills/fps/flow-state#step-2"
       },
       {
         "@type": "HowToStep",
+        "position": 3,
         "name": "Track Fluid Bezier Curves",
-        "text": "Lock visual focus on the fluid moving target, anticipating curvature changes rather than trailing the centroid."
+        "text": "Lock visual focus on the fluid moving target, anticipating curvature changes rather than trailing the centroid.",
+        "url": "https://skilldrills.online/drills/fps/flow-state#step-3"
       },
       {
         "@type": "HowToStep",
+        "position": 4,
         "name": "Maintain Continuous Flow Chains",
-        "text": "Sustain continuous target dwell without breaks to charge the Flow Meter and trigger high score multipliers."
+        "text": "Sustain continuous target dwell without breaks to charge the Flow Meter and trigger high score multipliers.",
+        "url": "https://skilldrills.online/drills/fps/flow-state#step-4"
       }
     ]
   };
@@ -264,8 +287,6 @@ export default function FlowStatePage() {
     ],
     audience: "Competitive FPS and tactical shooter players (Valorant, CS2, Apex Legends, Overwatch 2, Warzone), esports athletes preparing for tournament warmups, and cognitive performers training sustained attention and distraction resistance.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-    // Works named in this page's copy, with DOIs so a reader or an answer
-    // engine can check the figures rather than take them on trust.
     sources: pickSources('woods2015', 'krauzlis2004', 'posner1990', 'green2003', 'dietrich2004'),
     related: [
       { href: "/drills/fps/fps-tracking-trainer", label: "FPS Tracking Trainer" },
@@ -281,6 +302,10 @@ export default function FlowStatePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
       />
       <script
         type="application/ld+json"

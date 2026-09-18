@@ -120,7 +120,7 @@ const faqSchema = {
       "name": "How accurate are browser-based motor and mouse tests compared to desktop applications?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "SkillDrills motor tests leverage the W3C High Resolution Time API (performance.now()) delivering sub-millisecond event timestamping (0.1ms precision) alongside hardware-accelerated HTML5 Canvas rendering. By sampling raw mouse input deltas decoupled from display refresh rates, the tests offer esports-grade measurement fidelity with zero download requirement."
+        "text": "Browser timers are precise; the browser's input and display path is not. performance.now() resolves to 0.1ms, but end-to-end measurement is bounded by display refresh (about 8ms at 120Hz, 16ms at 60Hz) and mouse polling (about 1ms at 1000Hz, 8ms at 125Hz). These drills therefore resolve real differences of roughly 5ms and upward, which is enough to track your own progress on the same hardware and not enough to compare your score against someone else's on different hardware. A desktop application with raw input access can do better; any site claiming sub-millisecond precision from a web browser is overstating the platform."
       }
     }
   ]
@@ -147,7 +147,8 @@ const collectionSchema = {
     { "@type": "WebApplication", "name": "Aim Trainer - Target Snapping & Mouse Precision Test", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer" },
     { "@type": "WebApplication", "name": "Drag and Drop - Cursor Grip & Spatial Timing Interception", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop" },
     { "@type": "WebApplication", "name": "Precision Flick Shot - Aperture Centering & Target Snap Drill", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot" },
-    // Movement Speed (3 Drills)
+    // Movement Speed (4 Drills)
+    { "@type": "WebApplication", "name": "Keyboard Tester - Check Dead Keys, Ghosting & NKRO Rollover", "url": "https://skilldrills.online/drills/motor/keyboard-tester" },
     { "@type": "WebApplication", "name": "Finger Sequencing - Scale-Ordered Node Dexterity Test", "url": "https://skilldrills.online/drills/motor/movement-speed/finger-sequencing" },
     { "@type": "WebApplication", "name": "Keyboard Recognition - Keybind Muscle Memory Speed Trainer", "url": "https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition" },
     { "@type": "WebApplication", "name": "Rapid Tapping - CPS Click Cadence & Burst Speed Test", "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping" },

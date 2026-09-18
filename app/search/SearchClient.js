@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Search, ChevronRight, Zap, Target, Filter } from 'lucide-react';
+import { Search, ChevronRight, Target, Filter } from 'lucide-react';
 import { searchDrills } from '@/lib/searchDrills';
 import { DRILLS } from '@/lib/drillsRegistry';
 import SiteFooter from '@/components/SiteFooter';

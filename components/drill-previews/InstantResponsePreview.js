@@ -27,6 +27,8 @@ export default function InstantResponsePreview() {
             <span className="ir-prev-core" />
           </div>
 
+          <span className="ir-prev-hit-ring" />
+
           {/* Reaction hitmarker X */}
           <span className="ir-prev-hitmarker">
             <i className="ir-prev-hit-l1" />

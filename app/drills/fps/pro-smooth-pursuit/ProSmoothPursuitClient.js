@@ -89,7 +89,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function ProSmoothPursuitClient() {
+export default function ProSmoothPursuitClient({ copy = null }) {
   const [gameState, setGameState] = useState('start');
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -563,7 +563,8 @@ export default function ProSmoothPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Smooth Pursuit Aim Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Smooth Pursuit Aim Trainer"}</span>
+              {copy?.h1Suffix !== undefined ? copy.h1Suffix : " — Curve Tracking"}
             </h1>
           </div>
         )}
@@ -572,10 +573,10 @@ export default function ProSmoothPursuitClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: score },
-              { label: 'Time', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-emerald-400' },
-              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+              { label: copy?.statScore || 'Score', value: score },
+              { label: copy?.statTime || 'Time', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statAccuracy || 'Accuracy', value: `${accuracy}%`, color: 'text-emerald-400' },
+              { label: copy?.statBestScore || 'Best Score', value: bestScore, color: 'text-amber-400' },
             ].map((card) => (
               <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
@@ -660,8 +661,8 @@ export default function ProSmoothPursuitClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -677,8 +678,8 @@ export default function ProSmoothPursuitClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="green"
-              title="Pro Smooth Pursuit"
-              subtitle="Lissajous Curve Smooth Pursuit • Endless Level Progression"
+              title={copy?.startTitle || "Pro Smooth Pursuit"}
+              subtitle={copy?.startSubtitle || "Lissajous Curve Smooth Pursuit • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -686,7 +687,7 @@ export default function ProSmoothPursuitClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN — Universal Result Card */}
@@ -712,7 +713,7 @@ export default function ProSmoothPursuitClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Track and hold your crosshair continuously on the oscillating target as it traces smooth curves across the screen.
+            {copy?.stageCaption || "Track and hold your crosshair continuously on the oscillating target as it traces smooth curves across the screen."}
           </p>
         )}
 
@@ -721,12 +722,12 @@ export default function ProSmoothPursuitClient() {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -737,7 +738,7 @@ export default function ProSmoothPursuitClient() {
 
             <DrillAccordion
               id="about"
-              title="About Smooth Pursuit Aim Trainer"
+              title={copy?.aboutTitle || "About Smooth Pursuit Aim Trainer"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -750,7 +751,7 @@ export default function ProSmoothPursuitClient() {
                     Smooth pursuit is the eye movement that keeps a moving target on your fovea. It tracks accurately up to roughly 30&deg;/s; past that the eye falls behind and inserts catch-up saccades instead (Krauzlis, 2004; Rashbass, 1961).
                   </p>
                   <p className="text-sm leading-relaxed mb-3">
-                    <strong>Smooth Pursuit Training</strong> isolates your eyes' ability to follow a moving coordinate without quick saccadic jerks. In fast-paced FPS shooters, players who master <strong>smooth pursuit</strong> keep their weapons locked onto targets at various ranges, matching their exact path velocity.
+                    <strong>Smooth Pursuit Training</strong> isolates your eyes&apos; ability to follow a moving coordinate without quick saccadic jerks. In fast-paced FPS shooters, players who master <strong>smooth pursuit</strong> keep their weapons locked onto targets at various ranges, matching their exact path velocity.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
                     The Lissajous curve provides a harmonically oscillating trajectory that forces you to constantly adapt both horizontal and vertical mouse velocities simultaneously.
@@ -761,32 +762,7 @@ export default function ProSmoothPursuitClient() {
           </div>
         )}
 
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+
       </main>
 
       {/* ── FOOTER ── */}

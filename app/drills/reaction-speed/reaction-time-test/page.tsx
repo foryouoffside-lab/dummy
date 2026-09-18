@@ -1,4 +1,4 @@
-import ReactionTimeTestWrapper from './ReactionTimeTestWrapper';
+import ReactionTimeTestWrapper from './ReactionTimeTestWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -89,22 +89,56 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Launch the Test",
-      "text": "Click or tap Start Drill to launch the Reaction Time Test in full screen."
+      "name": "Launch the Drill",
+      "text": "Click or tap Start Drill to enter the fullscreen reaction test arena.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test#step-1"
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Memorize Target Interval",
-      "text": "Observe the target millisecond duration displayed on screen before the timing run begins."
+      "text": "Observe the target millisecond duration displayed on screen before the timing sequence begins.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test#step-2"
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Click at Exact Elapsed Time",
-      "text": "Click your mouse or tap your touchscreen as close to 0 ms error as possible when the target interval elapses."
+      "name": "Click on Cue",
+      "text": "Click your mouse or tap your touchscreen at the exact instant the cue triggers to register your response latency.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test#step-3"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Analyze Latency & Tier",
+      "text": "Complete multiple rounds to establish your median latency, standard deviation, and gamer tier rating.",
+      "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test#step-4"
     }
   ]
+};
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Reaction Time Test",
+  "alternateName": ["Reaction Speed Test", "Reflex Test", "Human Benchmark Reaction Time"],
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "High-precision web browser visual reaction time test and reflex game tracking millisecond response latency.",
+  "softwareVersion": "2.0"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Reaction Time Test - Free Visual Reflex Speed Game",
+  "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test",
+  "description": "Measure and train your visual reaction speed in milliseconds with zero setup or downloads.",
+  "genre": ["Reflex Game", "Action", "Esports Training"],
+  "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -321,13 +355,21 @@ export default function ReactionTimeTestPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <ReactionTimeTestWrapper />
+      <ReactionTimeTestWrapper copy={{ title: 'Reaction Time Test' }} />
       <DrillGuide guide={reactionGuide} />
     </>
   );

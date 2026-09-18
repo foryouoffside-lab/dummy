@@ -42,7 +42,7 @@ const saveData = (data: { totalSessions: number }) => {
   } catch (e) {}
 };
 
-export default function GhostingSuppressPursuitClient() {
+export default function GhostingSuppressPursuitClient({ copy }: { copy?: { title?: string; subtitle?: string; description?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -410,13 +410,13 @@ export default function GhostingSuppressPursuitClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Ghosting Suppress Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
-                Eye Fixation Stability Training
+              <span data-seo-kw="1">{copy?.title || "Ghosting Suppress Pursuit"}</span>
+              <span className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
+                {copy?.subtitle || "Eye Fixation Stability Training"}
               </span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Eye fixation stability training conditions active suppression of visual ghosting and motion smear artifacts during continuous target tracking (Burr, 1980). By anchoring central foveal gaze firmly on the high-contrast target core, your visual system attenuates distracting trail rings and maintains steady extraocular motor control (Martinez-Conde et al., 2004; Rolfs, 2009). Pursuit stays accurate to roughly 30&deg;/s, and it is the mismatch above that speed &mdash; image slipping across the retina &mdash; that produces the smear this drill asks you to suppress (Krauzlis, 2004).
+              {copy?.description || "Eye fixation stability training conditions active suppression of visual ghosting and motion smear artifacts during continuous target tracking (Burr, 1980). By anchoring central foveal gaze firmly on the high-contrast target core, your visual system attenuates distracting trail rings and maintains steady extraocular motor control (Martinez-Conde et al., 2004; Rolfs, 2009). Pursuit stays accurate to roughly 30°/s, and it is the mismatch above that speed — image slipping across the retina — that produces the smear this drill asks you to suppress (Krauzlis, 2004)."}
             </p>
           </div>
         )}

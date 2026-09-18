@@ -24,6 +24,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const ELITE_SCORE = 5000;
 const STORAGE_KEY = 'skilldrills_reaction_time_test_v2';
@@ -55,7 +56,15 @@ const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: n
 
 type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
 
-export default function ReactionTimeTestClient() {
+interface ReactionTimeTestClientProps {
+  copy?: {
+    title?: string;
+    caption?: string;
+  };
+}
+
+export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientProps = {}) {
+  const { locale, t } = useTranslation();
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -614,7 +623,7 @@ export default function ReactionTimeTestClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Reaction Time Test
+              <span data-seo-kw="1">{copy?.title || t('reactionTimeTest.title', 'Reaction Time Test')}</span>
             </h1>
           </div>
         )}
@@ -625,10 +634,10 @@ export default function ReactionTimeTestClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore, tone: 'text-cyan-400' },
-              { label: 'Avg Error', value: <>±{liveAvgError}<span className="text-[11px] text-slate-500 ml-0.5">ms</span></>, tone: 'text-white' },
-              { label: 'Level', value: `L${uiLevel}`, tone: 'text-indigo-400' },
-              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+              { label: t('reactionTimeTest.score', 'Score'), value: uiScore, tone: 'text-cyan-400' },
+              { label: t('reactionTimeTest.avgError', 'Avg Error'), value: <>±{liveAvgError}<span className="text-[11px] text-slate-500 ml-0.5">ms</span></>, tone: 'text-white' },
+              { label: t('reactionTimeTest.level', 'Level'), value: `L${uiLevel}`, tone: 'text-indigo-400' },
+              { label: t('reactionTimeTest.bestScore', 'Best Score'), value: bestScore, tone: 'text-amber-400' },
             ].map((s) => (
               <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
                 <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
@@ -652,7 +661,7 @@ export default function ReactionTimeTestClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50 font-mono">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50 font-mono">{t('reactionTimeTest.score', 'Score')}</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums font-mono leading-tight">{uiScore}</p>
               </div>
 
@@ -667,7 +676,7 @@ export default function ReactionTimeTestClient() {
                     }}
                     className="px-4 py-1.5 rounded-full bg-red-600/90 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg border border-red-400/40 cursor-pointer active:scale-95 transition-all"
                   >
-                    <XSquare className="w-3.5 h-3.5" /> End Drill
+                    <XSquare className="w-3.5 h-3.5" /> {t('reactionTimeTest.endDrill', 'End Drill')}
                   </button>
                 </div>
               )}
@@ -721,8 +730,8 @@ export default function ReactionTimeTestClient() {
             <FpsStartCard
               icon={Clock}
               accent="cyan"
-              title="Reaction Time Test"
-              subtitle="Visual Latency • Mental Chronometry"
+              title={copy?.title || t('reactionTimeTest.title', 'Reaction Time Test')}
+              subtitle={t('reactionTimeTest.startSubtitle', 'Visual Latency • Mental Chronometry')}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -730,7 +739,7 @@ export default function ReactionTimeTestClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={t('reactionTimeTest.getReady', 'GET READY')} />
           )}
 
           {/* END SCREEN */}
@@ -741,7 +750,7 @@ export default function ReactionTimeTestClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {t('reactionTimeTest.newBest', 'NEW BEST')}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color} font-mono`}>
@@ -753,7 +762,7 @@ export default function ReactionTimeTestClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums font-mono">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-mono">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-mono">{t('reactionTimeTest.points', 'Points')}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -763,15 +772,15 @@ export default function ReactionTimeTestClient() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white font-mono">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">{t('reactionTimeTest.accuracy', 'Accuracy')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-cyan-400 font-mono">±{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">Avg Error</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">{t('reactionTimeTest.avgError', 'Avg Error')}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white font-mono">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">{t('reactionTimeTest.peakLevel', 'Peak Level')}</p>
                   </div>
                 </div>
 
@@ -782,13 +791,13 @@ export default function ReactionTimeTestClient() {
                     onClick={enterDrill}
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {t('reactionTimeTest.playAgain', 'Play Again')}
                   </button>
                   <button
                     type="button"
                     onClick={sharePage}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
+                    title={t('reactionTimeTest.shareScore', 'Share Score')}
                   >
                     <Share2 className="w-4 h-4" />
                   </button>
@@ -796,7 +805,7 @@ export default function ReactionTimeTestClient() {
                     type="button"
                     onClick={handleExitDrill}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Return to Options"
+                    title={t('reactionTimeTest.returnOptions', 'Return to Options')}
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>
@@ -811,7 +820,7 @@ export default function ReactionTimeTestClient() {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Measure your visual reaction time in milliseconds by clicking the instant the target triggers.
+            {copy?.caption || t('reactionTimeTest.caption', 'Measure your visual reaction time in milliseconds by clicking the instant the target triggers.')}
           </p>
         )}
 
@@ -820,39 +829,57 @@ export default function ReactionTimeTestClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={t('reactionTimeTest.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Timing Accuracy" highlight="Up to +250 PTS" result="Sub-10ms error earns EXACT bonus" />
-                <RuleItem num="2" text="Combo Stacking" highlight="Up to 3.0x" result="Consecutive hits multiply point gains" />
-                <RuleItem num="3" text="Timing Miss" highlight="Combo Reset" result="Triggers red alert, score safe" />
-                <RuleItem num="4" text="Unlimited Time" highlight="Free Mode" result="Play at your pace until you click End Drill" />
+                <RuleItem
+                  num="1"
+                  text={t('reactionTimeTest.rule1Text', 'Timing Accuracy')}
+                  highlight={t('reactionTimeTest.rule1Highlight', 'Up to +250 PTS')}
+                  result={t('reactionTimeTest.rule1Result', 'Sub-10ms error earns EXACT bonus')}
+                />
+                <RuleItem
+                  num="2"
+                  text={t('reactionTimeTest.rule2Text', 'Combo Stacking')}
+                  highlight={t('reactionTimeTest.rule2Highlight', 'Up to 3.0x')}
+                  result={t('reactionTimeTest.rule2Result', 'Consecutive hits multiply point gains')}
+                />
+                <RuleItem
+                  num="3"
+                  text={t('reactionTimeTest.rule3Text', 'Timing Miss')}
+                  highlight={t('reactionTimeTest.rule3Highlight', 'Combo Reset')}
+                  result={t('reactionTimeTest.rule3Result', 'Triggers red alert, score safe')}
+                />
+                <RuleItem
+                  num="4"
+                  text={t('reactionTimeTest.rule4Text', 'Unlimited Time')}
+                  highlight={t('reactionTimeTest.rule4Highlight', 'Free Mode')}
+                  result={t('reactionTimeTest.rule4Result', 'Play at your pace until you click End Drill')}
+                />
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Reaction Time Test"
+              title={t('reactionTimeTest.aboutTitle', 'About Reaction Time Test')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-cyan-400" /> What Is Visual Reaction Time & Mental Chronometry?
+                    <Eye className="w-4 h-4 text-cyan-400" /> {t('reactionTimeTest.aboutHeading', 'What Is Visual Reaction Time & Mental Chronometry?')}
                   </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    Measure your visual reaction speed in milliseconds. A typical adult reacts in{' '}
-                    <span className="whitespace-nowrap">200&ndash;250&nbsp;ms</span>; under{' '}
-                    <span className="whitespace-nowrap">180&nbsp;ms</span> is elite.
+                    {t('reactionTimeTest.aboutP1', 'Measure your visual reaction speed in milliseconds. A typical adult reacts in 200–250 ms; under 180 ms is elite.')}
                   </p>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Reaction Time Test</strong> measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, the gap between two players is often a few tens of milliseconds, so shaving even a small amount off your visual response is what decides duels.
+                    {t('reactionTimeTest.aboutP2', 'Reaction Time Test measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, the gap between two players is often a few tens of milliseconds, so shaving even a small amount off your visual response is what decides duels.')}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    This drill isolates time estimation and visual stimulus latency. Training your temporal processing reduces visual reaction delay, improves hand-eye synchronization, and helps you execute actions with peak consistency.
+                    {t('reactionTimeTest.aboutP3', 'This drill isolates time estimation and visual stimulus latency. Training your temporal processing reduces visual reaction delay, improves hand-eye synchronization, and helps you execute actions with peak consistency.')}
                   </p>
                 </section>
 
@@ -860,23 +887,23 @@ export default function ReactionTimeTestClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                      <h4 className="text-xs font-bold text-white">{t('reactionTimeTest.audienceTitle', 'Who Should Use This?')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, esports athletes, musicians, and drivers looking to refine visual response speed and internal timing rhythm.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('reactionTimeTest.audienceDesc', 'Gamers, esports athletes, musicians, and drivers looking to refine visual response speed and internal timing rhythm.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Temporal Calibration</h4>
+                      <h4 className="text-xs font-bold text-white">{t('reactionTimeTest.calibTitle', 'Temporal Calibration')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Trains your brain to track seconds smoothly without relying on visual metronomes or rushing clicks.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('reactionTimeTest.calibDesc', 'Trains your brain to track seconds smoothly without relying on visual metronomes or rushing clicks.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Sustained Focus</h4>
+                      <h4 className="text-xs font-bold text-white">{t('reactionTimeTest.focusTitle', 'Sustained Focus')}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Unlimited practice mode allows you to build flow-state focus and track millisecond error statistics over time.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{t('reactionTimeTest.focusDesc', 'Unlimited practice mode allows you to build flow-state focus and track millisecond error statistics over time.')}</p>
                   </div>
                 </div>
               </div>

@@ -6,15 +6,14 @@ import {
   ArrowLeft,
   Brain,
   Layers,
-  Compass,
   Zap,
   Home,
   ChevronRight,
   Sparkles,
   Shuffle,
   Target,
-  Eye,
-  Activity
+  Clock,
+  ShieldCheck
 } from "lucide-react";
 import { DRILLS } from "@/lib/drillsRegistry";
 import { getDifficultyRank } from "@/lib/scoringEngine";
@@ -112,11 +111,11 @@ export default function CognitiveHubClient({ faqs = [] }) {
             if (parsed && parsed.bestLevel) {
               levels[d.folderName] = parsed.bestLevel;
             }
-          } catch (e) {}
+          } catch {}
         }
       });
       setDrillLevels(levels);
-    } catch (e) {}
+    } catch {}
   }, [isClient]);
 
   // Neural particle background effect
@@ -272,7 +271,7 @@ export default function CognitiveHubClient({ faqs = [] }) {
           <p className="mt-2 text-sm sm:text-base text-ink-2 leading-relaxed">
             {t(
               "hubs.cognitive.desc",
-              "Cognitive training targets the mental control networks that direct attention, suppress distraction, and accelerate decision speed. These 8 drills challenge selective attention, visual search, Stroop inhibition, and rapid task switching in short, focused blocks. Free to play online with no install, no account, and all performance scores stored privately in your browser."
+              "Train selective focus, distraction inhibition, rapid task switching, and processing speed."
             )}
           </p>
         </div>
@@ -307,7 +306,7 @@ export default function CognitiveHubClient({ faqs = [] }) {
           <div className="bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <Layers className="w-5 h-5 text-purple-400" />
-              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                 Cognitive Training Domains
               </h2>
             </div>
@@ -325,10 +324,10 @@ export default function CognitiveHubClient({ faqs = [] }) {
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-ink-1">
+                          <h3 className="text-sm font-semibold tracking-tight text-ink-1">
                             {cat.name}
                           </h3>
-                          <span className="text-[10px] font-mono text-purple-400">
+                          <span className="text-xs font-medium text-purple-400">
                             {cat.drills.length} {cat.drills.length === 1 ? "Drill" : "Drills"}
                           </span>
                         </div>
@@ -349,12 +348,12 @@ export default function CognitiveHubClient({ faqs = [] }) {
                           <Link
                             key={drill.href}
                             href={href}
-                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-purple-500/10 border border-hairline hover:border-purple-500/30 transition-all text-xs"
+                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-purple-500/10 border border-hairline hover:border-purple-500/30 transition-all text-sm"
                           >
                             <span className="font-medium text-ink-1 group-hover/item:text-purple-300 transition-colors truncate pr-2">
                               {localized.name}
                             </span>
-                            <span className="text-[10px] font-mono text-ink-3 group-hover/item:text-purple-400 shrink-0 flex items-center gap-1">
+                            <span className="text-xs font-medium text-ink-3 group-hover/item:text-purple-400 shrink-0 flex items-center gap-1">
                               {drill.duration}
                               <ChevronRight className="w-3 h-3 transition-transform group-hover/item:translate-x-0.5" />
                             </span>
@@ -369,51 +368,52 @@ export default function CognitiveHubClient({ faqs = [] }) {
           </div>
         </Reveal>
 
-        {/* Benefits Grid */}
-        <Reveal className="mb-12">
-          <div className="bg-surface-1 border border-hairline rounded-3xl p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
+        {/* Engine & Hardware Optimization */}
+        <Reveal className="mb-14">
+          <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <Sparkles className="w-5 h-5 text-purple-400" />
-              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
-                Cognitive Capacity Improvement Vectors
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                Engine &amp; Hardware Optimization
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                {
-                  icon: Eye,
-                  title: "Selective Attention",
-                  desc: "Augment signal-vs-noise filtering and target lock retention.",
-                },
-                {
-                  icon: Zap,
-                  title: "Processing Speed",
-                  desc: "Accelerate visual identification and reflex reaction latencies.",
-                },
-                {
-                  icon: Shuffle,
-                  title: "Task Flexibility",
-                  desc: "Minimize cognitive friction during high-speed rule and context switches.",
-                },
-                {
-                  icon: Target,
-                  title: "Inhibitory Control",
-                  desc: "Suppress impulsive misclicks and sustain precision under heavy distraction.",
-                },
-              ].map((benefit, i) => {
-                const Icon = benefit.icon;
-                return (
-                  <div key={i} className="bg-surface-2 border border-hairline rounded-xl p-4">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-3">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-bold text-purple-400 mb-1 uppercase text-xs tracking-wider font-mono">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-xs text-ink-2 leading-relaxed">{benefit.desc}</p>
-                  </div>
-                );
-              })}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-3">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Millisecond-Precision Stimulus Timers
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  High-precision monotonic performance timers track visual cues and interference onset at the browser's native ~1ms resolution, preventing frame-delayed reaction measurements.
+                </p>
+              </div>
+
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-3">
+                  <Shuffle className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Dynamic Interference Engine
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  Real-time Stroop and distractor conflict algorithms dynamically calibrate difficulty thresholds to stress selective attention without input bottlenecking.
+                </p>
+              </div>
+
+              <div className="bg-surface-2/80 border border-hairline rounded-2xl p-5">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-3">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
+                  Local Zero-Telemetry Storage
+                </h3>
+                <p className="text-2xs text-ink-3 leading-relaxed">
+                  Processes composite accuracy and cognitive stamina locally in-browser. Zero server hops or telemetry payloads ensure total privacy and immediate feedback.
+                </p>
+              </div>
             </div>
           </div>
         </Reveal>
@@ -424,7 +424,7 @@ export default function CognitiveHubClient({ faqs = [] }) {
             <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-purple-400" />
-                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                   {t("home.faqTitle", "Frequently Asked Questions")}
                 </h2>
               </div>

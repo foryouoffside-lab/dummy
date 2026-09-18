@@ -1,0 +1,172 @@
+{
+  "category": "visual",
+  "category_name": "Visual Perception",
+  "total_drills": 9,
+  "completed_count": 9,
+  "remaining_count": 0,
+  "category_status": "COMPLETED (9 of 9 Complete - 100.0%)",
+  "completed_drills": [
+    {
+      "id": 93,
+      "name": "Distance Judgment",
+      "slug": "visual/depth-perception/distance-judgment",
+      "category": "visual",
+      "subcategory": "depth-perception",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/01_distance-judgment.md"
+    },
+    {
+      "id": 94,
+      "name": "Go / No-Go",
+      "slug": "visual/reaction-speed/go/no-go",
+      "category": "visual",
+      "subcategory": "reaction-speed",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/02_go-no-go.md"
+    },
+    {
+      "id": 95,
+      "name": "Light Reaction",
+      "slug": "visual/reaction-speed/light-reaction",
+      "category": "visual",
+      "subcategory": "reaction-speed",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/03_light-reaction.md"
+    },
+    {
+      "id": 96,
+      "name": "Moving Target",
+      "slug": "visual/tracking-accuracy/moving-target",
+      "category": "visual",
+      "subcategory": "tracking-accuracy",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/04_moving-target.md"
+    },
+    {
+      "id": 97,
+      "name": "Multiple Targets",
+      "slug": "visual/tracking-accuracy/multiple-targets",
+      "category": "visual",
+      "subcategory": "tracking-accuracy",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/05_multiple-targets.md"
+    },
+    {
+      "id": 98,
+      "name": "Pursuit Tracker",
+      "slug": "visual/tracking-accuracy/pursuit-tracker",
+      "category": "visual",
+      "subcategory": "tracking-accuracy",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/06_pursuit-tracker.md"
+    },
+    {
+      "id": 99,
+      "name": "Entropic Grid",
+      "slug": "visual/visual-recognition/entropic-grid",
+      "category": "visual",
+      "subcategory": "visual-recognition",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/07_entropic-grid.md"
+    },
+    {
+      "id": 100,
+      "name": "Rhythm Anomaly",
+      "slug": "visual/visual-recognition/rhythm-anomaly",
+      "category": "visual",
+      "subcategory": "visual-recognition",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/08_rhythm-anomaly.md"
+    },
+    {
+      "id": 101,
+      "name": "Visual Search",
+      "slug": "visual/visual-recognition/visual-search",
+      "category": "visual",
+      "subcategory": "visual-recognition",
+      "locales_completed": [
+        "en",
+        "ja",
+        "de",
+        "ko",
+        "pt",
+        "es",
+        "fr"
+      ],
+      "verification_status": "VERIFIED_LEVEL_3",
+      "doc_path": "docs/completed-drills/visual/09_visual-search.md"
+    }
+  ]
+}

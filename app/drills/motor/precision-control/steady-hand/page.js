@@ -1,4 +1,4 @@
-import SteadyHandClient from './SteadyHandClient';
+import SteadyHandClient from './SteadyHandClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
@@ -19,9 +19,7 @@ import { pickSources } from '@/lib/drillSources';
 //           "corridor tracing game"       — Trajectory-constrained motor task
 //           "smooth cursor control"       — Velocity consistency query
 // LOCALES:
-//           ja: "イライラ棒 オンライン" (Wire Maze Online / Irritating Stick Game)
-//           ko: "손떨림 테스트" (Hand Tremor Test / Steady Hand Test)
-//           de: "ruhige hand spiel" (Steady Hand Game / Quiet Hand Game)
+//           ja: "イライラ棒" (Iraira-bō / Wire Loop Game / Steady Hand Game)
 // ============================================================
 
 export const metadata = {
@@ -99,6 +97,18 @@ const webApplicationSchema = {
   dateModified: '2026-09-05',
 };
 
+const videoGameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Steady Hand Game & Motor Precision Drill',
+  url: 'https://skilldrills.online/drills/motor/precision-control/steady-hand',
+  description: 'Online steady hand wire maze game testing fine motor precision, micro-tremor control, and Steering Law speed.',
+  genre: ['Precision Game', 'Action', 'Esports Training'],
+  gamePlatform: ['Web Browser', 'Desktop', 'Mobile'],
+  applicationCategory: 'Game',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
+};
+
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -153,7 +163,7 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'How does Woodworth\'s two-component model apply to path tracing?',
+      name: "How does Woodworth's two-component model apply to path tracing?",
       acceptedAnswer: {
         '@type': 'Answer',
         text: "Robert S. Woodworth (1899) demonstrated that aimed movements consist of an initial ballistic impulse followed by a current-control feedback phase. In corridor tracing, steering requires uninterrupted closed-loop current control where continuous visual feedback guides minor adjustments before reaching the wall boundary.",
@@ -194,21 +204,29 @@ const howToSchema = {
   step: [
     {
       '@type': 'HowToStep',
+      "position": 1,
+      "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand#step-1",
       name: 'Position Cursor in Start Zone',
       text: 'Click "Start Drill" and place your cursor inside the starting green zone to activate the circuit timer and trace path.',
     },
     {
       '@type': 'HowToStep',
+      "position": 2,
+      "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand#step-2",
       name: 'Maintain Steady Velocity Along the Path',
       text: 'Glide smoothly along the glowing corridor path. Balance forward speed against precision to stay within the 30-second lap time limit.',
     },
     {
       '@type': 'HowToStep',
+      "position": 3,
+      "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand#step-3",
       name: 'Anticipate Corners and Choke Points',
       text: 'Decelerate slightly before sharp hairpins to allow closed-loop visual adjustments, then accelerate through straight corridor segments.',
     },
     {
       '@type': 'HowToStep',
+      "position": 4,
+      "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand#step-4",
       name: 'Clear the Lap to Scale Narrowing Difficulty',
       text: 'Reach the destination safe zone to complete the lap. Each successful lap narrows the corridor width down to 12 pixels for extreme steadiness conditioning.',
     },
@@ -315,6 +333,10 @@ export default function SteadyHandPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"

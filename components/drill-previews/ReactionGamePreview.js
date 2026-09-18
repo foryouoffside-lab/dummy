@@ -391,38 +391,33 @@ export default function ReactionGamePreview() {
       ctx.save();
       const chX = crosshair.x || width * 0.5;
       const chY = crosshair.y || height * 0.5;
-      const chLen = 8;
-      const chGap = 3;
+      const chColor = '#f59e0b';
+      ctx.strokeStyle = chColor;
+      ctx.fillStyle = chColor;
 
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
+      const chRadius = 11;
+      const gap = 4;
+      const tickLen = 11;
+
+      // Circle
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      // 4 ticks
-      ctx.moveTo(chX - chGap - chLen, chY);
-      ctx.lineTo(chX - chGap, chY);
-      ctx.moveTo(chX + chGap, chY);
-      ctx.lineTo(chX + chGap + chLen, chY);
-      ctx.moveTo(chX, chY - chGap - chLen);
-      ctx.lineTo(chX, chY - chGap);
-      ctx.moveTo(chX, chY + chGap);
-      ctx.lineTo(chX, chY + chGap + chLen);
+      ctx.arc(chX, chY, chRadius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Outer targeting ring
-      ctx.globalAlpha = 0.5;
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1;
+      // 4 Cross lines with gap
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.arc(chX, chY, 11, 0, Math.PI * 2);
+      ctx.moveTo(chX, chY - tickLen); ctx.lineTo(chX, chY - gap);
+      ctx.moveTo(chX, chY + tickLen); ctx.lineTo(chX, chY + gap);
+      ctx.moveTo(chX - tickLen, chY); ctx.lineTo(chX - gap, chY);
+      ctx.moveTo(chX + tickLen, chY); ctx.lineTo(chX + gap, chY);
       ctx.stroke();
 
-      // Center dot
-      ctx.globalAlpha = 0.9;
-      ctx.fillStyle = '#ffffff';
+      // Center pip
       ctx.beginPath();
-      ctx.arc(chX, chY, 1.2, 0, Math.PI * 2);
+      ctx.arc(chX, chY, 1.8, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.restore();
 
       animId = requestAnimationFrame(renderFrame);

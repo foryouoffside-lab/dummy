@@ -1,9 +1,10 @@
-import DigitSpanClient from './DigitSpanClient';
+import DigitSpanClient from './DigitSpanClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Digit Span Memory Test - Free Number Recall Game",
+  title: "Digit Span Memory Test – Number Recall | SkillDrills",
   description: "Free digit span memory test. See how many numbers you can repeat back, and learn the chunking that stretches it past the usual limit.",
   keywords: [
     "digit span test",
@@ -21,13 +22,14 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/memory/short-term-memory/digit-span",
+    languages: getAlternateLanguages('/drills/memory/short-term-memory/digit-span'),
   },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Digit Span Memory Test - Free Number Recall Game",
+    title: "Digit Span Memory Test – Number Recall | SkillDrills",
     description: "Measure and train numerical working memory with our free online Digit Span Memory Test. Master phonological chunking, test Miller's 7±2 limit, and build focus.",
     url: "https://skilldrills.online/drills/memory/short-term-memory/digit-span",
     siteName: 'SkillDrills',
@@ -36,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Digit Span Memory Test - Free Number Recall Game",
+    title: "Digit Span Memory Test – Number Recall | SkillDrills",
     description: "Measure and train numerical working memory with our free online Digit Span Memory Test. Master phonological chunking, test Miller's 7±2 limit, and build focus.",
   },
 };
@@ -82,6 +84,31 @@ export default function DigitSpanPage() {
     "operatingSystem": "All",
     "isAccessibleForFree": true,
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Digit Span Memory Test",
+    "description": "Free cognitive working memory assessment measuring forward numerical recall span, phonological loop capacity, and articulatory rehearsal speed.",
+    "url": "https://skilldrills.online/drills/memory/short-term-memory/digit-span",
+    "genre": ["Memory Game", "Cognitive Training", "Brain Game"],
+    "gamePlatform": ["Web Browser", "Desktop", "Mobile"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "numberOfPlayers": {
+      "@type": "QuantitativeValue",
+      "value": 1
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "SkillDrills"
+    }
   };
 
   const faqSchema = {
@@ -180,16 +207,33 @@ export default function DigitSpanPage() {
     "step": [
       {
         "@type": "HowToStep",
+      "position": 1,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/digit-span#step-1",
+        
         "name": "Encode the Presented Digit String",
         "text": "Focus centrally on the screen as the numerical string is presented during the 3-second memorization window."
       },
       {
         "@type": "HowToStep",
-        "name": "Apply Rhythmical Chunking and Sub-Vocal Rehearsal",
-        "text": "Group the digits into pairs or triplets (e.g., 3-digit clusters) and sub-vocalize them continuously in an internal loop."
+      "position": 2,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/digit-span#step-2",
+        
+        "name": "Apply Rhythmical Chunking in Triads",
+        "text": "Group the digits into pairs or triplets (e.g., 3-digit clusters like phone numbers) to reduce cognitive load."
       },
       {
         "@type": "HowToStep",
+      "position": 3,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/digit-span#step-3",
+        
+        "name": "Sustain Sub-Vocal Articulatory Loop Rehearsal",
+        "text": "Sub-vocalize the sequence continuously in an internal loop to prevent trace decay across the phonological store."
+      },
+      {
+        "@type": "HowToStep",
+      "position": 4,
+      "url": "https://skilldrills.online/drills/memory/short-term-memory/digit-span#step-4",
+        
         "name": "Enter the Sequence via Keyboard or Numpad",
         "text": "When the input prompt activates, type the digits in exact forward order with steady cadence before the phonological trace fades."
       }
@@ -281,13 +325,22 @@ export default function DigitSpanPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DigitSpanClient />
+      <DigitSpanClient
+        copy={{
+          h1Keyword: "Digit Span Memory Test",
+          h1Suffix: " - Free Number Recall Game"
+        }}
+      />
       <DrillGuide guide={digitSpanGuide} />
     </>
   );

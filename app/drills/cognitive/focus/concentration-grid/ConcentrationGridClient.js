@@ -73,7 +73,7 @@ const RELATED_DRILLS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function ConcentrationGridClient() {
+export default function ConcentrationGridClient({ copy = null }) {
   const [phase, setPhase] = useState('start'); // 'start' | 'countdown' | 'playing' | 'ended'
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
@@ -375,8 +375,13 @@ export default function ConcentrationGridClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Schulte Table Trainer
+              {copy?.h1Prefix || null}
+              <span data-seo-kw="1">{copy?.h1Keyword || "Concentration Grid"}</span>
+              {copy?.h1Suffix || " – Schulte Table Trainer Online"}
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              {copy?.caption || "Tap numbers in strict numerical sequence on expanding Schulte grids. Train visual search speed, broad peripheral span, and sustained focus stamina under time pressure."}
+            </p>
           </div>
         )}
 
@@ -384,10 +389,10 @@ export default function ConcentrationGridClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: score, tone: 'text-cyan-400' },
-              { label: 'Time', value: `${Math.ceil(timeRemaining)}s`, tone: timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Grid Size', value: `${gridSize}×${gridSize}`, tone: 'text-indigo-400' },
-              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+              { label: copy?.statScore || 'Score', value: score, tone: 'text-cyan-400' },
+              { label: copy?.statTime || 'Time', value: `${Math.ceil(timeRemaining)}s`, tone: timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: copy?.statGridSize || 'Grid Size', value: `${gridSize}×${gridSize}`, tone: 'text-indigo-400' },
+              { label: copy?.statBest || 'Best Score', value: bestScore, tone: 'text-amber-400' },
             ].map((s) => (
               <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
                 <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
@@ -415,21 +420,21 @@ export default function ConcentrationGridClient() {
             <>
               {/* Score - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || 'Score'}</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{score}</p>
               </div>
 
               {/* Target Indicator - Top Center */}
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
                 <div className="flex items-center gap-2 bg-black/70 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 shadow-lg">
-                  <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase">Target:</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase">{copy?.hudTarget || 'Target:'}</span>
                   <span className="text-lg sm:text-2xl font-black text-cyan-400 font-mono">{currentNumber}</span>
                 </div>
               </div>
 
               {/* Time Remaining - Top Right */}
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{Math.ceil(timeRemaining)}s</p>
               </div>
             </>
@@ -473,8 +478,9 @@ export default function ConcentrationGridClient() {
             <FpsStartCard
               icon={Compass}
               accent="cyan"
-              title="Schulte Table Trainer"
-              subtitle="Sequential Number Search • Expanding Schulte Grid"
+              title={copy?.startTitle || "Concentration Grid Trainer"}
+              subtitle={copy?.startSubtitle || "Sequential Number Search • Expanding Schulte Grid"}
+              startButtonText={copy?.startButtonText || "Start Training"}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -482,7 +488,7 @@ export default function ConcentrationGridClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {phase === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* PLAYING GRID BOARD */}
@@ -516,7 +522,7 @@ export default function ConcentrationGridClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {endSummary.score.toLocaleString()}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.statPoints || "Points"}</div>
               </div>
 
               {/* Right 64% Stats & Actions, vertically centered */}
@@ -525,15 +531,15 @@ export default function ConcentrationGridClient() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{endSummary.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statAccuracy || "Accuracy"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{endSummary.gridsCleared}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Grids Cleared</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statGridsCleared || "Grids Cleared"}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{endSummary.peakGrid}×{endSummary.peakGrid}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Grid</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statPeakGrid || "Max Grid"}</p>
                   </div>
                 </div>
 
@@ -543,19 +549,19 @@ export default function ConcentrationGridClient() {
                     onClick={enterDrill}
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.playAgainText || "Play Again"}
                   </button>
                   <button
                     onClick={shareResult}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
+                    title={copy?.shareText || "Share Score"}
                   >
                     <Share2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={handleExitDrill}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit Drill"
+                    title={copy?.exitText || "Exit Drill"}
                   >
                     <ArrowLeft className="w-4 h-4 text-red-400" />
                   </button>
@@ -568,7 +574,7 @@ export default function ConcentrationGridClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Scan and tap numbers in sequential order across progressively expanding grid matrices before time expires.
+            {copy?.stageCaption || "Scan and tap numbers in sequential order across progressively expanding grid matrices before time expires."}
           </p>
         )}
 
@@ -577,12 +583,12 @@ export default function ConcentrationGridClient() {
         <div className="[&>div]:!mt-0">
         <DrillAccordion
           id="rules"
-          title="Drill Instructions & Scoring System"
+          title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
           isOpen={openAccordion === 'rules'}
           onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {RULES_ITEMS.map((item, i) => (
+            {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
               <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                 <p className="text-sm font-bold text-white mb-1">{item.title}</p>
                 <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
@@ -594,7 +600,7 @@ export default function ConcentrationGridClient() {
         {/* ── ACCORDION 2: ABOUT SCHULTE TABLE & CONCENTRATION GRID ── */}
         <DrillAccordion
           id="about"
-          title="About Schulte Table & Concentration Grid"
+          title={copy?.aboutTitle || "About Schulte Table & Concentration Grid"}
           isOpen={openAccordion === 'about'}
           onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
         >
@@ -602,36 +608,30 @@ export default function ConcentrationGridClient() {
             <section>
               <div className="space-y-4">
                 <p className="text-sm leading-relaxed text-gray-300">
-                  The Schulte table is a psychodiagnostic visual search grid designed to widen the functional peripheral field and reduce fixation latency during sequential scanning (Lu et al., 2022; Rayner, 1998). This expanding grid drill trains rapid eye movements (saccades) and selective attention to locate numerical targets under progressive visual crowding (Treisman &amp; Gelade, 1980; Wolfe, 2007).
+                  {copy?.aboutLead || "The Schulte table is a psychodiagnostic visual search grid designed to widen the functional peripheral field and reduce fixation latency during sequential scanning (Lu et al., 2022; Rayner, 1998). This expanding grid drill trains rapid eye movements (saccades) and selective attention to locate numerical targets under progressive visual crowding (Treisman & Gelade, 1980; Wolfe, 2007)."}
                 </p>
-                {ABOUT_TEXT.split('\n\n').map((para, i) => (
+                {(copy?.aboutText ? copy.aboutText.split('\n\n') : ABOUT_TEXT.split('\n\n')).map((para, i) => (
                   <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                 ))}
               </div>
             </section>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+              {(copy?.aboutCards || [
+                { title: "Who Should Use This?", text: "Elite athletes, pilots, and esports competitors who rely on rapid visual information processing, plus anyone training sustained focus under time pressure.", color: "bg-blue-600" },
+                { title: "Skills Improved", text: "Visual search speed, micro-saccadic eye movement efficiency, spatial scanning discipline, and sustained concentration stamina.", color: "bg-emerald-600" },
+                { title: "Peripheral Vision", text: "Each cleared grid expands to a larger, denser board, widening the visual field you must scan without losing track of the next target number.", color: "bg-purple-600" },
+              ]).map((card, idx) => (
+                <div key={idx} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className={`w-7 h-7 rounded-lg ${card.color || 'bg-blue-600'} flex items-center justify-center`}>
+                      {idx === 0 ? <Users className="w-3.5 h-3.5 text-white" /> : idx === 1 ? <TrendingUp className="w-3.5 h-3.5 text-white" /> : <Eye className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                 </div>
-                <p className="text-xs text-gray-300 leading-relaxed">Elite athletes, pilots, and esports competitors who rely on rapid visual information processing, plus anyone training sustained focus under time pressure.</p>
-              </div>
-              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Skills Improved</h5>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">Visual search speed, micro-saccadic eye movement efficiency, spatial scanning discipline, and sustained concentration stamina.</p>
-              </div>
-              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Eye className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Peripheral Vision</h5>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">Each cleared grid expands to a larger, denser board, widening the visual field you must scan without losing track of the next target number.</p>
-              </div>
+              ))}
             </div>
           </div>
         </DrillAccordion>

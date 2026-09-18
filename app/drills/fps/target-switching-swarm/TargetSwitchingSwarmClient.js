@@ -21,7 +21,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
@@ -111,7 +111,7 @@ const ABOUT_SECTIONS = [
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function TargetSwitchingSwarmClient() {
+export default function TargetSwitchingSwarmClient({ copy = null }) {
   const [gameState, setGameState] = useState('start');
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -156,7 +156,7 @@ export default function TargetSwitchingSwarmClient() {
     level: 1, score: 0, timeLeft: DRILL_DURATION,
     successfulHits: 0, missedClicks: 0, timeouts: 0, totalActions: 0,
     combo: 0, bestCombo: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 0, logicalHeight: 0
   });
 
@@ -302,6 +302,7 @@ export default function TargetSwitchingSwarmClient() {
       bestCombo: 0,
       particles: [],
       hitMarkers: [],
+      hitRings: [],
       screenShake: 0,
       logicalWidth: w,
       logicalHeight: h
@@ -410,6 +411,7 @@ export default function TargetSwitchingSwarmClient() {
 
         drillAudio.playHit();
         createExplosion(t.x, t.y, t.color);
+        eRef.hitRings.push(createHitRing(t.x, t.y, t.radius, t.color));
         createHitMarker(ch.x, ch.y);
         eRef.targets.splice(hitIndex, 1);
 
@@ -588,6 +590,8 @@ export default function TargetSwitchingSwarmClient() {
         ctx.fillRect(p.x, p.y, 3, 3);
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -675,7 +679,8 @@ export default function TargetSwitchingSwarmClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Target Switching Aim Trainer
+              <span data-seo-kw="1">{copy?.h1Keyword || "Target Switching Aim Trainer"}</span>
+              {copy?.h1Suffix || ""}
             </h1>
           </div>
         )}
@@ -684,10 +689,10 @@ export default function TargetSwitchingSwarmClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: score },
-              { label: "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
-              { label: "Accuracy", val: `${accuracy}%`, color: "text-cyan-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statScore || "Score", val: score },
+              { label: copy?.statTime || "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
+              { label: copy?.statAccuracy || "Accuracy", val: `${accuracy}%`, color: "text-cyan-400" },
+              { label: copy?.statBestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -715,12 +720,12 @@ export default function TargetSwitchingSwarmClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{score}</p>
               </div>
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTime || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
@@ -775,8 +780,8 @@ export default function TargetSwitchingSwarmClient() {
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
+                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
+                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
               </div>
             </div>
           )}
@@ -792,8 +797,8 @@ export default function TargetSwitchingSwarmClient() {
             <FpsStartCard
               icon={Crosshair}
               accent="cyan"
-              title="Target Switching Swarm"
-              subtitle="Hardware Raw Input • Endless Level Progression"
+              title={copy?.startTitle || "Target Switching Swarm"}
+              subtitle={copy?.startSubtitle || "Hardware Raw Input • Endless Level Progression"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -807,10 +812,10 @@ export default function TargetSwitchingSwarmClient() {
               score={score}
               isNewBest={isNewBest}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.successfulHits, label: "Targets Destroyed" },
-                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
-                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.statAccuracy || "Accuracy" },
+                { value: analytics.successfulHits, label: copy?.statTargetsDestroyed || "Targets Destroyed" },
+                { value: `${analytics.bestCombo}x`, label: copy?.statMaxCombo || "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: copy?.statPeakLevel || "Peak Level" },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareDrillLink}
@@ -822,7 +827,7 @@ export default function TargetSwitchingSwarmClient() {
         {/* Stage Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            Rapidly flick and eliminate spawning targets across the screen before their timer rings expire.
+            {copy?.stageCaption || "Rapidly flick and eliminate spawning targets across the screen before their timer rings expire."}
           </p>
         )}
 
@@ -831,12 +836,12 @@ export default function TargetSwitchingSwarmClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
@@ -844,7 +849,7 @@ export default function TargetSwitchingSwarmClient() {
 
             <DrillAccordion
               id="about"
-              title="About Target Switching"
+              title={copy?.aboutTitle || "About Target Switching"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >

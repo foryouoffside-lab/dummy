@@ -1,0 +1,1750 @@
+{
+  "category": "physical",
+  "category_name": "Physical Training",
+  "total_drills": 11,
+  "completed_count": 11,
+  "remaining_count": 0,
+  "drills": {
+    "stability-challenge": {
+      "slug": "stability-challenge",
+      "name": "Stability Challenge",
+      "route": "/drills/physical/balance-training/stability-challenge",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Balance Test Online – Free Cursor Stability Trainer",
+          "title_length": 51,
+          "description": "Free online balance test. Master force vector counteraction, postural equilibrium, and central crosshair stabilization against dynamic wind resistance.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "balance test online",
+          "keywords_count": 10,
+          "keywords": [
+            "balance test online",
+            "online balance trainer",
+            "cursor stability challenge",
+            "stability challenge",
+            "force vector counteraction",
+            "postural equilibrium trainer",
+            "wind resistance tracking drill",
+            "central crosshair stabilization",
+            "motor control balance game",
+            "recoil stabilization drill"
+          ]
+        },
+        "de": {
+          "title": "Maus Stabilitätstest – Balance & Präzision | SkillDrills",
+          "title_length": 56,
+          "description": "Kostenloser Maus-Stabilitätstest online. Halte das Fadenkreuz gegen dynamische Windkräfte stabil und trainiere Fadenkreuz-Kontrolle direkt im Browser.",
+          "description_length": 150,
+          "canonical": "https://skilldrills.online/de/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "Maus Präzision Testen Online",
+          "keywords_count": 10,
+          "keywords": [
+            "Maus Präzision Testen Online",
+            "Maus Stabilitätstest Online",
+            "Mauszeiger Zittern Beseitigen",
+            "Maus Genauigkeit Testen",
+            "Gleichgewichtssinn Trainieren Online",
+            "Recoil Kontrolle Übungen",
+            "Fadenkreuz Stabilisierung",
+            "Hand Auge Koordination Training",
+            "Maus Test Online Kostenlos",
+            "maus gleichgewichtstest"
+          ]
+        },
+        "ko": {
+          "title": "마우스 흔들림 보정 & 에임 안정성 테스트 – 무료 균형 감각 훈련 | SkillDrills",
+          "title_length": 51,
+          "description": "무료 온라인 마우스 흔들림 보정 및 에임 안정성 테스트. 무작위 외력과 바람 저항 벡터에 맞서 크로스헤어를 안전 구역 중앙에 유지하며 신경근 제동력과 자세 평형 감각을 과학적으로 단련합니다.",
+          "description_length": 106,
+          "canonical": "https://skilldrills.online/ko/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "마우스 흔들림 보정",
+          "keywords_count": 10,
+          "keywords": [
+            "마우스 흔들림 보정",
+            "에임 흔들림",
+            "마우스 커서 흔들림",
+            "온라인 균형감각 테스트",
+            "마우스 에임 안정성",
+            "마우스 제동력 훈련",
+            "발로란트 에임 흔들림",
+            "반동 제어 훈련",
+            "마우스 손떨림 보정",
+            "외력 저항 에임 훈련"
+          ]
+        },
+        "ja": {
+          "title": "エイム安定化・マウスブレ矯正テスト – 無料姿勢制御＆反動制御練習 | SkillDrills",
+          "title_length": 47,
+          "description": "無料オンラインマウス安定性テスト。不規則な風圧・外力ベクトルに抗してレティクルを中央サークル内に維持し、FPSの反動制御（リコイル）と手ブレ抑制・平衡感覚を科学的に鍛えます。",
+          "description_length": 87,
+          "canonical": "https://skilldrills.online/ja/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "エイム 安定 練習 ブラウザ",
+          "keywords_count": 10,
+          "keywords": [
+            "エイム 安定 練習 ブラウザ",
+            "マウス 安定性 テスト",
+            "エイム ぶれ 矯正",
+            "valorant エイム 安定",
+            "リコイル 練習 ブラウザ",
+            "マウス 手ブレ 補正 fps",
+            "平衡感覚 テスト オンライン",
+            "反動制御 練習",
+            "エイム 安定させる",
+            "外力抵抗 エイム練習"
+          ]
+        },
+        "pt": {
+          "title": "Estabilidade de Mira – Teste de Firmeza | SkillDrills",
+          "title_length": 53,
+          "description": "Teste de estabilidade de mira e firmeza do mouse grátis. Mantenha o retículo no centro contra vetores de força e elimine tremores para jogos de tiro no PC.",
+          "description_length": 155,
+          "canonical": "https://skilldrills.online/pt/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "como parar de tremer a mira",
+          "keywords_count": 10,
+          "keywords": [
+            "como parar de tremer a mira",
+            "teste de precisao do mouse",
+            "controle de recoil cs2",
+            "treino de estabilidade de mira",
+            "teste de estabilidade do mouse",
+            "estabilidade de mira valorant",
+            "equilibrio postural e controle motor",
+            "resistencia a forcas externas mouse",
+            "sensibilidade e estabilidade do cursor",
+            "treino de compensacao de recuo"
+          ]
+        },
+        "es": {
+          "title": "Estabilidad del Ratón – Test de Puntería | SkillDrills",
+          "title_length": 54,
+          "description": "Test de estabilidad del ratón gratis. Contrarresta fuerzas dinámicas para centrar la retícula, eliminar temblores y controlar el retroceso en shooters.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/es/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "juegos para mejorar la punteria con el raton",
+          "keywords_count": 10,
+          "keywords": [
+            "juegos para mejorar la punteria con el raton",
+            "test punteria raton",
+            "como controlar el retroceso",
+            "control de retroceso con raton",
+            "test de estabilidad del raton",
+            "como evitar que tiemble la mira al disparar",
+            "ejercicios de estabilidad de raton",
+            "entrenamiento de punteria y control motor",
+            "resistencia a perturbaciones externas",
+            "compensacion de retroceso valorant cs2"
+          ]
+        },
+        "fr": {
+          "title": "Stabilité de Visée – Test Précision Souris | SkillDrills",
+          "title_length": 56,
+          "description": "Test de stabilité de visée et précision souris en ligne. Résistez aux forces dynamiques pour garder le réticule centré et éliminer les tremblements.",
+          "description_length": 148,
+          "canonical": "https://skilldrills.online/fr/drills/physical/balance-training/stability-challenge",
+          "primary_keyword": "precision souris test",
+          "keywords_count": 10,
+          "keywords": [
+            "precision souris test",
+            "jeu precision souris",
+            "entrainement precision souris",
+            "ameliorer precision souris",
+            "test de visee souris",
+            "stabilite de la souris",
+            "controle du recul souris",
+            "comment stabiliser sa visee souris",
+            "test equilibre moteur et resistance",
+            "compensation des perturbations motrices"
+          ]
+        }
+      }
+    },
+    "complex-pattern": {
+      "slug": "complex-pattern",
+      "name": "Complex Pattern",
+      "route": "/drills/physical/coordination/complex-pattern",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Pattern Memory Game – Free Visual & Spatial Memory Training",
+          "title_length": 59,
+          "description": "Free pattern memory game. Memorize increasingly complex paths and redraw them to train visuospatial memory and motor coordination.",
+          "description_length": 130,
+          "canonical": "https://skilldrills.online/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "pattern memory game",
+          "keywords_count": 10,
+          "keywords": [
+            "pattern memory game",
+            "visual memory training",
+            "pattern memory test",
+            "visual memory game",
+            "spatial memory game",
+            "working memory training",
+            "pattern recognition game",
+            "memory drawing game",
+            "free online visual memory test",
+            "trace path memory training online"
+          ]
+        },
+        "de": {
+          "title": "Muster Merken Test – Visuelles Gedächtnis | SkillDrills",
+          "title_length": 55,
+          "description": "Kostenloses Muster-Merken-Spiel online. Merke dir komplexe Pfade und trainiere dein räumliches Arbeitsgedächtnis und Feinmotorik direkt im Browser.",
+          "description_length": 147,
+          "canonical": "https://skilldrills.online/de/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "Muster Merken Test",
+          "keywords_count": 10,
+          "keywords": [
+            "Muster Merken Test",
+            "Muster Merken Spiel",
+            "Räumliches Vorstellungsvermögen Test",
+            "Arbeitsgedächtnis Trainieren Spiele",
+            "Visuelles Gedächtnis Test Online",
+            "Pfade Merken Spiel Browser",
+            "Gedächtnisspiel Online Kostenlos",
+            "Gehirntraining Muster",
+            "Feinmotorik Koordination Maus",
+            "Recoil Pattern Training"
+          ]
+        },
+        "ko": {
+          "title": "도형 순서 기억 & 패턴 기억력 테스트 – 무료 공간 작업기억 훈련 | SkillDrills",
+          "title_length": 51,
+          "description": "무료 온라인 도형 순서 및 패턴 기억력 테스트. 화면에 번쩍이는 기하학적 경로를 순간 암기하고 순서대로 연결하여 시각 공간 작업기억 용량과 마우스 운동 협응력을 과학적으로 단련합니다.",
+          "description_length": 102,
+          "canonical": "https://skilldrills.online/ko/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "도형 순서 기억하기 게임",
+          "keywords_count": 10,
+          "keywords": [
+            "도형 순서 기억하기 게임",
+            "순서 기억 게임",
+            "패턴 기억력 테스트",
+            "공간 기억력 테스트",
+            "작업 기억력 훈련",
+            "시각 공간 기억력 게임",
+            "위치 기억 게임",
+            "마우스 궤적 기억 훈련",
+            "AI 역량검사 도형 기억",
+            "패턴 기억 게임"
+          ]
+        },
+        "ja": {
+          "title": "図形記憶テスト・空間認識能力トレーニング – 無料パターン記憶ゲーム | SkillDrills",
+          "title_length": 48,
+          "description": "無料オンライン図形記憶テスト＆空間認識能力トレーニング。瞬間点滅する幾何学的な経路を記憶し、正確になぞって再生することで視空間ワーキングメモリと手先の運動協調性を科学的に鍛えます。",
+          "description_length": 90,
+          "canonical": "https://skilldrills.online/ja/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "図形 記憶 テスト",
+          "keywords_count": 10,
+          "keywords": [
+            "図形 記憶 テスト",
+            "空間認識能力 テスト 無料",
+            "ワーキングメモリ 鍛えるゲーム",
+            "パターン 記憶 ゲーム",
+            "線をなぞるゲーム ブラウザ",
+            "視空間 記憶 トレーニング",
+            "図形 記憶 ゲーム",
+            "脳トレ 図形記憶",
+            "マウス 軌道 練習",
+            "リコイル パターン 練習"
+          ]
+        },
+        "pt": {
+          "title": "Jogo de Memória Visual – Padrões Espaciais | SkillDrills",
+          "title_length": 56,
+          "description": "Jogo de memória visual e espacial gratuito. Memorize trajetos complexos entre pontos para treinar sua memória de trabalho e coordenação motora no PC.",
+          "description_length": 149,
+          "canonical": "https://skilldrills.online/pt/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "jogo de memoria visual online",
+          "keywords_count": 10,
+          "keywords": [
+            "jogo de memoria visual online",
+            "teste de memoria de trabalho visual",
+            "teste de coordenacao motora fina",
+            "jogo de memorizar sequencia",
+            "teste de coordenacao viso motora",
+            "memorizar padroes geometricos",
+            "memoria espacial e controle de recoil",
+            "treino de traco vetorial",
+            "agilidade motora sequencial",
+            "bloco de notas visuoespacial treino"
+          ]
+        },
+        "es": {
+          "title": "Juego de Memoria Visual – Patrones Espaciales | SkillDrills",
+          "title_length": 59,
+          "description": "Juego de memoria visual y espacial gratuito. Memoriza secuencias de puntos y traza rutas para entrenar tu memoria de trabajo y coordinación visomotora.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/es/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "juego de memoria visual para adultos",
+          "keywords_count": 10,
+          "keywords": [
+            "juego de memoria visual para adultos",
+            "test de coordinacion viso motora",
+            "memoria de trabajo visoespacial secuencial",
+            "juegos de memoria visual y patrones",
+            "test de coordinacion motora fina",
+            "memorizar secuencias geometricas",
+            "trazado de patrones espaciales",
+            "ejercicios de memoria espacial y punteria",
+            "control de recoil y memoria motora",
+            "agenda visoespacial ejercicios online"
+          ]
+        },
+        "fr": {
+          "title": "Jeu de Mémoire Visuelle – Mémoire Spatiale | SkillDrills",
+          "title_length": 56,
+          "description": "Jeu de mémoire visuelle gratuit en ligne. Mémorisez des tracés de points pour développer votre mémoire spatiale et votre coordination motrice fine.",
+          "description_length": 147,
+          "canonical": "https://skilldrills.online/fr/drills/physical/coordination/complex-pattern",
+          "primary_keyword": "jeu de memoire visuelle en ligne",
+          "keywords_count": 10,
+          "keywords": [
+            "jeu de memoire visuelle en ligne",
+            "test memoire visuo spatiale",
+            "memoire de travail visuo spatiale",
+            "jeu de memoire visuelle gratuit",
+            "test memoire spatiale en ligne",
+            "reproduction de traces geometriques",
+            "coordination motrice fine et visuelle",
+            "test de sequencage moteur",
+            "memoire des formes et controle souris",
+            "calepin visuo spatial exercices"
+          ]
+        }
+      }
+    },
+    "cross-body-movement": {
+      "slug": "cross-body-movement",
+      "name": "Cross-Body Movement",
+      "route": "/drills/physical/coordination/cross-body-movement",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Hand Eye Coordination Game – Free Cross-Body Movement Drill",
+          "title_length": 59,
+          "description": "Free online hand eye coordination game. Connect nodes across the screen to train bilateral motor control, midline crossing, and diagonal vector precision.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "hand eye coordination game",
+          "keywords_count": 11,
+          "keywords": [
+            "hand eye coordination game",
+            "bilateral coordination exercises",
+            "cross body movement exercises",
+            "cross midline exercises",
+            "bilateral integration training",
+            "hand eye coordination exercises",
+            "motor coordination game",
+            "hand eye coordination test",
+            "cross body coordination",
+            "fine motor skills game",
+            "diagonal movement training"
+          ]
+        },
+        "de": {
+          "title": "Hand-Auge-Koordination Test – Koordination | SkillDrills",
+          "title_length": 56,
+          "description": "Kostenloser Hand-Auge-Koordinationstest online. Verbinde Nodes auf dem Bildschirm und trainiere bilaterale Koordination und diagonale Präzision im Browser.",
+          "description_length": 155,
+          "canonical": "https://skilldrills.online/de/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "Hand-Auge-Koordination Trainieren",
+          "keywords_count": 10,
+          "keywords": [
+            "Hand-Auge-Koordination Trainieren",
+            "Hand-Auge-Koordination Test",
+            "Hand-Auge-Koordination Spiele Online",
+            "Auge-Hand-Koordination Übungen",
+            "Bilaterale Koordination Übungen",
+            "Feinmotorik Koordination Test",
+            "Mittellinien Überkreuzung Training",
+            "Koordinationstraining Maus",
+            "Diagonale Flicks Üben",
+            "Hand Auge Koordination Verbessern"
+          ]
+        },
+        "ko": {
+          "title": "눈 손 협응력 테스트 & 협응 운동 게임 – 무료 대각선 제어 훈련 | SkillDrills",
+          "title_length": 51,
+          "description": "무료 온라인 눈-손 협응력 테스트 및 협응 운동 게임. 화면을 가로지르는 대각선 노드를 신속하게 연결하여 양측 협응력과 중심선 교차 제어 능력을 과학적으로 단련합니다.",
+          "description_length": 112,
+          "canonical": "https://skilldrills.online/ko/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "눈 손 협응력 테스트",
+          "keywords_count": 10,
+          "keywords": [
+            "눈 손 협응력 테스트",
+            "손 눈 협응력",
+            "협응력 테스트",
+            "협응력 게임",
+            "협응력 운동",
+            "눈-손 협응력 검사",
+            "양측성 협응 훈련",
+            "정중선 교차 훈련",
+            "마우스 대각선 플릭",
+            "신체 협응력"
+          ]
+        },
+        "ja": {
+          "title": "目と手の協応トレーニング・協調運動テスト – 無料視覚運動連動ゲーム | SkillDrills",
+          "title_length": 48,
+          "description": "無料オンライン目と手の協応動作トレーニング。画面上の対角ノードを素早く結び、両側性運動協調、正中線交差、対角ベクトル制御を科学的に鍛えます。",
+          "description_length": 89,
+          "canonical": "https://skilldrills.online/ja/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "目と手の協応 トレーニング",
+          "keywords_count": 10,
+          "keywords": [
+            "目と手の協応 トレーニング",
+            "目と手の協調運動",
+            "協調運動 トレーニング",
+            "目と手の協応 動作",
+            "協調運動 テスト",
+            "目と手の協応",
+            "正中線交差 ドリル",
+            "両側統合 トレーニング",
+            "対角線 フリック エイム",
+            "手先 協調運動"
+          ]
+        },
+        "pt": {
+          "title": "Coordenação Mão e Olho – Linha Média | SkillDrills",
+          "title_length": 50,
+          "description": "Teste de coordenação mão e olho online grátis. Conecte nós diagonais na tela para treinar coordenação bilateral e cruzamento de linha média no PC.",
+          "description_length": 146,
+          "canonical": "https://skilldrills.online/pt/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "teste de coordenacao motora mao e olho",
+          "keywords_count": 10,
+          "keywords": [
+            "teste de coordenacao motora mao e olho",
+            "exercicios de coordenacao motora fina",
+            "cruzamento da linha media corporal",
+            "treino de coordenacao bilateral",
+            "teste de reflexo e coordenacao motora",
+            "flick diagonal mouse aim",
+            "coordenacao visomotora teste online",
+            "jogo de coordenacao motora gratis",
+            "controle motor contralateral",
+            "mira diagonal fps"
+          ]
+        },
+        "es": {
+          "title": "Coordinación Ojo Mano – Puntería Diagonal | SkillDrills",
+          "title_length": 55,
+          "description": "Test de coordinación ojo-mano online gratis. Conecta nodos diagonales en pantalla para entrenar coordinación bilateral y cruce de línea media en el PC.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/es/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "test de coordinacion ojo mano online",
+          "keywords_count": 10,
+          "keywords": [
+            "test de coordinacion ojo mano online",
+            "ejercicios de coordinacion visomotriz",
+            "cruce de la linea media corporal",
+            "juegos de coordinacion mano ojo gratis",
+            "entrenamiento de coordinacion bilateral",
+            "control motor contralateral y barrido diagonal",
+            "flick diagonal punteria raton",
+            "ejercicios de motricidad fina y precision",
+            "coordinacion visomotora ejercicios",
+            "test de destreza motora"
+          ]
+        },
+        "fr": {
+          "title": "Coordination Œil-Main – Visée Diagonale | SkillDrills",
+          "title_length": 53,
+          "description": "Test de coordination œil-main gratuit en ligne. Reliez des nœuds diagonaux pour développer votre coordination bilatérale et votre visée motrice fine.",
+          "description_length": 149,
+          "canonical": "https://skilldrills.online/fr/drills/physical/coordination/cross-body-movement",
+          "primary_keyword": "test de coordination oeil main en ligne",
+          "keywords_count": 10,
+          "keywords": [
+            "test de coordination oeil main en ligne",
+            "exercice de coordination visuo motrice",
+            "franchissement de la ligne médiane motricité",
+            "coordination bilatérale et motricité fine",
+            "jeux de coordination motrice gratuit",
+            "mouvement de balayage diagonal souris",
+            "test de vitesse de réaction et coordination",
+            "contrôle moteur controlatéral",
+            "visée diagonale fps",
+            "dextérité motrice test"
+          ]
+        }
+      }
+    },
+    "dynamic-grid-evasion": {
+      "slug": "dynamic-grid-evasion",
+      "name": "Dynamic Grid Evasion",
+      "route": "/drills/physical/coordination/dynamic-grid-evasion",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Dynamic Grid Evasion – Free Spatial Reflex Game",
+          "title_length": 47,
+          "description": "Free grid evasion game. Navigate a 3x3 grid and dodge hazard cells to train peripheral scanning and spatial reflexes.",
+          "description_length": 117,
+          "canonical": "https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "grid evasion game",
+          "keywords_count": 11,
+          "keywords": [
+            "grid evasion game",
+            "spatial awareness game",
+            "reflex training game",
+            "spatial reflex trainer",
+            "visual reaction drill",
+            "peripheral vision game",
+            "mouse evasion test",
+            "dodge game online",
+            "spatial coordination drill",
+            "speed reflex trainer",
+            "peripheral scanning game"
+          ]
+        },
+        "de": {
+          "title": "Reaktionstest Kostenlos – Raster-Ausweichen | SkillDrills",
+          "title_length": 57,
+          "description": "Kostenloser Online-Reaktionstest. Weiche im Gefahrenraster Explosionszonen periphär aus und trainiere Reaktionszeit sowie Reflexe direkt im Browser.",
+          "description_length": 148,
+          "canonical": "https://skilldrills.online/de/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "Reaktionstest Online Kostenlos",
+          "keywords_count": 10,
+          "keywords": [
+            "Reaktionstest Online Kostenlos",
+            "Reflexe Trainieren Online",
+            "Peripheres Sehen Trainieren",
+            "Reaktionstest Spiel",
+            "Reflexspiel Kostenlos",
+            "Ausweichtraining Maus",
+            "Reaktionszeit Messen PC",
+            "Visuelle Aufmerksamkeit Test",
+            "Skillshot Ausweichen Üben",
+            "Hand-Auge-Koordination Reflexe"
+          ]
+        },
+        "ko": {
+          "title": "마우스 피하기 & 동체시력 테스트 게임 – 무료 주변시 회피 훈련 | SkillDrills",
+          "title_length": 50,
+          "description": "무료 온라인 마우스 피하기 및 동체시력 테스트 게임. 3x3 격자에서 번쩍이는 폭발 위험 구역을 주변시로 감지하고 안전 구역으로 즉각 플릭 회피하여 공간 반사신경과 탈출 반응속도를 과학적으로 단련합니다.",
+          "description_length": 113,
+          "canonical": "https://skilldrills.online/ko/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "마우스 피하기 게임",
+          "keywords_count": 10,
+          "keywords": [
+            "마우스 피하기 게임",
+            "동체시력 테스트 게임",
+            "동체시력 반응속도 테스트",
+            "반응속도 테스트 게임",
+            "주변시 훈련 게임",
+            "순발력 테스트 게임",
+            "반사신경 측정 테스트",
+            "논타겟 스킬 피하기 연습",
+            "마우스 회피 플릭",
+            "공간 반응속도 훈련"
+          ]
+        },
+        "ja": {
+          "title": "反射神経ゲーム・動体視力トレーニング – 無料周辺視野＆危険回避ドリル | SkillDrills",
+          "title_length": 49,
+          "description": "無料オンライン反射神経ゲーム＆動体視力トレーニング。3×3グリッド上で爆発する危険セルを周辺視野で瞬時に察知し、安全ゾーンへマウスをフリック回避して空間反射と危機回避能力を科学的に鍛えます。",
+          "description_length": 95,
+          "canonical": "https://skilldrills.online/ja/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "反射神経 ゲーム ブラウザ",
+          "keywords_count": 10,
+          "keywords": [
+            "反射神経 ゲーム ブラウザ",
+            "反射神経 ゲーム 無料",
+            "動体視力 トレーニング 無料",
+            "周辺視野 トレーニング ゲーム",
+            "危険回避 ゲーム",
+            "反射神経 鍛える",
+            "スキルショット 避ける 練習",
+            "マウス 回避 練習",
+            "空間認識 反応速度",
+            "視野拡大 トレーニング"
+          ]
+        },
+        "pt": {
+          "title": "Jogo de Desviar do Mouse – Esquiva & Reflexos | SkillDrills",
+          "title_length": 59,
+          "description": "Jogo de desviar do mouse online grátis. Detecte explosões na grade 3x3 e mova o cursor para células seguras para treinar visão periférica e reflexos no PC.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/pt/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "jogo de desviar do mouse",
+          "keywords_count": 10,
+          "keywords": [
+            "jogo de desviar do mouse",
+            "jogo de esquiva mouse reflexo",
+            "teste de visao periferica online",
+            "treino de reflexo e desvio",
+            "jogo de esquivar skillshots",
+            "teste de agilidade e reflexo online",
+            "treino de visao periferica fps",
+            "esquivar de habilidades treino",
+            "jogo de coordenacao e reflexos rapidos",
+            "flick de esquiva mouse"
+          ]
+        },
+        "es": {
+          "title": "Juego de Esquivar Ratón – Visión Periférica | SkillDrills",
+          "title_length": 57,
+          "description": "Juego de esquivar con el ratón gratis. Detecta explosiones en la cuadrícula 3x3 y escapa a zonas seguras para entrenar visión periférica y reflejos en PC.",
+          "description_length": 153,
+          "canonical": "https://skilldrills.online/es/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "juego de esquivar con el raton",
+          "keywords_count": 10,
+          "keywords": [
+            "juego de esquivar con el raton",
+            "test de vision periferica online gratis",
+            "juegos de esquivar obstaculos con el cursor",
+            "entrenamiento de reflejos espaciales",
+            "como esquivar skillshots entrenamiento",
+            "juegos de agilidad mental y reflejos",
+            "entrenar vision periferica para shooters",
+            "juegos de reflejos rapidos gratis",
+            "flick de evasion con raton",
+            "test de tiempo de reaccion y esquiva"
+          ]
+        },
+        "fr": {
+          "title": "Jeu d'Esquive Souris – Vision Périphérique | SkillDrills",
+          "title_length": 56,
+          "description": "Jeu d'esquive à la souris gratuit en ligne. Détectez les zones d'explosion sur la grille 3x3 et fuyez vers les cases sûres pour booster vos réflexes.",
+          "description_length": 150,
+          "canonical": "https://skilldrills.online/fr/drills/physical/coordination/dynamic-grid-evasion",
+          "primary_keyword": "jeu d'esquive a la souris en ligne",
+          "keywords_count": 10,
+          "keywords": [
+            "jeu d'esquive a la souris en ligne",
+            "test de vision peripherique en ligne gratuit",
+            "jeu d'esquive de zone reflexe",
+            "entrainement aux reflexes spatiaux",
+            "esquiver les sorts jeu d'entrainement",
+            "test d'attention visuelle et de detection peripherique",
+            "jeu de rapidite et d'evitement souris",
+            "reflexe d'evitement et coordination visuelle",
+            "esquive skillshots",
+            "reflexes souris entrainement"
+          ]
+        }
+      }
+    },
+    "agility-ladder": {
+      "slug": "agility-ladder",
+      "name": "Agility Ladder",
+      "route": "/drills/physical/fitness/agility-ladder",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Agility Ladder Drills – Free Footwork Sequencing Trainer",
+          "title_length": 56,
+          "description": "Free agility ladder drills online. Master rapid alternating footwork, motor sequencing, and rhythmic coordination to build explosive athletic speed.",
+          "description_length": 149,
+          "canonical": "https://skilldrills.online/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "agility ladder drills",
+          "keywords_count": 11,
+          "keywords": [
+            "agility ladder drills",
+            "motor sequencing training",
+            "agility ladder exercises",
+            "footwork agility drills",
+            "bilateral coordination drill",
+            "rhythmic mouse control",
+            "agility ladder game",
+            "sequential movement training",
+            "motor coordination exercises",
+            "agility ladder workout",
+            "esports footwork training"
+          ]
+        },
+        "de": {
+          "title": "Koordinationsleiter Übungen – Beinarbeit | SkillDrills",
+          "title_length": 54,
+          "description": "Kostenlose Koordinationsleiter-Übungen online. Trainiere Beinarbeit, Schrittfolgen und neuromuskuläre Schnelligkeit für Fußball und Sport im Browser.",
+          "description_length": 149,
+          "canonical": "https://skilldrills.online/de/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "Koordinationsleiter Übungen",
+          "keywords_count": 10,
+          "keywords": [
+            "Koordinationsleiter Übungen",
+            "Koordinationsleiter Fußball",
+            "Beinarbeit Trainieren",
+            "Schnelligkeitstraining Übungen",
+            "Agility Leiter Training",
+            "Motorische Sequenzierung",
+            "Hand-Auge-Rhythmus",
+            "Koordinationsleiter Sportabzeichen",
+            "Counter Strafing Rhythmus",
+            "Schnelligkeit Beinarbeit"
+          ]
+        },
+        "ko": {
+          "title": "스텝레더 훈련 & 민첩성 사다리운동 – 무료 풋워크 시퀀싱 드릴 | SkillDrills",
+          "title_length": 49,
+          "description": "무료 온라인 스텝레더 훈련 및 민첩성 사다리 운동. 하강하는 레더 스텝을 좌우 교대로 빠르게 연결하여 신경근 반응속도, 풋워크 시퀀싱, 카운터 스트레이핑 리듬감을 과학적으로 단련합니다.",
+          "description_length": 117,
+          "canonical": "https://skilldrills.online/ko/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "스텝레더 훈련",
+          "keywords_count": 10,
+          "keywords": [
+            "스텝레더 훈련",
+            "민첩성 사다리운동",
+            "순발력 민첩성 운동",
+            "풋워크 훈련",
+            "스텝레더 운동법",
+            "스피드 레더 훈련",
+            "풋워크 드릴",
+            "카운터 스트레이핑",
+            "양측성 운동 협응",
+            "사다리 스텝 훈련"
+          ]
+        },
+        "ja": {
+          "title": "ラダートレーニングメニュー＆アジリティ練習 – 無料フットワーク敏捷性ゲーム | SkillDrills",
+          "title_length": 52,
+          "description": "無料オンラインラダートレーニング＆アジリティ練習。スクロールするマス目を左右交互に素早くタップし、フットワークの敏捷性、運動連鎖リズム、FPSのレレレ撃ちストレイフィングを科学的に鍛えます。",
+          "description_length": 105,
+          "canonical": "https://skilldrills.online/ja/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "ラダートレーニング メニュー",
+          "keywords_count": 10,
+          "keywords": [
+            "ラダートレーニング メニュー",
+            "ラダートレーニング 効果",
+            "アジリティ トレーニング",
+            "フットワーク 練習 メニュー",
+            "敏捷性 トレーニング",
+            "レレレ撃ち コツ",
+            "ステップ ワーク 練習",
+            "アジリティ ラダー 練習",
+            "両側性運動協調",
+            "反射神経 フットワーク"
+          ]
+        },
+        "pt": {
+          "title": "Escada de Agilidade – Treino de Footwork | SkillDrills",
+          "title_length": 54,
+          "description": "Treino de escada de agilidade online grátis. Pratique sequências de passadas rápidas, coordenação de pés e ritmo motor no navegador para esportes.",
+          "description_length": 146,
+          "canonical": "https://skilldrills.online/pt/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "treino escada de agilidade",
+          "keywords_count": 10,
+          "keywords": [
+            "treino escada de agilidade",
+            "exercicios na escada de agilidade",
+            "escadinha de agilidade exercicios",
+            "treino de footwork e agilidade",
+            "treino de velocidade e agilidade",
+            "coordenacao motora e agilidade",
+            "counter strafing ritmo",
+            "treino de sequenciamento motor",
+            "cadencia e reflexo motor",
+            "treino de agilidade online"
+          ]
+        },
+        "es": {
+          "title": "Escalera de Agilidad – Ejercicios Footwork | SkillDrills",
+          "title_length": 56,
+          "description": "Ejercicios con escalera de agilidad online gratis. Entrena secuencias de pasos, juego de pies rápido y coordinación neuromuscular para fútbol y atletismo.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/es/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "ejercicios escalera de agilidad",
+          "keywords_count": 10,
+          "keywords": [
+            "ejercicios escalera de agilidad",
+            "entrenamiento escalera de velocidad",
+            "escalera de coordinacion ejercicios",
+            "ejercicios de footwork y agilidad",
+            "rutina escalera de agilidad",
+            "entrenamiento de velocidad y coordinacion",
+            "ritmo de counter strafe",
+            "secuenciacion motora bilateral",
+            "juego de pies y agilidad",
+            "test de velocidad de pies"
+          ]
+        },
+        "fr": {
+          "title": "Échelle d'Agilité – Travail des Appuis | SkillDrills",
+          "title_length": 52,
+          "description": "Exercices d'échelle d'agilité en ligne gratuits. Développez votre vitesse d'appuis, coordination motrice et jeu de jambes pour le football et le sport.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/fr/drills/physical/fitness/agility-ladder",
+          "primary_keyword": "exercices echelle d'agilite",
+          "keywords_count": 10,
+          "keywords": [
+            "exercices echelle d'agilite",
+            "echelle de rythme exercices",
+            "echelle de velocite entrainement",
+            "travail des appuis et vivacite",
+            "entrainement agilite et vitesse",
+            "coordination motrice bilaterale souris",
+            "rythme counter strafe",
+            "test de vitesse et vivacite",
+            "sequencage moteur reflexe",
+            "jeu de rythme moteur"
+          ]
+        }
+      }
+    },
+    "jump-sequence": {
+      "slug": "jump-sequence",
+      "name": "Jump Sequence",
+      "route": "/drills/physical/fitness/jump-sequence",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Jump Sequence Training - Free Mid-Air Interception Drill",
+          "title_length": 56,
+          "description": "Free online jump sequence training drill. Master stretch-shortening cycle impulse, trajectory calculation, and airborne target interception.",
+          "description_length": 134,
+          "canonical": "https://skilldrills.online/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "jump sequence training",
+          "keywords_count": 16,
+          "keywords": [
+            "jump sequence training",
+            "plyometric rhythm drill",
+            "jump timing drill",
+            "jump sequence drill",
+            "precision jumping game",
+            "trajectory timing drill",
+            "airborne interception trainer",
+            "stretch shortening cycle drill",
+            "vertical jump timing game",
+            "kinetic impulse control drill",
+            "sports jump timing test",
+            "optical tau interception test",
+            "parabolic target tracking drill",
+            "athletic jump reaction game",
+            "esports airborne aim trainer",
+            "cerebellar timing drill"
+          ]
+        },
+        "de": {
+          "title": "Sprungkraft Trainieren – Plyometrik | SkillDrills",
+          "title_length": 49,
+          "description": "Kostenloses Sprungkraft-Training online. Fange parabelförmige Sprungziele am Scheitelpunkt ab und trainiere Timing und plyometrischen Rhythmus im Browser.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/de/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "Sprungkraft Trainieren Übungen",
+          "keywords_count": 10,
+          "keywords": [
+            "Sprungkraft Trainieren Übungen",
+            "Plyometrisches Training Sprungkraft",
+            "Sprungkraft Trainieren Zuhause",
+            "Vertikalsprung Trainieren",
+            "Flugbahn Antizipation Training",
+            "Abfang-Timing Spiel",
+            "Dehnungs-Verkürzungs-Zyklus",
+            "Basketball Sprungkraft Verbessern",
+            "Volleyball Sprungkraft Übungen",
+            "Parabel Flugbahn Zielen"
+          ]
+        },
+        "ko": {
+          "title": "점프력 높이는 운동 & 서전트 점프 훈련 – 무료 플라이오메트릭 타이밍 드릴 | SkillDrills",
+          "title_length": 56,
+          "description": "무료 온라인 점프력 높이는 운동 및 서전트 점프 훈련. 포물선 궤적으로 상승하는 표적의 정점을 예측 요격하여 플라이오메트릭 점프 타이밍과 시공간 궤적 판단력을 과학적으로 단련합니다.",
+          "description_length": 108,
+          "canonical": "https://skilldrills.online/ko/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "점프력 높이는 운동",
+          "keywords_count": 10,
+          "keywords": [
+            "점프력 높이는 운동",
+            "서전트 점프 훈련",
+            "플라이오메트릭 운동",
+            "점프력 강화 운동",
+            "플라이오메트릭 점프",
+            "점프 타이밍 훈련",
+            "농구 점프력 운동",
+            "배구 점프력 트레이닝",
+            "신장 단축 주기 훈련",
+            "공중 궤적 예측 요격"
+          ]
+        },
+        "ja": {
+          "title": "ジャンプ力トレーニング＆プライオメトリクス練習 – 無料滞空軌道迎撃ゲーム | SkillDrills",
+          "title_length": 51,
+          "description": "無料オンラインジャンプ力トレーニング＆プライオメトリクス練習。放物線を描いて飛翔する標的の頂点を予測して迎撃し、跳躍タイミングと空中軌道制御を科学的に鍛えます。",
+          "description_length": 105,
+          "canonical": "https://skilldrills.online/ja/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "ジャンプ力 トレーニング 自宅",
+          "keywords_count": 10,
+          "keywords": [
+            "ジャンプ力 トレーニング 自宅",
+            "プライオメトリクス トレーニング",
+            "プライオメトリクス ジャンプ",
+            "垂直跳び トレーニング",
+            "ジャンプ タイミング 練習",
+            "空中 軌道 制御",
+            "バスケ ジャンプ力 メニュー",
+            "バレーボール 最高到達点 伸ばす",
+            "伸張 反射 トレーニング",
+            "空中 エイム 放物線"
+          ]
+        },
+        "pt": {
+          "title": "Salto Vertical – Treino Pliométrico | SkillDrills",
+          "title_length": 49,
+          "description": "Treino de salto vertical online grátis. Intercepte alvos no ápice da parábola e desenvolva tempo de reação, ritmo pliométrico e controle no PC.",
+          "description_length": 143,
+          "canonical": "https://skilldrills.online/pt/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "exercicios para aumentar o salto vertical",
+          "keywords_count": 10,
+          "keywords": [
+            "exercicios para aumentar o salto vertical",
+            "treino de salto vertical e impulsao",
+            "treino pliometrico para salto",
+            "como pular mais alto exercicios",
+            "treino de impulsao basquete e volei",
+            "mira aerea e predicao de trajetoria",
+            "ciclo alongamento encurtamento treino",
+            "timing de salto e reflexo motor",
+            "exercicios para impulsao vertical em casa",
+            "jogo de sincronizacao de salto"
+          ]
+        },
+        "es": {
+          "title": "Saltar Más Alto – Salto Vertical | SkillDrills",
+          "title_length": 46,
+          "description": "Ejercicios para saltar más alto online gratis. Intercepta objetivos en el vértice de su parábola y entrena sincronización motora y ritmo pliométrico en PC.",
+          "description_length": 155,
+          "canonical": "https://skilldrills.online/es/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "ejercicios para saltar mas alto",
+          "keywords_count": 10,
+          "keywords": [
+            "ejercicios para saltar mas alto",
+            "entrenamiento de salto vertical voleibol y basket",
+            "ejercicios pliometricos para potencia",
+            "como aumentar el salto vertical",
+            "test de salto vertical online",
+            "punteria en el aire y parabola fps",
+            "ciclo de estiramiento acortamiento musculo",
+            "temporizacion motora y sincronizacion de salto",
+            "rutina para ganar salto vertical en casa",
+            "juego de timing y parabola aérea"
+          ]
+        },
+        "fr": {
+          "title": "Détente Verticale – Sauter Plus Haut | SkillDrills",
+          "title_length": 50,
+          "description": "Exercices pour sauter plus haut en ligne gratuits. Interceptez des cibles en apesanteur pour développer votre détente verticale et vos réflexes au PC.",
+          "description_length": 150,
+          "canonical": "https://skilldrills.online/fr/drills/physical/fitness/jump-sequence",
+          "primary_keyword": "exercices pour sauter plus haut",
+          "keywords_count": 10,
+          "keywords": [
+            "exercices pour sauter plus haut",
+            "detente verticale entrainement volley basket",
+            "pliometrie pour la detente verticale",
+            "comment augmenter sa detente verticale",
+            "test de detente verticale en ligne",
+            "visee aerienne et trajectoire parabolique",
+            "cycle etirement raccourcissement pliometrie",
+            "timing de saut et synchronisation motrice",
+            "programme detente verticale gratuit",
+            "interception de trajectoire aerienne"
+          ]
+        }
+      }
+    },
+    "speed-drill": {
+      "slug": "speed-drill",
+      "name": "Speed Drill",
+      "route": "/drills/physical/fitness/speed-drill",
+      "category": "physical",
+      "locales": {
+        "en": {
+          "title": "Speed Drill - Free Target Acquisition & Tapping Trainer",
+          "title_length": 55,
+          "description": "Free speed drill online. Train rapid target acquisition, ballistic clicking reflexes, and optical tau interception timing across dynamic spawning targets.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/drills/physical/fitness/speed-drill",
+          "primary_keyword": "speed drill training",
+          "keywords_count": 15,
+          "keywords": [
+            "speed drill training",
+            "rapid tapping trainer",
+            "target acquisition speed",
+            "speed drill game",
+            "click speed trainer",
+            "rapid clicking drill",
+            "ballistic motor flick drill",
+            "peripheral target acquisition",
+            "fps rapid tap training",
+            "motor speed multiplier drill",
+            "speed accuracy tradeoff game",
+            "decaying target interception",
+            "burst clicking trainer",
+            "athletic tapping drill",
+            "sports reaction speed drill"
+          ]
+        },
+        "de": {
+          "title": "Klickgeschwindigkeit Test – Klick-Speed | SkillDrills",
+          "title_length": 53,
+          "description": "Kostenloser Klickgeschwindigkeitstest online. Klicke blitzschnell auf auftauchende Ziele und trainiere CPS, Reaktionszeit und Zielgenauigkeit im Browser.",
+          "description_length": 153,
+          "canonical": "https://skilldrills.online/de/drills/physical/fitness/speed-drill",
+          "primary_keyword": "Klickgeschwindigkeit Test",
+          "keywords_count": 10,
+          "keywords": [
+            "Klickgeschwindigkeit Test",
+            "Klicks pro Sekunde Test",
+            "Klickgeschwindigkeit Messen",
+            "Maus Klicks pro Sekunde",
+            "Klick Test Online",
+            "Maus Reaktionszeit Test",
+            "Schnelligkeitstraining Maus",
+            "CPS Test Kostenlos",
+            "Zielerfassung Schnelligkeit",
+            "Ballistisches Zielen Üben"
+          ]
+        },
+        "ko": {
+          "title": "클릭 속도 측정 & 마우스 반응속도 테스트 – 무료 광클 에임 드릴 | SkillDrills",
+          "title_length": 51,
+          "description": "무료 온라인 클릭 속도 측정 및 마우스 반응속도 테스트. 화면에 출현하는 표적을 초고속으로 플릭 클릭하여 CPS 연타력, 에임 반응속도, 광클 순발력을 과학적으로 단련합니다.",
+          "description_length": 116,
+          "canonical": "https://skilldrills.online/ko/drills/physical/fitness/speed-drill",
+          "primary_keyword": "클릭 속도 측정",
+          "keywords_count": 10,
+          "keywords": [
+            "클릭 속도 측정",
+            "광클 속도 테스트",
+            "마우스 반응속도 테스트",
+            "단발 광클 테스트",
+            "순발력 테스트 게임",
+            "에임 속도 테스트",
+            "타겟 에임 반응속도",
+            "CPS 측정 사이트",
+            "마우스 플릭 반응속도",
+            "광클 타속 훈련"
+          ]
+        },
+        "ja": {
+          "title": "クリック速度測定＆クリック連打テスト – 無料エイム反応速度練習 | SkillDrills",
+          "title_length": 46,
+          "description": "無料オンラインクリック速度測定＆連打テスト。ランダムに出現する標的を瞬時に視認・フリッククリックし、CPS連打速度、エイム反応速度、標的捕捉精度を科学的に鍛えます。",
+          "description_length": 107,
+          "canonical": "https://skilldrills.online/ja/drills/physical/fitness/speed-drill",
+          "primary_keyword": "クリック速度測定",
+          "keywords_count": 10,
+          "keywords": [
+            "クリック速度測定",
+            "クリック速度テスト",
+            "連打 測定 サイト",
+            "クリック 連打 練習",
+            "エイム 速度 練習",
+            "エイム 反応速度",
+            "CPS 測定 無料",
+            "反射神経 クリックゲーム",
+            "フリック エイム 速度",
+            "瞬発力 トレーニング ゲーム"
+          ]
+        },
+        "pt": {
+          "title": "Cliques por Segundo – Teste de CPS Online | SkillDrills",
+          "title_length": 55,
+          "description": "Teste de cliques por segundo online grátis. Clique em alvos velozes para medir seu CPS, reflexos e precisão de clique rápido no navegador para jogos.",
+          "description_length": 149,
+          "canonical": "https://skilldrills.online/pt/drills/physical/fitness/speed-drill",
+          "primary_keyword": "teste de cliques por segundo",
+          "keywords_count": 10,
+          "keywords": [
+            "teste de cliques por segundo",
+            "teste de cps online",
+            "teste de cliques mouse",
+            "medir cliques por segundo",
+            "teste de velocidade de clique",
+            "treino de reflexo mouse",
+            "velocidade de aquisicao de alvos",
+            "teste de agilidade no clique",
+            "cliques rapidos jogo online",
+            "flick rapido fps treino"
+          ]
+        },
+        "es": {
+          "title": "Test de Clics por Segundo – Velocidad CPS | SkillDrills",
+          "title_length": 55,
+          "description": "Test de clics por segundo online gratis. Haz clic rápido en objetivos emergentes para medir tu CPS, velocidad de reacción y puntería rápida en el PC.",
+          "description_length": 149,
+          "canonical": "https://skilldrills.online/es/drills/physical/fitness/speed-drill",
+          "primary_keyword": "test de clics por segundo",
+          "keywords_count": 10,
+          "keywords": [
+            "test de clics por segundo",
+            "prueba de velocidad de clic",
+            "test de cps online",
+            "medir clics por segundo",
+            "test de reflejos raton",
+            "mejorar reflejos fps",
+            "velocidad de adquisicion de blancos",
+            "juegos de clics rapidos gratis",
+            "entrenamiento de velocidad motora",
+            "flick y clic de velocidad"
+          ]
+        },
+        "fr": {
+          "title": "Test de Clics par Seconde – Test CPS | SkillDrills",
+          "title_length": 50,
+          "description": "Test de clics par seconde en ligne gratuit. Cliquez rapidement sur les cibles pour mesurer vos CPS, votre vitesse de réaction et votre précision au PC.",
+          "description_length": 153,
+          "canonical": "https://skilldrills.online/fr/drills/physical/fitness/speed-drill",
+          "primary_keyword": "test de clics par seconde",
+          "keywords_count": 10,
+          "keywords": [
+            "test de clics par seconde",
+            "test cps souris",
+            "mesurer clics par seconde",
+            "test de vitesse de clic",
+            "test de réflexe souris",
+            "améliorer ses réflexes fps",
+            "acquisition rapide de cibles",
+            "jeu de clic rapide gratuit",
+            "entraînement vitesse motrice souris",
+            "flick tir rapide précision"
+          ]
+        }
+      }
+    },
+    "drop-catch": {
+      "slug": "drop-catch",
+      "name": "Drop Catch Reflex Test",
+      "route": "/drills/physical/reflex-training/drop-catch",
+      "category": "physical",
+      "completed_at": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Drop Catch Reflex Test - Free Reaction Timing Drill",
+          "title_length": 51,
+          "description": "Free drop catch reflex test online. Catch falling targets under gravity to measure visual reaction time, anticipation latency, and catch precision in ms.",
+          "description_length": 153,
+          "canonical": "https://skilldrills.online/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "reflex drop catch",
+          "keywords_count": 15,
+          "keywords": [
+            "reflex drop catch",
+            "drop catch reaction drill",
+            "ruler drop test online",
+            "reflex drop catch test",
+            "falling target reaction test",
+            "go no go reflex game",
+            "impulse control reflex test",
+            "reaction speed game",
+            "hand eye coordination drop test",
+            "gravitational interception drill",
+            "visual discrimination reflex test",
+            "free online reflex drop catch test",
+            "falling ball reflex reaction drill",
+            "esports inhibitory control click trainer",
+            "ruler drop test alternative browser game"
+          ]
+        },
+        "de": {
+          "title": "Lineal-Falltest – Reaktionszeit Messen | SkillDrills",
+          "title_length": 52,
+          "description": "Kostenloser Lineal-Falltest online. Fange fallende Objekte im freien Fall ab und messe deine Reaktionszeit und Reflexe in Millisekunden direkt im Browser.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/de/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "Lineal Fallen Lassen Reaktionszeit",
+          "keywords_count": 10,
+          "keywords": [
+            "Lineal Fallen Lassen Reaktionszeit",
+            "Reaktionszeit Lineal Fangen",
+            "Reaktionszeit Messen Lineal",
+            "Reaktionstest Online Kostenlos",
+            "Wahlreaktionszeit Test",
+            "Fallende Ziele Abfangen",
+            "Impulskontrolle Reaktionstraining",
+            "Reflexe Testen Online",
+            "Optische Reizdiskrimination",
+            "Go No-Go Test Online"
+          ]
+        },
+        "ko": {
+          "title": "자 반응속도 테스트 & 반사신경 테스트 게임 – 무료 낙하 드롭 캐치 훈련 | SkillDrills",
+          "title_length": 55,
+          "description": "무료 온라인 자 반응속도 테스트 및 반사신경 측정 게임. 중력 가속도로 낙하하는 초록색 표적을 밀리초 단위로 낚아채고 붉은색 유인 함정을 억제하여 돈더스 C형 선택 반응시간과 전두엽 충동 제어력을 과학적으로 단련합니다.",
+          "description_length": 122,
+          "canonical": "https://skilldrills.online/ko/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "자 반응속도 테스트",
+          "keywords_count": 10,
+          "keywords": [
+            "자 반응속도 테스트",
+            "반사신경 테스트 게임",
+            "반응속도 테스트 게임",
+            "순발력 게임 드랍 스틱",
+            "순발력 측정 사이트",
+            "선택 반응속도 테스트",
+            "낙하 표적 요격 훈련",
+            "충동 억제 반사 훈련",
+            "동체시력 낙하 테스트",
+            "드롭 캐치 반응속도"
+          ]
+        },
+        "ja": {
+          "title": "定規落としゲーム＆反射神経測定テスト – 無料落下ドロップキャッチ練習 | SkillDrills",
+          "title_length": 49,
+          "description": "無料オンライン定規落としゲーム＆反射神経測定テスト。重力加速度で落下する緑ターゲットを瞬時にキャッチし、赤いデコイの罠を衝動抑制することで、ドンデルスC型選択反応時間と動体視力を科学的に鍛え上げます。",
+          "description_length": 100,
+          "canonical": "https://skilldrills.online/ja/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "定規 落とし ゲーム",
+          "keywords_count": 10,
+          "keywords": [
+            "定規 落とし ゲーム",
+            "反射神経 測定 ものさし",
+            "物差し 反応速度",
+            "反射神経 測定 ゲーム",
+            "反射神経 ゲーム 無料",
+            "反射神経 ゲーム ブラウザ",
+            "選択反応時間 テスト",
+            "落下 ターゲット 迎撃",
+            "動体視力 落下 テスト",
+            "衝動抑制 反射 トレーニング"
+          ]
+        },
+        "pt": {
+          "title": "Teste da Régua – Tempo de Reação Online | SkillDrills",
+          "title_length": 53,
+          "description": "Teste da régua online grátis. Intercepte alvos em queda livre para medir seu tempo de reação em milissegundos e treinar reflexos motores rápidos no PC.",
+          "description_length": 151,
+          "canonical": "https://skilldrills.online/pt/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "teste da régua reflexo",
+          "keywords_count": 10,
+          "keywords": [
+            "teste da régua reflexo",
+            "teste da régua tempo de reação",
+            "teste de tempo de reação online",
+            "teste de reflexo e atenção",
+            "treino de reflexo e mira",
+            "teste go no go online",
+            "tempo de reação de escolha",
+            "teste de reflexos visuais",
+            "exercícios de reflexo motor",
+            "como melhorar tempo de reação"
+          ]
+        },
+        "es": {
+          "title": "Test de la Regla – Tiempo de Reacción | SkillDrills",
+          "title_length": 51,
+          "description": "Test de la regla online gratis. Atrapa objetos en caída libre para medir tu tiempo de reacción en milisegundos y entrenar reflejos rápidos en el PC.",
+          "description_length": 148,
+          "canonical": "https://skilldrills.online/es/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "test de la regla tiempo de reaccion",
+          "keywords_count": 10,
+          "keywords": [
+            "test de la regla tiempo de reaccion",
+            "prueba de la regla reflejos",
+            "test de tiempo de reaccion online",
+            "medir tiempo de reaccion online",
+            "test go no go online",
+            "tiempo de reaccion de eleccion",
+            "test de reflejos y control de impulsos",
+            "mejorar tiempo de reaccion fps",
+            "ejercicios de reflejos visuales",
+            "prueba de reaccion discriminativa"
+          ]
+        },
+        "fr": {
+          "title": "Test de la Règle – Temps de Réaction | SkillDrills",
+          "title_length": 50,
+          "description": "Test de la règle en ligne gratuit. Rattrapez des cibles en chute libre pour mesurer votre temps de réaction en millisecondes et tester vos réflexes au PC.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/fr/drills/physical/reflex-training/drop-catch",
+          "primary_keyword": "test de la règle temps de réaction",
+          "keywords_count": 10,
+          "keywords": [
+            "test de la règle temps de réaction",
+            "test de réflexe règle",
+            "mesurer son temps de réaction en ligne",
+            "test de temps de réaction visuel",
+            "test go no go en ligne",
+            "temps de réaction de choix",
+            "test de réflexes et contrôle inhibiteur",
+            "améliorer son temps de réaction fps",
+            "test de réflexe visuo-moteur",
+            "exercices de réflexes et discrimination"
+          ]
+        }
+      }
+    },
+    "peripheral-threat-sweeper": {
+      "slug": "peripheral-threat-sweeper",
+      "name": "Peripheral Threat Sweeper",
+      "route": "/drills/physical/reflex-training/peripheral-threat-sweeper",
+      "category": "physical",
+      "completed_at": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Peripheral Vision Test - Free Radial Awareness Drill",
+          "title_length": 52,
+          "description": "Free online peripheral vision test. Train spatial awareness, useful field of view (UFOV), and radial target acquisition before core breach.",
+          "description_length": 139,
+          "canonical": "https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "peripheral vision test",
+          "keywords_count": 14,
+          "keywords": [
+            "peripheral vision test",
+            "peripheral threat sweeper",
+            "peripheral vision training",
+            "useful field of view test",
+            "visual motor integration drill",
+            "spatial awareness drill",
+            "peripheral reaction test",
+            "radial threat scanning",
+            "field of view reaction game",
+            "reaction speed drill",
+            "free online peripheral vision test",
+            "esports field of view reaction trainer",
+            "covert visual attention training online",
+            "parafoveal target detection exercise"
+          ]
+        },
+        "de": {
+          "title": "Peripheres Sehen Trainieren & Test | SkillDrills",
+          "title_length": 48,
+          "description": "Kostenloser Online-Test für peripheres Sehen. Wehre 360°-Bedrohungen aus dem Augenwinkel ab und erweitere dein Blickfeld (UFOV) direkt im Browser.",
+          "description_length": 146,
+          "canonical": "https://skilldrills.online/de/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "peripheres sehen trainieren",
+          "keywords_count": 10,
+          "keywords": [
+            "peripheres sehen trainieren",
+            "peripheres sehen test",
+            "blickfeld erweitern übungen",
+            "reaktionsschnelligkeit trainieren",
+            "ufov test online",
+            "augentraining online kostenlos",
+            "tunnelblick vermeiden",
+            "periphere wahrnehmung verbessern",
+            "hand auge koordination trainieren",
+            "visuelle reaktionszeit test"
+          ]
+        },
+        "ko": {
+          "title": "주변 시야 테스트 – 동체시력 반응속도 훈련 게임 | SkillDrills",
+          "title_length": 41,
+          "description": "무료 온라인 주변 시야 테스트 및 동체시력 반응속도 게임. 중심 코어를 주시한 채 360도 전방위 외곽에서 침투하는 위협 노드를 망막 주변부로 신속히 감지하고 요격하여 터널 비전을 예방하고 유효 시야(UFOV)를 극대화하십시오.",
+          "description_length": 127,
+          "canonical": "https://skilldrills.online/ko/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "동체시력 테스트 게임",
+          "keywords_count": 10,
+          "keywords": [
+            "동체시력 테스트 게임",
+            "동체시력 반응속도 테스트",
+            "주변시야 훈련",
+            "주변시야 테스트",
+            "반응속도 훈련 게임",
+            "동체시력 테스트 사이트",
+            "터널 비전 교정",
+            "유효 시야 UFOV 확장",
+            "시야각 반응속도",
+            "주변시야 방어 요격"
+          ]
+        },
+        "ja": {
+          "title": "周辺視野トレーニング＆動体視力テストゲーム – 有効視野(UFOV)拡大と反応速度強化 | SkillDrills",
+          "title_length": 57,
+          "description": "無料オンライン周辺視野トレーニング＆動体視力テストゲーム。中央の防壁コアを凝視したまま、全方位360度の外周から迫り来る脅威ノードを周辺視野で瞬時に察知して迎撃。トンネルビジョンを解消し、有効視野(UFOV)と空間認識能力を極限まで鍛え上げます。",
+          "description_length": 123,
+          "canonical": "https://skilldrills.online/ja/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "周辺視野 トレーニング",
+          "keywords_count": 10,
+          "keywords": [
+            "周辺視野 トレーニング",
+            "動体視力 トレーニング ゲーム",
+            "周辺 視野 トレーニング 方法",
+            "エイム 周辺 視野",
+            "周辺視野 中心視野 違い",
+            "有効視野 UFOV 拡大",
+            "動体視力 反応速度",
+            "視野 拡大 練習",
+            "反射神経 トレーニング ゲーム",
+            "トンネルビジョン 改善"
+          ]
+        },
+        "pt": {
+          "title": "Treinar Visão Periférica – Teste Online | SkillDrills",
+          "title_length": 53,
+          "description": "Teste de visão periférica online grátis. Intercepte ameaças radiais em 360° pelo canto dos olhos e amplie seu campo visual útil (UFOV) no navegador.",
+          "description_length": 148,
+          "canonical": "https://skilldrills.online/pt/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "treinar visão periférica",
+          "keywords_count": 10,
+          "keywords": [
+            "treinar visão periférica",
+            "teste de visão periférica online",
+            "expandir campo visual",
+            "campo de visão eSports",
+            "evitar visão de túnel",
+            "exercícios para visão periférica",
+            "teste de reflexos periféricos",
+            "teste ufov online",
+            "coordenação olho mão reflexos",
+            "treino de percepção visual rápida"
+          ]
+        },
+        "es": {
+          "title": "Entrenar Visión Periférica – Test Online | SkillDrills",
+          "title_length": 54,
+          "description": "Test de visión periférica online gratis. Intercepta amenazas en 360° por el rabillo del ojo y amplía tu campo visual útil (UFOV) en el navegador.",
+          "description_length": 145,
+          "canonical": "https://skilldrills.online/es/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "entrenar vision periferica",
+          "keywords_count": 10,
+          "keywords": [
+            "entrenar vision periferica",
+            "test de vision periferica online",
+            "ampliar campo visual ejercicios",
+            "evitar vision de tunel gaming",
+            "test de reflejos perifericos",
+            "ejercicios de vision periferica para deportes",
+            "test ufov online",
+            "mejorar percepcion espacial y reflejos",
+            "atencion visual encubierta test",
+            "entrenamiento visual para gamers"
+          ]
+        },
+        "fr": {
+          "title": "Vision Périphérique – Test en Ligne | SkillDrills",
+          "title_length": 49,
+          "description": "Test de vision périphérique gratuit en ligne. Neutralisez les menaces à 360° du coin des yeux et élargissez votre champ visuel utile (UFOV) au PC.",
+          "description_length": 146,
+          "canonical": "https://skilldrills.online/fr/drills/physical/reflex-training/peripheral-threat-sweeper",
+          "primary_keyword": "entraîner sa vision périphérique",
+          "keywords_count": 10,
+          "keywords": [
+            "entraîner sa vision périphérique",
+            "test de vision périphérique en ligne",
+            "élargir son champ visuel exercices",
+            "éviter la vision en tunnel gaming",
+            "test de réflexes périphériques",
+            "test champ visuel utile ufov",
+            "exercices de vision périphérique sport",
+            "attention visuelle couverte test",
+            "entraînement visuel esport",
+            "rapidité de balayage visuel"
+          ]
+        }
+      }
+    },
+    "quick-dodge": {
+      "slug": "quick-dodge",
+      "name": "Quick Dodge",
+      "route": "/drills/physical/reflex-training/quick-dodge",
+      "category": "physical",
+      "completed_at": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Reflex Game Online - Free Quick Dodge Challenge",
+          "title_length": 47,
+          "description": "Train reflexes, mouse agility, and spatial evasion in this free browser reflex game. Dodge dynamic homing threats across 15 progressive difficulty levels.",
+          "description_length": 154,
+          "canonical": "https://skilldrills.online/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "reflex game online",
+          "keywords_count": 14,
+          "keywords": [
+            "reflex game online",
+            "quick dodge reflex test",
+            "dodge game online",
+            "cursor dodge game",
+            "reaction dodge test",
+            "mouse control reflex game",
+            "mouse evasion game",
+            "obstacle evasion drill",
+            "kinetic evasion trainer",
+            "hand eye coordination dodge test",
+            "free online browser reflex game",
+            "esports cursor agility trainer",
+            "cerebellar trajectory planning exercise",
+            "high speed obstacle avoidance game"
+          ]
+        },
+        "de": {
+          "title": "Maus-Ausweichspiel – Reflex-Test | SkillDrills",
+          "title_length": 46,
+          "description": "Kostenloses Maus-Ausweichspiel online. Weiche schnellen Projektilen mit dem Cursor aus und trainiere Reaktionszeit und Reflexe direkt im Browser.",
+          "description_length": 145,
+          "canonical": "https://skilldrills.online/de/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "Maus Ausweichspiel",
+          "keywords_count": 10,
+          "keywords": [
+            "Maus Ausweichspiel",
+            "Reflexe Testen Spiel",
+            "Kugeln Ausweichen Spiel",
+            "Maussteuerung Trainieren",
+            "Reaktionsspiel Online Kostenlos",
+            "Geschicklichkeitsspiel Maus",
+            "Maus Ausweichen Reflexe",
+            "Reaktionstest Ausweichen",
+            "Mikrobewegungen Maus E-Sport",
+            "Hand-Auge-Koordination Reflexspiel"
+          ]
+        },
+        "ko": {
+          "title": "마우스 피하기 게임 – 순발력 탄막 회피 테스트 | SkillDrills",
+          "title_length": 40,
+          "description": "무료 온라인 마우스 피하기 게임 및 순발력 탄막 회피 테스트. 사방에서 날아오는 고속 투사체 벡터를 마우스 커서로 극한까지 회피하며 카와토 소뇌 내부 모델 기반 궤적 예측과 정밀 무빙 컨트롤을 훈련합니다.",
+          "description_length": 114,
+          "canonical": "https://skilldrills.online/ko/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "마우스 피하기 게임",
+          "keywords_count": 10,
+          "keywords": [
+            "마우스 피하기 게임",
+            "순발력 테스트 게임",
+            "탄막 피하기 게임",
+            "총알 피하기 게임",
+            "마우스 컨트롤 게임",
+            "반응속도 피하기",
+            "동체시력 피하기 게임",
+            "마우스 무빙 연습",
+            "투사체 회피 훈련",
+            "에임 무빙 테스트"
+          ]
+        },
+        "ja": {
+          "title": "マウス避けるゲーム＆反射神経弾幕テスト – 無料回避ドリル | SkillDrills",
+          "title_length": 43,
+          "description": "無料オンラインマウス避けるゲーム。四方から迫る高速弾幕をカーソルで極限まで回避し、川人小脳内部モデルに基づく軌道予測と超精密なマイクロムービングを科学的に鍛えます。",
+          "description_length": 82,
+          "canonical": "https://skilldrills.online/ja/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "マウス 避ける ゲーム",
+          "keywords_count": 10,
+          "keywords": [
+            "マウス 避ける ゲーム",
+            "反射神経 避ける ゲーム",
+            "弾幕 避ける ゲーム",
+            "弾避け ゲーム ブラウザ",
+            "マウス 操作 練習 ゲーム",
+            "動体視力 回避 トレーニング",
+            "弾幕 回避 ゲーム 無料",
+            "マウス 移動 精度 テスト",
+            "反射神経 テスト ゲーム",
+            "エイム 回避 練習"
+          ]
+        },
+        "pt": {
+          "title": "Jogo de Desviar o Mouse – Teste de Reflexos | SkillDrills",
+          "title_length": 57,
+          "description": "Jogo de desviar o mouse online grátis. Esquive-se de projéteis velozes com o cursor para medir reflexos motores e tempo de reação no navegador.",
+          "description_length": 143,
+          "canonical": "https://skilldrills.online/pt/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "jogo de desviar o mouse",
+          "keywords_count": 10,
+          "keywords": [
+            "jogo de desviar o mouse",
+            "jogo de desviar com o mouse",
+            "teste de reflexo desviar",
+            "jogo de esquiva mouse",
+            "treino de reflexo mouse",
+            "teste de reflexos online",
+            "jogo de desviar de projeteis",
+            "treino de micro movimentacao mouse",
+            "coordenação motora fina mouse",
+            "teste de agilidade e reflexo"
+          ]
+        },
+        "es": {
+          "title": "Juego de Esquivar con el Ratón – Reflejos | SkillDrills",
+          "title_length": 55,
+          "description": "Juego de esquivar con el ratón online gratis. Esquiva proyectiles veloces con el cursor para medir reflejos motores y tiempo de evasión en el PC.",
+          "description_length": 145,
+          "canonical": "https://skilldrills.online/es/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "juego de esquivar con el raton",
+          "keywords_count": 10,
+          "keywords": [
+            "juego de esquivar con el raton",
+            "juegos de esquivar con el mouse",
+            "test de reflejos esquivar",
+            "juego de esquivar proyectiles",
+            "entrenar reflejos raton",
+            "juegos de habilidad con el raton",
+            "prueba de reflejos y velocidad de reaccion",
+            "entrenamiento de micro movimiento raton",
+            "juegos para mejorar reflejos pc",
+            "coordinacion ojo mano reflejos juego"
+          ]
+        },
+        "fr": {
+          "title": "Jeu d'Esquive Souris – Test de Réflexes | SkillDrills",
+          "title_length": 53,
+          "description": "Jeu d'esquive souris gratuit en ligne. Évitez les projectiles au curseur pour tester vos réflexes et votre temps de réaction motrice.",
+          "description_length": 133,
+          "canonical": "https://skilldrills.online/fr/drills/physical/reflex-training/quick-dodge",
+          "primary_keyword": "jeu d",
+          "keywords_count": 11,
+          "keywords": [
+            "jeu d",
+            ",\n    ",
+            ",\n    ",
+            ",\n    ",
+            "esquive de projectiles",
+            "entraînement réflexes souris",
+            "micro-mouvements souris esport",
+            "bullet hell entraînement souris en ligne",
+            "temps de réaction moteur esquive",
+            "esquive de projectiles en ligne",
+            "jeu de réflexes souris gratuit"
+          ]
+        }
+      }
+    },
+    "reaction-chain": {
+      "slug": "reaction-chain",
+      "name": "Reaction Chain",
+      "route": "/drills/physical/reflex-training/reaction-chain",
+      "category": "physical",
+      "completed_at": "2026-09-16",
+      "locales": {
+        "en": {
+          "title": "Impulse Control Reflex Game - Free Reaction Chain Drill",
+          "title_length": 55,
+          "description": "Train reaction speed, motor inhibition, and precision stopping. Intercept and arrest cursor momentum on targets in this free reflex training game.",
+          "description_length": 146,
+          "canonical": "https://skilldrills.online/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "impulse control reflex game",
+          "keywords_count": 14,
+          "keywords": [
+            "impulse control reflex game",
+            "reaction chain trainer",
+            "motor inhibition drill",
+            "precision stopping drill",
+            "mouse deceleration training",
+            "cursor brake control game",
+            "reaction speed game",
+            "mouse precision test",
+            "hand eye coordination game",
+            "stop signal reaction test",
+            "free online browser reflex game",
+            "eliminate mouse overflicking drill",
+            "kinetic brake control training browser",
+            "tactical shooter snap deceleration exercise"
+          ]
+        },
+        "de": {
+          "title": "Maus Bremskontrolle – Reflex-Test | SkillDrills",
+          "title_length": 47,
+          "description": "Fange kinetische Knoten ab und stoppe den Cursor millimetergenau. Trainiere Bremskontrolle und motorische Hemmung direkt im Browser.",
+          "description_length": 132,
+          "canonical": "https://skilldrills.online/de/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "impuls hemmer reflex spiel",
+          "keywords_count": 10,
+          "keywords": [
+            "impuls hemmer reflex spiel",
+            "präzisionsbremsung reaktionstest",
+            "motorische inhibition übung",
+            "maus verzögerungstraining",
+            "overflick korrektur maus",
+            "kinetischer stopp reflex training",
+            "maus präzisionstest online",
+            "reaktionsgeschwindigkeit spiel",
+            "zielbremsung maus training",
+            "stoppsignal reaktionstest online"
+          ]
+        },
+        "ko": {
+          "title": "마우스 에임 브레이킹 – 충동 억제 반사 훈련 | SkillDrills",
+          "title_length": 39,
+          "description": "고속으로 쇄도하는 노드를 요격하고 커서를 즉각 영점 정지(Kinetic Arrest)시키는 신경생체역학 운동 억제 드릴. 로건 경마 모델(Logan & Cowan, 1984) 기반 오버플릭 교정 훈련.",
+          "description_length": 112,
+          "canonical": "https://skilldrills.online/ko/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "충동 억제 반사 훈련",
+          "keywords_count": 10,
+          "keywords": [
+            "충동 억제 반사 훈련",
+            "마우스 정지 반응 드릴",
+            "운동 억제 반사 신경",
+            "마우스 에임 브레이킹 연습",
+            "오버플릭 교정 훈련",
+            "마우스 감속 제어 게임",
+            "마우스 정밀도 테스트",
+            "반응 속도 게임",
+            "에임 브레이킹 훈련 사이트",
+            "발로란트 에임 정지 연습"
+          ]
+        },
+        "ja": {
+          "title": "マウス エイムブレーキング – 衝動抑制反射トレーニング | SkillDrills",
+          "title_length": 42,
+          "description": "高速移動するノードを迎撃しカーソル慣性を瞬間ゼロ静止（Kinetic Arrest）させる神経生体力学ドリル。ローガン競走モデル（Logan & Cowan, 1984）に基づくオーバーフリック矯正訓練。",
+          "description_length": 102,
+          "canonical": "https://skilldrills.online/ja/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "衝動 抑制 反射 トレーニング",
+          "keywords_count": 10,
+          "keywords": [
+            "衝動 抑制 反射 トレーニング",
+            "マウス 停止 反応 テスト",
+            "運動 抑制 反応 ドリル",
+            "マウス エイム ブレーキング 練習",
+            "オーバーフリック 矯正 マウス",
+            "マウス 減速 コントロール ゲーム",
+            "マウス 精度 テスト",
+            "反応 速度 ゲーム",
+            "エイム ストッピング 練習",
+            "マウス ブレーキ 測定"
+          ]
+        },
+        "pt": {
+          "title": "Frenagem de Mira – Inibição Motora no Mouse | SkillDrills",
+          "title_length": 57,
+          "description": "Treine frenagem de mira e inibição motora no mouse. Intercepte nós cinéticos e elimine o overflick em alta velocidade no navegador.",
+          "description_length": 131,
+          "canonical": "https://skilldrills.online/pt/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "treino de frenagem de mira mouse",
+          "keywords_count": 10,
+          "keywords": [
+            "treino de frenagem de mira mouse",
+            "como corrigir overflick no mouse",
+            "teste de inibição motora reflexo",
+            "jogo de reflexo e parada do mouse",
+            "treino de controle e desaceleração do mouse",
+            "parada cinética mira reflexo",
+            "teste de precisão e reflexo do mouse",
+            "jogo de velocidade de reação mouse",
+            "como parar a mira no alvo",
+            "treino de mira valorant frenagem"
+          ]
+        },
+        "es": {
+          "title": "Frenado de Puntería – Inhibición Motora | SkillDrills",
+          "title_length": 53,
+          "description": "Entrena frenado de puntería e inhibición motora con el ratón. Intercepta objetivos en movimiento y elimina el overflicking en el PC.",
+          "description_length": 132,
+          "canonical": "https://skilldrills.online/es/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "entrenamiento de frenado de punteria raton",
+          "keywords_count": 10,
+          "keywords": [
+            "entrenamiento de frenado de punteria raton",
+            "como corregir overflick raton",
+            "test de inhibicion motora reflejos",
+            "juego de frenado de raton y reflejos",
+            "ejercicio de desaceleracion de raton",
+            "parada cinetica punteria raton",
+            "test de precision y reflejos raton",
+            "juego de velocidad de reaccion raton",
+            "como frenar la mira en fps",
+            "entrenar stopping power raton"
+          ]
+        },
+        "fr": {
+          "title": "Freinage de Visée Souris – Test Réflexe | SkillDrills",
+          "title_length": 53,
+          "description": "Entraînez le freinage de visée et le contrôle moteur à la souris. Interceptez des cibles cinétiques et supprimez l'overflick au PC.",
+          "description_length": 131,
+          "canonical": "https://skilldrills.online/fr/drills/physical/reflex-training/reaction-chain",
+          "primary_keyword": "entraînement au freinage de visée souris",
+          "keywords_count": 10,
+          "keywords": [
+            "entraînement au freinage de visée souris",
+            "comment corriger overflick souris",
+            "test d",
+            ",\n    ",
+            ",\n    ",
+            ",\n    ",
+            ",\n    ",
+            ",\n    ",
+            ",\n    ",
+            ",\n    "
+          ]
+        }
+      }
+    }
+  }
+}

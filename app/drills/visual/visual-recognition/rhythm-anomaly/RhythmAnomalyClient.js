@@ -37,7 +37,7 @@ const getSavedData = () => {
     if (!raw) return { bestScore: 0 };
     const p = parseInt(raw, 10);
     return { bestScore: isNaN(p) ? 0 : p };
-  } catch (e) {
+  } catch {
     return { bestScore: 0 };
   }
 };
@@ -48,7 +48,7 @@ const saveData = (score) => {
     if (score > currentBest && score > 0) {
       localStorage.setItem(STORAGE_KEY, score.toString());
     }
-  } catch (e) {}
+  } catch {}
 };
 
 // ==========================================
@@ -81,7 +81,7 @@ class GameErrorBoundary extends React.Component {
 // ==========================================
 // MAIN COMPONENT
 // ==========================================
-export default function RhythmAnomalyClient() {
+export default function RhythmAnomalyClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -550,7 +550,7 @@ export default function RhythmAnomalyClient() {
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
-    } catch (e) {
+    } catch {
       const text = `🎯 I scored ${score} PTS (Grade ${analytics.grade?.letter || 'C'} - ${analytics.grade?.label || 'Good'}) on Rhythm Anomaly Pro (45s)! Accuracy: ${analytics.accuracy}%. Try it: ${url}`;
       if (typeof navigator !== 'undefined' && navigator.share) {
         navigator.share({ title: 'My Rhythm Score', text, url }).catch(() => {});
@@ -569,10 +569,10 @@ export default function RhythmAnomalyClient() {
         {!isFullscreen && (
           <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Rhythm Anomaly Timing Test
+              <span data-seo-kw="1">{copy?.title || "Rhythm Anomaly Timing Test"}</span>
             </h1>
             <p className="text-sm text-slate-400 mt-1">
-              A visual timing test asks you to spot the one element in a pulsing array that is out of step with the rest. Human sensitivity to flicker peaks somewhere around 10–20 Hz and falls away to nothing near 50–60 Hz, above which a flickering light simply looks steady (De Lange, 1958; Kelly, 1961). Judging whether two things pulse in phase is harder than detecting the flicker itself and breaks down at considerably lower rates, which is what this 6x6 matrix measures.
+              {copy?.description || copy?.subtitle || "A visual timing test asks you to spot the one element in a pulsing array that is out of step with the rest. Human sensitivity to flicker peaks somewhere around 10–20 Hz and falls away to nothing near 50–60 Hz, above which a flickering light simply looks steady (De Lange, 1958; Kelly, 1961). Judging whether two things pulse in phase is harder than detecting the flicker itself and breaks down at considerably lower rates, which is what this 6x6 matrix measures."}
             </p>
           </div>
         )}
@@ -682,8 +682,8 @@ export default function RhythmAnomalyClient() {
               <FpsStartCard
                 icon={Zap}
                 accent="purple"
-                title="Rhythm Anomaly"
-                subtitle="Visual Temporal Perception • Flicker Discrimination"
+                title={copy?.title || "Rhythm Anomaly"}
+                subtitle={copy?.subtitle || "Visual Temporal Perception • Flicker Discrimination"}
                 isTouchOnlyDevice={false}
                 onStart={enterDrill}
               />

@@ -17,7 +17,7 @@ import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -150,7 +150,7 @@ As your score rises, target containers shrink and movement speed accelerates, co
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function DragAndDropClient() {
+export default function DragAndDropClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -194,7 +194,7 @@ export default function DragAndDropClient() {
     crosshair: { x: 0, y: 0, initialized: false },
     score: 0, level: 1, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
     drops: 0, misses: 0, timeouts: 0, totalActions: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
 
@@ -377,7 +377,7 @@ export default function DragAndDropClient() {
       crosshair: { ...engine.current.crosshair },
       score: 0, level: startLevel, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
       drops: 0, misses: 0, timeouts: 0, totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     spawnPositions(w, h, config);
@@ -465,7 +465,9 @@ export default function DragAndDropClient() {
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
             drillAudio.playHit();
+            const bucketColor = eRef.combo >= 10 ? '#00f0ff' : '#38bdf8';
             createExplosion(eRef.bucket.x, eRef.bucket.y, '#3b82f6');
+            eRef.hitRings.push(createHitRing(eRef.bucket.x, eRef.bucket.y, eRef.bucket.r, bucketColor));
             createHitMarker(eRef.ball.x, eRef.ball.y);
             setUiScore(eRef.score);
 
@@ -624,6 +626,8 @@ export default function DragAndDropClient() {
         drawSmallBlueBall(ctx, ball.x, ball.y, ball.r, ball.dragging);
       }
 
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -706,7 +710,7 @@ export default function DragAndDropClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Drag &amp; Drop Mouse Trainer
+              <span data-seo-kw="1">{copy?.title || "Drag & Drop Mouse Trainer"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
               A drag and drop test measures how accurately you can pick up an object, carry it with the mouse button held down, and release it on a target. Dragging is measurably slower and more error-prone than simply pointing at the same target with the same device (MacKenzie, Sellen &amp; Buxton, 1991), and the carry obeys the Steering Law: the time to stay inside a corridor scales with its length divided by its width, so a lane half as wide takes about twice as long to cross cleanly (Accot &amp; Zhai, 1997).

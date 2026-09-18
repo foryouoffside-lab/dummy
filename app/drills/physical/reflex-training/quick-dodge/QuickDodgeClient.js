@@ -108,7 +108,7 @@ const spawnObstacle = (w, h, level, combo, ch) => {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function QuickDodgeClient() {
+export default function QuickDodgeClient({ copy = {} } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -604,15 +604,20 @@ export default function QuickDodgeClient() {
         {!isFullscreen && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Quick dodge
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              <span data-seo-kw="1">{copy?.title || "Quick Dodge Challenge"}</span>
+              {copy?.subtitle && (
+                <span className="block text-sm font-semibold text-slate-400 mt-1">
+                  {copy.subtitle}
+                </span>
+              )}
+            </h1>
               <span className="text-[11px] font-semibold text-red-400/90 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full" data-seo-kw="1">
                 Reflex Game Online
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Dodging a pursuer is a prediction problem rather than a reaction one: by the time you see where it is, it has moved. Fast movements are planned in advance from an internal model of how the limb and the target will behave, not corrected continuously in flight (Kawato, 1999), because vision needs roughly 100–150 ms to alter a movement already under way (Woodworth, 1899). As the threats speed up, the window for a mid-course correction closes and only the prediction is left.
+              {copy?.description || "Dodging a pursuer is a prediction problem rather than a reaction one: by the time you see where it is, it has moved. Fast movements are planned in advance from an internal model of how the limb and the target will behave, not corrected continuously in flight (Kawato, 1999), because vision needs roughly 100–150 ms to alter a movement already under way (Woodworth, 1899). As the threats speed up, the window for a mid-course correction closes and only the prediction is left."}
             </p>
           </div>
         )}
@@ -621,19 +626,19 @@ export default function QuickDodgeClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.score || 'Score'}</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.time || 'Time'}</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.bestScore || 'Best Score'}</div>
+              <div className="text-lg sm:text-xl font-black text-yellow-400 tabular-nums">{bestScore}</div>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{copy?.hudLabels?.bestCombo || 'Best Combo'}</div>
               <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -658,11 +663,11 @@ export default function QuickDodgeClient() {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.score || 'Score'}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.hudLabels?.time || 'Time'}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -712,8 +717,8 @@ export default function QuickDodgeClient() {
             <FpsStartCard
               icon={ShieldAlert}
               accent="red"
-              title="Quick Dodge"
-              subtitle="Kinetic Evasion Reflex Drill • 15 Levels"
+              title={copy?.title || "Quick Dodge"}
+              subtitle={copy?.subtitle || "Kinetic Evasion Reflex Drill • 15 Levels"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -721,7 +726,7 @@ export default function QuickDodgeClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.hudLabels?.getReady || "GET READY"} />
           )}
 
           {/* END SCREEN */}
@@ -732,7 +737,7 @@ export default function QuickDodgeClient() {
               <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
+                    {copy?.resultLabels?.newBest || 'NEW BEST'}
                   </span>
                 )}
                 <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
@@ -744,7 +749,7 @@ export default function QuickDodgeClient() {
                 <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.resultLabels?.points || 'Points'}</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
@@ -754,19 +759,19 @@ export default function QuickDodgeClient() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.accuracy || 'Accuracy'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.sequencesCleared}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Dodges</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.dodges || 'Dodges'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">{analytics.peakSpeed} px/s</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Speed</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.peakSpeed || 'Peak Speed'}</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.resultLabels?.peakLevel || 'Peak Level'}</p>
                   </div>
                 </div>
 
@@ -776,7 +781,7 @@ export default function QuickDodgeClient() {
                     onClick={enterDrill} 
                     className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.resultLabels?.playAgain || 'Play Again'}
                   </button>
                   <button 
                     onClick={shareScore} 
@@ -804,12 +809,12 @@ export default function QuickDodgeClient() {
           <div className="[&>div]:!mt-0">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
                     <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                       <Target className="w-4 h-4 text-red-400" />
@@ -823,18 +828,30 @@ export default function QuickDodgeClient() {
 
             <DrillAccordion
               id="about"
-              title="About Quick Dodge (Reflex Game Online)"
+              title={copy?.aboutTitle || "About Quick Dodge (Reflex Game Online)"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-red-400" />
-                  Kinetic Collision Evasion & Trajectory Planning
-                </h3>
-                {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                  <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
-                ))}
+                {copy?.aboutSections ? (
+                  copy.aboutSections.map((sec, idx) => (
+                    <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                      <h3 className="text-sm font-bold text-white mb-1">{sec.title}</h3>
+                      {sec.subtitle && <h4 className="text-xs font-semibold text-slate-400 mb-2">{sec.subtitle}</h4>}
+                      <p className="text-xs leading-relaxed text-slate-300">{sec.content}</p>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <ShieldAlert className="w-4 h-4 text-red-400" />
+                      Kinetic Collision Evasion & Trajectory Planning
+                    </h3>
+                    {(copy?.aboutText || ABOUT_TEXT).split('\n\n').map((para, i) => (
+                      <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
+                    ))}
+                  </>
+                )}
               </div>
             </DrillAccordion>
           </div>

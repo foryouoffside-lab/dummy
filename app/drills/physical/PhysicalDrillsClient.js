@@ -369,7 +369,7 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
           <div className="bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <Layers className="w-5 h-5 text-rose-400" />
-              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                 Physical Training Domains
               </h2>
             </div>
@@ -387,10 +387,10 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-ink-1">
+                          <h3 className="text-sm font-semibold tracking-tight text-ink-1">
                             {cat.name}
                           </h3>
-                          <span className="text-[10px] font-mono text-rose-400">
+                          <span className="text-xs font-medium text-rose-400">
                             {cat.drills.length} {cat.drills.length === 1 ? 'Drill' : 'Drills'}
                           </span>
                         </div>
@@ -411,12 +411,12 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
                           <Link
                             key={drill.href}
                             href={href}
-                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-rose-500/10 border border-hairline hover:border-rose-500/30 transition-all text-xs"
+                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-rose-500/10 border border-hairline hover:border-rose-500/30 transition-all text-sm"
                           >
                             <span className="font-medium text-ink-1 group-hover/item:text-rose-300 transition-colors truncate pr-2">
                               {localized.name}
                             </span>
-                            <span className="text-[10px] font-mono text-ink-3 group-hover/item:text-rose-400 shrink-0 flex items-center gap-1">
+                            <span className="text-xs font-medium text-ink-3 group-hover/item:text-rose-400 shrink-0 flex items-center gap-1">
                               {drill.duration}
                               <ChevronRight className="w-3 h-3 transition-transform group-hover/item:translate-x-0.5" />
                             </span>
@@ -436,8 +436,8 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
           <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
             <div className="flex items-center gap-2 mb-6">
               <Sparkles className="w-5 h-5 text-rose-400" />
-              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
-                Biomechanics &amp; Sensorimotor Specifications
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
+                Engine &amp; Hardware Optimization
               </h2>
             </div>
 
@@ -446,7 +446,7 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
                 <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-3">
                   <Zap className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-1 mb-1.5">
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
                   Dynamic Evasion Latency
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
@@ -458,7 +458,7 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
                 <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-3">
                   <Activity className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-1 mb-1.5">
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
                   Equilibrium &amp; Force Resistance
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
@@ -470,7 +470,7 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
                 <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-3">
                   <Gauge className="w-4 h-4" />
                 </div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-1 mb-1.5">
+                <h3 className="text-sm font-semibold tracking-tight text-ink-1 mb-1.5">
                   Bilateral Agility Cadence
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
@@ -487,7 +487,7 @@ export default function PhysicalDrillsClient({ faqs = [] }) {
             <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-rose-400" />
-                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+                <h2 className="text-base sm:text-lg font-semibold tracking-tight text-ink-1">
                   {t('home.faqTitle', 'Frequently Asked Questions')}
                 </h2>
               </div>
