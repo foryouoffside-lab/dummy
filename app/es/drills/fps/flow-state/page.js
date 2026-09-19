@@ -20,7 +20,7 @@ export const metadata = {
     "hipofrontalidad transitoria shooters",
     "como no desconcentrarse cs2",
     "rutina de enfoque mental gaming",
-    "entrenador de punteria gratis"
+    "aim trainer flow state gratis"
   ],
   alternates: {
     canonical: "https://skilldrills.online/es/drills/fps/flow-state",

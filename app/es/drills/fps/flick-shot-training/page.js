@@ -20,7 +20,7 @@ export const metadata = {
     "como hacer flick shots precisos",
     "entrenar precision de primer disparo",
     "rutina de flick shot navegador",
-    "entrenador de punteria flick gratis"
+    "aim trainer flick gratis"
   ],
   alternates: {
     canonical: "https://skilldrills.online/es/drills/fps/flick-shot-training",

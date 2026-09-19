@@ -10,7 +10,7 @@ export const metadata = {
   description: 'Entrenador de puntería secuencial gratis. Mejora la velocidad de cambio de objetivo y la precisión de clic en orden numérico directo en tu navegador.',
   keywords: [
     'aim trainer secuencial',
-    'entrenador de punteria en secuencia',
+    'aim trainer secuencial gratis',
     'test de velocidad de dedos',
     'clic secuencial test',
     'cambio rapido de objetivos aim',
@@ -96,7 +96,7 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: '¿Qué es un entrenador de puntería secuencial?',
+      name: '¿Qué es un aim trainer secuencial?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Es un ejercicio motor interactivo donde se debe hacer clic en varios objetivos en un estricto orden de numeración o tamaño decreciente antes de que venza el tiempo. Desarrolla la adquisición balística de blancos y la fluidez de trayectoria.',

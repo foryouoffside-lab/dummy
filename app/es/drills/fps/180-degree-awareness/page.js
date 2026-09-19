@@ -15,7 +15,7 @@ export const metadata = {
     "como hacer giros de 180 en cs2",
     "entrenar vision periferica fps",
     "esquivar flashbang entrenamiento",
-    "entrenador de punteria 180 grados",
+    "aim trainer 180 grados",
     "girar rapido en fps con el raton",
     "reaccion a la espalda fps entrenamiento",
     "control de espacio alfombrilla raton",

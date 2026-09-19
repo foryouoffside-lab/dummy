@@ -7,22 +7,22 @@ const fpsDrills = DRILLS.filter((d) => d.category === 'fps');
 
 export const metadata = {
   title: 'Mejorar Puntería FPS – Aim Trainer Online | SkillDrills',
-  description: 'Entrenador de puntería gratis para Valorant, CS2 y Apex. 15 ejercicios de flicks, tracking, control de retroceso y reflejos directamente en tu navegador.',
+  description: 'Aim Trainer gratis para Valorant, CS2 y Apex. 15 ejercicios de flicks, tracking, control de retroceso y reflejos directamente en tu navegador.',
   keywords: [
     'mejorar puntería fps', 'entrenar puntería valorant', 'cs2 puntería entrenamiento',
     'flick shots ejercicios', 'tracking puntería', 'colocación de la mira',
-    'sensibilidad ratón shooter', 'entrenador de puntería online', 'reflejos gaming test',
+    'sensibilidad ratón shooter', 'aim trainer online gratis', 'reflejos gaming test',
     'control de retroceso online', 'apuntar con brazo o muñeca', 'microajustes puntería',
     'precisión de ratón test', 'calculadora edpi shooter', 'aim trainer navegador gratis'
   ],
   openGraph: {
     title: 'Mejorar Puntería FPS – Aim Trainer Online | SkillDrills',
-    description: 'Entrenador de puntería gratis para Valorant, CS2 y Apex. 15 ejercicios de flicks, tracking, control de retroceso y reflejos directamente en tu navegador.',
+    description: 'Aim Trainer gratis para Valorant, CS2 y Apex. 15 ejercicios de flicks, tracking, control de retroceso y reflejos directamente en tu navegador.',
     type: 'website',
     url: 'https://skilldrills.online/es/drills/fps',
     siteName: 'SkillDrills',
     locale: 'es_ES',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: 'Entrenador de Puntería FPS Online' }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: 'Aim Trainer FPS Online' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -73,7 +73,7 @@ const faqSchema = {
       "name": "¿Cómo se transfiere el entrenamiento de puntería en navegador a shooters tácticos como Valorant y CS2?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "En shooters tácticos como Valorant y CS2, el tiempo para matar (TTK) suele ser inferior a 200 ms, por lo que la precisión del primer impacto y los microajustes finales deciden cada duelo. Las partidas de combate a muerte (Deathmatch) en el juego conllevan tiempos muertos de reaparición y desplazamientos pasivos, mientras que un entrenador de puntería dedicado aísla cientos de movimientos balísticos (flicks) y mecánicas de frenado en solo 10 minutos. Esto automatiza los patrones neuromusculares en la corteza motora, liberando ancho de banda cognitivo para la colocación de la mira (crosshair placement) y la toma de decisiones tácticas."
+        "text": "En shooters tácticos como Valorant y CS2, el tiempo para matar (TTK) suele ser inferior a 200 ms, por lo que la precisión del primer impacto y los microajustes finales deciden cada duelo. Las partidas de combate a muerte (Deathmatch) en el juego conllevan tiempos muertos de reaparición y desplazamientos pasivos, mientras que un aim trainer dedicado aísla cientos de movimientos balísticos (flicks) y mecánicas de frenado en solo 10 minutos. Esto automatiza los patrones neuromusculares en la corteza motora, liberando ancho de banda cognitivo para la colocación de la mira (crosshair placement) y la toma de decisiones tácticas."
       }
     },
     {
@@ -110,7 +110,7 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "¿Un entrenador de puntería en navegador es tan rápido y sensible como un software descargable?",
+      "name": "¿Un aim trainer en navegador es tan rápido y sensible como un software descargable?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Sí. SkillDrills implementa la API estándar W3C Raw Pointer Lock y renderizado por aceleración de hardware en HTML5 Canvas. Esto omite por completo las curvas de aceleración del ratón del sistema operativo y los bordes del escritorio, procesando deltas de movimiento directos del sensor (movementX y movementY). Gracias a una física de paso de tiempo fijo desacoplada del renderizado, la plataforma ofrece una respuesta instantánea 1:1 apta para monitores de 144 Hz, 240 Hz y 360 Hz sin requerir instalaciones ni consumir espacio en disco."

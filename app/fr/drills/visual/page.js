@@ -106,7 +106,7 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "En quoi le test de réaction à la lumière diffère-t-il d'un test de réflexe conventionnel ?",
+      "name": "En quoi le test de temps de réaction à la lumière diffère-t-il d'un test de réflexe conventionnel ?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Les tests de réaction classiques engagent des étapes cognitives de discrimination sémantique ou chromatique. Le test à la lumière isole la latence visuo-motrice primitive : il mesure strictement le délai entre la phototransduction rétinienne sous flash stroboscopique et l'activation électromyographique de l'index."

@@ -16,7 +16,7 @@ export const metadata = {
     "entrenar precision de headshot",
     "frenado de mira fps",
     "control de micro movimientos raton",
-    "entrenador de punteria micro ajuste",
+    "aim trainer micro ajuste precision",
     "como mejorar micro correcciones valorant",
     "precision de clic tactico",
     "parada de mira cs2",

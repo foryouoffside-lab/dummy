@@ -35,7 +35,7 @@ export const metadata = {
   openGraph: {
     title: "Entraînement des Réflexes – Test d'Agilité | SkillDrills",
     description:
-      'Entraînement des réflexes et test de réaction multi-cibles en ligne. Développez votre attention partagée et votre coordination œil-main.',
+      'Entraînement des réflexes et test de temps de réaction multi-cibles en ligne. Développez votre attention partagée et votre coordination œil-main.',
     url: 'https://skilldrills.online/fr/drills/reaction-speed/reflex-training-drill',
     siteName: 'SkillDrills',
     locale: 'fr_FR',

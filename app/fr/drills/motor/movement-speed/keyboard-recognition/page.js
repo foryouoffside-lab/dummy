@@ -95,7 +95,7 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Qu’est-ce qu’un test de réaction et de vitesse de clavier ?',
+      name: 'Qu’est-ce qu’un test de temps de réaction et de vitesse de clavier ?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Il évalue le temps écoulé entre l’affichage d’un symbole à l’écran et la frappe de la touche physique correspondante sur votre clavier. Il mesure le temps de réaction de choix, l’orientation spatiale et le contrôle inhibiteur.',

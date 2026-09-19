@@ -8,7 +8,7 @@ export const metadata = {
   description: '82 ejercicios online gratuitos en 8 categorías: puntería FPS para shooters, test de reacción, memoria, CPS y agudeza visual directamente en el navegador.',
   keywords: [
     'aim trainer gratis',
-    'entrenador de punteria online',
+    'aim trainer online',
     'test de tiempo de reaccion',
     'juegos de entrenamiento cerebral',
     'test de memoria online',

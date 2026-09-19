@@ -20,7 +20,7 @@ export const metadata = {
     "como castigar peekers en fps",
     "aguantar esquinas cs2 entrenamiento",
     "entrenamiento de reflejos para esquinas",
-    "entrenador de punteria de retencion"
+    "aim trainer retencion de angulos"
   ],
   alternates: {
     canonical: "https://skilldrills.online/es/drills/fps/angle-hold-trainer",

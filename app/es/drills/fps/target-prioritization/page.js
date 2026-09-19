@@ -17,7 +17,7 @@ export const metadata = {
     "entrenamiento de toma de decisiones fps",
     "disciplina de gatillo shooter",
     "seleccion de objetivos valorant",
-    "entrenador de punteria cognitiva",
+    "aim trainer priorizacion objetivos",
     "identificacion de blancos shooter",
     "entrenamiento reflejo go no go",
     "ejercicio de priorizacion de objetivos"

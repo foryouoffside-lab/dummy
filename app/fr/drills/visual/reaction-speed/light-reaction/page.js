@@ -5,10 +5,10 @@ import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Test de Réaction à la Lumière: Réflexe Visuel | SkillDrills",
-  description: "Test de réaction à la lumière gratuit. Mesurez votre temps de réaction visuel simple en millisecondes face au repère de 200-250 ms. Sans inscription.",
+  title: "Test de Temps de Réaction à la Lumière: Réflexe Visuel | SkillDrills",
+  description: "Test de temps de réaction à la lumière gratuit. Mesurez votre temps de réaction visuel simple en millisecondes face au repère de 200-250 ms. Sans inscription.",
   keywords: [
-    "test de réaction à la lumière",
+    "test de temps de réaction à la lumière",
     "test de temps de réaction visuel",
     "test de réflexe visuel en ligne",
     "temps de réaction simple srt",
@@ -149,7 +149,7 @@ const faqSchema = {
       "name": "Qu'est-ce que le test de réflexe de réaction à la lumière ?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Le test de réaction à la lumière est un protocole psychophysique rigoureux mesurant le temps de réaction simple (SRT). Il chronomètre avec une précision milliseconde le délai entre l'illumination blanche d'un repère visuel et la contraction motrice du doigt."
+        "text": "Le test de temps de réaction à la lumière est un protocole psychophysique rigoureux mesurant le temps de réaction simple (SRT). Il chronomètre avec une précision milliseconde le délai entre l'illumination blanche d'un repère visuel et la contraction motrice du doigt."
       }
     },
     {
@@ -218,7 +218,7 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Ce test de réaction à la lumière est-il gratuit et respectueux de la vie privée ?",
+      "name": "Ce test de temps de réaction à la lumière est-il gratuit et respectueux de la vie privée ?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Oui. Le test SkillDrills est entièrement gratuit, sans compte ni paiement requis. Les données restent stockées localement dans la mémoire de votre navigateur, sans aucun suivi distant."

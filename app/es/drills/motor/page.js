@@ -9,7 +9,7 @@ export const metadata = {
   title: 'Precisión del Ratón & Test de CPS | SkillDrills',
   description: 'Entrenamiento motor y puntería online. 9 ejercicios científicos para velocidad de clic (CPS), pulso firme, velocidad de teclado y coordinación mano-ojo.',
   keywords: [
-    'test de precisión del mouse online', 'entrenador de puntería gratis', 'test de cps clicks por segundo',
+    'test de precisión del mouse online', 'aim trainer gratis', 'test de cps clicks por segundo',
     'velocidad de clic prueba online', 'test de pulso firme raton', 'test de velocidad de teclado online',
     'test de ghosting teclado', 'test de chattering teclado mecanico', 'ejercicios de coordinacion mano ojo',
     'control micromotor del mouse', 'jitter click test gratis', 'butterfly click tecnica entrenamiento',

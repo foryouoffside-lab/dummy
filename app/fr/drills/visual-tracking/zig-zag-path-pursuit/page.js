@@ -19,7 +19,7 @@ export const metadata = {
     "précision visuelle et virages rapides",
     "entraînement neuro-visuel réflexes en ligne",
     "agilité visuelle pour sportifs et gamers",
-    "test de réaction visuelle dynamique gratuit"
+    "temps de réaction visuelle dynamique gratuit"
   ],
   alternates: {
     canonical: "https://skilldrills.online/fr/drills/visual-tracking/zig-zag-path-pursuit",
