@@ -102,7 +102,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`scroll-smooth ${inter.variable}`}>
+    <html lang="en" className={`scroll-smooth font-sans ${inter.variable}`}>
       <head>
         {/* next/font/google self-hosts Inter at build time, so nothing is ever
             fetched from fonts.googleapis.com or fonts.gstatic.com at runtime.
