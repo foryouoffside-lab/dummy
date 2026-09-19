@@ -27,6 +27,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -364,6 +365,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
   }, [spawnTarget]);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -374,6 +376,11 @@ export default function VerticalAirTrackClient({ copy = null }) {
     }
     setGameState('start');
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   // Pointer lock change listener — exit drill on pointer lock loss
   useEffect(() => {

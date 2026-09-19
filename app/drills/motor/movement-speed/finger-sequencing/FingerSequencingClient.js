@@ -23,6 +23,7 @@ import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
 import DrillResultCard from '@/components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -167,6 +168,7 @@ export default function FingerSequencingClient({ copy } = {}) {
   }, []);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -179,6 +181,11 @@ export default function FingerSequencingClient({ copy } = {}) {
     }
     setGameState('start');
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   const spawnChain = useCallback((width, height, currentLevel) => {
     const e = engine.current;

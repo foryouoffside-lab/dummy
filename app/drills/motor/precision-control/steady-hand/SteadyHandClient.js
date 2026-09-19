@@ -19,6 +19,7 @@ import FpsStartCard from '@/components/drill/FpsStartCard';
 import DrillResultCard from '@/components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 const DRILL_DURATION = 45; // Fixed 45-second session
 
@@ -277,6 +278,7 @@ export default function SteadyHandClient({ copy = null }) {
   }, [startActualDrill]);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     setIsFullscreen(false);
@@ -285,6 +287,11 @@ export default function SteadyHandClient({ copy = null }) {
     }
     setGameState('start');
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   const shareScore = useCallback(async () => {
     const url = copy?.shareUrl || 'https://skilldrills.online/drills/motor/precision-control/steady-hand';

@@ -4,7 +4,7 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, Brain, ChevronRight, Crosshair,
+  Activity, ArrowRight, Brain, ChevronRight, Crosshair,
   Eye, Flame, GraduationCap, RefreshCw, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX,
   Zap, ZapOff, Users, Share2, LogOut, Award, ShieldAlert
@@ -172,13 +172,6 @@ export default function ReactionChainClient({ copy = {} } = {}) {
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
   });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
 
   const updateLevelParams = (currentScore) => {
     const e = engine.current;
@@ -814,26 +807,8 @@ export default function ReactionChainClient({ copy = {} } = {}) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pauseTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pauseSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas
             ref={canvasRef}
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`}
           />
 

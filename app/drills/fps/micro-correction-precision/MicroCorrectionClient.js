@@ -27,6 +27,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -389,6 +390,7 @@ export default function MicroCorrectionClient({ copy = null }) {
   }, [spawnAnchor]);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -428,6 +430,11 @@ export default function MicroCorrectionClient({ copy = null }) {
       microSpawnTime: 0, particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   // Handle escape key to immediately exit to start screen
   useEffect(() => {

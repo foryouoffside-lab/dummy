@@ -21,6 +21,7 @@ import FpsStartCard from '@/components/drill/FpsStartCard';
 import DrillResultCard from '@/components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 const DRILL_DURATION = 45;
 const STORAGE_KEY = 'skilldrills_motor_rapid_tapping_v2';
@@ -150,6 +151,7 @@ export default function RapidTappingClient({ copy } = {}) {
   }, []);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -162,6 +164,11 @@ export default function RapidTappingClient({ copy } = {}) {
     }
     setGameState('start');
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   // Direct exit on Escape, pointer lock loss, or fullscreen exit
   useEffect(() => {

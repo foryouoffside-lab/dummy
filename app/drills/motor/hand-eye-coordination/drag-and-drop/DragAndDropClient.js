@@ -23,6 +23,7 @@ import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 /**
  * Draws a hollow tactical bucket target container with empty inside space.
@@ -265,6 +266,7 @@ export default function DragAndDropClient({ copy } = {}) {
   }, []);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -276,6 +278,11 @@ export default function DragAndDropClient({ copy } = {}) {
     }
     setGameState('start');
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   // End Game Management
   const endGame = useCallback(() => {

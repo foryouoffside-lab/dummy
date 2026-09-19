@@ -24,6 +24,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 // ============================================================
 // SINGLE-LINE INSTRUCTION RULE ITEM
@@ -174,6 +175,7 @@ export default function TargetAcquisitionClient({ copy = null }) {
   }, []);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -208,6 +210,11 @@ export default function TargetAcquisitionClient({ copy = null }) {
       logicalWidth: w, logicalHeight: h
     };
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   // ESC key listener (capture phase)
   useEffect(() => {

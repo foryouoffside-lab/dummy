@@ -27,6 +27,7 @@ import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -202,6 +203,7 @@ export default function AngleHoldClient({ copy = null }) {
   }, []);
 
   const handleExitDrill = useCallback(() => {
+    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -220,6 +222,11 @@ export default function AngleHoldClient({ copy = null }) {
       targetsEscaped: 0, avgReactionMs: 0, maxCombo: 0, finalLevel: 1, grade: null
     });
   }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
   useEffect(() => {
     const handleKeyDown = (e) => {

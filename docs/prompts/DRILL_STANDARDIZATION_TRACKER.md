@@ -425,6 +425,8 @@
   - R7: Loader Missing #080811 Aspect-Ratio Skeleton or Emerald Spinner
   - R3: Rules Cards (Requires 2-Col Grid, Single-Line RuleItem, Neutral White Badges)
   - R5: Crosshair (Missing Pure White #ffffff Reticle with Shadow Blur)
-  - R6: Exit Lifecycle (Trapped in Pause Overlay or Missing Direct Esc/PointerLock/Fullscreen Exit)
+  - ~~R6: Exit Lifecycle~~ — fixed: removed the vestigial "Game Paused" click-to-resume
+    overlay (dead code superseded by `useUnexpectedExitGuard`, which already exits to
+    `start` on pointer-lock loss). See xx.md §4 deep-search pass.
   - R8: Incomplete Locales (0/6 completed, missing: de (no guide/footer), es (no guide/footer), fr (no guide/footer), ja (no guide/footer), ko (no guide/footer), pt (no guide/footer))
 
