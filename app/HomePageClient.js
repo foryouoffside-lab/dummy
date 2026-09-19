@@ -97,70 +97,75 @@ const categoryConfigs = [
 ];
 
 const features = [
-  { 
-    icon: Zap, 
-    title: 'Real-time Telemetry', 
-    description: 'Instant latency, precision, and accuracy metrics updated every millisecond', 
+  {
+    icon: Zap,
+    title: 'Real-time Telemetry',
+    description: 'Instant latency, precision, and accuracy metrics updated every millisecond',
     gradient: 'from-amber-400 to-yellow-500',
   },
-  { 
-    icon: BarChart3, 
-    title: 'Local Progress Curves', 
-    description: 'Track scores and neural adaptation rates privately in your browser', 
+  {
+    icon: BarChart3,
+    title: 'Local Progress Curves',
+    description: 'Track scores and neural adaptation rates privately in your browser',
     gradient: 'from-blue-400 to-indigo-500',
   },
-  { 
-    icon: Trophy, 
-    title: 'Adaptive Progression', 
-    description: 'Dynamic difficulty curves adjust target speeds to keep you in peak flow', 
+  {
+    icon: Trophy,
+    title: 'Adaptive Progression',
+    description: 'Dynamic difficulty curves adjust target speeds to keep you in peak flow',
     gradient: 'from-orange-400 to-red-500',
   },
-  { 
-    icon: Shield, 
-    title: 'Validated Paradigms', 
-    description: 'Modeled directly on established cognitive psych instruments and esports standards', 
+  {
+    icon: Shield,
+    title: 'Validated Paradigms',
+    description: 'Modeled directly on established cognitive psych instruments and esports standards',
     gradient: 'from-purple-400 to-violet-500',
   },
-  { 
-    icon: Target, 
-    title: 'Focused Skill Vectors', 
-    description: 'Target specific bottlenecks across 8 specialized performance categories', 
+  {
+    icon: Target,
+    title: 'Focused Skill Vectors',
+    description: 'Target specific bottlenecks across 8 specialized performance categories',
     gradient: 'from-emerald-400 to-green-500',
   },
-  { 
-    icon: Users, 
-    title: 'Zero Latency & Friction', 
-    description: '100% free, client-side execution with zero account registration or credit card', 
+  {
+    icon: Users,
+    title: 'Zero Latency & Friction',
+    description: '100% free, client-side execution with zero account registration or credit card',
     gradient: 'from-pink-400 to-rose-500',
   },
 ];
 
 const audienceData = [
-  { 
-    icon: Crosshair, 
+  {
+    icon: Crosshair,
     gradient: 'from-red-500 to-orange-500',
-    title: 'Competitive Gamers', 
-    description: 'Sharpen flick accuracy, target tracking, and reaction times for Valorant, CS2, Overwatch, and Apex Legends.' 
+    title: 'Competitive Gamers',
+    description: 'Sharpen flick accuracy, target tracking, and reaction times for Valorant, CS2, Overwatch, and Apex Legends.'
   },
-  { 
-    icon: Brain, 
+  {
+    icon: Brain,
     gradient: 'from-blue-500 to-indigo-500',
-    title: 'Cognitive Performers', 
-    description: 'Expand working memory span, improve attention stamina, and accelerate processing speed.' 
+    title: 'Cognitive Performers',
+    description: 'Expand working memory span, improve attention stamina, and accelerate processing speed.'
   },
-  { 
-    icon: BarChart3, 
+  {
+    icon: BarChart3,
     gradient: 'from-emerald-500 to-green-500',
-    title: 'Daily Training Enthusiasts', 
-    description: '5-minute micro-sessions designed for quick mental warm-ups and daily mechanical calibration.' 
+    title: 'Daily Training Enthusiasts',
+    description: '5-minute micro-sessions designed for quick mental warm-ups and daily mechanical calibration.'
   },
 ];
 
-export default function HomePageClient() {
+export default function HomePageClient({ copy = {} }) {
   const [profile, setProfile] = useState(null);
 
   const totalDrillsCount = DRILLS.length;
   const totalCategoriesCount = categoryConfigs.length;
+
+  const t = (key, fallback) => copy[key] ?? fallback;
+  const catCopy = (id, field, fallback) => copy.categories?.[id]?.[field] ?? fallback;
+  const featureCopy = (idx, field, fallback) => copy.features?.[idx]?.[field] ?? fallback;
+  const audienceCopy = (idx, field, fallback) => copy.audience?.[idx]?.[field] ?? fallback;
 
   useEffect(() => {
     try {
@@ -246,11 +251,9 @@ export default function HomePageClient() {
 
       {/* SEO Structured Content */}
       <section className="sr-only" aria-label="Platform description">
-        <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
+        <h2>{t('srH2', 'SkillDrills - Free Brain Training and FPS Aim Trainer Platform')}</h2>
         <p>
-          SkillDrills is a free online training platform offering {totalDrillsCount} interactive drills across {totalCategoriesCount} categories:
-          FPS aim training, cognitive brain exercises, visual tracking, working memory games, hand-eye motor skills, physical reflex drills, visual recognition, and reaction speed testing.
-          Zero registration, 100% browser-native performance drills.
+          {t('srBody', `SkillDrills is a free online training platform offering ${totalDrillsCount} interactive drills across ${totalCategoriesCount} categories: FPS aim training, cognitive brain exercises, visual tracking, working memory games, hand-eye motor skills, physical reflex drills, visual recognition, and reaction speed testing. Zero registration, 100% browser-native performance drills.`)}
         </p>
       </section>
 
@@ -261,43 +264,43 @@ export default function HomePageClient() {
             {/* Left Text Column */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               <h1 id="hero-heading" className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.05] uppercase text-white">
-                Master Your Mind &amp; Mechanics
+                {t('heroH1', 'Master Your Mind & Mechanics')}
               </h1>
-              
+
               <p className="text-base sm:text-lg text-ink-2 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                Build mechanical precision, target acquisition velocity, and working memory capacity. Access {totalDrillsCount} zero-friction, browser-native drills across {totalCategoriesCount} performance domains. Free, open, and instant.
+                {t('heroSub', `Build mechanical precision, target acquisition velocity, and working memory capacity. Access ${totalDrillsCount} zero-friction, browser-native drills across ${totalCategoriesCount} performance domains. Free, open, and instant.`)}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start pt-2">
-                <Link 
-                  href="/drills" 
+                <Link
+                  href="/drills"
                   className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white px-8 py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/25 active:scale-[0.98] transition-all"
                 >
-                  Explore All {totalDrillsCount} Drills
+                  {t('heroExploreCta', `Explore All ${totalDrillsCount} Drills`)}
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
-                <Link 
-                  href="/drills/fps" 
+                <Link
+                  href="/drills/fps"
                   className="inline-flex items-center justify-center gap-2 bg-surface-1/90 border border-white/10 text-white px-7 py-3.5 rounded-xl font-bold hover:bg-surface-2 hover:border-white/20 active:scale-[0.98] transition-all"
                 >
                   <Crosshair className="w-4.5 h-4.5 text-red-400" aria-hidden="true" />
-                  FPS Aim Hub
+                  {t('fpsHubCta', 'FPS Aim Hub')}
                 </Link>
               </div>
-              
+
               {/* Telemetry Architecture Specs */}
               <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0 pt-7 border-t border-white/10">
                 <div className="text-left">
                   <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">{totalDrillsCount}</p>
-                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Free Drills</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('statFreeDrills', 'Free Drills')}</p>
                 </div>
                 <div className="text-left">
                   <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">{totalCategoriesCount}</p>
-                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Domains</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('statDomains', 'Domains')}</p>
                 </div>
                 <div className="text-left">
                   <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">0ms</p>
-                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Server Delay</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('statServerDelay', 'Server Delay')}</p>
                 </div>
               </div>
 
@@ -306,22 +309,22 @@ export default function HomePageClient() {
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-cyan-400 font-bold flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                    ENGINE TELEMETRY
+                    {t('hudEngineTelemetry', 'ENGINE TELEMETRY')}
                   </span>
-                  <span className="text-emerald-400 font-bold">READY</span>
+                  <span className="text-emerald-400 font-bold">{t('hudReady', 'READY')}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center pt-2">
                   <div className="p-2.5 rounded-xl bg-surface-2/80 border border-white/5">
                     <p className="text-xs font-bold text-white">140ms</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Avg Latency</p>
+                    <p className="text-[10px] text-ink-3 font-mono">{t('hudAvgLatency', 'Avg Latency')}</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-surface-2/80 border border-white/5">
                     <p className="text-xs font-bold text-white">98.4%</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Precision</p>
+                    <p className="text-[10px] text-ink-3 font-mono">{t('hudPrecision', 'Precision')}</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-surface-2/80 border border-white/5">
                     <p className="text-xs font-bold text-white">240 Hz</p>
-                    <p className="text-[10px] text-ink-3 font-mono">Frame Sync</p>
+                    <p className="text-[10px] text-ink-3 font-mono">{t('hudFrameSync', 'Frame Sync')}</p>
                   </div>
                 </div>
               </div>
@@ -329,7 +332,7 @@ export default function HomePageClient() {
 
             {/* Right Desktop Widget Column - playable reaction test */}
             <div className="lg:col-span-5 hidden lg:block">
-              <HeroReactionTest />
+              <HeroReactionTest copy={copy.reactionTest ?? {}} />
             </div>
           </div>
         </Reveal>
@@ -353,10 +356,10 @@ export default function HomePageClient() {
                       <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
                       <div className="w-2 h-2 rounded-full bg-emerald-500/80" />
                     </div>
-                    <span className="font-bold text-white tracking-wider ml-1">TELEMETRY CALIBRATION</span>
+                    <span className="font-bold text-white tracking-wider ml-1">{t('hudCalibration', 'TELEMETRY CALIBRATION')}</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-mono">
-                    SUB-PIXEL ENGINE
+                    {t('hudSubPixel', 'SUB-PIXEL ENGINE')}
                   </span>
                 </div>
 
@@ -417,34 +420,34 @@ export default function HomePageClient() {
               <div className="md:col-span-7 space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-2xs font-mono text-blue-400 font-bold uppercase tracking-wider">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Cognitive &amp; Mechanical Paradigms</span>
+                  <span>{t('methodologyBadge', 'Cognitive & Mechanical Paradigms')}</span>
                 </div>
-                
+
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
-                  Rooted in Cognitive Science &amp; Esports Mechanics
+                  {t('methodologyH2', 'Rooted in Cognitive Science & Esports Mechanics')}
                 </h2>
 
                 <p className="text-sm sm:text-base text-ink-2 leading-relaxed">
-                  Every drill is modeled directly on validated psychometric tests and competitive esports motor demands—isolating distinct neurological stimulus-response pathways and hand-eye coordination mechanics.
+                  {t('methodologyBody', 'Every drill is modeled directly on validated psychometric tests and competitive esports motor demands—isolating distinct neurological stimulus-response pathways and hand-eye coordination mechanics.')}
                 </p>
 
                 {/* Paradigm Pills */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
                   <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
-                    <p className="text-xs font-bold text-white">Digit Span</p>
-                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Working Memory</p>
+                    <p className="text-xs font-bold text-white">{t('pillDigitSpan', 'Digit Span')}</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">{t('pillDigitSpanSub', 'Working Memory')}</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
-                    <p className="text-xs font-bold text-white">N-Back Task</p>
-                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Executive Control</p>
+                    <p className="text-xs font-bold text-white">{t('pillNBack', 'N-Back Task')}</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">{t('pillNBackSub', 'Executive Control')}</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
-                    <p className="text-xs font-bold text-white">Choice RT</p>
-                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Latency Calibration</p>
+                    <p className="text-xs font-bold text-white">{t('pillChoiceRT', 'Choice RT')}</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">{t('pillChoiceRTSub', 'Latency Calibration')}</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-surface-1/80 border border-white/10 text-center">
-                    <p className="text-xs font-bold text-white">Smooth Pursuit</p>
-                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">Oculomotor Tracking</p>
+                    <p className="text-xs font-bold text-white">{t('pillSmoothPursuit', 'Smooth Pursuit')}</p>
+                    <p className="text-[10px] text-ink-3 font-mono mt-0.5">{t('pillSmoothPursuitSub', 'Oculomotor Tracking')}</p>
                   </div>
                 </div>
 
@@ -452,9 +455,9 @@ export default function HomePageClient() {
                 <div className="p-3.5 rounded-2xl bg-canvas border border-white/10 flex items-center justify-between text-xs text-ink-3 font-mono">
                   <div className="flex items-center gap-2.5">
                     <LineChart className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="text-ink-2">Typical Adaptation Curve: 15–22% latency reduction over 14 days</span>
+                    <span className="text-ink-2">{t('adaptationCurve', 'Typical Adaptation Curve: 15–22% latency reduction over 14 days')}</span>
                   </div>
-                  <span className="text-[10px] text-ink-3 font-sans italic opacity-75 hidden sm:inline">(Empirical progress model)</span>
+                  <span className="text-[10px] text-ink-3 font-sans italic opacity-75 hidden sm:inline">{t('empiricalNote', '(Empirical progress model)')}</span>
                 </div>
               </div>
 
@@ -476,30 +479,30 @@ export default function HomePageClient() {
                     <Brain className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-tight">Your Diagnostic Profile</h2>
-                    <p className="text-xs text-ink-3">Local browser progression aggregated across completed drills</p>
+                    <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-tight">{t('profileH2', 'Your Diagnostic Profile')}</h2>
+                    <p className="text-xs text-ink-3">{t('profileSub', 'Local browser progression aggregated across completed drills')}</p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
                   <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
                     <p className="text-xl font-black text-white">{profile.gamesPlayed}</p>
-                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Sessions</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('profileSessions', 'Sessions')}</p>
                   </div>
                   <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
                     <p className="text-xl font-black text-white">{profile.drillsCount}</p>
-                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Drills</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('profileDrills', 'Drills')}</p>
                   </div>
                   <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
-                    <p className="text-xl font-black text-white">Lvl {profile.avgLevel}</p>
-                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Avg Level</p>
+                    <p className="text-xl font-black text-white">{t('profileLvlPrefix', 'Lvl')} {profile.avgLevel}</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('profileAvgLevel', 'Avg Level')}</p>
                   </div>
                   <div className="bg-canvas border border-white/10 p-3.5 rounded-xl text-center">
                     <p className="text-xl font-black text-amber-400 flex items-center justify-center gap-1">
                       <Trophy className="w-4 h-4" />
                       {profile.fitnessRating}%
                     </p>
-                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Rating</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">{t('profileRating', 'Rating')}</p>
                   </div>
                 </div>
               </div>
@@ -513,13 +516,13 @@ export default function HomePageClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-14 space-y-3">
             <h2 id="categories-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Training Categories
+              {t('categoriesH2', 'Training Categories')}
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
-              Select a specialized skill vector to begin your performance calibration.
+              {t('categoriesSub', 'Select a specialized skill vector to begin your performance calibration.')}
             </p>
           </Reveal>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {categoryConfigs.map((cat, idx) => {
               const Icon = cat.icon;
@@ -540,31 +543,31 @@ export default function HomePageClient() {
                         <div className="flex items-center gap-1.5">
                           {isDesktopOnly && (
                             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                              Desktop Only
+                              {t('desktopOnly', 'Desktop Only')}
                             </span>
                           )}
                           <span className="text-2xs font-mono font-semibold px-2.5 py-1 rounded-full bg-white/5 text-ink-3 border border-white/10">
-                            {count} Drills
+                            {count} {t('drillsSuffix', 'Drills')}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between mb-1.5">
                         <h3 className={`text-base font-bold text-white transition-colors group-hover:${cat.accentColor}`}>
-                          {cat.name}
+                          {catCopy(cat.id, 'name', cat.name)}
                         </h3>
                         {cat.featured && (
                           <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono font-bold uppercase rounded-full">
-                            Popular
+                            {t('popular', 'Popular')}
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-ink-2 leading-relaxed mb-4 line-clamp-2">{cat.description}</p>
+                      <p className="text-xs text-ink-2 leading-relaxed mb-4 line-clamp-2">{catCopy(cat.id, 'description', cat.description)}</p>
                     </div>
 
                     <div className={`relative pt-4 border-t border-white/10 flex items-center justify-between text-xs font-semibold ${cat.accentColor}`}>
-                      <span>Explore Category</span>
+                      <span>{t('exploreCategory', 'Explore Category')}</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
@@ -580,13 +583,13 @@ export default function HomePageClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-14 space-y-3">
             <h2 id="features-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Engine Diagnostics &amp; Features
+              {t('featuresH2', 'Engine Diagnostics & Features')}
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
-              Built for high-refresh rates and instant tactile response in all modern browsers.
+              {t('featuresSub', 'Built for high-refresh rates and instant tactile response in all modern browsers.')}
             </p>
           </Reveal>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((feature, index) => {
               const Icon = feature.icon;
@@ -597,8 +600,8 @@ export default function HomePageClient() {
                       <div className={`absolute -inset-1.5 rounded-xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-50 blur-md -z-10 transition-opacity`} />
                       <Icon className="w-5.5 h-5.5" />
                     </div>
-                    <h3 className="text-base font-bold text-white mb-2 uppercase tracking-tight">{feature.title}</h3>
-                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{feature.description}</p>
+                    <h3 className="text-base font-bold text-white mb-2 uppercase tracking-tight">{featureCopy(index, 'title', feature.title)}</h3>
+                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{featureCopy(index, 'description', feature.description)}</p>
                   </article>
                 </Reveal>
               );
@@ -612,13 +615,13 @@ export default function HomePageClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-14 space-y-3">
             <h2 id="audience-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Target Audience
+              {t('audienceH2', 'Target Audience')}
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
-              Tailored training paths whether you are calibrating aim or expanding cognitive limits.
+              {t('audienceSub', 'Tailored training paths whether you are calibrating aim or expanding cognitive limits.')}
             </p>
           </Reveal>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {audienceData.map((item, index) => {
               const Icon = item.icon;
@@ -629,8 +632,8 @@ export default function HomePageClient() {
                       <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-40 blur-md -z-10 transition-opacity`} />
                       <Icon className="w-6.5 h-6.5" />
                     </div>
-                    <h3 className="text-base font-bold text-white mb-2 uppercase tracking-tight">{item.title}</h3>
-                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{item.description}</p>
+                    <h3 className="text-base font-bold text-white mb-2 uppercase tracking-tight">{audienceCopy(index, 'title', item.title)}</h3>
+                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{audienceCopy(index, 'description', item.description)}</p>
                   </div>
                 </Reveal>
               );
@@ -649,25 +652,25 @@ export default function HomePageClient() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <Reveal>
             <h2 id="cta-heading" className="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase">
-              Start Training Now
+              {t('ctaH2', 'Start Training Now')}
             </h2>
             <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-              No accounts. No payments. {totalDrillsCount} browser-native drills ready for instant calibration.
+              {t('ctaSub', `No accounts. No payments. ${totalDrillsCount} browser-native drills ready for instant calibration.`)}
             </p>
             <div className="pt-5 flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-                href="/drills" 
+              <Link
+                href="/drills"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-9 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/25 active:scale-[0.98] transition-all"
               >
-                Browse All {totalDrillsCount} Drills
+                {t('ctaExploreCta', `Browse All ${totalDrillsCount} Drills`)}
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
               </Link>
-              <Link 
-                href="/drills/fps" 
+              <Link
+                href="/drills/fps"
                 className="inline-flex items-center gap-2 bg-surface-2 border border-white/10 text-white px-8 py-4 rounded-xl font-bold hover:bg-surface-1 hover:border-white/20 active:scale-[0.98] transition-all"
               >
                 <Crosshair className="w-4.5 h-4.5 text-red-400" aria-hidden="true" />
-                FPS Aim Hub
+                {t('fpsHubCta', 'FPS Aim Hub')}
               </Link>
             </div>
           </Reveal>

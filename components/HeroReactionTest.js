@@ -6,12 +6,12 @@ import { RotateCcw } from 'lucide-react';
 const MIN_WAIT_MS = 1200;
 const MAX_WAIT_MS = 4200;
 
-function reactionLabel(ms) {
-  if (ms < 180) return 'ELITE';
-  if (ms < 220) return 'FAST';
-  if (ms < 280) return 'AVERAGE';
-  if (ms < 350) return 'SLOW';
-  return 'WARM UP';
+function reactionLabel(ms, copy) {
+  if (ms < 180) return copy.labelElite ?? 'ELITE';
+  if (ms < 220) return copy.labelFast ?? 'FAST';
+  if (ms < 280) return copy.labelAverage ?? 'AVERAGE';
+  if (ms < 350) return copy.labelSlow ?? 'SLOW';
+  return copy.labelWarmUp ?? 'WARM UP';
 }
 
 const circleStyles = {
@@ -22,7 +22,7 @@ const circleStyles = {
   early: 'bg-amber-500/15 border-amber-400/50 text-amber-100 shadow-[0_0_50px_-12px_rgba(245,158,11,0.6)]',
 };
 
-export default function HeroReactionTest() {
+export default function HeroReactionTest({ copy = {} }) {
   const [phase, setPhase] = useState('idle'); // idle | waiting | go | result | early
   const [reaction, setReaction] = useState(null);
   const [best, setBest] = useState(null);
@@ -62,19 +62,19 @@ export default function HeroReactionTest() {
   }, [phase, arm]);
 
   const headline = {
-    idle: 'CLICK TO START',
-    waiting: 'WAIT FOR GREEN',
-    go: 'CLICK!',
+    idle: copy.headlineIdle ?? 'CLICK TO START',
+    waiting: copy.headlineWaiting ?? 'WAIT FOR GREEN',
+    go: copy.headlineGo ?? 'CLICK!',
     result: `${reaction} ms`,
-    early: 'TOO SOON',
+    early: copy.headlineEarly ?? 'TOO SOON',
   }[phase];
 
   const subline = {
-    idle: 'Red now — click the moment it turns green',
-    waiting: 'Hold steady…',
-    go: 'Now!',
-    result: reactionLabel(reaction ?? 0),
-    early: 'You clicked before the green flash',
+    idle: copy.sublineIdle ?? 'Red now — click the moment it turns green',
+    waiting: copy.sublineWaiting ?? 'Hold steady…',
+    go: copy.sublineGo ?? 'Now!',
+    result: reactionLabel(reaction ?? 0, copy),
+    early: copy.sublineEarly ?? 'You clicked before the green flash',
   }[phase];
 
   return (
@@ -86,10 +86,10 @@ export default function HeroReactionTest() {
       <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/5 text-2xs font-mono text-ink-3">
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="font-bold text-ink-2 tracking-wider uppercase">Latency Telemetry</span>
+          <span className="font-bold text-ink-2 tracking-wider uppercase">{copy.hudTitle ?? 'Latency Telemetry'}</span>
         </div>
         <span className="px-2 py-0.5 rounded-full bg-white/5 text-ink-3 border border-white/10 uppercase tracking-widest text-[10px]">
-          Live Module
+          {copy.hudBadge ?? 'Live Module'}
         </span>
       </div>
 
@@ -99,10 +99,10 @@ export default function HeroReactionTest() {
         onClick={handleCircle}
         aria-label={
           phase === 'go'
-            ? 'Click now'
+            ? (copy.ariaClickNow ?? 'Click now')
             : phase === 'waiting'
-              ? 'Wait for the circle to turn green'
-              : 'Start the reaction test'
+              ? (copy.ariaWait ?? 'Wait for the circle to turn green')
+              : (copy.ariaStart ?? 'Start the reaction test')
         }
         className={`relative aspect-square w-full max-w-[280px] mx-auto flex flex-col items-center justify-center rounded-full border-2 transition-all duration-150 select-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 active:scale-[0.98] ${circleStyles[phase]}`}
       >
@@ -118,26 +118,26 @@ export default function HeroReactionTest() {
       </button>
 
       <p aria-live="polite" className="sr-only">
-        {phase === 'result' ? `Reaction time ${reaction} milliseconds` : ''}
+        {phase === 'result' ? (copy.liveReaction ?? `Reaction time ${reaction} milliseconds`).replace('{ms}', reaction) : ''}
       </p>
 
       {/* Readout + retry */}
       <div className="mt-6 bg-canvas/90 rounded-2xl border border-white/10 p-4 flex items-center gap-4">
         <div className="flex-1 font-mono text-2xs space-y-2 text-ink-3 min-w-0">
           <p className="flex justify-between gap-2">
-            <span className="text-cyan-400 font-semibold">&gt; LAST:</span>
+            <span className="text-cyan-400 font-semibold">&gt; {copy.statLast ?? 'LAST'}:</span>
             <span className="text-emerald-400 font-bold tabular-nums">
               {reaction !== null ? `${reaction} ms` : '—'}
             </span>
           </p>
           <p className="flex justify-between gap-2">
-            <span className="text-cyan-400 font-semibold">&gt; BEST:</span>
+            <span className="text-cyan-400 font-semibold">&gt; {copy.statBest ?? 'BEST'}:</span>
             <span className="text-white font-bold tabular-nums">
               {best !== null ? `${best} ms` : '—'}
             </span>
           </p>
           <p className="flex justify-between gap-2">
-            <span className="text-cyan-400 font-semibold">&gt; ATTEMPTS:</span>
+            <span className="text-cyan-400 font-semibold">&gt; {copy.statAttempts ?? 'ATTEMPTS'}:</span>
             <span className="text-cyan-300 font-bold tabular-nums">{attempts}</span>
           </p>
         </div>
@@ -148,7 +148,7 @@ export default function HeroReactionTest() {
           className="shrink-0 inline-flex items-center gap-2 bg-surface-2 border border-white/10 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-surface-1 hover:border-white/20 active:scale-[0.98] transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-          Reset
+          {copy.resetBtn ?? 'Reset'}
         </button>
       </div>
     </div>
