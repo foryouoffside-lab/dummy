@@ -1,6 +1,6 @@
 # UX Bug-Fix, Consistency & Localization Audit Pass
 
-**Run this from `docs/prompts/ANTIGRAVITY_UX_BUGFIX_LOCALIZATION_PASS.md`.**
+**Run this from `xx.md` at the repo root.**
 Repo: `global-drill-system-nextjs` (SkillDrills), Next.js 15 App Router, JS.
 
 This brief bundles everything reported in one QA sweep (refresh flash, start-button
@@ -10,14 +10,14 @@ It does not replace the existing playbooks — it points at them and adds what t
 don't yet cover.
 
 **Read these first, do not re-derive what they already establish:**
-- [`CLAUDE.md`](../../CLAUDE.md) — Debug2Fix, output discipline, "npx next build not npm run build."
-- [`DRILL_STANDARDIZATION_PLAYBOOK.md`](./DRILL_STANDARDIZATION_PLAYBOOK.md) — page hierarchy (§4), the
+- [`CLAUDE.md`](./CLAUDE.md) — Debug2Fix, output discipline, "npx next build not npm run build."
+- [`docs/prompts/DRILL_STANDARDIZATION_PLAYBOOK.md`](./docs/prompts/DRILL_STANDARDIZATION_PLAYBOOK.md) — page hierarchy (§4), the
   ESC/pointer-lock/fullscreen exit "Golden Solution" (§6), no-machine-translation mandate (§9).
-- [`DRILL_STANDARDIZATION_TRACKER.md`](./DRILL_STANDARDIZATION_TRACKER.md) — R1–R8 checklist, 26/82 done, 56 pending.
-- [`PERF_REFRESH_FOUC_DEBUG_PASS.md`](./PERF_REFRESH_FOUC_DEBUG_PASS.md) — the refresh/big-text-flash
+- [`docs/prompts/DRILL_STANDARDIZATION_TRACKER.md`](./docs/prompts/DRILL_STANDARDIZATION_TRACKER.md) — R1–R8 checklist, 26/82 done, 56 pending.
+- [`docs/prompts/PERF_REFRESH_FOUC_DEBUG_PASS.md`](./docs/prompts/PERF_REFRESH_FOUC_DEBUG_PASS.md) — the refresh/big-text-flash
   investigation already run once. Confirm whether it is still reproducing before treating it as new.
-- [`ANTIGRAVITY_HEADER_WIDTH_PASS.md`](./ANTIGRAVITY_HEADER_WIDTH_PASS.md) — header-width sweep, in progress.
-- [`ANTIGRAVITY_MASTER_DRILL_PASS.md`](./ANTIGRAVITY_MASTER_DRILL_PASS.md) — how keyword research and
+- [`docs/prompts/ANTIGRAVITY_HEADER_WIDTH_PASS.md`](./docs/prompts/ANTIGRAVITY_HEADER_WIDTH_PASS.md) — header-width sweep, in progress.
+- [`docs/prompts/ANTIGRAVITY_MASTER_DRILL_PASS.md`](./docs/prompts/ANTIGRAVITY_MASTER_DRILL_PASS.md) — how keyword research and
   localization decisions are made (measure, don't guess or translate).
 
 ---
@@ -52,7 +52,7 @@ don't yet cover.
 text briefly render oversized or with distorted spacing before snapping to the
 final layout.
 
-**This may already be the exact defect `PERF_REFRESH_FOUC_DEBUG_PASS.md` targeted.**
+**This may already be the exact defect `docs/prompts/PERF_REFRESH_FOUC_DEBUG_PASS.md` targeted.**
 
 1. First: reproduce on the current `main`/branch HEAD and confirm whether that
    pass's fixes (`text-size-adjust`, `font-sans` on `<html>`, font `display`
@@ -151,9 +151,9 @@ the fullscreen drill box (paused), instead of fully exiting back to the drill
 page's "START DRILL" card as described.
 
 **This is a known-solved pattern that has regressed or was never rolled out
-everywhere.** `DRILL_STANDARDIZATION_PLAYBOOK.md` §6 documents the exact "Golden
+everywhere.** `docs/prompts/DRILL_STANDARDIZATION_PLAYBOOK.md` §6 documents the exact "Golden
 Solution" — `handleExitDrill()` wired to `keydown` (Escape), `pointerlockchange`,
-and `fullscreenchange`, with **no pause overlay at all**. `DRILL_STANDARDIZATION_TRACKER.md`
+and `fullscreenchange`, with **no pause overlay at all**. `docs/prompts/DRILL_STANDARDIZATION_TRACKER.md`
 lists this as rule **R6**, currently only guaranteed on the 26 "completed" drills.
 
 1. Reproduce on the specific drill(s) the user hit this on. Confirm via
@@ -169,7 +169,7 @@ lists this as rule **R6**, currently only guaranteed on the 26 "completed" drill
    fullscreen, releases pointer lock, cancels RAF/timeouts, and resets
    `gameState` to `'start'`).
 3. Do this **one drill at a time**, per §8's "Rollout Checklist." Update
-   `DRILL_STANDARDIZATION_TRACKER.md` (mark R6 for that drill) as you go so the
+   `docs/prompts/DRILL_STANDARDIZATION_TRACKER.md` (mark R6 for that drill) as you go so the
    tracker stays true — do not let this pass diverge from the tracker's bookkeeping.
 
 **Verify:** on the fixed drill, mid-drill ESC returns to the exact "START DRILL"
@@ -202,7 +202,7 @@ anywhere in the trail including the active/current crumb.
 ## 6. CONSISTENCY — drill-box border + one-line keyword subtitle, every drill, every locale
 
 Add two rules to the standardization checklist (append to
-`DRILL_STANDARDIZATION_TRACKER.md`'s rule list as **R9** and **R10**; track
+`docs/prompts/DRILL_STANDARDIZATION_TRACKER.md`'s rule list as **R9** and **R10**; track
 compliance per-drill the same way R1–R8 are tracked):
 
 - **R9 — Visible drill-box border.** The interactive stage container must have a
@@ -212,7 +212,7 @@ compliance per-drill the same way R1–R8 are tracked):
 - **R10 — One-line keyword subtitle.** Every drill's `<h1>` must be followed by
   exactly one line of subtitle text that functions as the SEO keyword line (the
   existing `data-seo-kw` span pattern — see
-  `ANTIGRAVITY_MASTER_DRILL_PASS.md` §2.2 for the canonical markup). If a drill
+  `docs/prompts/ANTIGRAVITY_MASTER_DRILL_PASS.md` §2.2 for the canonical markup). If a drill
   has none, add one (real target keyword, not filler — check `lib/drillSeo.js`
   for what that drill is already supposed to target before inventing new copy).
   If a drill's subtitle wraps to more than one line, shorten it to fit one line
@@ -247,15 +247,22 @@ pass, exactly like R1–R8. Do not create a second, competing checklist file.
 
 The user asked explicitly: **produce a list of every localized page that is a
 straight translation of the English page** (not built from native keyword
-research), per `DRILL_STANDARDIZATION_PLAYBOOK.md` §9 and
-`ANTIGRAVITY_MASTER_DRILL_PASS.md`'s "never target a translated phrase" rule.
+research), per `docs/prompts/DRILL_STANDARDIZATION_PLAYBOOK.md` §9 and
+`docs/prompts/ANTIGRAVITY_MASTER_DRILL_PASS.md`'s "never target a translated phrase" rule.
+
+If you find a page that is fully a machine/dictionary translation of the English
+page (title, subtitle, FAQ, About-drill prose all just carried over into the
+target language with no native keyword behind any of it), **add it by name to
+the "Fully English-translated pages" list in §7.3 below** — that list is a
+required deliverable of this pass, not optional.
 
 ### 7.1 Why this matters here specifically
 
-The current git status shows a large batch of `app/de/drills/**/page.js` files
-modified but **uncommitted**. Before touching anything else, find out what that
-in-progress change actually is — it may already be a translation-only edit,
-which would itself be the exact defect being audited for:
+The current git status shows a large batch of `app/de/drills/**/page.js` (and
+similarly shaped `es`/`fr`/`ja`/`ko`/`pt` files) modified. Before touching
+anything else, find out what that in-progress change actually is — it may
+already be a translation-only edit, which would itself be the exact defect
+being audited for:
 ```
 git diff --stat -- app/de/
 git diff app/de/drills/fps/flick-shot-training/page.js
@@ -288,8 +295,9 @@ playbook; word-for-word sentence translation is the problem).
 
 For **every** locale currently in the tree (`de`, `es`, `fr`, `ja`, `ko`, `pt` —
 confirm the actual set with `ls app | grep -E '^(de|es|fr|ja|ko|pt)$'`), walk
-every `page.js` under `app/<locale>/drills/**` and classify it. Output a table:
+every `page.js` under `app/<locale>/drills/**` and classify it. Output two things:
 
+**A. The full classification table:**
 ```
 | Locale | Route | Verdict | Evidence |
 |---|---|---|---|
@@ -297,16 +305,28 @@ every `page.js` under `app/<locale>/drills/**` and classify it. Output a table:
 | ko | /ko/... | NATIVE (ok) | subtitle matches measured term from <cite the research doc/commit> |
 ```
 
+**B. A dedicated "Fully English-translated pages" list** — every route marked
+TRANSLATED, grouped by locale, plain list, no prose:
+```
+### Fully English-translated pages (defect list)
+de:
+- /de/drills/fps/flick-shot-training
+- ...
+es:
+- ...
+```
+This list is what the user asked for directly — keep it separable from the full
+table so it can be handed off on its own.
+
 **Do not fix any TRANSLATED page in this same pass.** Producing the list is the
 deliverable for step 7. Fixing each one is real content work — keyword
 measurement + native rewrite — and per the one-drill-at-a-time rule and the
 playbook's "One Drill at a Time" mandate (§9.5), each fix is its own subsequent
-pass, sequenced by the demand data already on record in the
-`docs/prompts/DRILL_KEYWORD_TARGETS` / country-language-demand memory (Korean +
-Japanese are the only markets with proven translation-resistant demand;
-`de`/`es`/`fr` mostly measure at or near zero for translated phrasings — a
-TRANSLATED `de`/`es`/`fr` page is likely to end in "revert to English fallback,"
-not "localize properly," per that prior measurement work).
+pass, sequenced by prior demand measurement (Korean + Japanese are the only
+markets with proven translation-resistant demand; `de`/`es`/`fr` mostly measure
+at or near zero for translated phrasings — a TRANSLATED `de`/`es`/`fr` page is
+likely to end in "revert to English fallback," not "localize properly," per
+that prior measurement work).
 
 **Verify the audit itself** by spot-checking 3 pages you marked NATIVE against
 their actual git history / a fresh Bing measurement — don't let false negatives
