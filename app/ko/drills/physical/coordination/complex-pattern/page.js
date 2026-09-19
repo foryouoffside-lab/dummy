@@ -2,6 +2,7 @@ import ComplexPatternClient from '@/app/drills/physical/coordination/complex-pat
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — South Korea (KR / KO)
@@ -323,7 +324,10 @@ const patternGuide = {
     "라운드 시작 카운트다운 후 녹색 선으로 나타나는 경로를 주시합니다.",
     "선이 사라진 후 하늘색 시작 노드를 클릭하고 드래그를 시작합니다.",
     "암기한 순서대로 각 노드를 통과한 뒤 자홍색 종료 노드에서 마우스를 놓습니다."
-  ]
+  ],
+  audience: "FPS e스포츠 게이머(에임 반동 제어 및 즉각적인 마우스 궤적 컨트롤 향상), 취업 준비생 및 인적성/AI 역량검사(도형 순서 기억 및 공간지각 평가) 응시자, 그리고 시공간 작업기억력과 손가락 미세 협응력을 강화하려는 모든 사용자.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('baddeley1974', 'cowan2001', 'lashley1951', 'woodworth1899', 'woods2015')
 };
 
 export default function ComplexPatternPageKo() {

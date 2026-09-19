@@ -1,5 +1,6 @@
 import FlowStateClient from './FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -323,8 +324,18 @@ export default function FlowStatePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FlowStateClient />
+      <FlowStateClient
+        copy={{
+          rulesItems: [
+            { num: "1", text: "Tracking Alignment", highlight: "+10 PTS (+0.4s/s)", result: "Keep Locked on Target" },
+            { num: "2", text: "Flow Multiplier", highlight: "Up to 3.0× Points", result: "Continuous Focus Chain" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Bezier Speed" },
+            { num: "4", text: "Focus Break Rule", highlight: "1.0s Off-Target", result: "Resets Combo (-0.6s)" }
+          ]
+        }}
+      />
       <DrillGuide guide={flowStateGuide} />
+      <DrillFooter />
     </>
   );
 }

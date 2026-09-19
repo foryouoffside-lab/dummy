@@ -2,6 +2,7 @@ import DistanceJudgmentClient from '@/app/drills/visual/depth-perception/distanc
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distance-judgment (Korean: 원근감 테스트 / 입체시 검사)
@@ -228,9 +229,10 @@ const faqSchema = {
 const distanceGuideKo = {
   heading: '원근감 및 공간 입체시 평가 기준',
   intro: [
-    '원근감(깊이 지각)은 세상을 3차원으로 인식하고 물체의 거리와 공간적 위치 관계를 판단하는 시지각 능력입니다. 모터스포츠, 비행 조종, 운전, 구기 스포츠에서 찰나의 거리 판단은 성공적인 인터셉트와 충돌의 갈림길이 됩니다.',
-    '본 드릴은 하워드-돌먼(Howard, 1919) 검사와 생태학적 시각 팽창 이론(Lee, 1976; Regan & Beverley, 1978)을 온라인 환경에 맞게 재구성했습니다. 가상 터널을 따라 다가오는 타겟의 루밍 속도와 도달 시간(TTC)을 계산하는 시각 피질 훈련을 제공합니다.',
-    '측정 방식: performance.now() API를 통해 밀리초 단위로 입력을 포착하며, 기준 링과 타겟의 상대적 지름 오차율을 계산하여 정밀도를 판정합니다.',
+    '원근감(깊이 지각 및 입체시)은 시각 피질과 안구 운동 신경계가 외부 공간을 3차원으로 통합하여 물체 간의 상대적 거리, 체적, 그리고 동적 이동 궤적을 밀리초 단위로 정확히 판단하는 고차원적 인지 능력입니다. 모터스포츠, 항공기 조종, 운전면허 적성검사(대형·특수면허 입체시 검사), 그리고 하이퍼 FPS e스포츠에서 찰나의 거리 판단은 성공적인 인터셉트와 치명적인 충돌 사고를 가르는 절대적 기준이 됩니다.',
+    '본 드릴은 Harvey J. Howard(1919)가 비행 적성 선별을 위해 개발한 하워드-돌먼 삼간법(Howard-Dolman apparatus)의 기하학적 원리와 David N. Lee(1976), David Regan & Kenneth I. Beverley(1978)의 생태학적 시각 팽창 이론(Optical Looming 및 접촉 여유시간 τ)을 정밀하게 웹 브라우저 상에 구현했습니다. 원경에서 다가오는 3D 타겟 구체가 중앙의 기준 심도 링과 완벽히 일치하는 순간을 낚아챔으로써 동적 거리 지각력과 반응 타이밍을 집중 훈련합니다.',
+    '측정 정밀도 및 하드웨어 환경 안내: 모든 인터셉트 오차는 브라우저의 performance.now() 고해상도 타이머를 통해 서브 밀리초 단위로 로컬에서 연산되며, 기준 링 직경 대비 상대 오차율(|실측 직경 - 기준 직경| / 기준 직경)로 산출됩니다. 디스플레이 주사율(60Hz 약 16.7ms, 144Hz 약 6.9ms, 240Hz 약 4.1ms)과 마우스 폴링레이트(125Hz vs 1000Hz)에 따른 물리적 양자화 지연이 발생합니다(Woods et al., 2015). 5ms 미만의 차이는 측정 노이즈로 간주하며, 동일한 기기 환경에서 종단적 훈련 추이를 비교하는 것이 가장 신뢰성 높습니다.',
+    '데이터 투명성 및 개인정보 보호: SkillDrills는 어떠한 개인정보, 안과적 진단 수치, 세션 로그도 외부 서버로 전송하거나 수집하지 않습니다. 달성한 모든 최고 기록, 오차율 및 레벨 진행 상태는 사용자의 웹 브라우저 로컬 저장소(LocalStorage)에만 안전하게 보관됩니다.'
   ],
   benchmarks: {
     title: '원근감 판정 기준표 (자체 평가 가이드)',
@@ -264,6 +266,14 @@ const distanceGuideKo = {
       },
     ],
   },
+  steps: [
+    '훈련 시작 버튼을 눌러 45초간 진행되는 원근감 및 거리 판정 세션을 시작합니다.',
+    '가상 터널의 중간 심도 평면에 배치된 하늘색 기준 링에 양안의 초점을 고정합니다.',
+    '터널 깊은 곳에서 생성되어 시선 방향으로 가속하며 다가오는 3D 구체를 주시합니다.',
+    '팽창하는 구체의 외곽 경계선이 기준 링의 직경과 정확히 겹치는 순간 마우스 클릭 또는 화면 터치를 실행합니다.',
+    '각 회차별 정밀도 판정(<5% 오차: 퍼펙트 / +150점)을 확인하며 점진적으로 빨라지는 45초간의 접근 속도에 적응합니다.'
+  ],
+  audience: '운전면허 적성검사(대형·트레일러·버스 입체시 삼간도 검사)를 준비하는 운전자, 중장비 조종사, 야구·테니스·배드민턴 등 구기 스포츠 선수, 항공 조종사 및 공간 거리 감각을 극대화하려는 게이머.',
   faqs: {
     title: '원근감 및 거리 측정에 관한 자주 묻는 질문(FAQ)',
     items: faqSchema.mainEntity.map((q) => ({
@@ -271,6 +281,15 @@ const distanceGuideKo = {
       a: q.acceptedAnswer.text,
     })),
   },
+  sources: pickSources('howard1919', 'lee1976', 'regan1978', 'julesz1971', 'woods2015'),
+  related: [
+    { href: "/drills/visual/tracking-accuracy/moving-target", label: "움직이는 타겟 인터셉트" },
+    { href: "/drills/visual/reaction-speed/light-reaction", label: "빛 반응 속도 테스트" },
+    { href: "/drills/visual/tracking-accuracy/multiple-targets", label: "다중 객체 추적 (MOT)" },
+    { href: "/drills/visual/tracking-accuracy/pursuit-tracker", label: "활창 추종 안구 운동 트래커" },
+    { href: "/drills/visual/reaction-speed/go/no-go", label: "Go / No-Go 충동 제어 훈련" },
+    { href: "/drills/visual/visual-recognition/entropic-grid", label: "엔트로픽 시각 탐색 테스트" }
+  ]
 };
 
 const copyKo = {

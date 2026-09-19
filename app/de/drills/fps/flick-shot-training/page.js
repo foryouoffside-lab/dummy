@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 // ============================================================
 // GERMAN SEARCH KEYWORD RESEARCH & INTENT CLUSTERING (DACH)
@@ -224,7 +225,7 @@ export default function FlickShotDePage() {
         "@type": "HowToStep",
         "position": 3,
         "name": "Ballistische Beschleunigung",
-        "text": "Bewege die Maus in einer flüssigen, ununterbrochenen Beschleunigungskurve direkt auf das Zielzentrum, noch bevor der äußere Timer-Ring abläuft."
+        "text": "Bewege die Maus in einer flüssigen, ununterbrochenen Beschleunigungskurve direkt auf das Zielzentrum, noch bevor das Zeitfenster des Ziels abläuft."
       },
       {
         "@type": "HowToStep",
@@ -329,6 +330,7 @@ export default function FlickShotDePage() {
         copy={{
           h1Keyword: "Flick Shot Training",
           h1Suffix: " – Snap Aim & Präzision",
+          subtitle: "Trainiere Snap Aiming, ballistisches Muskelgedächtnis, Zielerfassung und Mausbremsung mit Echtzeit-Feedback.",
           statScore: "Punkte",
           statTime: "Verbleibende Zeit",
           statAccuracy: "Präzision",
@@ -343,13 +345,13 @@ export default function FlickShotDePage() {
           toggleSound: "Soundeffekte umschalten",
           pausedTitle: "Pausiert",
           pausedSubtitle: "Klicken zum Fortsetzen — Mauszeiger-Sperre wird reaktiviert.",
-          stageCaption: "Ziele blitzschnell auf zufällig erscheinende Ziele und klicke, bevor sich der Timer-Ring schließt.",
+          stageCaption: "Ziele blitzschnell auf zufällig erscheinende Ziele und klicke präzise, bevor das Zeitlimit abläuft.",
           rulesTitle: "Trainingsregeln & Punktesystem",
           rulesItems: [
-            { num: "1", text: "Zieltreffer", highlight: "+100 Punkte / +0,4s", result: "Schnellere Flicks bringen Bonuspunkte" },
-            { num: "2", text: "Zeitbonus", highlight: "+0,4s Verlängerung", result: "Verlängert die Rundenzeit bei Trefferserien" },
-            { num: "3", text: "Zeitüberschreitung / Fehlschuss", highlight: "Fehlversuch-Strafe", result: "Setzt den Combo-Multiplikator sofort zurück" },
-            { num: "4", text: "Levelaufstieg", highlight: "+1 Level je 1.400 Punkte", result: "Kleinere Targets und verkürzte Haltezeit" }
+            { num: "1", text: "Zieltreffer", highlight: "+100 PTS (+0,6s)", result: "×Combo-Multiplikator" },
+            { num: "2", text: "Trefferserie", highlight: "Bis zu 3,0×", result: "Schnellere Ziele" },
+            { num: "3", text: "Levelaufstieg", highlight: "+1 / 1800 PTS", result: "Adaptive Skalierung" },
+            { num: "4", text: "Fehlschuss / Timeout", highlight: "Strafe", result: "Combo-Reset (-0,8s)" }
           ],
           aboutTitle: "Über den Pro Flick Trainer",
           aboutHeading: "Was ist Flick Aiming?",
@@ -364,6 +366,7 @@ export default function FlickShotDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

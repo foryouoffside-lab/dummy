@@ -1,6 +1,7 @@
 import FPSTrackingTrainerClient from '@/app/drills/reaction-speed/fps-tracking-trainer/FPSTrackingTrainerWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -210,11 +211,14 @@ const guideProps = {
   title: 'Treinador de Tracking FPS — Precisão de Rastreamento e Mira Contínua',
   subtitle:
     'Aprimore a perseguição ocular suave, o controle de recuo contínuo e a firmeza muscular contra alvos em movimentação multidirecional.',
-  scientificIntro: `O tracking em jogos de tiro em primeira pessoa (FPS) exige uma interação dinâmica entre dois subsistemas visomotores fundamentais: o sistema de perseguição ocular suave (smooth pursuit) e o controle proprioceptivo dos músculos motores do membro superior (Rashbass, 1961; Krauzlis, 2004). Enquanto o disparo balístico instantâneo depende de rajadas sacádicas, o rastreamento contínuo exige a anulação constante do erro de velocidade retiniana em tempo real.
-
-Quando o alvo se desloca através do campo visual, o córtex visual transmite sinais contínuos para a área temporal medial superior (MST), que decodifica o vetor de velocidade e orienta o cerebelo na modulação do tônus muscular. Se o operador sofre de co-contração isométrica dos músculos agonistas e antagonistas do punho, o movimento torna-se trêmulo, forçando o cérebro a recorrer a micro-sacadas corretivas ineficientes.
-
-O presente protocolo de treino isola as variáveis cinéticas da perseguição contínua, permitindo ao jogador descondicionar a tensão excessiva no periférico e desenvolver uma coordenação visomotora fluida. O resultado é uma mira estável, previsível e com tempo de permanência no alvo maximizado em confrontos dinâmicos de curta e média distância.`,
+  intro: {
+    title: 'Treinador de Tracking FPS e Fundamentos Científicos da Mira Suave',
+    paragraphs: [
+      'O tracking em jogos de tiro em primeira pessoa (FPS) exige uma interação dinâmica entre dois subsistemas visomotores fundamentais: o sistema de perseguição ocular suave (smooth pursuit) e o controle proprioceptivo dos músculos motores do membro superior (Rashbass, 1961; Krauzlis, 2004). Enquanto o disparo balístico instantâneo depende de rajadas sacádicas, o rastreamento contínuo exige a anulação constante do erro de velocidade retiniana em tempo real.',
+      'Quando o alvo se desloca através do campo visual, o córtex visual transmite sinais contínuos para a área temporal medial superior (MST), que decodifica o vetor de velocidade e orienta o cerebelo na modulação do tônus muscular. Se o operador sofre de co-contração isométrica dos músculos agonistas e antagonistas do punho, o movimento torna-se trêmulo, forçando o cérebro a recorrer a micro-sacadas corretivas ineficientes.',
+      'O presente protocolo de treino isola as variáveis cinéticas da perseguição contínua, permitindo ao jogador descondicionar a tensão excessiva no periférico e desenvolver uma coordenação visomotora fluida. Em monitores de alta taxa de atualização (Woods et al., 2015), o resultado é uma mira estável, previsível e com tempo de permanência no alvo maximizado em confrontos dinâmicos de curta e média distância (Green & Bavelier, 2003).',
+    ],
+  },
   sources: pickSources('krauzlis2004', 'rashbass1961', 'green2003', 'woods2015'),
   benchmarks: {
     title: 'Tabela de Desempenho em Precisão de Tracking e Tempo no Alvo',
@@ -243,6 +247,10 @@ O presente protocolo de treino isola as variáveis cinéticas da perseguição c
       {
         title: 'Desafio em Velocidade Máxima (5 min)',
         description: 'Aumente a velocidade do alvo para forçar adaptação neural e expansão da amplitude motora do antebraço.',
+      },
+      {
+        title: 'Controle Fluido em Inversões de Sentido (Strafe Reversals)',
+        description: 'Ao registrar a mudança repentina de trajetória, aguarde a confirmação visual da curva e reoriente o cursor com aceleração suave do antebraço sem puxadas bruscas.',
       },
     ],
   },
@@ -290,6 +298,7 @@ export default function EnhancedPage() {
           currentHref="https://skilldrills.online/pt/drills/reaction-speed/fps-tracking-trainer"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

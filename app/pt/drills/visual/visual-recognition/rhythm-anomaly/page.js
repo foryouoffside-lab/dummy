@@ -235,12 +235,22 @@ export default function RhythmAnomalyLocalePage() {
         <p dangerouslySetInnerHTML={{ __html: `A via visual primária divide-se em dois fluxos anatômicos: a via parvocelular (P) e a via magnocelular (M). A via magnocelular é composta por neurônios de grande calibre com axônios densamente mielinizados e condução ultraveloz até o fluxo dorsal. Por sua latência mínima, os neurônios M são otimizados para altas frequências temporais, registrando oscilações de luminância e desvios de fase de até 40–50 Hz (De Lange, 1958; Holcombe, 2009). Quando uma única célula na grade pulsa mais rápido que as vizinhas, o delta de frequência temporal cria um avanço de fase que aciona o pop-out atencional automático em V1 (Kelly, 1961; Burr, 1980).` }} />
 
         <h3>Dois limites da visão temporal: Amostragem rápida vs. Vinculação cortical</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Em revisão seminal sobre cronometria perceptual, Holcombe (2009) demonstrou que a percepção temporal humana possui dois limites fisiológicos distintos: um <strong>limite subcortical de amostragem rápida (~40–50 Hz)</strong>, no qual neurônios magnocelulares retinianos resolvem cintilações, e um <strong>limite de vinculação cortical (~2–5 Hz)</strong>, muito mais lento, necessário para identificação consciente e integração de características. O teste Rhythm Anomaly treina justamente a ponte entre esses dois sistemas: a detecção rápida pelo M-pathway deve ser validada pelas redes de atenção frontoparietais antes do próximo ciclo.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Em uma revisão seminal sobre cronometria perceptual, Holcombe (2009) demonstrou que a percepção temporal humana é governada por dois limites fisiológicos distintos:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Limite subcortical de amostragem rápida (~40–50 Hz):</strong> Células ganglionares magnocelulares da retina e neurônios de V1 resolvem contraste temporal e cintilações luminosas em frequências superiores a 40 Hz (De Lange, 1958; Kelly, 1961).
+          </li>
+          <li>
+            <strong>Limite de vinculação cortical consciente (~2–5 Hz):</strong> A identificação cognitiva consciente e a união de características visuais demandam circuitos recorrentes lentos operando a apenas 2 a 5 ciclos por segundo (Holcombe, 2009).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `O teste Rhythm Anomaly treina justamente a ponte funcional entre esses dois sistemas: o observador deve utilizar a sensibilidade magnocelular precoce para isolar a célula anômala e ativar prontamente a verificação atencional descendente (top-down) antes da conclusão do ciclo de pulso.` }} />
 
         <h3>Janelas de Integração Temporal & Ruído de Entropia</h3>
         <p dangerouslySetInnerHTML={{ __html: `O cérebro integra informações de fótons em janelas temporais de aproximadamente 30 a 100 milissegundos (Burr, 1980; Woods et al., 2015). Estímulos que ocorrem dentro de uma mesma janela fundem-se em um único percepto contínuo. Os flashes intermitentes de 'entropia estocástica' no drill inserem ruídos transitórios nessa janela, forçando o cérebro a distinguir oscilações senoidais periódicas reais de picos isolados de luminância (Burr, 1980; Posner, 1980).` }} />
 
         <h3>Parâmetros de Desempenho Temporal (Grade Pulsante 45s)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Com base em dados cronométricos computados ao longo de ensaios de 45 segundos na matriz pulsante de 36 células, a capacidade de discriminação temporal é categorizada em cinco níveis empíricos de acuidade:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

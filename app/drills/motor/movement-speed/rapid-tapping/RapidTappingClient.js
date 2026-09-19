@@ -4,7 +4,7 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, LogOut, RefreshCw, Share2,
+  Activity, BarChart3,
   TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
@@ -14,17 +14,15 @@ import { drillAudio } from '@/lib/drillAudio';
 import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import { drillTimeout } from '@/lib/drillTimeout';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '@/lib/canvasFx';
-import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
-import DrillFooter from '@/components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, createHitRing, drawHitRings } from '@/lib/canvasFx';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import DrillResultCard from '@/components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const DRILL_DURATION = 45;
-const ELITE_SCORE = 80;
 const STORAGE_KEY = 'skilldrills_motor_rapid_tapping_v2';
 
 const getSavedData = () => {
@@ -56,16 +54,24 @@ const getCoachAdvice = (cps, totalClicks, score, t) => {
   return t ? t('rapidTapping.coachElite', "Elite CPS performance! Your rapid tapping speed and muscle endurance easily rival top-tier competitive Minecraft and FPS players.") : "Elite CPS performance! Your rapid tapping speed and muscle endurance easily rival top-tier competitive Minecraft and FPS players.";
 };
 
+// ============================================================
+// ACCORDION DATA
+// ============================================================
+const RULES_ITEMS = [
+  { num: "1", text: "Rapid Tap", highlight: "Expands Ball", result: "Prevents Decay" },
+  { num: "2", text: "Click Threshold", highlight: "+1 / 10 Clicks", result: "Session Score" },
+  { num: "3", text: "Decay Speed", highlight: "Dynamic Scaling", result: "Pushes Speed Limit" },
+  { num: "4", text: "Tapping Form", highlight: "Jitter / Butterfly", result: "Maximizes Peak CPS" }
+];
 
 export default function RapidTappingClient({ copy } = {}) {
-  const { locale, t } = useTranslation();
+  const { t } = useTranslation();
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -94,7 +100,6 @@ export default function RapidTappingClient({ copy } = {}) {
   const startingRef = useRef(false);
   const countdownTimeoutsRef = useRef([]);
   const backdropCacheRef = useRef(null);
-  const isPausedRef = useRef(false);
 
   const engine = useRef({
     crosshair: { x: 0, y: 0 },
@@ -113,10 +118,6 @@ export default function RapidTappingClient({ copy } = {}) {
     logicalWidth: 800,
     logicalHeight: 450
   });
-
-  useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
 
   const triggerFlash = useCallback((color = 'red') => {
     if (!drillFlash.isEnabled()) return;
@@ -142,25 +143,18 @@ export default function RapidTappingClient({ copy } = {}) {
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-    };
-  }, []);
-
-  // Stop the render loop on unmount (e.g. SPA navigation away mid-drill) so it
-  // doesn't keep scheduling requestAnimationFrame callbacks forever.
-  useEffect(() => {
-    return () => {
+      countdownTimeoutsRef.current = [];
       gameActiveRef.current = false;
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, []);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
     gameActiveRef.current = false;
-    setIsPaused(false);
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
     setIsFullscreen(false);
     if (document.pointerLockElement) {
@@ -169,20 +163,37 @@ export default function RapidTappingClient({ copy } = {}) {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
+  // Direct exit on Escape, pointer lock loss, or fullscreen exit
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked || isTouchOnlyDevice);
+      if (gameState === 'playing' && !isLocked && !isTouchOnlyDevice) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      const isFs = Boolean(document.fullscreenElement);
+      setIsFullscreen(isFs);
+      if (!isFs && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
 
-  const resumeDrill = useCallback(async () => {
-    setIsPaused(false);
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isTouchOnlyDevice, handleExitDrill]);
 
   const spawnParticles = useCallback((x, y, color, count) => {
     const e = engine.current;
@@ -193,10 +204,10 @@ export default function RapidTappingClient({ copy } = {}) {
         x, y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        radius: Math.random() * 4 + 1.5,
+        radius: Math.random() * 3.5 + 1.5,
         color,
-        life: 0.35,
-        maxLife: 0.35
+        life: 0.45,
+        maxLife: 0.45
       });
     }
   }, []);
@@ -223,10 +234,10 @@ export default function RapidTappingClient({ copy } = {}) {
     let color = 'text-slate-400';
 
     if (finalScore >= 60 || finalCps >= 11) { letter = 'S+'; label = copy?.rankElite || t('rapidTapping.rankElite', 'ELITE TAPPER'); color = 'text-yellow-400'; }
-    else if (finalScore >= 40 || finalCps >= 9) { letter = 'S'; label = copy?.rankMaster || t('rapidTapping.rankMaster', 'MASTER TAPPER'); color = 'text-amber-400'; }
+    else if (finalScore >= 40 || finalCps >= 9) { letter = 'S'; label = copy?.rankMaster || t('rapidTapping.rankMaster', 'MASTER TAPPER'); color = 'text-cyan-400'; }
     else if (finalScore >= 25 || finalCps >= 7) { letter = 'A'; label = copy?.rankPro || t('rapidTapping.rankPro', 'PRO TAPPER'); color = 'text-emerald-400'; }
-    else if (finalScore >= 15 || finalCps >= 5) { letter = 'B'; label = copy?.rankAdvanced || t('rapidTapping.rankAdvanced', 'ADVANCED'); color = 'text-cyan-400'; }
-    else if (finalScore >= 5 || finalCps >= 3) { letter = 'C'; label = copy?.rankIntermediate || t('rapidTapping.rankIntermediate', 'INTERMEDIATE'); color = 'text-blue-400'; }
+    else if (finalScore >= 15 || finalCps >= 5) { letter = 'B'; label = copy?.rankAdvanced || t('rapidTapping.rankAdvanced', 'ADVANCED'); color = 'text-yellow-400'; }
+    else if (finalScore >= 5 || finalCps >= 3) { letter = 'C'; label = copy?.rankIntermediate || t('rapidTapping.rankIntermediate', 'INTERMEDIATE'); color = 'text-orange-400'; }
 
     const grade = { letter, label, color };
     const advice = getCoachAdvice(finalCps, e.clicks, finalScore, t);
@@ -260,7 +271,7 @@ export default function RapidTappingClient({ copy } = {}) {
   }, [t, copy]);
 
   const handlePointerDown = useCallback((e) => {
-    if (!gameActiveRef.current || isPausedRef.current) return;
+    if (!gameActiveRef.current) return;
     const eng = engine.current;
     const cvs = canvasRef.current;
     if (!cvs) return;
@@ -290,11 +301,16 @@ export default function RapidTappingClient({ copy } = {}) {
 
       addHitMarker(eng.crosshair.x, eng.crosshair.y);
 
+      const recentClicks = eng.clickTimestamps.filter((t) => performance.now() - t <= 2000);
+      const curCps = recentClicks.length / 2.0;
+      const isMint = curCps >= 10.0 || eng.score >= 20;
+      const accentColor = isMint ? '#34d399' : '#10b981';
+
       if (eng.clicks % 10 === 0) {
         eng.score += 1;
         drillAudio.playHit();
-        spawnParticles(cx, cy, '#d946ef', 14);
-        eng.hitRings.push(createHitRing(cx, cy, eng.radius, '#d946ef'));
+        spawnParticles(cx, cy, accentColor, 14);
+        createHitRing(eng.hitRings, cx, cy, accentColor, 55);
         eng.screenShake = 6;
 
         // Dynamic difficulty shrink acceleration
@@ -333,40 +349,37 @@ export default function RapidTappingClient({ copy } = {}) {
       lastTime = now;
 
       const e = engine.current;
-      const isCurrentlyPaused = isPausedRef.current;
 
-      if (!isCurrentlyPaused) {
-        e.timeLeft -= dt;
-        e.elapsedTime += dt;
+      e.timeLeft -= dt;
+      e.elapsedTime += dt;
 
-        // Shrink Target Ball
-        if (drillTimeout.isEnabled()) e.radius -= e.shrinkRate * dt;
-        if (drillTimeout.isEnabled() && e.radius <= 0) {
-          e.radius = 45;
-          drillAudio.playPenalty();
-          e.screenShake = 12;
-          triggerFlash('red');
-          spawnParticles(e.logicalWidth / 2, e.logicalHeight / 2, '#ef4444', 18);
-        }
+      // Shrink Target Ball
+      if (drillTimeout.isEnabled()) e.radius -= e.shrinkRate * dt;
+      if (drillTimeout.isEnabled() && e.radius <= 0) {
+        e.radius = 45;
+        drillAudio.playPenalty();
+        e.screenShake = 12;
+        triggerFlash('red');
+        spawnParticles(e.logicalWidth / 2, e.logicalHeight / 2, '#ef4444', 16);
+      }
 
-        // Live CPS calculation (past 2 seconds window)
-        const recentClicks = e.clickTimestamps.filter((t) => now - t <= 2000);
-        const calcCps = recentClicks.length > 0 ? parseFloat((recentClicks.length / 2.0).toFixed(1)) : 0.0;
-        setLiveCps(calcCps);
+      // Live CPS calculation (past 2 seconds window)
+      const recentClicks = e.clickTimestamps.filter((t) => now - t <= 2000);
+      const calcCps = recentClicks.length > 0 ? parseFloat((recentClicks.length / 2.0).toFixed(1)) : 0.0;
+      setLiveCps(calcCps);
 
-        if (Math.abs(e.timeLeft - lastTimeRef.current) > 0.1) {
-          lastTimeRef.current = e.timeLeft;
-          setUiTimeLeft(Math.max(0, Math.ceil(e.timeLeft)));
-        }
+      if (Math.abs(e.timeLeft - lastTimeRef.current) > 0.1) {
+        lastTimeRef.current = e.timeLeft;
+        setUiTimeLeft(Math.max(0, Math.ceil(e.timeLeft)));
+      }
 
-        if (e.timeLeft <= 0) {
-          finishDrillSession();
-          return;
-        }
+      if (e.timeLeft <= 0) {
+        finishDrillSession();
+        return;
+      }
 
-        if (e.screenShake > 0) {
-          e.screenShake = Math.max(0, e.screenShake - dt * 35);
-        }
+      if (e.screenShake > 0) {
+        e.screenShake = Math.max(0, e.screenShake - dt * 35);
       }
 
       const dpr = getCanvasDpr(ctx);
@@ -378,7 +391,7 @@ export default function RapidTappingClient({ copy } = {}) {
           bCtx.fillStyle = '#050508';
           bCtx.fillRect(0, 0, w, h);
 
-          bCtx.strokeStyle = 'rgba(217, 70, 239, 0.04)';
+          bCtx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
           bCtx.lineWidth = 1;
           for (let x = 0; x < w; x += 50) {
             bCtx.beginPath();
@@ -415,20 +428,27 @@ export default function RapidTappingClient({ copy } = {}) {
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Render Dynamic Target Ball
+      // Render Dynamic Target Ball — Tactical Emerald Palette
       const fillPercent = Math.max(0, e.radius / 140);
-      ctx.beginPath();
-      ctx.arc(cx, cy, Math.max(2, e.radius), 0, Math.PI * 2);
+      const isMint = calcCps >= 10.0 || e.score >= 20;
+      const currentRadius = Math.max(2, e.radius);
 
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(2, e.radius));
+      ctx.beginPath();
+      ctx.arc(cx, cy, currentRadius, 0, Math.PI * 2);
+
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, currentRadius);
       if (fillPercent < 0.28) {
         grad.addColorStop(0, 'rgba(239, 68, 68, 0.85)');
         grad.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
         ctx.strokeStyle = '#ef4444';
+      } else if (isMint) {
+        grad.addColorStop(0, 'rgba(52, 211, 153, 0.85)');
+        grad.addColorStop(1, 'rgba(52, 211, 153, 0.2)');
+        ctx.strokeStyle = '#34d399';
       } else {
-        grad.addColorStop(0, 'rgba(217, 70, 239, 0.85)');
-        grad.addColorStop(1, 'rgba(217, 70, 239, 0.2)');
-        ctx.strokeStyle = '#d946ef';
+        grad.addColorStop(0, 'rgba(16, 185, 129, 0.85)');
+        grad.addColorStop(1, 'rgba(16, 185, 129, 0.2)');
+        ctx.strokeStyle = '#10b981';
       }
 
       ctx.fillStyle = grad;
@@ -436,30 +456,32 @@ export default function RapidTappingClient({ copy } = {}) {
       ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      drawPulseRing(ctx, cx, cy, e.radius + 6, fillPercent, fillPercent < 0.28 ? '#ef4444' : '#d946ef');
-
       // Center Dot
       ctx.beginPath();
       ctx.arc(cx, cy, 3, 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff';
       ctx.fill();
 
-      // Render Particles
+      // Render Particles with delta-time alpha decay
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        p.life -= dt;
+        p.life -= dt * 2.2;
         if (p.life <= 0) {
           e.particles.splice(i, 1);
           continue;
         }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * Math.max(0, p.life / p.maxLife), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
+        ctx.restore();
       }
 
+      // Draw Hit Rings
       drawHitRings(ctx, e.hitRings, dt);
 
       // Render Hit Markers
@@ -471,9 +493,9 @@ export default function RapidTappingClient({ copy } = {}) {
           continue;
         }
         ctx.save();
-        ctx.strokeStyle = '#d946ef';
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
-        const sz = 8 * (1 - hm.life / 0.25);
+        const sz = 7 * (1 - hm.life / 0.25);
         ctx.beginPath();
         ctx.moveTo(hm.x - sz, hm.y - sz); ctx.lineTo(hm.x + sz, hm.y + sz);
         ctx.moveTo(hm.x + sz, hm.y - sz); ctx.lineTo(hm.x - sz, hm.y + sz);
@@ -481,33 +503,40 @@ export default function RapidTappingClient({ copy } = {}) {
         ctx.restore();
       }
 
-      // Professional FPS Gaming Reticle Cursor
+      // Tactical Pro White Crosshair
       const px = e.crosshair.x;
       const py = e.crosshair.y;
 
       ctx.save();
-      ctx.shadowColor = '#d946ef';
-      ctx.shadowBlur = 6;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 3;
 
       const gap = 5;
-      const len = 7;
-      ctx.strokeStyle = '#d946ef';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
+      const radius = 14;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
 
+      // Top line
       ctx.beginPath();
-      ctx.moveTo(px, py - gap); ctx.lineTo(px, py - gap - len);
-      ctx.moveTo(px, py + gap); ctx.lineTo(px, py + gap + len);
-      ctx.moveTo(px - gap, py); ctx.lineTo(px - gap - len, py);
-      ctx.moveTo(px + gap, py); ctx.lineTo(px + gap + len, py);
+      ctx.moveTo(px, py - radius); ctx.lineTo(px, py - gap);
       ctx.stroke();
 
+      // Bottom line
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(217, 70, 239, 0.45)';
-      ctx.lineWidth = 1;
-      ctx.arc(px, py, 14, 0, Math.PI * 2);
+      ctx.moveTo(px, py + gap); ctx.lineTo(px, py + radius);
       ctx.stroke();
 
+      // Left line
+      ctx.beginPath();
+      ctx.moveTo(px - radius, py); ctx.lineTo(px - gap, py);
+      ctx.stroke();
+
+      // Right line
+      ctx.beginPath();
+      ctx.moveTo(px + gap, py); ctx.lineTo(px + radius, py);
+      ctx.stroke();
+
+      // Center dot
       ctx.beginPath();
       ctx.fillStyle = '#ffffff';
       ctx.arc(px, py, 2, 0, Math.PI * 2);
@@ -524,7 +553,6 @@ export default function RapidTappingClient({ copy } = {}) {
 
   const startActualDrill = useCallback(() => {
     setGameState('playing');
-    setIsPaused(false);
     gameActiveRef.current = true;
 
     const e = engine.current;
@@ -535,6 +563,9 @@ export default function RapidTappingClient({ copy } = {}) {
     e.elapsedTime = 0;
     e.timeLeft = DRILL_DURATION;
     e.clickTimestamps = [];
+    e.particles = [];
+    e.hitRings = [];
+    e.hitMarkers = [];
 
     setUiScore(0);
     setLiveCps(0.0);
@@ -560,6 +591,8 @@ export default function RapidTappingClient({ copy } = {}) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
 
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+
     setGameState('countdown');
     setCountdownValue(3);
     drillAudio.playCountdownTick();
@@ -567,20 +600,24 @@ export default function RapidTappingClient({ copy } = {}) {
     const t1 = setTimeout(() => {
       setCountdownValue(2);
       drillAudio.playCountdownTick();
-    }, 1000);
+    }, 700);
 
     const t2 = setTimeout(() => {
       setCountdownValue(1);
       drillAudio.playCountdownTick();
-    }, 2000);
+    }, 1400);
 
     const t3 = setTimeout(() => {
+      setCountdownValue('GO');
       drillAudio.playGo();
+    }, 2100);
+
+    const t4 = setTimeout(() => {
       startingRef.current = false;
       startActualDrill();
-    }, 3000);
+    }, 2600);
 
-    countdownTimeoutsRef.current = [t1, t2, t3];
+    countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, [isTouchOnlyDevice, startActualDrill]);
 
   useEffect(() => {
@@ -614,20 +651,6 @@ export default function RapidTappingClient({ copy } = {}) {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && gameState === 'playing') {
-        setIsPaused(true);
-      }
-    };
-
-    const handlePointerLockChange = () => {
-      const isLocked = !!document.pointerLockElement;
-      setPointerLocked(isLocked);
-      if (!isLocked && gameActiveRef.current && !isTouchOnlyDevice) {
-        setIsPaused(true);
-      }
-    };
-
     const handleMouseMove = (e) => {
       if (!gameActiveRef.current) return;
       const eng = engine.current;
@@ -643,21 +666,15 @@ export default function RapidTappingClient({ copy } = {}) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
     document.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('pointerlockchange', handlePointerLockChange);
-      document.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [universalSens, gameState, isTouchOnlyDevice]);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [universalSens]);
 
   const shareScore = useCallback(async () => {
     const player = getPlayerName();
     const gradeLetter = analytics.grade ? analytics.grade.letter : 'A';
-    const url = 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping';
+    const url = copy?.shareUrl || 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping';
+    const drillName = copy?.title || t('rapidTapping.title', 'CPS Test');
     try {
       const canvas = generateShareCard({
         score: uiScore,
@@ -665,17 +682,23 @@ export default function RapidTappingClient({ copy } = {}) {
         accuracy: `${analytics.cps} CPS`,
         rating: { letter: gradeLetter, label: analytics.grade?.label || 'Keep Going', emoji: '⚡' },
         newBest: isNewBest,
-        drillName: copy?.title || t('rapidTapping.title', 'CPS Test'),
+        drillName,
         playerName: player,
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on the ${copy?.title || t('rapidTapping.title', 'CPS Test')}! Practice at skilldrills.online!`;
+      let text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on the ${drillName}! Practice at skilldrills.online!`;
+      if (copy?.shareTextTemplate) {
+        text = copy.shareTextTemplate
+          .replace('{score}', uiScore)
+          .replace('{cps}', analytics.cps)
+          .replace('{drillName}', drillName);
+      }
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: `${copy?.title || t('rapidTapping.title', 'CPS Test')} Score`, text, url }).catch(() => {});
+        navigator.share({ title: copy?.shareTitle || `${drillName} Score`, text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
+        alert(copy?.copiedAlert || 'Score card copied to clipboard!');
       }
     }
   }, [uiScore, analytics, bestScore, isNewBest, t, copy]);
@@ -684,7 +707,7 @@ export default function RapidTappingClient({ copy } = {}) {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title & AIO Header */}
+        {/* Title & Scientific Header */}
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
@@ -702,7 +725,7 @@ export default function RapidTappingClient({ copy } = {}) {
             {[
               { label: copy?.score || t('rapidTapping.score', "Score"), val: uiScore },
               { label: copy?.timeLeft || t('rapidTapping.timeLeft', "Time Left"), val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: copy?.cpsRate || t('rapidTapping.cpsRate', "CPS Rate"), val: liveCps, color: "text-fuchsia-400" },
+              { label: copy?.cpsRate || t('rapidTapping.cpsRate', "CPS Rate"), val: liveCps, color: "text-emerald-400" },
               { label: copy?.bestScore || t('rapidTapping.bestScore', "Best Score"), val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
@@ -737,7 +760,7 @@ export default function RapidTappingClient({ copy } = {}) {
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.time || t('rapidTapping.time', 'Time')}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.timeLeft || t('rapidTapping.time', 'Time')}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -772,25 +795,8 @@ export default function RapidTappingClient({ copy } = {}) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-fuchsia-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
-            </div>
-          )}
-
-          {/* PAUSE OVERLAY IF GAME IS PAUSED */}
-          {gameState === 'playing' && !isTouchOnlyDevice && isPaused && (
-            <div
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-fuchsia-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.paused || t('rapidTapping.paused', 'Game Paused')}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.clickResume || t('rapidTapping.clickResume', 'Click to resume — drill timer and pointer lock will re-engage.')}</p>
-              </div>
             </div>
           )}
 
@@ -804,9 +810,10 @@ export default function RapidTappingClient({ copy } = {}) {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Activity}
-              accent="fuchsia"
+              accent="emerald"
               title={copy?.title || t('rapidTapping.title', 'CPS Test')}
               subtitle={copy?.startSubtitle || t('rapidTapping.startSubtitle', 'CPS Click Speed Trainer • Hardware Raw Input')}
+              startButtonText={copy?.startButtonText || t('rapidTapping.startBtn', 'Start Drill')}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -817,84 +824,32 @@ export default function RapidTappingClient({ copy } = {}) {
             <DrillCountdown value={countdownValue} subtitle={copy?.getReady || t('rapidTapping.getReady', 'GET READY')} />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Standardized DrillResultCard */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(217,70,239,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    {copy?.newBest || t('rapidTapping.newBest', 'NEW BEST')}
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">{copy?.points || t('rapidTapping.points', 'Points')}</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.cps}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.avgCps || t('rapidTapping.avgCps', 'Average CPS')}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.totalClicks}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.totalClicks || t('rapidTapping.totalClicks', 'Total Clicks')}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">+{analytics.maxDifficulty}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.maxDifficulty || t('rapidTapping.maxDifficulty', 'Max Difficulty')}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{bestCps}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.peakCps || t('rapidTapping.peakCps', 'Peak CPS')}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.playAgain || t('rapidTapping.playAgain', 'Play Again')}
-                  </button>
-                  <button
-                    onClick={shareScore}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title={copy?.shareScore || t('rapidTapping.shareScore', 'Share Score')}
-                  >
-                    <Share2 className="w-4 h-4 text-fuchsia-400" />
-                  </button>
-                  <button
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title={copy?.exit || t('rapidTapping.exit', 'Exit & Return')}
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={analytics.finalScore}
+              isNewBest={isNewBest}
+              playAgainText={copy?.playAgain || t('rapidTapping.playAgain', 'Play Again')}
+              shareText={copy?.shareTitle || copy?.shareScore || t('rapidTapping.shareScore', 'Share Score')}
+              exitText={copy?.exitTitle || copy?.exit || t('rapidTapping.exit', 'Exit')}
+              stats={[
+                { value: `${analytics.cps} CPS`, label: copy?.avgCps || t('rapidTapping.avgCps', 'Average CPS') },
+                { value: `${analytics.totalClicks}`, label: copy?.totalClicks || t('rapidTapping.totalClicks', 'Total Clicks') },
+                { value: `+${analytics.maxDifficulty}%`, label: copy?.maxDifficulty || t('rapidTapping.maxDifficulty', 'Max Difficulty') },
+                { value: `${bestCps} CPS`, label: copy?.peakCps || t('rapidTapping.peakCps', 'Peak CPS') },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
               title={copy?.rulesTitle || t('rapidTapping.rulesTitle', 'Drill Instructions & Scoring System')}
@@ -902,30 +857,9 @@ export default function RapidTappingClient({ copy } = {}) {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem
-                  num="1"
-                  text={copy?.rule1Title || t('rapidTapping.rule1Title', 'Rapid Target Tapping')}
-                  highlight={copy?.rule1Highlight || t('rapidTapping.rule1Highlight', '(Click Target Ball)')}
-                  result={copy?.rule1Result || t('rapidTapping.rule1Result', 'Expands target radius & prevents decay')}
-                />
-                <RuleItem
-                  num="2"
-                  text={copy?.rule2Title || t('rapidTapping.rule2Title', 'Scoring Threshold')}
-                  highlight={copy?.rule2Highlight || t('rapidTapping.rule2Highlight', '+1 Point per 10 Clicks')}
-                  result={copy?.rule2Result || t('rapidTapping.rule2Result', 'Builds final session score')}
-                />
-                <RuleItem
-                  num="3"
-                  text={copy?.rule3Title || t('rapidTapping.rule3Title', 'Dynamic Shrink Rate')}
-                  highlight={copy?.rule3Highlight || t('rapidTapping.rule3Highlight', 'Accelerates at higher scores')}
-                  result={copy?.rule3Result || t('rapidTapping.rule3Result', 'Pushes finger speed & endurance limits')}
-                />
-                <RuleItem
-                  num="4"
-                  text={copy?.rule4Title || t('rapidTapping.rule4Title', 'Zero Ball Radius')}
-                  highlight={copy?.rule4Highlight || t('rapidTapping.rule4Highlight', 'Triggers Penalty Reset')}
-                  result={copy?.rule4Result || t('rapidTapping.rule4Result', 'Resets ball to base size with time penalty')}
-                />
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
+                ))}
               </div>
             </DrillAccordion>
 
@@ -938,7 +872,7 @@ export default function RapidTappingClient({ copy } = {}) {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-fuchsia-400" /> {copy?.aboutHeading || t('rapidTapping.aboutHeading', 'Neuromuscular Tapping Frequency & Clicking Endurance')}
+                    <Activity className="w-4 h-4 text-emerald-400" /> {copy?.aboutHeading || t('rapidTapping.aboutHeading', 'Neuromuscular Tapping Frequency & Clicking Endurance')}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
                     {copy?.aboutP1 || t('rapidTapping.aboutP1', 'The CPS Test (rapid tapping test) isolates and evaluates the maximum firing rate of your neuromuscular pathway, measuring how many discrete ballistic inputs your motor cortex can generate per second. In competitive gaming environments like Minecraft PvP, MOBA combat, and semi-automatic pistol rounds in CS2/Valorant, click frequency directly determines damage throughput and engagement outcomes.')}
@@ -951,21 +885,21 @@ export default function RapidTappingClient({ copy } = {}) {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
                       <h4 className="text-xs font-bold text-white">{copy?.cardAudienceTitle || t('rapidTapping.cardAudienceTitle', 'Target Audience')}</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">{copy?.cardAudienceDesc || t('rapidTapping.cardAudienceDesc', 'Competitive Minecraft PvP players, tactical FPS gamers, and rhythm game enthusiasts training finger tapping frequency and endurance.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
                       <h4 className="text-xs font-bold text-white">{copy?.cardPhysioTitle || t('rapidTapping.cardPhysioTitle', 'Physiological Benefits')}</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">{copy?.cardPhysioDesc || t('rapidTapping.cardPhysioDesc', 'Strengthens finger extensor and flexor tendons, elevates motor unit recruitment velocity, and delays neuromuscular fatigue.')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-pink-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-3.5 h-3.5 text-white" /></div>
                       <h4 className="text-xs font-bold text-white">{copy?.cardDecayTitle || t('rapidTapping.cardDecayTitle', 'Dynamic Decay Engine')}</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">{copy?.cardDecayDesc || t('rapidTapping.cardDecayDesc', 'Target decay accelerates up to +600px/sec as score increases, demanding faster CPS and unrelenting tap frequency.')}</p>
@@ -975,43 +909,26 @@ export default function RapidTappingClient({ copy } = {}) {
             </DrillAccordion>
           </div>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
 }
 
 // === Subcomponents ===
-function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/10' }) {
-  return (
-    <div className={`rounded-xl border ${accentColor} bg-black backdrop-blur-md p-1.5 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5 pointer-events-none font-sans`}>
-      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-mono tabular-nums">
-        {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>
-    </div>
-  );
-}
-
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
           {result}
         </div>
       </div>
     </div>
   );
 }
-

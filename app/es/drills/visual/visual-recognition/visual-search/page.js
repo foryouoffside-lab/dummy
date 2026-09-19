@@ -229,18 +229,37 @@ export default function VisualSearchLocalePage() {
         title="La Ciencia de la Búsqueda Visual, Integración de Características & Atención Selectiva"
         sources={sources}
       >
-        <p dangerouslySetInnerHTML={{ __html: `La capacidad de localizar con rapidez un estímulo diana dentro de un entorno visual saturado es un pilar esencial del procesamiento cognitivo humano. Desde la lectura de radiografías en medicina clínica hasta el control aéreo, las operaciones de seguridad y el seguimiento de rivales en los deportes electrónicos, la búsqueda visual depende de una sinergia perfecta entre los campos receptores de la retina y las redes atencionales frontoparietales (Treisman & Gelade, 1980; Wolfe, 1994).` }} />
+        <p dangerouslySetInnerHTML={{ __html: `En entornos visuales naturales, los estímulos rara vez se presentan de forma aislada. Ya sea inspeccionando una pantalla de radar aeroportuario, revisando documentos densos o detectando a un adversario asomado tras una cobertura en esports tácticos, el sistema visual humano debe discriminar velozmente señales críticas inmersas en desorden visual complejo. En psicofísica visual, esta facultad se evalúa mediante <strong>paradigmas de búsqueda visual</strong>, que analizan cómo la atención espacial interactúa a lo largo del tiempo con los mapas neuronales de características (Treisman &amp; Gelade, 1980; Wolfe, 1994).` }} />
 
-        <h3>Teoría de Integración de Características: Pop-Out Paralelo vs. Búsqueda Serial</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Anne Treisman y Garry Gelade (1980) postularon la Teoría de Integración de Características (FIT). Cuando la diana se distingue por un único rasgo aislado (como color o brillo), la detección ocurre de forma <strong>paralela y preatencional</strong> produciendo un efecto de 'pop-out' instantáneo independiente del número de distractores. En cambio, si el objetivo se define por una <strong>conjunción de características</strong> o si los distractores están orientados aleatoriamente, el pop-out se inhabilita. El cerebro debe aplicar atención focal secuencial elemento por elemento en una <strong>búsqueda serial</strong>, elevando el tiempo de respuesta de forma proporcional a los elementos en pantalla (Treisman & Gelade, 1980; Duncan & Humphreys, 1989).` }} />
+        <h3>Teoría de Integración de Características: Pop-Out Paralelo vs. Búsqueda Conjuntiva</h3>
+        <p dangerouslySetInnerHTML={{ __html: `La psicofísica visual clásica divide los procesos de búsqueda en dos regímenes fundamentales según la saliencia y la composición de los rasgos del blanco:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Búsqueda de Características (Pop-Out Paralelo):</strong> Cuando la diana se diferencia de los distractores por un único rasgo continuo (por ejemplo, un círculo rojo entre cuadrados azules), las neuronas de la corteza visual primaria (V1) registran la discrepancia simultáneamente en todo el campo visual. La latencia de respuesta se mantiene plana con independencia del número total de elementos (Treisman &amp; Gelade, 1980; Wolfe, 1994).
+          </li>
+          <li>
+            <strong>Búsqueda Conjuntiva (Enlace Serial y Guiado):</strong> Cuando el objetivo está definido por una combinación de características que se solapan individualmente con distractores circundantes (como localizar una 'C' entre distractores rotados 'O', 'Q' y 'G'), los mecanismos preatencionales paralelos no pueden resolver el blanco por sí solos. La corteza visual debe orientar la atención espacial de forma secuencial celda por celda, provocando que el tiempo de reacción aumente linealmente con el tamaño del conjunto (Treisman &amp; Gelade, 1980; Duncan &amp; Humphreys, 1989).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `Este fenómeno ilustra el denominado <em>problema del enlace visual (binding problem)</em>: mientras las áreas visuales primarias procesan la orientación, la curvatura y el cierre en mapas modulares independientes, sintetizar esos componentes dispares en la percepción de un objeto integrado exige la asignación activa de atención espacial mediada por la corteza parietal posterior y los campos oculares frontales (Treisman &amp; Gelade, 1980; Wolfe, 1994).` }} />
 
-        <h3>Modelo de Búsqueda Guiada y Principios de Similitud (Wolfe, 1994; Duncan & Humphreys, 1989)</h3>
-        <p dangerouslySetInnerHTML={{ __html: `El modelo Guided Search de Jeremy Wolfe (Wolfe, 1994) demostró que el cerebro no explora a ciegas: las etapas sensoriales tempranas calculan un 'mapa de prioridades' que guía las sacadas oculares hacia las zonas más prometedoras. Duncan y Humphreys (1989) establecieron que la eficacia de este proceso depende de la <em>similitud diana-distractor</em> y la <em>homogeneidad entre distractores</em>. Cuando los distractores presentan orientaciones variadas, el agrupamiento gestáltico del fondo desaparece, obligando a un análisis foveal pormenorizado.` }} />
+        <h3>Homogeneidad de Distractores y Eficiencia de Búsqueda (Duncan &amp; Humphreys, 1989)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `En investigaciones fundamentales sobre la eficiencia exploratoria, Duncan y Humphreys (1989) demostraron que el rendimiento de búsqueda no está condicionado únicamente por las conjunciones de rasgos, sino por dos relaciones perceptivas determinantes:` }} />
+        <ol className="list-decimal pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Similitud Diana-Distractor:</strong> A medida que aumenta la similitud visual entre el blanco y los distractores circundantes, los umbrales de discriminación se elevan, requiriendo un examen foveal más exhaustivo y tiempos de fijación más prolongados.
+          </li>
+          <li>
+            <strong>Homogeneidad entre Distractores:</strong> Cuando los distractores comparten forma y orientación espacial uniforme, el sistema visual los agrupa perceptivamente en una textura de fondo coherente bajo principios gestálticos. Sin embargo, cuando los distractores están rotados al azar —como ocurre en esta prueba de 96 celdas— el agrupamiento se anula por completo, forzando una evaluación serial exhaustiva.
+          </li>
+        </ol>
 
-        <h3>Lente Zoom Atencional y Carga Perceptiva (Lavie, 1995; Eriksen & St. James, 1986)</h3>
-        <p dangerouslySetInnerHTML={{ __html: `El modelo zoom-lens de Eriksen y St. James (1986) describe la atención como un foco de amplitud adaptable: ampliar el campo disminuye la resolución discriminativa, mientras que constreñirlo sobre una sola celda maximiza la agudeza. Por su parte, la Teoría de la Carga Perceptiva de Nilli Lavie (1995) demuestra que la saturación sensorial previene distracciones irrelevantes. En condiciones de alta carga perceptiva —como nuestra densa matriz de 96 caracteres bajo el cronómetro de 45 segundos—, los recursos atencionales se agotan íntegramente en la tarea, facilitando un estado de flujo ininterrumpido (Lavie, 1995; Bacon & Egeth, 1994).` }} />
+        <h3>Lente Zoom Atencional y Carga Perceptiva (Lavie, 1995; Eriksen &amp; St. James, 1986)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Según el modelo zoom lens de atención espacial (Eriksen &amp; St. James, 1986), la atención visual actúa como un foco de amplitud variable. Conforme el foco se ensancha para abarcar múltiples celdas de la matriz de 96 casillas, la resolución de procesamiento disminuye; cuando se restringe a una única celda, la agudeza alcanza su cúspide a expensas de la visión periférica.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Asimismo, la Teoría de la Carga Perceptiva de Nilli Lavie (1995) demuestra que la susceptibilidad a la distracción depende del consumo de recursos sensoriales. En condiciones de baja carga, la capacidad atencional sobrante escapa involuntariamente procesando distractores irrelevantes. Por el contrario, bajo alta carga perceptiva —como nuestra densa cuadrícula de 12x8 bajo 45 segundos de presión temporal— la capacidad sensorial queda completamente copada, imponiendo una atención selectiva estricta y suprimiendo cualquier divagación cognitiva (Lavie, 1995; Bacon &amp; Egeth, 1994).` }} />
 
         <h3>Baremos de Rendimiento en Búsqueda Visual (Matriz de 96 Celdas)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Los rangos expuestos a continuación proporcionan una guía editorial de referencia para contextualizar los resultados individuales sobre esta matriz de 96 celdas (12x8) en sesiones estandarizadas de 45 segundos:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

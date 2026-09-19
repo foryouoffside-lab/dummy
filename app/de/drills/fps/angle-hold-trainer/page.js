@@ -1,5 +1,6 @@
 import AngleHoldClient from '@/app/drills/fps/angle-hold-trainer/AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -318,10 +319,10 @@ export default function GermanAngleHoldPage() {
     overviewTitle: "Prinzipien der defensiven Fadenkreuz-Platzierung",
     overviewLead: "Winkel halten bedeutet, das Fadenkreuz genau dort zu verankern, wo der gegnerische Kopf beim Peeken erscheinen wird. Die menschliche einfache visuelle Reaktionszeit beträgt rund 180–240 ms. Durch korrektes Vorhalten (Pre-Aiming) eliminierst du motorische Flicks und reduzierst das Duell auf einen reinen temporalen Klick-Impuls (Donders, 1868; Hick, 1952).",
     rulesItems: [
-      { num: "1", text: "Zieltreffer", highlight: "+100 PTS (+0,6s)", result: "× Combo × Level-Multiplikator" },
-      { num: "2", text: "Combo-Multiplikator", highlight: "Bis zu 3,0x Punkte", result: "Höhere Serien triggern aggressivere Peeks" },
-      { num: "3", text: "Level-Progression", highlight: "+1 Level / 1400 PTS", result: "Verkürztes Zeitfenster & kleinere Ziele" },
-      { num: "4", text: "Fehlschuss / Frühschuss", highlight: "Fehler-Strafe", result: "Combo-Reset (bei Strafzeit: -0,8s)" }
+      { num: "1", text: "Zieltreffer", highlight: "+100 PTS (+0,6s)", result: "×Combo-Mult" },
+      { num: "2", text: "Peek-Spawns", highlight: "Mauerecken", result: "Kürzere Zeit" },
+      { num: "3", text: "Level-Aufstieg", highlight: "+1 Level / 1400 PTS", result: "Adaptive Skalierung" },
+      { num: "4", text: "Fehlschuss / Frühschuss", highlight: "Fehler-Strafe", result: "Combo-Reset (-0,8s)" }
     ],
     aboutCards: [
       { iconBg: "bg-blue-600", title: "Empfohlen für", text: "Verteidiger (Site-Anchors) in Valorant, CS2-Holders, R6-Siege-Spieler und alle Schützen, die Ecken diszipliniert absichern wollen." },
@@ -385,6 +386,7 @@ export default function GermanAngleHoldPage() {
       </div>
 
       <DrillGuide guide={angleHoldGuide} />
+      <DrillFooter />
     </>
   );
 }

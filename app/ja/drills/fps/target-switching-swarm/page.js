@@ -1,6 +1,7 @@
 import TargetSwitchingSwarmClient from '@/app/drills/fps/target-switching-swarm/TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -334,6 +335,7 @@ export default function TargetSwitchingSwarmPageJa() {
         copy={{
           h1Keyword: "ターゲット スイッチング エイム",
           h1Suffix: " – 無料ブラウザFPSマルチターゲットフリック練習",
+          subtitle: "停止ディレイなしの高速連続フリック移行とスプレーツランスファー、視覚的インデックスを訓練。",
           statScore: "スコア",
           statTime: "制限時間",
           statAccuracy: "命中精度",
@@ -343,36 +345,14 @@ export default function TargetSwitchingSwarmPageJa() {
           statPeakLevel: "最高到達レベル",
           startTitle: "Target Switching Swarm",
           startSubtitle: "高精度RAWマウス入力 • エンドレス難易度進行",
-          pausedTitle: "ゲーム一時停止",
-          pausedSubtitle: "クリックで再開 — マウスカーソルが自動ロックされます",
-          stageCaption: "制限時間リングが縮小する前に、出現するターゲット群を高速フリックで連続破壊。",
+          stageCaption: "制限時間が終了する前に、出現するターゲット群を高速フリックで連続破壊。",
           rulesTitle: "ドリル操作方法 & スコア計算システム",
           aboutTitle: "ターゲット スイッチング（Target Switching）について",
           rulesItems: [
-            {
-              num: "1",
-              text: "ターゲット即時破壊",
-              highlight: "+100 PTS / +0.35秒",
-              result: "タイマーリングが尽きる前にシアンの標的をクリック"
-            },
-            {
-              num: "2",
-              text: "無停止スイッチング",
-              highlight: "キル確認ロス排除",
-              result: "撃破直後に淀みなく隣接ターゲットへフリック"
-            },
-            {
-              num: "3",
-              text: "ミス・時間切れペナルティ",
-              highlight: "コンボリセット",
-              result: "クリック失敗や時間切れでコンボ倍率がリセット"
-            },
-            {
-              num: "4",
-              text: "動的スワーム進行",
-              highlight: "難易度無段階上昇",
-              result: "スコア獲得に応じてターゲット出現頻度と縮小速度が加速"
-            }
+            { num: "1", text: "ターゲット即時破壊", highlight: "シアン標的 (+100 PTS / +0.35秒)", result: "+100 PTS / +0.35秒" },
+            { num: "2", text: "動的スワーム移行", highlight: "即時リスポーン", result: "持続スワーム" },
+            { num: "3", text: "失敗ペナルティ", highlight: "ミス / 制限時間超過", result: "コンボリセット" },
+            { num: "4", text: "レベル難易度上昇", highlight: "+1 レベル / 2100 PTS", result: "小型化 & 高速化" }
           ]
         }}
       />
@@ -384,6 +364,7 @@ export default function TargetSwitchingSwarmPageJa() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

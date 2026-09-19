@@ -2,6 +2,7 @@ import DistanceJudgmentClient from '@/app/drills/visual/depth-perception/distanc
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distance-judgment (Spanish: Percepción de Profundidad)
@@ -227,9 +228,10 @@ const faqSchema = {
 const distanceGuideEs = {
   heading: 'Criterios de Percepción de Profundidad y Cálculo Espacial',
   intro: [
-    'La percepción de profundidad es la facultad visual y neurológica que nos permite interpretar el entorno en tres dimensiones y calcular la distancia, volumen y trayectoria de objetos. En el deporte, la aviación y la conducción, estimar distancias en milésimas de segundo previene accidentes.',
-    'Este ejercicio aplica el modelo clásico de Howard-Dolman (1919) y la óptica ecológica de David Lee (1976; Regan & Beverley, 1978). Entrena la corteza visual para procesar la velocidad de expansión y calcular el tiempo hasta el contacto (TTC).',
-    'Metodología: Se registran los tiempos mediante performance.now() y se calcula la desviación porcentual relativa.',
+    'La percepción de profundidad (visión estereoscópica y cálculo espacial) es la facultad visual y neurológica que nos permite interpretar el entorno en tres dimensiones y calcular con exactitud milimétrica la distancia, volumen y trayectoria de objetos en movimiento. En el deporte de alta velocidad (béisbol, tenis, automovilismo), en la aviación, en las pruebas psicotécnicas de conducción y en los eSports tácticos, estimar distancias en fracciones de segundo marca la frontera entre una intercepción perfecta y una colisión crítica.',
+    'Este ejercicio traslada a un entorno digital los principios geométricos del clásico aparato estereoscópico de Howard-Dolman (Howard, 1919) y las investigaciones de óptica ecológica de David N. Lee (1976) y David Regan & Kenneth I. Beverley (1978). Al proyectar una esfera 3D a través de un túnel visual hacia un plano de referencia fijo, el test entrena la corteza visual para procesar la velocidad de expansión retiniana (looming) y estimar con exactitud el tiempo hasta el contacto (Time-to-Contact, τ) bajo velocidades crecientes.',
+    'Metodología y Precisión de Muestreo: Todas las desviaciones de intercepción se registran localmente con la API de alta resolución performance.now() en escala de submilisegundos. El error se calcula como la desviación porcentual relativa (|Diámetro Real - Diámetro Objetivo| / Diámetro Objetivo). Existen latencias físicas de cuantización de pantalla (~16,7 ms a 60 Hz, ~6,9 ms a 144 Hz, ~4,1 ms a 240 Hz) y de sondeo del ratón (125 Hz vs 1000 Hz), descritas por Woods et al. (2015). Desviaciones inferiores a 5 ms constituyen ruido de medición estándar; compare sus registros en el mismo equipo.',
+    'Transparencia y Privacidad de Datos: SkillDrills no almacena ni recopila datos personales, resultados psicotécnicos ni métricas agregadas en servidores externos. Todas las puntuaciones, niveles superados y porcentajes de precisión se guardan exclusivamente en el almacenamiento local (LocalStorage) de su navegador.'
   ],
   benchmarks: {
     title: 'Tabla de Baremos en Percepción de Profundidad',
@@ -263,6 +265,14 @@ const distanceGuideEs = {
       },
     ],
   },
+  steps: [
+    'Haz clic en "Comenzar Test" para iniciar la sesión de 45 segundos de cálculo de profundidad.',
+    'Fija la mirada de forma estable en el anillo cian de referencia situado en el plano medio.',
+    'Observa la esfera 3D que aparece al fondo del túnel y acelera progresivamente hacia ti.',
+    'Haz clic con el ratón, toca la pantalla o pulsa la barra espaciadora en el instante exacto en que la esfera coincida con el diámetro del anillo objetivo.',
+    'Consulta la retroalimentación de precisión (<5% de error: Perfecto / +150 PTS) y adáptate a la velocidad creciente durante los 45 segundos.'
+  ],
+  audience: 'Conductores y aspirantes a permisos de conducir y licencias profesionales, operadores de maquinaria pesada, deportistas de pelota y raqueta (tenis, pádel, béisbol), pilotos y jugadores de eSports que busquen calibrar su cálculo de distancias e intercepción.',
   faqs: {
     title: 'Preguntas Frecuentes sobre Percepción de Profundidad y Distancias',
     items: faqSchema.mainEntity.map((q) => ({
@@ -270,6 +280,15 @@ const distanceGuideEs = {
       a: q.acceptedAnswer.text,
     })),
   },
+  sources: pickSources('howard1919', 'lee1976', 'regan1978', 'julesz1971', 'woods2015'),
+  related: [
+    { href: "/drills/visual/tracking-accuracy/moving-target", label: "Intercepción de Objetivo Móvil" },
+    { href: "/drills/visual/reaction-speed/light-reaction", label: "Test de Reacción a la Luz" },
+    { href: "/drills/visual/tracking-accuracy/multiple-targets", label: "Seguimiento de Múltiples Objetos" },
+    { href: "/drills/visual/tracking-accuracy/pursuit-tracker", label: "Rastreador de Persecución Ocular" },
+    { href: "/drills/visual/reaction-speed/go/no-go", label: "Control de Impulsos Go / No-Go" },
+    { href: "/drills/visual/visual-recognition/entropic-grid", label: "Búsqueda en Cuadrícula Entrópica" }
+  ]
 };
 
 const copyEs = {

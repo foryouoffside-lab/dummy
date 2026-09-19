@@ -2,4 +2,4 @@
 
 import dynamic from 'next/dynamic';
 
-export default dynamic(() => import('./DynamicEvasionPursuitClient'), { ssr: false });
+export default dynamic(() => import('./DynamicEvasionPursuitClient'));

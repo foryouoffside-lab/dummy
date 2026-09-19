@@ -18,9 +18,7 @@ import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
@@ -68,10 +66,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Tracking Alignment", highlight: "+10 PTS / 0.25s", result: "Continuous Crosshair Lock On Target" },
-  { num: "2", text: "Target Elimination", highlight: "+25 Bonus PTS", result: "Fully Deplete Target Health" },
-  { num: "3", text: "Continuous Tracking Uptime", highlight: "+0.4s / sec", result: "Chain Streak Multipliers up to 3.0x" },
-  { num: "4", text: "Escape / Tracking Loss", highlight: "Failure Penalty", result: "Combo resets to 0 (-0.6s with Time Penalty enabled)" }
+  { num: "1", text: "Tracking Alignment", highlight: "+50 PTS (+0.4s/s)", result: "×Combo Mult" },
+  { num: "2", text: "Target Elimination", highlight: "+25 Bonus PTS", result: "Reset HP & Respawn" },
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Zigzag" },
+  { num: "4", text: "Target Escape", highlight: "Lifespan Expiry", result: "Resets Combo (-0.6s)" }
 ];
 
 const ABOUT_INTRO = [
@@ -153,7 +151,7 @@ export default function AntiZigzagClient({ copy = null }) {
     level: 1, score: 0, timeLeft: DRILL_DURATION,
     combo: 0, bestCombo: 0, focusTimer: 0, continuousTrackTime: 0, msOffTarget: 0,
     totalFrames: 0, framesOnTarget: 0, targetsDestroyed: 0, targetsEscaped: 0,
-    particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 0, logicalHeight: 0
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: 0, logicalHeight: 0
   });
 
   useEffect(() => {
@@ -183,6 +181,15 @@ export default function AntiZigzagClient({ copy = null }) {
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
+  }, []);
+
+  const createExplosion = useCallback((x, y, color) => {
+    const e = engine.current;
+    for (let i = 0; i < 14; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 4.5;
+      e.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
+    }
   }, []);
 
   const createHitMarker = useCallback((x, y) => {
@@ -285,7 +292,7 @@ export default function AntiZigzagClient({ copy = null }) {
       level: startLevel, score: 0, timeLeft: DRILL_DURATION,
       combo: 0, bestCombo: 0, focusTimer: 0, continuousTrackTime: 0, msOffTarget: 0,
       totalFrames: 0, framesOnTarget: 0, targetsDestroyed: 0, targetsEscaped: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     spawnTarget(w, h, startLevel, 0);
@@ -310,36 +317,64 @@ export default function AntiZigzagClient({ copy = null }) {
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, [spawnTarget]);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
 
-    setIsFullscreen(false);
-    if (document.pointerLockElement) {
-      document.exitPointerLock();
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
     }
+
+    if (document.pointerLockElement) {
+      try { document.exitPointerLock(); } catch (e) {}
+    }
+    if (document.fullscreenElement) {
+      try { document.exitFullscreen(); } catch (e) {}
+    }
+
+    setIsFullscreen(false);
+    setPointerLocked(false);
     setGameState('start');
   }, []);
 
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (gameState === 'playing' || gameState === 'countdown' || gameState === 'gameOver') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleExitDrill();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked);
+      if (!isLocked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+  }, [gameState, handleExitDrill]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = !!document.fullscreenElement;
+      setIsFullscreen(isFull);
+      if (!isFull && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -462,6 +497,8 @@ export default function AntiZigzagClient({ copy = null }) {
           e.screenShake = 6;
           triggerFlash();
           drillAudio.playPenalty();
+          createExplosion(tgt.x, tgt.y, '#ef4444');
+          e.hitRings.push(createHitRing(tgt.x, tgt.y, cfg.radius, '#ef4444'));
           spawnTarget(w, h, e.level, e.combo);
         }
 
@@ -492,6 +529,8 @@ export default function AntiZigzagClient({ copy = null }) {
 
             drillAudio.playHit();
             createHitMarker(e.crosshair.x, e.crosshair.y);
+            createExplosion(tgt.x, tgt.y, e.combo >= 10 ? '#34d399' : '#10b981');
+            e.hitRings.push(createHitRing(tgt.x, tgt.y, cfg.radius, e.combo >= 10 ? '#34d399' : '#10b981'));
           }
 
           if (tgt.health <= 0) {
@@ -499,6 +538,8 @@ export default function AntiZigzagClient({ copy = null }) {
             e.score += Math.round(25 * getComboMultiplier(e.combo));
             setScore(e.score);
             drillAudio.playHit();
+            createExplosion(tgt.x, tgt.y, '#34d399');
+            e.hitRings.push(createHitRing(tgt.x, tgt.y, cfg.radius * 1.5, '#34d399'));
             spawnTarget(w, h, e.level, e.combo);
           }
 
@@ -508,6 +549,9 @@ export default function AntiZigzagClient({ copy = null }) {
             setCombo(e.combo);
             setBestCombo(e.bestCombo);
             e.continuousTrackTime -= 1.0;
+            if (e.combo % 5 === 0) {
+              e.hitRings.push(createHitRing(tgt.x, tgt.y, cfg.radius * 1.5, '#34d399'));
+            }
           }
         } else {
           e.continuousTrackTime = 0;
@@ -522,6 +566,8 @@ export default function AntiZigzagClient({ copy = null }) {
               e.screenShake = 6;
               triggerFlash();
               drillAudio.playPenalty();
+              createExplosion(tgt.x, tgt.y, '#ef4444');
+              e.hitRings.push(createHitRing(tgt.x, tgt.y, cfg.radius, '#ef4444'));
             }
             e.msOffTarget = 0;
           }
@@ -558,7 +604,9 @@ export default function AntiZigzagClient({ copy = null }) {
         const dist = Math.hypot(e.crosshair.x - tgt.x, e.crosshair.y - tgt.y);
         const isLocked = dist <= cfg.radius;
 
-        const targetColor = isLocked ? '#00ff88' : '#ef4444';
+        const targetColor = gameState === 'playing'
+          ? (isLocked ? (e.combo >= 10 ? '#34d399' : '#10b981') : '#ef4444')
+          : '#10b981';
 
         if (tgt.history.length > 1) {
           ctx.strokeStyle = targetColor;
@@ -571,8 +619,6 @@ export default function AntiZigzagClient({ copy = null }) {
           ctx.stroke();
         }
 
-        drawPulseRing(ctx, tgt.x, tgt.y, cfg.radius, targetColor, (time % 1000) / 1000);
-
         drawTacticalTarget(ctx, tgt.x, tgt.y, cfg.radius, targetColor, true);
 
         // HP Bar (drawn above the target)
@@ -581,7 +627,7 @@ export default function AntiZigzagClient({ copy = null }) {
         const hbH = 4;
         const hbX = tgt.x - hbW / 2;
         const hbY = tgt.y - cfg.radius - 12;
-        const hpColor = hpPct > 0.5 ? '#22c55e' : '#ef4444';
+        const hpColor = hpPct > 0.5 ? (e.combo >= 10 ? '#34d399' : '#10b981') : '#ef4444';
 
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.beginPath();
@@ -596,13 +642,31 @@ export default function AntiZigzagClient({ copy = null }) {
         }
       }
 
+      // Render particles
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Render hit rings
+      drawHitRings(ctx, e.hitRings, dt);
+
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
         hm.life -= dt * 4.5;
         if (hm.life <= 0) { e.hitMarkers.splice(i, 1); continue; }
-        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#ef4444';
-        const s = 5 + (1 - hm.life) * 6;
+        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#ffffff';
+        const s = 6 + (1 - hm.life) * 8;
         ctx.beginPath();
         ctx.moveTo(hm.x - s, hm.y - s); ctx.lineTo(hm.x + s, hm.y + s);
         ctx.moveTo(hm.x + s, hm.y - s); ctx.lineTo(hm.x - s, hm.y + s);
@@ -611,8 +675,11 @@ export default function AntiZigzagClient({ copy = null }) {
       ctx.globalAlpha = 1.0;
 
       const ch = e.crosshair;
-      if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
+      if (ch.initialized && (gameState === 'playing' || gameState === 'start' || gameState === 'countdown')) {
+        const activeColor = '#ffffff';
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 
@@ -629,6 +696,7 @@ export default function AntiZigzagClient({ copy = null }) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -643,7 +711,7 @@ export default function AntiZigzagClient({ copy = null }) {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, endGame, triggerFlash, spawnTarget, createHitMarker]);
+  }, [gameState, pointerLocked, endGame, triggerFlash, spawnTarget, createHitMarker, createExplosion]);
 
   const shareDrillLink = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer';
@@ -765,26 +833,8 @@ export default function AntiZigzagClient({ copy = null }) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -898,9 +948,6 @@ export default function AntiZigzagClient({ copy = null }) {
 
 
       </main>
-
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
@@ -910,11 +957,11 @@ function RuleItem({ num, text, highlight = '', result }) {
   return (
     <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
       <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
+      <div className="flex-1 flex flex-row items-center justify-between gap-2 min-w-0">
+        <p className="text-sm font-medium text-gray-100 font-sans truncate">
           {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide flex-shrink-0">
           {result}
         </div>
       </div>

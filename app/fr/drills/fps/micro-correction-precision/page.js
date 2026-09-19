@@ -1,5 +1,6 @@
 import MicroCorrectionClient from '@/app/drills/fps/micro-correction-precision/MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -237,6 +238,7 @@ export default function MicroCorrectionPage() {
   const copyFr = {
     h1Keyword: "Micro-Correction de Visée",
     h1Suffix: " – Précision Headshot FPS",
+    subtitle: "Maîtrisez la décélération terminale et les micro-ajustements immédiats pour une précision headshot létale.",
     statScore: "Score",
     statTime: "Temps",
     statAccuracy: "Précision",
@@ -249,15 +251,13 @@ export default function MicroCorrectionPage() {
     getReady: "PRÊT ?",
     toggleFlash: "Flash de tir manqué",
     toggleSound: "Effets sonores",
-    pausedTitle: "Jeu en Pause",
-    pausedSubtitle: "Cliquez sur la zone de jeu pour réactiver le verrouillage du curseur.",
     stageCaption: "Cliquez sur la cible ancre puis ajustez instantanément votre réticule avec les doigts pour toucher la micro-cible.",
     rulesTitle: "Consignes d'Entraînement et Barème",
     rulesItems: [
-      { num: "1", text: "Toucher l'Ancre", highlight: "+10 pts (+0,2s)", result: "Fait apparaître la micro-cible périphérique" },
-      { num: "2", text: "Toucher la Micro-Cible", highlight: "jusqu'à +585 pts (+0,2s)", result: "Multiplié par la précision et la série de combo" },
-      { num: "3", text: "Montée de Niveau", highlight: "tous les 1 400 pts", result: "La taille des cibles diminue progressivement" },
-      { num: "4", text: "Tir Manqué / Expiration", highlight: "Pénalité", result: "Réinitialise instantanément le combo" }
+      { num: "1", text: "Toucher l'Ancre", highlight: "+10 pts (+0,2s)", result: "Active la micro-cible" },
+      { num: "2", text: "Toucher la Micro", highlight: "jusqu'à +585 pts", result: "Précision × Combo" },
+      { num: "3", text: "Montée de Niveau", highlight: "+1 Niveau / 1 400 pts", result: "Échelle adaptative" },
+      { num: "4", text: "Tir Manqué", highlight: "Pénalité", result: "Reset combo (-0,6s)" }
     ],
     aboutTitle: "À Propos de la Micro-Correction de Visée",
     aboutHeading: "Qu'est-ce que la Micro-Correction de Visée ?",
@@ -374,6 +374,7 @@ export default function MicroCorrectionPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

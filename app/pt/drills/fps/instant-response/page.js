@@ -2,6 +2,8 @@ import InstantResponseClient from '@/app/drills/fps/instant-response/InstantResp
 import DrillGuide from '@/components/drill/DrillGuide';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import { pickSources } from '@/lib/drillSources';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Tempo de Reação FPS – Treino de Reflexo | SkillDrills",
@@ -242,10 +244,10 @@ export default function InstantResponsePtPage() {
     stageCaption: "Clique imediatamente quando o alvo central acender em verde. Evite disparos antecipados em fintas.",
     rulesTitle: "Regras de Treino e Sistema de Pontos",
     rulesItems: [
-      { num: "1", text: "Acerto no Flash", highlight: "+100 PTS", result: "Clique rápido assim que o verde acender" },
-      { num: "2", text: "Bônus de Velocidade", highlight: "Até +150 PTS", result: "Reações ultrarrápidas abaixo de 160 ms" },
-      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Janela de reação reduzida a cada nível" },
-      { num: "4", text: "Disparo Antecipado", highlight: "Falta / Reset", result: "Zera o combo ao clicar antes do flash" }
+      { num: "1", text: "Acerto no Flash", highlight: "+100 PTS (+0.6s)", result: "×Mult de Combo" },
+      { num: "2", text: "Bônus de Velocidade", highlight: "Tiro Sub-150ms", result: "Até +150 PTS" },
+      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Janelas Adaptativas" },
+      { num: "4", text: "Disparo Antecipado", highlight: "Penalidade", result: "Reset de Combo (-0.8s)" }
     ],
     aboutTitle: "Sobre o Teste de Tempo de Reação FPS",
     aboutHeading: "Como funciona o teste de reflexo para FPS?"
@@ -312,7 +314,24 @@ export default function InstantResponsePtPage() {
           desc: "No nível competitivo, saber quando não atirar é tão importante quanto atirar rápido. O treino de No-Go reforça as vias pré-frontais que impedem cliques acidentais."
         }
       ]
-    }
+    },
+    steps: [
+      "Ajuste sua sensibilidade de mouse usual nas configurações para manter a memória muscular consistente.",
+      "Clique em 'Iniciar Treino' para ativar o modo de tela cheia e o bloqueio de cursor (Pointer Lock).",
+      "Concentre a atenção visual na retícula central com o dedo indicador encostado levemente no gatilho.",
+      "Clique instantaneamente ao detectar o sinal verde, evitando atirar antes da hora durante o atraso aleatório.",
+      "Analise seu tempo médio de reação, desvio padrão de consistência e sequências de combo ao longo dos níveis."
+    ],
+    audience: "Jogadores competitivos de FPS e shooters táticos (Valorant, CS2, Rainbow Six Siege, Apex Legends, Overwatch 2), atletas de esportes eletrônicos e qualquer um treinando velocidade de reflexo.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'posner1990', 'donders1969', 'hick1952'),
+    related: [
+      { href: "/pt/drills/fps/angle-hold-trainer", label: "Posicionamento de Mira e Retenção de Ângulos" },
+      { href: "/pt/drills/fps/flick-shot-training", label: "Treino de Flick Shot" },
+      { href: "/pt/drills/fps/180-degree-awareness", label: "Consciência Espacial 180°" },
+      { href: "/pt/drills/reaction-speed/reaction-time-test", label: "Teste de Tempo de Reação" },
+      { href: "/pt/drills/reaction-speed/reflex-training-drill", label: "Treino de Reflexos" }
+    ]
   };
 
   return (
@@ -350,6 +369,7 @@ export default function InstantResponsePtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

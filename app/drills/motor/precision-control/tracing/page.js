@@ -1,6 +1,8 @@
 import TracingClient from './TracingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -323,6 +325,29 @@ const guideProps = {
   },
 };
 
+const copyEn = {
+  title: "Mouse Tracing Game",
+  subtitle: "Raw Input Continuous Tracking • 45s Timer",
+  startButtonText: "Start Drill",
+  trainAgain: "Train Again",
+  shareTitle: "Share Score",
+  exitTitle: "Exit & Return",
+  statFlowScore: "Flow Score",
+  statTimeLeft: "Time Left",
+  statFlowIntegrity: "Flow Integrity",
+  statBestScore: "Best Score",
+  maxStreakLabel: "Max Streak Frames",
+  peakFlowLabel: "Peak Flow State",
+  bestScoreLabel: "Personal Best",
+  rulesTitle: "Drill Instructions & Scoring System",
+  rulesItems: [
+    { num: "1", text: "Trace Corridor", highlight: "Emerald Wave", result: "+1 PT / frame locked-on" },
+    { num: "2", text: "Speed Ramps", highlight: "Progressive Wave", result: "2.2 → 3.8 px/f over 45s" },
+    { num: "3", text: "Flow Integrity", highlight: "Super Flow", result: "4s Lock-on yields +5 Bonus" },
+    { num: "4", text: "Strict Tracking", highlight: "Desktop Exclusive", result: "1:1 Raw Mouse Input" }
+  ],
+};
+
 export default function TracingPage() {
   return (
     <>
@@ -350,8 +375,12 @@ export default function TracingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <TracingClient copy={{ title: "Mouse Tracing Game" }} />
+      <TracingClient copy={copyEn} />
       <DrillGuide {...guideProps} />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/tracing" />
+      </div>
+      <DrillFooter />
     </>
   );
 }

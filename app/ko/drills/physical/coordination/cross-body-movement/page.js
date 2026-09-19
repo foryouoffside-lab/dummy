@@ -2,6 +2,7 @@ import CrossBodyMovementClient from '@/app/drills/physical/coordination/cross-bo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — South Korea (KR / KO)
@@ -324,7 +325,10 @@ const crossBodyGuide = {
     "라운드가 시작되면 화면 모서리에 나타나는 하늘색 시작 노드 A에 커서를 올립니다.",
     "빛나는 통로 오차 구역을 유지하며 반대편 모서리의 자홍색 노드 B를 향해 대각선으로 스윕합니다.",
     "노드 B를 정확히 타격하여 파티클을 발생시키고 연속 연결로 3.0배 콤보를 유지합니다."
-  ]
+  ],
+  audience: "FPS 및 MOBA 게이머(발로란트, 오버워치, 배그, 롤), 운동선수, 정밀 손놀림이 필요한 전문가 및 양측성 눈-손 협응력과 정중선 제어력을 향상시키고자 하는 모든 사용자.",
+  faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
 };
 
 export default function CrossBodyMovementPageKo() {

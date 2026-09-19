@@ -1,5 +1,6 @@
-import FlowStateClient from '@/app/drills/fps/flow-state/FlowInductionClient';
+import FlowStateClient from '@/app/drills/fps/flow-state/FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -310,10 +311,10 @@ export default function GermanFlowStatePage() {
     stageCaption: "Halte deinen Rhythmus und verfolge kontinuierliche Bewegungen entlang fließender Kurven ohne Fokusverlust.",
     rulesTitle: "Trainingsanleitung & Punktesystem",
     rulesItems: [
-      { num: "1", text: "Ziel-Tracking", highlight: "+10 PTS (+0,4s/s)", result: "Kontinuierliches Dwell im Radius" },
-      { num: "2", text: "Flow-Multiplikator", highlight: "Bis zu 3,0x Punkte", result: "Wächst mit ununterbrochenem Fokus" },
-      { num: "3", text: "Level-Progression", highlight: "+1 Level / 1400 PTS", result: "Zielgeschwindigkeit passt sich Fähigkeiten an" },
-      { num: "4", text: "Fokus-Abbruch", highlight: "Streak-Reset", result: "1s Zielverlust setzt Multiplikator zurück" }
+      { num: "1", text: "Ziel-Tracking", highlight: "+10 PTS (+0,4s/s)", result: "Ziel kontinuierlich im Fokus" },
+      { num: "2", text: "Flow-Multiplikator", highlight: "Bis zu 3,0x Punkte", result: "Ununterbrochene Kette halten" },
+      { num: "3", text: "Level-Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Kurvengeschwindigkeit" },
+      { num: "4", text: "Fokus-Abbruch", highlight: "1,0s Zielverlust", result: "Multiplikator-Reset (-0,6s)" }
     ],
     aboutTitle: "Über den Flow State Aim Trainer"
   };
@@ -349,6 +350,7 @@ export default function GermanFlowStatePage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/flow-state" locale="de" />
       </div>
       <DrillGuide guide={flowStateGuide} />
+      <DrillFooter />
     </>
   );
 }

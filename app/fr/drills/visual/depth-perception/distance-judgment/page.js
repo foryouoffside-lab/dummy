@@ -2,6 +2,7 @@ import DistanceJudgmentClient from '@/app/drills/visual/depth-perception/distanc
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distance-judgment (French: Perception de la Profondeur)
@@ -227,9 +228,10 @@ const faqSchema = {
 const distanceGuideFr = {
   heading: 'Critères d\'Évaluation de la Perception de Profondeur',
   intro: [
-    'La perception de la profondeur est la faculté neurologique permettant de situer les objets dans un environnement en trois dimensions et de jauger leurs distances et trajectoires relatives. Dans le sport, l\'aviation et la conduite d\'urgence, une estimation erronée de quelques centimètres peut provoquer une collision.',
-    'Ce test transpose les principes du test classique de Howard-Dolman (1919) et de la théorie de l\'expansion optique (Lee, 1976; Regan & Beverley, 1978). Il entraîne le cortex visuel à extraire le taux de grossissement d\'une cible pour en déduire le temps restant avant impact (TTC).',
-    'Méthodologie : Les saisies sont horodatées via performance.now() à la milliseconde près, et l\'erreur relative est quantifiée par rapport à l\'anneau repère.',
+    'La perception de la profondeur (vision stéréoscopique et sens du relief) est la fonction sensorielle et neurologique permettant d\'interpréter l\'environnement en trois dimensions et de jauger avec une rigueur absolue la distance, le volume et la trajectoire des objets en mouvement. Dans le sport de haut niveau (tennis, baseball, sports mécaniques), l\'aviation, la conduite d\'urgence et l\'eSport compétitif, estimer une distance à la milliseconde près fait la différence entre une interception parfaite et une collision critique.',
+    'Ce drill transpose fidèlement sur le web les principes optiques de l\'appareil stéréoscopique classique de Howard-Dolman (Howard, 1919) et la théorie écologique de l\'expansion optique de David N. Lee (1976) ainsi que David Regan & Kenneth I. Beverley (1978). En projetant une sphère 3D le long d\'un tunnel virtuel vers un plan de référence fixe, l\'exercice entraîne le cortex visuel à extraire le taux de grossissement rétinien (looming) et à calculer le temps de contact résiduel (Time-to-Contact, τ) sous des vitesses d\'approche croissantes.',
+    'Métrologie & Précision d\'Échantillonnage : Tous les écarts d\'interception sont chronométrés localement à l\'aide de l\'API haute résolution performance.now() à l\'échelle de la sous-milliseconde. L\'erreur correspond au pourcentage de déviation relative (|Diamètre Réel - Diamètre Repère| / Diamètre Repère). Les latences matérielles (quantification d\'affichage de ~16,7 ms à 60 Hz, ~6,9 ms à 144 Hz, ~4,1 ms à 240 Hz) et les fréquences d\'interrogation de la souris (125 Hz vs 1000 Hz) introduisent une dispersion incompressible (Woods et al., 2015). Toute variation inférieure à 5 ms relève du bruit de mesure ; comparez vos séries sur le même matériel.',
+    'Confidentialité et Protection des Données : SkillDrills ne collecte aucune donnée personnelle, aucun bilan ophtalmologique ni aucune métrique d\'usage centralisée. L\'ensemble de vos scores, records et niveaux franchis reste strictement confiné dans le stockage local (LocalStorage) de votre navigateur.'
   ],
   benchmarks: {
     title: 'Barème de Référence en Perception de Profondeur',
@@ -263,6 +265,14 @@ const distanceGuideFr = {
       },
     ],
   },
+  steps: [
+    'Cliquez sur "Démarrer le Test" pour initialiser la session d\'évaluation de 45 secondes.',
+    'Fixez votre regard de manière stable sur l\'anneau de référence cyan situé au plan médian.',
+    'Suivez l\'approche de la sphère 3D apparaissant au fond du corridor et accélérant vers vous.',
+    'Cliquez avec la souris, touchez l\'écran ou appuyez sur la barre d\'espace à la milliseconde exacte où la sphère s\'ajuste au diamètre de l\'anneau cible.',
+    'Consultez votre niveau de précision (<5% d\'erreur : Parfait / +150 PTS) et adaptez votre réflexe aux accélérations progressives durant 45 secondes.'
+  ],
+  audience: 'Conducteurs et candidats aux permis de conduire professionnels (poids lourds, transport en commun), opérateurs d\'engins de manutention, athlètes de sports de raquette et de balle (tennis, badminton, baseball), pilotes et joueurs d\'eSport tactique cherchant à aiguiser leur appréciation des distances.',
   faqs: {
     title: 'Foire Aux Questions sur la Perception de Profondeur et des Distances',
     items: faqSchema.mainEntity.map((q) => ({
@@ -270,6 +280,15 @@ const distanceGuideFr = {
       a: q.acceptedAnswer.text,
     })),
   },
+  sources: pickSources('howard1919', 'lee1976', 'regan1978', 'julesz1971', 'woods2015'),
+  related: [
+    { href: "/drills/visual/tracking-accuracy/moving-target", label: "Interception de Cible Mobile" },
+    { href: "/drills/visual/reaction-speed/light-reaction", label: "Test de Réaction à la Lumière" },
+    { href: "/drills/visual/tracking-accuracy/multiple-targets", label: "Poursuite d'Objets Multiples" },
+    { href: "/drills/visual/tracking-accuracy/pursuit-tracker", label: "Suivi Oculaire Continu" },
+    { href: "/drills/visual/reaction-speed/go/no-go", label: "Contrôle d'Impulsion Go / No-Go" },
+    { href: "/drills/visual/visual-recognition/entropic-grid", label: "Exploration de Grille Entropique" }
+  ]
 };
 
 const copyFr = {

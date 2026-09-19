@@ -1,5 +1,6 @@
 import ReactionSimulatorWrapper from './ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
@@ -376,6 +377,7 @@ export default function ReactionGamePage() {
       />
       <ReactionSimulatorWrapper copy={{ title: 'Reaction Game' }} />
       <DrillGuide guide={reactionGameGuide} />
+      <DrillFooter />
     </>
   );
 }

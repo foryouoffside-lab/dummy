@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from '@/app/drills/reaction-speed/reaction-time-test/ReactionTimeTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -248,6 +249,38 @@ const faqSchema = {
         text: 'Sí, la plataforma está 100% optimizada para pantallas táctiles en iOS y Android, tanto en posición vertical como horizontal sin necesidad de instalar aplicaciones.',
       },
     },
+    {
+      '@type': 'Question',
+      name: '¿Este test de tiempo de reacción es completamente gratis?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sí, todos los tests de reflejos y entrenamiento cognitivo en SkillDrills son 100% gratuitos, sin registros, descargas ni anuncios emergentes molestos.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Pueden los atletas de deportes tradicionales utilizar este test?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sí. Pilotos de Fórmula 1, boxeadores, velocistas y jugadores de tenis o pádel entrenan su velocidad de reacción visual para optimizar la activación neuromuscular y la velocidad de respuesta de fibras de contracción rápida.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Debo fijar la mirada en el centro o utilizar la visión periférica?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Se recomienda mantener un enfoque visual relajado ("mirada suave"). Esto permite que los bastones fotorreceptores de la retina periférica capten el cambio visual de inmediato, reduciendo el tiempo hasta la pulsación motora.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Con qué frecuencia debería medir y entrenar mis reflejos?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Una sesión diaria de 5 a 10 minutos proporciona una referencia objetiva de tu estado de alerta neurológico, sirve como calentamiento antes de partidas competitivas y registra tu evolución a largo plazo.',
+      },
+    },
   ],
 };
 
@@ -342,6 +375,7 @@ export default function SpanishReactionTimeTestPage() {
       />
       <ReactionTimeTestWrapper copy={{ title: 'Test de Reflejos' }} />
       <DrillGuide guide={reactionGuide} />
+      <DrillFooter />
     </>
   );
 }

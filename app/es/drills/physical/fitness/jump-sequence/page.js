@@ -2,6 +2,7 @@ import JumpSequenceClient from '@/app/drills/physical/fitness/jump-sequence/Jump
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // INVESTIGACIÓN DE PALABRAS CLAVE NATIVAS (SERP ESPAÑA / LATAM)
@@ -322,7 +323,10 @@ const jumpGuide = {
     "Analiza la cota y velocidad del blanco entrante y carga el impulso en la medida justa.",
     "Modula suavemente la trayectoria en el aire para intersectar el centro de la esfera.",
     "Encadena el aterrizaje con el siguiente salto de inmediato para mantener 3.0x de combo en 45 segundos."
-  ]
+  ],
+  audience: "Atletas (voleibol, baloncesto, fútbol, atletismo) que buscan mejorar el timing de salto e interceptación, y jugadores de eSports que entrenan la puntería contra blancos aéreos veloces.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('komi2000', 'kawato1999', 'lee1976', 'woodworth1899', 'fitts1954', 'woods2015')
 };
 
 export default function JumpSequencePageEs() {

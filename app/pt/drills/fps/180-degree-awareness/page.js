@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Treino de Giro 180° – Mira e Reação FPS | SkillDrills",
@@ -290,21 +291,20 @@ export default function AwarenessDrillPtPage() {
   const copyPt = {
     h1Keyword: "Treino de Giro 180°",
     h1Suffix: " — Mira e Reação FPS",
+    subtitle: "Treine detecção periférica de ameaças, flicks de grande amplitude e desaceleração terminal em giros de 180°.",
     statScore: "Pontuação",
     statTime: "Tempo",
     statAccuracy: "Precisão",
     statBestScore: "Recorde",
     startTitle: "Treino de Giro 180°",
     startSubtitle: "Entrada Bruta de Mouse • Progressão Infinita de Níveis",
-    getReady: "PREPARE-SE",
-    pausedTitle: "Jogo Pausado",
-    pausedSubtitle: "Clique na tela para reativar o bloqueio do cursor do mouse",
-    stageCaption: "Identifique alvos nas bordas com visão periférica e realize giros rápidos de 180°.",
+    stageCaption: "Identifique alvos nas bordas com visão periférica e realize giros rápidos de 180° antes que o temporizador expire.",
     rulesTitle: "Regras de Treino e Sistema de Pontuação",
     rulesItems: [
-      { title: "Acerto de Alvo (+100 pts)", text: "Acertos consecutivos aumentam o multiplicador de combo até 3.0x." },
-      { title: "Extremidades de 180° e Níveis", text: "Alvos surgem nas bordas, encolhem e exigem reações cada vez mais rápidas." },
-      { title: "Erro de Tiro / Tempo Esgotado", text: "Tiros perdidos resetam o combo. Com penalidade ativa, perde-se 0.8s do cronômetro." }
+      { num: "1", text: "Acerto de Alvo", highlight: "Grande Ângulo (+100 PTS / +0,6s)", result: "×Mult de Combo" },
+      { num: "2", text: "Bordas de 180°", highlight: "Visão Periférica Extrema", result: "Mais Rápido e Menor" },
+      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1.750 PTS", result: "Escala Adaptativa" },
+      { num: "4", text: "Erro / Tempo Esgotado", highlight: "Penalidade", result: "Reset Combo (-0,8s)" }
     ],
     aboutTitle: "Sobre o Treino de Giro 180°",
     aboutHeading: "Por que treinar giros de 180 graus?",
@@ -350,6 +350,7 @@ export default function AwarenessDrillPtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

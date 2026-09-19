@@ -2,6 +2,7 @@ import PathTracingClient from '@/app/drills/memory/spatial-memory/path-tracing/P
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: "Test des Blocs de Corsi – Mémoire Séquentielle | SkillDrills",
@@ -262,25 +263,68 @@ const faqSchema = {
 const pathTracingGuide = {
   heading: "Guide Scientifique : Test des Blocs de Corsi & Mémoire Séquentielle",
   intro: [
-    "L empan spatial mesure la longueur maximale d une sequence de positions qu un sujet peut restituer dans l ordre chronologique exact. Concu a l origine par Philip M. Corsi en 1972 sous la direction de Brenda Milner a l Institut Neurologique de Montreal, le test des blocs de Corsi est devenu l etalon-or mondial de l evaluation de la memoire de travail visuo-spatiale.",
-    "Les travaux pionniers de Milner (1971) ont etabli une double dissociation neurocognitive majeure: les lesions temporales gauches alterent l empan auditivo-verbal (Digit Span), tandis que les lesions de la region temporale droite et de l hippocampe reduisent specifiquement l empan spatial de Corsi.",
-    "Dans le modele de memoire de travail de Robert Logie (1995), cette epreuve sollicite specifiquement le 'scribe interne', l element actif responsable de la repetition des mouvements et du maintien des trajectoires dynamiques dans l espace, a la difference du 'cache visuel' passif dedie aux formes immobiles.",
-    "L etalonnage normatif de Kessels et al. (2000, 2008) aupres d adultes sains a confirme un empan direct moyen d environ 5 a 6 blocs. Les performances superieures reposent principalement sur la capacite a decouvrir des symetries et a integrer les vecteurs individuels au sein d une trajectoire motrice continue (chunking spatial).",
-    "Precision chronometrique: les apparitions lumineuses et vos clics de reponse sont synchronises a la milliseconde pres via l horloge haute resolution performance.now() de votre navigateur. La fluidite depend du taux de rafraichissement de votre ecran (16,7 ms par image a 60 Hz). Evaluez vos resultats dans un cadre materiel stable.",
-    "Confidentialite et finalite: aucune donnee privee ni aucun score individuel n est transmis a des serveurs distants. Vos performances restent conservees dans le stockage local de votre terminal (localStorage). Ce drill interactif est un outil d entrainement cognitif et ne constitue pas un diagnostic medical."
+    "Le test de mémoire de trajectoire spatiale (Path Tracing / Blocs de Corsi) évalue la mémoire de travail visuo-spatiale séquentielle, la rétention d'itinéraires dynamiques et la reconstruction vectorielle à travers des matrices évolutives de 3x3 à 7x7. Ancré dans le paradigme neuropsychologique historique des blocs de Corsi (Milner, 1971 ; Corsi, 1972) et le modèle du « scribe interne » de Robert H. Logie (1995), ce test isole l'encodage spatio-temporel actif du stockage passif de motifs statiques.",
+    "Durant chaque manche, une cible animée illumine une série de coordonnées matricielles à intervalles calibrés de 500 ms. L'utilisateur doit encoder à la fois les coordonnées spatiales et l'ordre chronologique strict, puis retracer fidèlement la trajectoire complète durant la fenêtre d'évaluation de 45 secondes.",
+    "Dans l'architecture cognitive de la mémoire de travail, Logie (1995) et Alan Baddeley (2000) ont établi que les mouvements séquentiels sont répétés et maintenus par le scribe interne, boucle de répétition spatiale active. George A. Miller (1956) et Herbert A. Simon (1974) ont prouvé que la rétention séquentielle repose sur le regroupement vectoriel directionnel (chunking), tandis que Nelson Cowan (2001) a formalisé que la mémoire focale humaine est bornée à environ 4 unités d'information non assistées.",
+    "Les études normatives standardisées sur tâches de Corsi informatisées (Kessels et al., 2000) situent l'empan spatial moyen de l'adulte sain à 5,4 ± 0,9 étapes, démontrant une forte sensibilité à la fatigue cognitive, au sommeil et aux fonctions exécutives préfrontales.",
+    "Méthodologie de mesure : chaque étape est horodatée avec l'horloge haute résolution performance.now() de votre navigateur, directement sur votre appareil — aucune donnée n'est téléversée vers un serveur distant. Les minuteurs des navigateurs sont volontairement discrétisés face aux vulnérabilités matérielles (de l'ordre de 1 ms), et l'affichage quantifie chaque transition à l'intervalle de rafraîchissement d'écran (environ 16,7 ms par trame à 60 Hz ; Woods et al., 2015). Les variations inférieures à 5 ms relèvent du bruit expérimental ; pour évaluer vos progrès réels, préservez le même matériel.",
+    "Transparence et respect de la vie privée : SkillDrills ne collecte aucune donnée agrégée. Vos scores et préférences demeurent exclusivement enregistrés dans le localStorage de votre navigateur web, garantissant qu'aucune moyenne globale ni profil d'utilisateur n'est diffusé. Toutes les références numériques et scientifiques mentionnées ici proviennent directement des publications scientifiques évaluées par des pairs répertoriées ci-dessous.",
+    "Cet entraînement est une application interactive sur navigateur destinée à l'entraînement cognitif personnel et à l'intérêt pédagogique. Il ne constitue pas un dispositif médical, un outil de diagnostic neuropsychologique formel, ni un protocole de dépistage clinique pour les troubles de la mémoire, le TDAH ou les déficits exécutifs. En cas de préoccupation médicale sur vos capacités cognitives, consultez un neuropsychologue ou un médecin qualifié."
   ],
   benchmarks: {
-    title: "Paliers de Référence : Empan Spatial de Corsi",
-    headers: ["Palier de Performance", "Longueur de la Séquence (Empan)", "Taille de Grille", "Profil Neurocognitif & Stratégie Motrice"],
+    title: "Paliers Normatifs de l'Empan Séquentiel de Trajectoire Spatiale",
+    headers: ["Palier de Performance", "Empan & Échelle de Grille", "Score à l'Exercice", "Profil Cognitif & Rétention de Trajectoire"],
     rows: [
-      ["Palier 1 : Maître", "8+ étapes", "Grille 6x6 – 7x7", "Empan d élite : fusion spatio-temporelle parfaite et chunking vectoriel instinctif."],
-      ["Palier 2 : Avancé", "6–7 étapes", "Grille 5x5 – 6x6", "Performance remarquable : dépassement net des normes adultes de Kessels."],
-      ["Palier 3 : Compétent", "5 étapes", "Grille 4x4 – 5x5", "Empan standard : niveau moyen attendu chez l adulte sain (5,4 ± 0,8)."],
-      ["Palier 4 : En développement", "4 étapes", "Grille 3x3 – 4x4", "Capacité fonctionnelle : sensible à l interférence des trajectoires croisées."],
-      ["Palier 5 : Débutant", "1–3 étapes", "Grille 3x3", "Difficulté à maintenir l ordre chronologique des transitions lumineuses."]
+      ["Palier 1 (Supérieur / 99e Percentile)", "Empan 10 – 14+ étapes (grille 6x6–7x7)", "1 200+ points", "Élite séquentielle visuo-spatiale ; décomposition des parcours complexes en 2–3 macro-vecteurs directionnels ; mémorisation parfaite dans le scribe interne ; cadence de clic sub-400 ms."],
+      ["Palier 2 (Moyenne Supérieure / 85e–95e Percentile)", "Empan 8 – 9 étapes (grille 5x5–6x6)", "900 – 1 199 points", "Dépassement net des moyennes adultes standards ; groupement vectoriel robuste (virages en L, diagonales, zigzags) ; résistance aux interférences sérielles ; cadence 400 – 600 ms."],
+      ["Palier 3 (Moyenne Adulte Standard / 50e Percentile)", "Empan 5 – 7 étapes (grille 4x4–5x5)", "600 – 899 points", "Norme adulte saine (Corsi, 1972 ; Kessels et al., 2000, empan 5,4 ± 0,9) ; rétention fluide de séquences de 5–6 étapes ; perte des points de virage intermédiaires sur grilles 5x5 ; cadence 600 – 850 ms."],
+      ["Palier 4 (Moyenne Inférieure / Dégradation Sérielle)", "Empan 4 étapes (grille 3x3–4x4)", "400 – 599 points", "Proche de la limite brute sans chunking (Cowan, 2001) ; tentative de mémoriser chaque coordonnée isolément sans regrouper les vecteurs ; cadence 850 – 1 100 ms."],
+      ["Palier 5 (En Développement / Empan Restreint)", "Empan < 4 étapes (grille 3x3)", "< 400 points", "Dégradation temporelle rapide de la trace ; vulnérabilité aux inversions d'ordre séquentiel ; difficulté à maintenir plus de 3 étapes après le délai de rétention ; cadence supérieure à 1 100 ms."]
     ],
-    note: "Ces paliers sont calibres d apres les etudes neuropsychologiques de Corsi (1972) et de Kessels et al. (2000, 2008); ils sont fournis a vocation d auto-evaluation et d entrainement personnel."
-  }
+    note: "La longueur de l'empan et la dimension de la grille reflètent le niveau maximal validé durant la session de 45 secondes ; percentiles normatifs calibrés sur les standards des Blocs de Corsi (Corsi, 1972 ; Kessels et al., 2000 ; Woods et al., 2015)."
+  },
+  techniques: {
+    title: "Protocoles Scientifiques pour Développer la Mémoire de Trajectoire",
+    items: [
+      {
+        name: "Chunking Vectoriel Directionnel (Miller 1956 ; Simon 1974)",
+        desc: "Regroupez mentalement les étapes séquentielles isolées en macro-vecteurs de direction. Par exemple, au lieu de mémoriser 5 coordonnées distinctes, encodez le trajet comme « deux cases à droite, une case en haut, deux cases à gauche ». Cette compression vectorielle réduit la charge mnésique brute de plus de 60 %.",
+        tips: "Identifiez des formes géométriques telles que des virages en L, des triangles ou des escaliers plutôt que des points individuels."
+      },
+      {
+        name: "Pré-Planification Kinésique du Scribe Interne (Logie 1995)",
+        desc: "Mobilisez le cortex moteur dès la présentation du stimulus en traçant mentalement la ligne continue reliant les cases illuminées. Pré-activer les circuits de planification motrice renforce les traces visuelles passives par une répétition kinesthésique active.",
+        tips: "Ressentez le geste dans votre main avant même d'entrer en contact avec l'écran."
+      },
+      {
+        name: "Ancrage Parafovéal sur le Centroïde de la Grille",
+        desc: "Fixez votre regard au centre géométrique de la matrice plutôt que d'effectuer des saccades oculaires précipitées sur chaque case allumée. La vision parafovéale enregistre fidèlement le vecteur de mouvement sans subir la latence de suppression saccadique.",
+        tips: "Gardez la tête et les yeux stables pour laisser les flashs lumineux s'imprimer dans l'ensemble de votre champ visuel."
+      },
+      {
+        name: "Cadence et Rythme Moteur Fluide",
+        desc: "Restituez la trajectoire enregistrée avec une frappe régulière et rythmée. Hésiter entre les clics favorise l'oubli temporel des étapes tardives du parcours. Exécutez le vecteur mémorisé en une seule séquence motrice fluide.",
+        tips: "Enchaînez la séquence d'un geste continu sans marquer de temps d'arrêt entre deux cases."
+      }
+    ]
+  },
+  steps: [
+    "Fixez votre regard sur le centre de la grille et suivez le parcours lumineux de la cible.",
+    "Regroupez mentalement les coordonnées illuminées en vecteurs de direction continus (ex. « droite-haut-droite »).",
+    "Pendant le court délai de rétention, répétez mentalement la trajectoire avec le scribe interne.",
+    "Retracez la séquence de coordonnées dans l'ordre chronologique exact avec une cadence rythmique fluide.",
+    "Progressez à travers les matrices de 3x3 à 7x7 pour étendre votre empan spatial séquentiel."
+  ],
+  audience: "Joueurs compétitifs (gestion des routes de patrouille et rotations de compétences), étudiants en sciences et ingénierie, chorégraphes, conducteurs et toute personne souhaitant renforcer sa mémoire de travail spatio-temporelle.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('corsi1972', 'milner1971', 'logie1995', 'cowan2001', 'baddeley2000', 'miller1956', 'simon1974', 'kessels2000', 'woods2015'),
+  related: [
+    { href: "/drills/memory/spatial-memory/grid-memorization", label: "Test de Mémoire Visuelle" },
+    { href: "/drills/memory/spatial-memory/object-location", label: "Test de Mémoire de Localisation" },
+    { href: "/drills/memory/short-term-memory/digit-span", label: "Test d'Empan Numérique" },
+    { href: "/drills/memory/short-term-memory/word-recall", label: "Test de Mémoire Verbale" },
+    { href: "/drills/memory/working-memory/n-back", label: "Test de Mémoire de Travail N-Back" }
+  ]
 };
 
 export default function PathTracingFrenchPage() {

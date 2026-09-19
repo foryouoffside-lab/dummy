@@ -3,7 +3,7 @@
 // Smooth Pursuit Aim Trainer — authentic animated card preview.
 // Recreates the EXACT in-game visuals and mechanics from ProSmoothPursuitClient.js:
 // 1. Lissajous figure-8 / harmonic motion curve
-// 2. Neon emerald tactical target (#00ff88) traversing the smooth trajectory
+// 2. Neon emerald tactical target (#10b981) traversing the smooth trajectory
 // 3. Player crosshair maintaining uninterrupted pursuit tracking with active pulse feedback.
 
 export default function ProSmoothPursuitPreview() {
@@ -14,7 +14,7 @@ export default function ProSmoothPursuitPreview() {
         <svg className="psp-track-svg" viewBox="0 0 280 160" fill="none">
           <path
             d="M 140 80 C 180 30, 250 30, 250 80 C 250 130, 180 130, 140 80 C 100 30, 30 30, 30 80 C 30 130, 100 130, 140 80 Z"
-            stroke="rgba(0, 255, 136, 0.12)"
+            stroke="rgba(16, 185, 129, 0.12)"
             strokeWidth="1.5"
             strokeDasharray="3 5"
           />

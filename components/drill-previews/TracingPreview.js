@@ -9,7 +9,7 @@ import React, { useRef, useEffect } from 'react';
  * - Dark tactical arena (#05060b) with subtle rose grid lines
  * - Continuous progressive sinusoidal wave filament with harmonic oscillation scrolling horizontally
  * - Authentic in-game visual states:
- *     1. On-path locked tracking: Neon rose wave (#f43f5e) with ambient bloom, vibrant emerald cursor (#00ff88) with tracking ring and flow particles
+ *     1. On-path locked tracking: Neon rose wave (#f43f5e) with ambient bloom, vibrant emerald cursor (#10b981) with tracking ring and flow particles
  *     2. Brief micro-deviation: Alert red wave (#ef4444), slate cursor (#64748b), smooth re-engagement
  * - Authentic crosshair: 4 precision cross lines, inner indicator core, and green lock ring
  * - Zero in-preview title tags, badges, or fake 'LOCKED-IN FLOW' pills
@@ -72,7 +72,7 @@ export default function TracingPreview() {
         life: 1.0,
         decay: 0.035 + Math.random() * 0.025,
         size: 1.4 + Math.random() * 1.4,
-        color: Math.random() < 0.65 ? '#00ff88' : '#34d399',
+        color: Math.random() < 0.65 ? '#10b981' : '#34d399',
       });
     };
 
@@ -237,7 +237,7 @@ export default function TracingPreview() {
       const chY = state.cursor.y;
 
       ctx.save();
-      const chColor = isOffPath ? '#64748b' : '#00ff88';
+      const chColor = isOffPath ? '#64748b' : '#10b981';
       ctx.strokeStyle = chColor;
       ctx.fillStyle = chColor;
 

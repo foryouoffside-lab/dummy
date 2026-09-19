@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
     title: "180도 플릭 에임 연습 – 180도 화면전환 트레이너 | SkillDrills",
@@ -318,21 +319,20 @@ export default function AwarenessDrillKoPage() {
         copy={{
           h1Keyword: "180도 플릭 에임 연습",
           h1Suffix: " - 180도 화면전환·주변시야 트레이너",
+          subtitle: "주변시야를 통한 신속한 적 탐지와 대각도 플릭 전환, 180도 화면전환 제동력을 훈련하세요.",
           statScore: "점수",
           statTime: "남은 시간",
           statAccuracy: "명중률",
           statBestScore: "최고 점수",
           startTitle: "180도 플릭 에임 연습",
           startSubtitle: "하드웨어 로우 인풋 • 무한 난이도 진행",
-          getReady: "준비 완료",
-          pausedTitle: "일시 정지됨",
-          pausedSubtitle: "클릭하여 재개 — 커서 잠금이 다시 활성화됩니다",
-          stageCaption: "화면 양쪽 끝에 생성되는 목표를 주변시야로 감지하고, 신속한 180도 화면전환으로 타격하세요.",
+          stageCaption: "화면 가장자리에 생성되는 목표를 주변시야로 포착하고, 타이머가 만료되기 전에 180도 플릭으로 격추하세요.",
           rulesTitle: "훈련 규칙 & 점수 체계",
           rulesItems: [
-            { title: "표적 명중 (+100점)", text: "연속 명중으로 콤보 배수를 최대 3.0배까지 누적." },
-            { title: "180° 가장자리 생성 & 스트릭 가속", text: "화면 좌우 끝에 생성되며, 스트릭 상승 시 표적 축소 및 노출시간 감소." },
-            { title: "미스 / 시간 초과", text: "사격 실패 또는 시간 초과 시 콤보 리셋. 패널티 설정 시 0.8초 차감." }
+            { num: "1", text: "가장자리 표적 격추", highlight: "대각도 표적 (+100점 / +0.6초)", result: "×콤보 배수" },
+            { num: "2", text: "180° 주변부 생성", highlight: "극단적 주변시야", result: "소형화 & 가속" },
+            { num: "3", text: "레벨 난이도 상승", highlight: "+1 레벨 / 1750점", result: "적응형 스케일링" },
+            { num: "4", text: "미스 / 시간 초과", highlight: "실패 페널티", result: "콤보 리셋 (-0.8초)" }
           ],
           aboutTitle: "180도 플릭 에임 훈련 정보",
           aboutHeading: "180도 플릭 훈련이란 무엇인가요?",
@@ -349,6 +349,7 @@ export default function AwarenessDrillKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -227,18 +227,37 @@ export default function VisualSearchLocalePage() {
         title="Die Wissenschaft der visuellen Suche, Merkmalsintegration & selektiven Aufmerksamkeit"
         sources={sources}
       >
-        <p dangerouslySetInnerHTML={{ __html: `Die Fähigkeit, ein gesuchtes Objekt in einer unübersichtlichen, visuell überladenen Umgebung schnell zu lokalisieren, ist eine fundamentale kognitive Leistung. Ob beim Durchsuchen von Röntgenbildern in der Radiologie, beim Erkennen von getarnten Bedrohungen im Einsatz oder beim Auffinden gegnerischer Spielfiguren in komplexen 3D-Spielwelten – die visuelle Suche beansprucht ein hochentwickeltes Netzwerk aus retinalen Rezeptoren, frontoparietalen Aufmerksamkeitszentren und okulomotorischen Steuerungskreisen (Treisman & Gelade, 1980; Wolfe, 1994).` }} />
+        <p dangerouslySetInnerHTML={{ __html: `In natürlichen visuellen Umgebungen treten Zielobjekte selten isoliert auf. Ob bei der Überwachung eines Radarschirms, beim Korrekturlesen dichter Texte oder beim blitzschnellen Aufspüren eines Gegners hinter Deckungen in taktischen Shootern – das menschliche Sehsystem muss hochgradig relevante Signale aus dichtem visuellem Clutter herausfiltern. In der Psychophysik wird diese Fähigkeit über <strong>visuelle Suchparadigmen</strong> quantifiziert, die das Zusammenspiel räumlicher Aufmerksamkeit mit sensorischen Merkmalskarten im Zeitverlauf analysieren (Treisman &amp; Gelade, 1980; Wolfe, 1994).` }} />
 
         <h3>Merkmalsintegrationstheorie: Paralleles Pop-out vs. serielle Konjunktionssuche</h3>
-        <p dangerouslySetInnerHTML={{ __html: `In ihrer wegweisenden Arbeit etablierten Treisman und Gelade (1980) die Merkmalsintegrationstheorie (Feature Integration Theory, FIT). Unterscheidet sich ein Zielobjekt durch ein einziges elementares Merkmal (z. B. eine leuchtend rote Scheibe unter blauen Quadraten), erfolgt die Erkennung <strong>vorattentiv und parallel</strong> über das gesamte Sehfeld. Die Reaktionszeit bleibt unabhängig von der Anzahl der Störreize konstant flach ('Pop-out-Effekt'). Definiert sich das Ziel jedoch durch eine <strong>Kombination mehrerer Merkmale</strong> (Konjunktionssuche) oder sind Störreize wie in diesem Drill unregelmäßig rotiert, versagt das parallele Pop-out. Das Sehsystem muss fokussierte Aufmerksamkeit seriell von Objekt zu Objekt lenken, wodurch die Suchzeit linear mit jedem zusätzlichen Distraktor ansteigt (Treisman & Gelade, 1980; Duncan & Humphreys, 1989).` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Die klassische visuelle Psychophysik unterteilt Suchprozesse anhand der Zielbeschaffenheit in zwei grundlegende Verarbeitungsmodi:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Merkmalssuche (Paralleles Pop-out):</strong> Unterscheidet sich ein Zielobjekt durch ein einziges elementares Merkmal (z. B. ein roter Kreis unter blauen Quadraten), registrieren frühe Neuronen im primären visuellen Kortex (V1) die Diskrepanz simultan über das gesamte Sehfeld. Die Reaktionszeit bleibt unabhängig von der Anzahl der Störreize konstant flach (Treisman &amp; Gelade, 1980; Wolfe, 1994).
+          </li>
+          <li>
+            <strong>Konjunktionssuche (Serielles &amp; geführtes Binden):</strong> Definiert sich das Ziel durch eine Kombination von Merkmalen, die sich mit benachbarten Distraktoren überschneiden (wie das Auffinden eines 'C' unter rotierten 'O'-, 'Q'- und 'G'-Zeichen), versagt die parallele vorattentive Erkennung. Die visuelle Aufmerksamkeit muss sequenziell von Zelle zu Zelle wandern, wodurch die Latenz proportional zur Rastergröße ansteigt (Treisman &amp; Gelade, 1980; Duncan &amp; Humphreys, 1989).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `Dieses Phänomen illustriert das in den Kognitionsneurowissenschaften als <em>visuelles Bindungsproblem</em> bekannte Dilemma: Während frühe kortikale Areale Orientierung, Linienkrümmung und Schließung in getrennten Merkmalskarten analysieren, erfordert die Synthese zu einem kohärenten Objekt die aktive Zuweisung räumlicher Aufmerksamkeit über den posterioren parietalen Kortex und die frontalen Augenfelder (Treisman &amp; Gelade, 1980; Wolfe, 1994).` }} />
 
-        <h3>Guided Search Model & Ähnlichkeitsgesetze (Wolfe, 1994; Duncan & Humphreys, 1989)</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Jeremy Wolfes 'Guided Search'-Modell (Wolfe, 1994) verfeinerte Treismans Modell: Das menschliche Gehirn sucht nicht rein stochastisch, sondern nutzt parallele vorattentive Merkmalskarten, um eine 'Prioritätskarte' zu berechnen. Fokussierte Aufmerksamkeit wird bevorzugt zu den Positionen mit der höchsten Aktivität gelenkt. Wie Duncan und Humphreys (1989) bewiesen, wird die Effizienz dieser Führung von zwei Faktoren bestimmt: <em>Ziel-Distraktor-Ähnlichkeit</em> (je ähnlicher das Ziel den Störreizen ist, desto höher die Fixationsdauer) und <em>Distraktor-Homogenität</em>. Wenn Distraktoren wie in unserem 96-Zellen-Gitter zufällig gedreht sind, bricht die gestaltpsychologische Hintergrundgruppierung zusammen und erzwingt eine individuelle foveale Auswertung.` }} />
+        <h3>Distraktor-Homogenität &amp; Suchleistung (Duncan &amp; Humphreys, 1989)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `In bahnbrechenden Untersuchungen zur Sucheffizienz wiesen Duncan und Humphreys (1989) nach, dass die Suchleistung von zwei entscheidenden wahrnehmungsbezogenen Relationen determiniert wird:` }} />
+        <ol className="list-decimal pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Ziel-Distraktor-Ähnlichkeit:</strong> Je größer die visuelle Ähnlichkeit zwischen dem Zielobjekt und den umgebenden Störreizen ist, desto höher klettert die Diskriminationsschwelle und desto länger verweilt die foveale Fixation auf jeder Zelle.
+          </li>
+          <li>
+            <strong>Distraktor-Distraktor-Homogenität:</strong> Weisen Störreize eine einheitliche Form und Ausrichtung auf, fasst das Sehsystem sie nach Gestaltgesetzen zu einer zusammenhängenden Hintergrundtextur zusammen. Sind Distraktoren jedoch wie in diesem Drill unregelmäßig rotiert, bricht diese Gruppierung zusammen und erzwingt eine aufwendige serielle Einzelprüfung.
+          </li>
+        </ol>
 
-        <h3>Aufmerksamkeits-Zoomlinse & perzeptive Belastung (Lavie, 1995; Eriksen & St. James, 1986)</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Nach dem Zoom-Lens-Modell der räumlichen Aufmerksamkeit (Eriksen & St. James, 1986) agiert die visuelle Aufmerksamkeit wie ein Scheinwerfer mit variablem Durchmesser. Weitet sich der Fokus, sinkt die Detailauflösung; verengt er sich auf eine einzelne Zelle, erreicht die Auflösung ihr Maximum. Nilli Lavies Perceptual Load Theory (Lavie, 1995) belegt zudem, dass kognitive Ablenkbarkeit vom sensorischen Ressourcenverbrauch abhängt. In hochgradig beladenden Bedingungen – wie unserem 96-Zellen-Buchstabengitter unter 45 Sekunden Zeitdruck – ist die perzeptive Kapazität vollständig gesättigt, was störende Gedanken unterdrückt und höchste selektive Konzentration erzwingt (Lavie, 1995; Bacon & Egeth, 1994).` }} />
+        <h3>Aufmerksamkeits-Zoomlinse &amp; perzeptive Belastung (Lavie, 1995; Eriksen &amp; St. James, 1986)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Nach dem Zoom-Lens-Modell der räumlichen Aufmerksamkeit (Eriksen &amp; St. James, 1986) agiert die visuelle Aufmerksamkeit wie ein Scheinwerfer mit variablem Durchmesser. Weitet sich der Fokus über das 96-Zellen-Gitter, sinkt die Verarbeitungsauflösung; verengt er sich auf eine einzelne Zelle, erreicht die Trennschärfe ihr Maximum auf Kosten des peripheren Überblicks.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Nilli Lavies Perceptual Load Theory (Lavie, 1995) belegt zudem, dass kognitive Ablenkbarkeit vom sensorischen Ressourcenverbrauch abhängt. In niedrig belasteten Aufgaben diffundieren überschüssige Kapazitäten unwillkürlich in irrelevante Reize ab. Unter hoher perzeptiver Last – wie unserem 96-Zellen-Buchstabengitter unter 45 Sekunden Zeitdruck – ist die sensorische Bandbreite vollständig gesättigt, was störende Gedanken unterdrückt und höchste selektive Konzentration erzwingt (Lavie, 1995; Bacon &amp; Egeth, 1994).` }} />
 
         <h3>Suchlatenz- und Durchsatz-Standards (96-Zellen-Gitter)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Die nachfolgenden Leistungsbereiche dienen der Orientierung zur Einordnung der eigenen Ergebnisse auf diesem 96-Zellen-Raster (12x8) unter standardisiertem 45-Sekunden-Zeitdruck:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

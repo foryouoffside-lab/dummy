@@ -1,5 +1,6 @@
 import AntiZigzagClient from '@/app/drills/fps/anti-zigzag-movement-trainer/AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -335,10 +336,10 @@ export default function AntiZigzagDePage() {
           stageCaption: "Halte dein Fadenkreuz auf ausweichenden Zielen mit unberechenbaren Zickzack-Mustern. Konzentriere dich auf den Mittelkorridor!",
           rulesTitle: "Trainingsregeln & Punktesystem",
           rulesItems: [
-            { num: "1", text: "Zielkontakt", highlight: "Kontinuierlicher Schaden", result: "Hält Dwell-Uptime aufrecht" },
-            { num: "2", text: "V-Crossover", highlight: "Zentrum fokussieren", result: "Verhindert Überschwingen an Wendepunkten" },
-            { num: "3", text: "Level-Progression", highlight: "Alle 1.400 PKT +1 Level", result: "Steigende Geschwindigkeit & Zickzack-Frequenz" },
-            { num: "4", text: "Entspannter Griff", highlight: "Kein Death-Gripping", result: "Flüssiges Gleiten statt Ruckeln" }
+            { num: "1", text: "Zielerfassung", highlight: "+50 PKT (+0,4s/s)", result: "×Combo-Multiplikator" },
+            { num: "2", text: "Zielzerstörung", highlight: "+25 Bonus-PKT", result: "HP-Reset & Respawn" },
+            { num: "3", text: "Levelprogression", highlight: "+1 Stufe / 1400 PKT", result: "Adaptives Zickzack-Tempo" },
+            { num: "4", text: "Zielverlust", highlight: "Lebensdauer abgelaufen", result: "Setzt Combo zurück (-0,6s)" }
           ],
           aboutTitle: "Über Anti-Zigzag Movement Tracking"
         }}
@@ -351,6 +352,7 @@ export default function AntiZigzagDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

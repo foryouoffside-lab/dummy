@@ -1,5 +1,6 @@
 import ReflexTrainingDrillWrapper from '@/app/drills/reaction-speed/reflex-training-drill/ReflexTrainingDrillWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -325,6 +326,7 @@ export default function KoreanReflexTrainingDrillPage() {
       />
       <ReflexTrainingDrillWrapper copy={{ title: '순발력 테스트・반사신경 게임' }} />
       <DrillGuide guide={reflexDrillGuide} />
+      <DrillFooter />
     </>
   );
 }

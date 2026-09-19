@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "スムーズ トラッキング 練習 – 滑走性眼球運動 | SkillDrills",
@@ -244,10 +245,10 @@ export default function ProSmoothPursuitJaPage() {
     stageCaption: "画面上を滑らかに周回・振動するリサジュー曲線のターゲットに照準を乗せ続けます。",
     rulesTitle: "トレーニングルール & スコアリング",
     rulesItems: [
-      { title: "連続追従ボーナス", text: "ターゲット上に照準を置き続けると1秒あたりスコアが加算され、最大3.0倍までコンボ倍率が上昇します。" },
-      { title: "オフターゲットペナルティ", text: "照準がターゲットから外れるとコンボがリセットされます。設定で有効にしている場合、制限時間も減少します。" },
-      { title: "リサジュー曲線軌道", text: "縦横の正弦波が合成された滑らかな軌道を描き、急激な直線反転とは異なる連続的な速度変化を追従します。" },
-      { title: "レベル進行システム", text: "1400ポイント獲得ごとにレベルが上昇し、ターゲットの移動速度と軌道複雑度が増加します。" }
+      { num: "1", text: "追従照準維持", highlight: "+50 PTS (+0.4s/s)", result: "×コンボ倍率" },
+      { num: "2", text: "連続コンボ蓄積", highlight: "最大 3.0×", result: "最大倍率" },
+      { num: "3", text: "レベル難易度進行", highlight: "+1 レベル / 1400 PTS", result: "適応型曲線" },
+      { num: "4", text: "オフターゲット", highlight: "1.0秒離脱", result: "コンボリセット (-0.6s)" }
     ],
     aboutTitle: "スムーズトラッキング・滑走性眼球運動について",
   };
@@ -255,9 +256,11 @@ export default function ProSmoothPursuitJaPage() {
   const jaGuide = {
     heading: "スムーズトラッキング訓練のバイオメカニクスとベンチマーク",
     intro: [
-      "スムーズトラッキング（Smooth Pursuit）訓練は、リサジュー曲線の調和振動に照準を同調させ、前腕の運動安定化と眼球の滑走運動を極限まで高める科学的エイムドリルです。Apex Legends、Overwatch 2、The Finalsなどの撃ち合いでは、数秒間にわたり跳躍やスライディングを行う敵に照準を当て続ける持続火力が不可欠です。",
-      "滑走性眼球運動の神経基盤はKrauzlis（2004）によって解明されており、内側上側頭野（MST）、前頭眼野（FEF）、視覚運動野（MT/V5）の皮質ループが目標の速度ベクトルをリアルタイムに計算して眼球を駆動します。Cyril Rashbass（1961）の古典的実験では、位置ズレに反応するサッカードと速度変化に反応するスムーズパシュートが独立した神経機構であることが証明されました。力んでフリックしようとするとサッカードが混入し、エイムのカクつきを引き起こします。",
-      "本ツールでは、中心窩視線の先読み理論（Land & McLeod, 2000）、注意視覚の拡張（Green & Bavelier, 2003）、および高分解能クロノメトリ（Woods et al., 2015）を応用し、手首の力みを排除して氷上を滑るようなスムーズなエイムトラッキングを実現します。"
+      "スムーズトラッキング（Smooth Pursuit）訓練は、リサジュー曲線の調和振動に照準を同調させ、前腕の運動安定化と眼球の滑走運動を極限まで高める実証的感覚運動エイムドリルです。Apex Legends、Overwatch 2、The Finalsなどの撃ち合いでは、数秒間にわたり跳躍やスライディング、空中軌道を行う敵に照準を当て続けるダメージ維持率（Damage Uptime）が勝敗を決定づけます。",
+      "滑走性眼球運動の神経基盤はKrauzlis（2004）によって解明されており、内側上側頭野（MST）、前頭眼野（FEF）、視覚運動野（MT/V5）の反復性皮質ループが目標の速度ベクトルをリアルタイムに計算して眼球筋を連続駆動します。この神経回路は受動的に反応するのではなく、標的の速度と位相を予測モデル化して眼球運動系を同期させます。",
+      "Cyril Rashbass（1961）の古典的実験では、位置ズレに反応するサッカード（跳躍眼球運動）と速度変化（網膜スリップ）に反応するスムーズパシュートが解剖学的・機能的に独立した神経機構であることが証明されました。力んでフリックしようとしたり、マウスを握りしめすぎるとスムーズパシュート回路が破綻し、不随意の補正サッカードが混入してエイムの目立つカクつき（Aim Stutter）を引き起こします。",
+      "本ドリルでは、リサジュー曲線による調和振動座標生成に、中心窩視線の先読み理論（Land & McLeod, 2000）、動的注意視覚の拡張（Green & Bavelier, 2003）、および高分解能デジタルクロノメトリ（Woods et al., 2015）を統合し、前腕の筋緊張を完全に排除して非線形曲線を氷上のように滑らかに追従するレーザービームエイムを確立します。",
+      "測定方法とハードウェア遅延について：すべての追従判定はブラウザ内蔵のperformance.now()高精度クロックによってローカル環境でのみ計測され、外部へのデータ送信は一切行われません。ブラウザのタイマーはSpectre対策により約1ms単位で丸められており、モニターの垂直同期はフレームごとに視覚情報を量子化します（60Hzで約16.7ms、144Hzで6.9ms、240Hzで4.1ms、Woods et al., 2015）。マウスのポーリングレートは125Hzで約8ms、1000Hzで約1msの遅延差を生じさせます。5ms未満の差異は測定ノイズとして扱い、同一のハードウェア環境で継続的に自己記録の変化を追跡してください。"
     ],
     benchmarks: {
       title: "トラッキング維持率（Uptime）と実力ティア",
@@ -346,6 +349,7 @@ export default function ProSmoothPursuitJaPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/pro-smooth-pursuit" locale="ja" />
       </div>
       <DrillGuide guide={jaGuide} />
+      <DrillFooter />
     </>
   );
 }

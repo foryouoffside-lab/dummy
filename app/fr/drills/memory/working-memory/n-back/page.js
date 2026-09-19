@@ -294,11 +294,19 @@ const nBackClientCopyFr = {
 };
 
 const guideFr = {
-  lead: "Le test de memoire de travail N-Back est l etalon-or de l evaluation cognitive de l actualisation de l information, du controle executif prefrontal et de la capacite de concentration sous forte contrainte temporelle.",
+  heading: "Guide du Test N-Back et Baremos Cognitifs",
+  intro: [
+    "Le test de mémoire de travail N-Back est le paradigme neuropsychologique de référence pour évaluer l'actualisation continue des représentations mentales, le contrôle exécutif préfrontal et le maintien dynamique de l'information sous contrainte temporelle. Issu des travaux séminaux de Wayne K. Kirchner (1958) sur la rétention d'informations à renouvellement rapide, la tâche N-Back s'est imposée comme le standard de référence en neurosciences cognitives.",
+    "À la différence des épreuves d'empan passif qui évaluent une simple capacité de stockage brut, la tâche N-Back exige la mise à jour permanente d'une mémoire tampon dynamique de type FIFO (premier entré, premier sorti). Au fil de l'apparition séquentielle des lettres, l'utilisateur doit décider si le caractère affiché correspond à celui présenté exactement N étapes plus tôt (débutant au 3-Back et progressant vers le 4-Back et au-delà), en éliminant immédiatement les jetons obsolètes pour encoder les nouveaux stimuli.",
+    "Méthodologie de mesure : chaque événement est horodaté au moyen de l'horloge haute résolution performance.now() du navigateur, s'exécutant intégralement sur votre machine locale sans transmission de scores vers un serveur. Les horloges logicielles subissent une quantification de sécurité (atténuation Spectre d'environ 1 ms) et l'affichage quantifie chaque transition selon la fréquence de rafraîchissement de l'écran (environ 16,7 ms par trame à 60 Hz, Woods et al., 2015). Considérez tout écart inférieur à 5 ms comme du bruit de mesure et comparez vos séries sur un matériel identique.",
+    "Transparence des données : SkillDrills ne recueille aucune donnée télémétrique ni résultat agrégé. Vos scores et configurations demeurent strictement confinés au stockage local (localStorage) de votre navigateur. Toutes les valeurs de référence et percentiles cités ci-dessous proviennent exclusivement de la littérature scientifique révisée par les pairs.",
+    "Ce drill est un jeu en ligne gratuit destiné à l'entraînement et à la curiosité cognitive. Il ne constitue en aucun cas un dispositif médical, un instrument d'évaluation clinique ou un protocole thérapeutique. Si vous avez des inquiétudes concernant votre mémoire ou vos facultés cognitives, veuillez consulter un professionnel de santé qualifié."
+  ],
   metrics: [
-    { label: "Niveau N-Back", desc: "Le nombre d etapes antecedentes a maintenir simultanement dans le tampon de travail (2-Back, 3-Back, 4-Back)." },
-    { label: "Precision d actualisation", desc: "Taux d identification correcte des correspondances reelles et d evitement des faux positifs." },
-    { label: "Vitesse de reaction", desc: "Temps de latence decisionnel lors de l apparition de chaque stimulus alphabetique." }
+    { label: "Niveau N-Back maximal", desc: "Plus haut palier de profondeur atteint dans la session (3-Back fondamental, 4-Back avancé, 5-Back+ élite)." },
+    { label: "Score cumulé de session", desc: "Total des points accumulés en 45 secondes (+150 PTS par décision exacte de correspondance ou non-correspondance, sans pénalité négative)." },
+    { label: "Précision de jugement", desc: "Pourcentage de jugements corrects par rapport aux erreurs d'omission et de fausse alerte." },
+    { label: "Vitesse d'actualisation", desc: "Rapidité décisionnelle et latence de réponse durant les fenêtres d'exposition des stimuli reflétant l'efficacité exécutive." }
   ],
   benchmarks: [
     { tier: "Palier 1 : Mémoire de Travail d'Élite (Top 1%)", range: "4-Back à 5-Back+ (1 200+ pts)", desc: "Maintien d une file glissante de 4 à 5 lettres ; latence inférieure à 600 ms ; précision supérieure à 92 %." },
@@ -356,16 +364,7 @@ export default function NBackFrenchPage() {
 
       <NBackClient copy={nBackClientCopyFr} />
 
-      <DrillGuide
-        lead={guideFr.lead}
-        metrics={guideFr.metrics}
-        benchmarks={guideFr.benchmarks}
-        science={guideFr.science}
-        protocols={guideFr.protocols}
-        sources={guideFr.sources}
-        faqs={guideFr.faqs}
-        related={guideFr.related}
-      />
+      <DrillGuide {...guideFr} />
 
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="memory" currentHref="/drills/memory/working-memory/n-back" locale="fr" />

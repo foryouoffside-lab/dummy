@@ -1,5 +1,6 @@
 import MicroCorrectionClient from '@/app/drills/fps/micro-correction-precision/MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -237,6 +238,7 @@ export default function MicroCorrectionPage() {
   const copyEs = {
     h1Keyword: "Micro Corrección de Puntería",
     h1Suffix: " – Headshot FPS & Precisión",
+    subtitle: "Domina la desaceleración terminal y los micro ajustes inmediatos para maximizar la precisión de tus disparos a la cabeza.",
     statScore: "Puntuación",
     statTime: "Tiempo",
     statAccuracy: "Precisión",
@@ -249,15 +251,13 @@ export default function MicroCorrectionPage() {
     getReady: "PREPÁRATE",
     toggleFlash: "Alternar Flash de Fallo",
     toggleSound: "Alternar Sonido",
-    pausedTitle: "Juego Pausado",
-    pausedSubtitle: "Haz clic en la pantalla para reactivar el bloqueo de cursor.",
     stageCaption: "Haz clic en el objetivo ancla y ajusta de inmediato tu retícula con los dedos hacia el micro objetivo.",
     rulesTitle: "Instrucciones de Entrenamiento y Puntuación",
     rulesItems: [
-      { num: "1", text: "Impactar Objetivo Ancla", highlight: "+10 pts (+0,2s)", result: "Desbloquea el micro objetivo vecino" },
-      { num: "2", text: "Impactar Micro Objetivo", highlight: "hasta +585 pts (+0,2s)", result: "Multiplicado por precisión y racha de combo" },
-      { num: "3", text: "Subida de Nivel", highlight: "cada 1.400 puntos", result: "Los objetivos reducen su tamaño gradualmente" },
-      { num: "4", text: "Fallo / Tiempo Agotado", highlight: "Penalización", result: "Reinicia el multiplicador de combo al instante" }
+      { num: "1", text: "Objetivo Ancla", highlight: "+10 pts (+0,2s)", result: "Activa micro objetivo" },
+      { num: "2", text: "Micro Objetivo", highlight: "hasta +585 pts", result: "Precisión × Combo" },
+      { num: "3", text: "Subida de Nivel", highlight: "+1 Nivel / 1.400 pts", result: "Escalado adaptativo" },
+      { num: "4", text: "Fallo / Tiempo", highlight: "Penalización", result: "Reseteo combo (-0,6s)" }
     ],
     aboutTitle: "Sobre el Entrenamiento de Micro Corrección",
     aboutHeading: "¿Qué es la Micro Corrección de Puntería?",
@@ -374,6 +374,7 @@ export default function MicroCorrectionPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,7 @@ import SteadyHandClient from '@/app/drills/motor/precision-control/steady-hand/S
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -336,7 +337,13 @@ const esCopy = {
   shareTitle: 'Compartir Puntuación',
   exitTitle: 'Salir y Volver',
   rulesTitle: 'Instrucciones y Sistema de Puntos',
-  rule1Text: 'Sigue el sendero azul',
+  rulesItems: [
+    { num: '1', text: 'Sigue el sendero esmeralda', highlight: 'iluminado con precisión', result: 'Llegar a la meta reinicia a 45s' },
+    { num: '2', text: 'Vuelta completada', highlight: 'Escalado continuo', result: 'Pasillos más estrechos y cerrados' },
+    { num: '3', text: 'Toque de pared', highlight: 'Reinicio al comienzo', result: 'Penalización de vuelta y fallo sumado' },
+    { num: '4', text: 'Control de ratón', highlight: 'Recomendado para PC', result: 'Entrada 1:1 sin aceleración' },
+  ],
+  rule1Text: 'Sigue el sendero esmeralda',
   rule1Highlight: 'iluminado con precisión',
   rule1Result: 'Llegar a la meta reinicia a 45s',
   rule2Text: 'Vuelta completada',
@@ -403,6 +410,7 @@ export default function SpanishSteadyHandPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" locale="es" />
       </div>
+      <DrillFooter />
     </>
   );
 }

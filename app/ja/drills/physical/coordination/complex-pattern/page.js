@@ -2,6 +2,7 @@ import ComplexPatternClient from '@/app/drills/physical/coordination/complex-pat
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — Japan (JP / JA)
@@ -323,7 +324,10 @@ const patternGuide = {
     "カウントダウン後、画面に緑色のラインで浮かび上がる経路を注視します。",
     "ラインが消失したら水色の開始ノードをクリックしてドラッグを開始します。",
     "記憶した順序通りに各ノードを通過し、赤紫色の終了ノード上でクリックを離します。"
-  ]
+  ],
+  audience: "FPS競技ゲーマー（リコイル制御や直感的なマウス軌道コントロールの向上）、就職活動・適性検査（視覚記憶・空間認識課題）対策を行う受験者、および視覚的ワーキングメモリと手指の協調運動を鍛えたいすべての方。",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('baddeley1974', 'cowan2001', 'lashley1951', 'woodworth1899', 'woods2015')
 };
 
 export default function ComplexPatternPageJa() {

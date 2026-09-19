@@ -1,5 +1,6 @@
 import ReactionSimulatorWrapper from '@/app/drills/reaction-speed/reaction-game/ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
@@ -245,6 +246,30 @@ const faqSchema = {
         text: 'Una sesión de 5 a 10 minutos al día antes de jugar es suficiente para calentar la coordinación neuromuscular sin fatigar la mano ni la vista.',
       },
     },
+    {
+      '@type': 'Question',
+      name: '¿Qué tipos de juegos ponen a prueba el tiempo de reacción?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'El tiempo de reacción se evalúa mediante pruebas de clic visual simple (Simple Reaction Time), juegos de intercepción de blancos dinámicos en caída, juegos de ritmo acelerado y entrenadores de puntería para shooters tácticos (FPS) que desafían el procesamiento sensorial.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Qué juegos mejoran la coordinación óculo-manual?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Los juegos de objetivos en caída vertical, los títulos de acción rítmica y los ejercicios de rastreo visual rápido entrenan intensamente la coordinación mano-ojo al exigir una alineación espacial instantánea entre la fijación visual y la posición del cursor.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Es este juego de reacción gratuito y sin registro?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sí, el juego de reacción de SkillDrills es 100 % gratuito, se ejecuta directamente en cualquier navegador web moderno sin descargas, sin registro de cuenta y sin publicidad emergente intrusiva.',
+      },
+    },
   ],
 };
 
@@ -254,6 +279,7 @@ const reactionGameGuideEs = {
     'Un juego de reflejos es una herramienta interactiva diseñada para evaluar y acondicionar la velocidad de respuesta neuromuscular, el rastreo ocular y la coordinación visomotora ante estímulos en movimiento.',
     'A diferencia de los tests básicos de clic de luz roja a verde, este juego multilínea demanda tiempo de reacción con elección fundamentado en la Ley de Hick (Hick, 1952): el cerebro debe localizar objetivos en caída libre, calcular su aceleración y activar el clic antes de que alcancen el borde inferior.',
     'Metodología de Medición y Latencia de Pantalla: El tiempo de respuesta se mide localmente en el navegador mediante la API de alta resolución performance.now(). Las pantallas normales de 60Hz introducen hasta 16,7 ms de retardo de búfer, mientras que los monitores de 144Hz (6,9 ms) y 240Hz (4,1 ms) minimizan la latencia de hardware (Woods et al., 2015).',
+    'Metodología de medición y factores de hardware: cada evento se registra con la marca de tiempo de alta resolución performance.now() directamente en su dispositivo, sin subir datos a servidores. Los temporizadores del navegador están discretizados por seguridad contra vulnerabilidades tipo Spectre (~1 ms) y la pantalla cuantiza los estímulos según su frecuencia de refresco (16,7 ms a 60 Hz, 6,9 ms a 144 Hz y 4,1 ms a 240 Hz; Woods et al., 2015). La tasa de sondeo del ratón (polling rate) añade ~8 ms a 125 Hz frente a ~1 ms a 1000 Hz. Considere variaciones menores a 5 ms como ruido de medición y compare sus marcas siempre en el mismo equipo.',
   ],
   benchmarks: {
     title: 'Tabla de Rendimiento y Niveles de Puntuación del Juego de Reflejos (45 segundos)',
@@ -322,6 +348,7 @@ export default function SpanishReactionGamePage() {
 
       <ReactionSimulatorWrapper copy={{ title: 'Juego de Reflejos Online' }} />
       <DrillGuide guide={reactionGameGuideEs} />
+      <DrillFooter />
     </>
   );
 }

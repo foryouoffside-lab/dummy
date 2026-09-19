@@ -1,5 +1,6 @@
 import ReflexTrainingDrillWrapper from '@/app/drills/reaction-speed/reflex-training-drill/ReflexTrainingDrillWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -323,6 +324,7 @@ export default function SpanishReflexTrainingDrillPage() {
       />
       <ReflexTrainingDrillWrapper copy={{ title: 'Juego de Reflejos (Multi-Objetivo)' }} />
       <DrillGuide guide={reflexDrillGuide} />
+      <DrillFooter />
     </>
   );
 }

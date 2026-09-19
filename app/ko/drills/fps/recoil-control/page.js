@@ -1,6 +1,7 @@
 import RecoilControlClient from '@/app/drills/fps/recoil-control/RecoilControlClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -238,6 +239,12 @@ export default function RecoilControlKoPage() {
     statBest: "최고 점수",
     caption: "반동 제어는 학습된 개방 루프 운동 프로그램입니다. 스프레이 패턴은 일정하므로 탄착군을 직접 보며 반응하기 전에 선제적인 마우스 하향 드래그를 실행해야 합니다.",
     rulesTitle: "훈련 규칙 및 점수 체계",
+    rulesItems: [
+      { num: "1", text: "헤드샷 정밀 타격", highlight: "+100 PTS / +0.25초", result: "최우선 표적 구역" },
+      { num: "2", text: "가슴 및 팔다리 적중", highlight: "+40 / +20 PTS", result: "콤보 스트릭 유지" },
+      { num: "3", text: "레벨 상승 메커니즘", highlight: "1400점당 +1 레벨", result: "속도 및 반동 증가" },
+      { num: "4", text: "탄창 사격 규율", highlight: "명중률 40% 미만 시", result: "콤보 초기화 (-0.6초)" }
+    ],
     aboutTitle: "반동 제어 및 스프레이 패턴 과학",
     aboutIntro: [
       "반동 제어 훈련은 연사 사격 시 총기의 상향 반동과 좌우 탄튐에 맞서 마우스를 지속적으로 미세 조작하는 감각 운동 능력을 배양합니다.",
@@ -265,7 +272,8 @@ export default function RecoilControlKoPage() {
       "반동 제어 트레이너(Recoil Control Trainer)는 총기 고유의 스프레이 패턴, 수직 상승 속도, 수평 흔들림을 상쇄하는 근육 기억을 구축하는 전문 에임 훈련 도구입니다. 카운터 스트라이크 2, 발로란트, 배틀그라운드, 에이펙스 레전드 등 실전 FPS에서는 초탄 헤드샷 한 발로 끝나지 않는 난전이 빈번합니다. 적의 변칙 무빙 속에서도 풀오토 연사를 꽂아 넣는 집탄 제어력이 승패를 가릅니다.",
       "고속 반동 제어의 운동 학습 기전은 Schmidt & Lee(2011)의 일반화 운동 프로그램(GMP 이론)으로 설명됩니다. 10발의 탄환이 700ms 이내에 발사되는 초고속 환경에서는 시각 피드백을 보고 반응할 시간적 여유가 없으므로, 운동 피질에 내재화된 불변 매개변수를 갖는 개방 루프 운동이 즉각 실행되어야 합니다.",
       "이 과정은 Woodworth(1899)의 2성분 조준 모델 및 Meyer et al.(1988)의 최적 하위운동 모델과 일치합니다: 초반 탄도학적 수직 하향 드래그에 이어, 수평 탄튐과 적의 회피에 반응하는 미세 시각 추종 폐루프 보정이 결합되어 극강의 명중률이 완성됩니다.",
-      "운동 정밀도는 피츠의 법칙(Fitts, 1954)과 슈미트의 충격량 변동성 모델(Schmidt et al., 1979)을 따릅니다: 마우스를 과도하게 강하게 잡아당기면 근육의 운동 변동성이 커져 오히려 집탄이 망가집니다. 본 도구는 performance.now() 디지털 크로노메트리(Woods et al., 2015)를 적용하여 일정한 속도의 매끄러운 드래그 습관을 정착시킵니다."
+      "운동 정밀도는 피츠의 법칙(Fitts, 1954)과 슈미트의 충격량 변동성 모델(Schmidt et al., 1979)을 따릅니다: 마우스를 과도하게 강하게 잡아당기면 근육의 운동 변동성이 커져 오히려 집탄이 망가집니다. 본 도구는 performance.now() 디지털 크로노메트리(Woods et al., 2015)를 적용하여 일정한 속도의 매끄러운 드래그 습관을 정착시킵니다.",
+      "측정 기준 및 하드웨어 지연 시간: 모든 마우스 입력 이벤트는 외부 서버 전송 없이 브라우저 내장 고해상도 performance.now() 시계를 통해 로컬 기기에서만 정밀 측정됩니다. 브라우저 타이머는 스펙터(Spectre) 보안 완화 조치로 인해 약 1ms 단위로 양자화되며, 모니터 디스플레이는 주사율에 따라 시각 자극 프레임을 양자화합니다(60Hz 기준 약 16.7ms, 144Hz 기준 약 6.9ms, 240Hz 기준 약 4.1ms) (Woods et al., 2015). 마우스 폴링레이트는 125Hz에서 약 8ms, 1000Hz에서 1ms의 지연 편차를 추가합니다. 따라서 약 5ms 미만의 오차는 정상적인 측정 노이즈로 간주되며, 타인의 세팅과 단순 비교하기보다는 동일한 하드웨어 환경에서 본인의 기록 변화를 추적하는 것이 과학적입니다."
     ],
     benchmarks: {
       title: "탄창 명중률 및 반동 제어 숙련도 티어",
@@ -352,11 +360,13 @@ export default function RecoilControlKoPage() {
 
       <RecoilControlClient copy={copyKo} />
 
+      <DrillGuide guide={recoilGuideKo} />
+
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/recoil-control" locale="ko" />
       </div>
 
-      <DrillGuide guide={recoilGuideKo} />
+      <DrillFooter />
     </>
   );
 }

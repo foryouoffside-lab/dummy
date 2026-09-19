@@ -1,5 +1,6 @@
 import VerticalAirTrackClient from './VerticalAirTrackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -319,10 +320,17 @@ export default function VerticalAirTrackPage() {
       <VerticalAirTrackClient
         copy={{
           h1Keyword: "Vertical Aim Trainer",
-          h1Suffix: " - Free Airborne Tracking Drill"
+          h1Suffix: " - Free Airborne Tracking Drill",
+          rulesItems: [
+            { num: "1", text: "Airborne Target", highlight: "+100 PTS / +0.4s", result: "Track Parabolic Trajectory" },
+            { num: "2", text: "Height Bonus", highlight: "Up to +75 PTS", result: "Apex Destructions Award More" },
+            { num: "3", text: "Failure Rule", highlight: "Combo Reset", result: "Target Drop Penalty (-0.6s)" },
+            { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Gravity & Speed" }
+          ]
         }}
       />
       <DrillGuide guide={verticalAirTrackGuide} />
+      <DrillFooter />
     </>
   );
 }

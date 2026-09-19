@@ -1,5 +1,6 @@
 import AwarenessDrillClient from './AwarenessDrillClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -325,10 +326,19 @@ export default function AwarenessDrillPage() {
       <AwarenessDrillClient
         copy={{
           h1Keyword: "180° Aim Trainer",
-          h1Suffix: " — Snap Turn Awareness"
+          h1Suffix: " — Snap Turn Awareness",
+          subtitle: "Master rapid peripheral detection, large-angle flick transitions, and snap turn deceleration.",
+          stageCaption: "Spot and snap to targets spawning at extreme screen edges before their timer expires.",
+          rulesItems: [
+            { num: "1", text: "Edge Target Hit", highlight: "+100 PTS (+0.6s)", result: "×Combo Mult" },
+            { num: "2", text: "180° Spawns", highlight: "Extreme Peripheral", result: "Faster & Smaller" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1750 PTS", result: "Adaptive Scaling" },
+            { num: "4", text: "Miss / Timeout", highlight: "Penalty", result: "Resets Combo (-0.8s)" }
+          ]
         }}
       />
       <DrillGuide guide={awarenessGuide} />
+      <DrillFooter />
     </>
   );
 }

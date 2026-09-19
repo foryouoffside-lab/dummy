@@ -243,10 +243,13 @@ const faqSchema = {
 const digitSpanGuide = {
   heading: "Guide Scientifique de l Empan Digital et de la Memoire de Travail",
   intro: [
-    "Le test d empan digital (Digit Span) est l une des epreuves neuropsychologiques les plus emblematiques pour quantifier la capacite de la memoire a court terme verbale. Integre des 1939 aux echelles de Wechsler, il permet d evaluer directement l integrite de la boucle phonologique et du cortex prefrontal.",
-    "La retention de suites numeriques repose sur l interaction entre deux systemes decrits par Baddeley & Hitch (1974) : le magasin phonologique passif, sujet a un effacement rapide en 1,5 a 2 secondes, et la boucle de repetition articulatoire, qui rafraichit continuellement la trace mnesique par subvocalisation interne.",
-    "Dans son article princeps, George A. Miller (1956) a etabli le celebre seuil de 7 plus ou moins 2 items. Cependant, Nelson Cowan (2001) a demontre que sans strategie active de regroupement (chunking), l empan pur de l attention humaine n excede pas 4 unites independantes.",
-    "Ce test utilise une mesure de temps de reaction ultra-precise conforme aux standards de chronometrie cognitive de Woods et al. (2015)."
+    "Le test d empan digital (Digit Span Memory Test) est l evaluation neuropsychologique de reference pour mesurer la memoire de travail verbale, l empan mnesique a court terme et les capacites de traitement phonologique. Employe depuis plus d un siecle en psychologie cognitive et dans les batteries d intelligence clinique, l empan digital permet de quantifier les limites physiques du tampon de retention immediate de l esprit humain.",
+    "Les fondements theoriques de l epreuve reposent sur les travaux pionniers de George A. Miller (1956), « The Magical Number Seven, Plus or Minus Two », qui identifiait la capacite brute de la memoire immediate a environ sept elements distincts. David Wechsler (1939, 1955, 2008) a integre l empan digital direct, indirect et sequentiel a l Echelle d Intelligence pour Adultes de Wechsler (WAIS), en faisant l etalon-or clinique de l Indice de Memoire de Travail (IMT).",
+    "Dans le modele multicomposant d Alan Baddeley (Baddeley & Hitch, 1974 ; Baddeley, 1986, 2000), les sequences de chiffres sont maintenues dans la boucle phonologique. Le registre phonologique passif conserve les traces acoustiques qui s estompent en 1,5 a 2,0 secondes, a moins d etre continuellement rafraichies par la repetition articulatoire subvocale (« voix interieure »). Nelson Cowan (2001, 2010) a complete ces observations en demontrant que la capacite d attention focale brute non groupee est strictement limitee a 4 ± 1 elements ; l atteinte d empans superieurs repose donc exclusivement sur le regroupement strategique (chunking).",
+    "Integrant une chronometrie numerique de haute precision (Woods et al., 2015), cet entrainement mesure avec exactitude votre empan brut et votre cadence de frappe, convergeant vers votre veritable seuil de performance grace a un protocole psychometrique adaptatif en escalier.",
+    "Methodologie de mesure : chaque evenement est horodate a l aide de l horloge haute resolution performance.now() du navigateur, directement sur votre appareil sans aucune transmission vers des serveurs externes. Les compteurs du navigateur subissent un lissage delibere contre les failles Spectre (environ 1 ms), et l affichage quantifie chaque transition selon la frequence de rafraichissement de l ecran (environ 16,7 ms par image a 60 Hz) (Woods et al., 2015). Considerez les variations inferieures a 5 ms comme du bruit de mesure et comparez vos resultats sur le meme materiel informatique.",
+    "Transparence des donnees : SkillDrills ne collecte aucune donnee consolidee. Vos scores et configurations demeurent exclusivement stockes dans le localStorage de votre navigateur et ne sont jamais televerses ; ainsi, cette plateforme ne publie pas de moyennes globales arbitraires. Chaque donnee chiffree provient directement des publications scientifiques evaluees par des pairs citees dans la section References ci-dessous.",
+    "Cet exercice en ligne est un outil ludique d entrainement cerebral et de developpement personnel. Il ne constitue en aucun cas un dispositif medical, un instrument de diagnostic clinique, ni un protocole therapeutique pour les troubles cognitifs. Si vous avez des inquietudes concernant votre memoire ou votre fonctionnement cognitif, consultez un medecin ou un neuropsychologue qualifie."
   ],
   benchmarks: {
     title: "Baremes Neuropsychologiques de l Empan Digital (Population Adulte)",
@@ -293,11 +296,12 @@ const digitSpanGuide = {
   ],
   audience: "Etudiants preparant des examens, professionnels sous forte charge mentale, passionnes d entrainement cerebral et personnes souhaitant preserver leur acuite cognitive.",
   faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-  sources: pickSources('miller1956', 'cowan2001', 'baddeley1974', 'wechsler1945', 'woods2015'),
+  sources: pickSources('miller1956', 'cowan2001', 'baddeley1974', 'baddeley2000', 'logie1995', 'woods2015'),
   related: [
     { href: "/fr/drills/memory/short-term-memory/color-sequence", label: "Jeu Simon des Couleurs" },
     { href: "/fr/drills/memory/short-term-memory/word-recall", label: "Test de Memoire Verbale" },
     { href: "/fr/drills/memory/spatial-memory/grid-memorization", label: "Memoire Spatiale sur Grille" },
+    { href: "/fr/drills/memory/spatial-memory/object-location", label: "Localisation d Objets" },
     { href: "/fr/drills/memory/working-memory/n-back", label: "Test Dual N-Back" }
   ]
 };

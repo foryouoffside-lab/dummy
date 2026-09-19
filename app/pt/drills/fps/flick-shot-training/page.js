@@ -2,6 +2,8 @@ import ProFlickClient from '@/app/drills/fps/flick-shot-training/ProFlickClientL
 import DrillGuide from '@/components/drill/DrillGuide';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: "Treino de Flick Shot – Mira Rápida e Precisão | SkillDrills",
@@ -212,7 +214,7 @@ export default function FlickShotPtPage() {
         "@type": "HowToStep",
         "position": 3,
         "name": "Disparo Balístico Explosivo e Clique",
-        "text": "Realize uma aceleração contínua e rápida em direção ao centro do alvo, clicando antes do colapso do anel temporizador."
+        "text": "Realize uma aceleração contínua e rápida em direção ao centro do alvo, clicando com precisão antes de esgotar o tempo do alvo."
       },
       {
         "@type": "HowToStep",
@@ -284,7 +286,23 @@ export default function FlickShotPtPage() {
           desc: "A desaceleração eficiente depende do engajamento coordenado entre músculos flexores e extensores e da fricção intencional contra o tecido do mousepad."
         }
       ]
-    }
+    },
+    steps: [
+      "Clique em Iniciar Treino para abrir a arena de flick shot em tela cheia.",
+      "Mantenha o foco visual no centro da retícula.",
+      "Assim que o alvo surgir, movimente o mouse rapidamente até o centro do alvo e clique.",
+      "Evite arrastos lentos: priorize aceleração rápida seguida de frenagem firme sobre o alvo.",
+      "Analise sua taxa de acerto, tempo médio até o alvo e patente competitiva no placar final."
+    ],
+    audience: "Jogadores de FPS tático (Valorant, CS2, Rainbow Six Siege), Battle Royale (Apex Legends, Fortnite) e qualquer jogador buscando velocidade mecânica e precisão no primeiro tiro.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'elliott2010', 'fitts1954', 'schmidt1979'),
+    related: [
+      { href: "/pt/drills/fps/180-degree-awareness", label: "Consciência Espacial 180°" },
+      { href: "/pt/drills/fps/angle-hold-trainer", label: "Posicionamento de Mira e Retenção de Ângulos" },
+      { href: "/pt/drills/reaction-speed/reaction-time-test", label: "Teste de Tempo de Reação" },
+      { href: "/pt/drills/motor/movement-speed/rapid-tapping", label: "Teste de CPS e Velocidade de Cliques" }
+    ]
   };
 
   return (
@@ -316,7 +334,33 @@ export default function FlickShotPtPage() {
       <ProFlickClient
         copy={{
           h1Keyword: "Treino de Flick Shot",
-          h1Suffix: " – Mira Rápida e Precisão"
+          h1Suffix: " – Mira Rápida e Precisão",
+          subtitle: "Treine snap aim, memória motora balística, aquisição de alvos e frenagem de mouse com métricas em tempo real.",
+          statScore: "Pontuação",
+          statTime: "Tempo Restante",
+          statAccuracy: "Precisão",
+          statBestScore: "Recorde",
+          statAvgFlick: "Flick Médio",
+          statMaxCombo: "Combo Máximo",
+          statPeakLevel: "Nível Máximo",
+          startTitle: "Pro Flick Trainer",
+          startSubtitle: "Flicks Balísticos & Aquisição de Alvos • Progressão Infinita de Níveis",
+          getReady: "Prepare-se",
+          toggleFlash: "Flash ao Errar",
+          toggleSound: "Efeitos Sonoros",
+          pausedTitle: "Pausado",
+          pausedSubtitle: "Clique para continuar — O travamento do cursor será reativado.",
+          stageCaption: "Mire rapidamente nos alvos aleatórios e dispare com precisão antes que o tempo limite expire.",
+          rulesTitle: "Regras do Treino & Sistema de Pontuação",
+          rulesItems: [
+            { num: "1", text: "Alvo Atingido", highlight: "+100 PTS (+0,6s)", result: "×Multiplicador Combo" },
+            { num: "2", text: "Sequência de Combo", highlight: "Até 3.0×", result: "Alvos Mais Rápidos" },
+            { num: "3", text: "Subir de Nível", highlight: "+1 / 1800 PTS", result: "Escalonamento Adaptativo" },
+            { num: "4", text: "Erro / Tempo Esgotado", highlight: "Penalidade", result: "Zera Combo (-0,8s)" }
+          ],
+          aboutTitle: "Sobre o Pro Flick Trainer",
+          aboutHeading: "O que é Flick Aim?",
+          aboutText: "Flick aim é a capacidade neuromuscular de deslocar a retícula em um impulso balístico contínuo até o alvo e pará-la instantaneamente. Conforme a Lei de Fitts (1954), a dificuldade escala com a distância e o tamanho do alvo. O domínio reside na frenagem mecânica de oposição no mousepad (Elliott et al., 2010)."
         }}
       />
       <DrillGuide guide={flickGuide} />
@@ -327,6 +371,7 @@ export default function FlickShotPtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

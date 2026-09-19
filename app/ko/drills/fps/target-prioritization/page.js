@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "타겟 우선순위 에임 연습 – 위협 평가 트레이너 | SkillDrills",
@@ -233,10 +234,11 @@ export default function TargetPrioritizationKoPage() {
     heading: "타겟 우선순위 에임 트레이너 실전 가이드",
     subtitle: "난전 상황에서의 위협 평가 속도, 방해 자극 억제, 그리고 냉철한 사격 충동 제어를 완성하는 과학적 방법론",
     intro: [
-      "타겟 우선순위(Target Prioritization)는 다수의 적과 아군이 뒤엉키는 FPS의 난전 속에서 어떤 목표를 가장 먼저 격파하고, 어떤 대상에 대한 사격을 억제해야 하는지 찰나의 순간에 결정하는 고차원 인지 판단 기술입니다. 발로란트나 카운터스트라이크 2 같은 전술 슈팅 게임에서는 단순히 보이는 대상을 쏘는 것만으로는 부족하며, 진짜 위협을 꿰뚫어 보는 침착함이 승패를 결정합니다.",
-      "Anne Treisman과 Garry Gelade(1980)의 특징 통합 이론, 그리고 Michael I. Posner(1990)의 주의 네트워크 이론이 증명하듯, 인간의 시각 시스템은 공간적 위치 탐색과 대상 특성 선별을 별도의 신경 회로로 처리합니다. 나아가 Gordon D. Logan & Philip E. Cowan(1984)의 경주 모델에 따르면, 사격 실행 과정과 사격 정지 과정(Go/No-Go)은 뇌 속에서 치열하게 속도 경쟁을 벌입니다.",
-      "본 드릴은 즉시 제거해야 할 '고위협(빨강)', 시간이 지나면 위험해지는 '중위협(노랑)', 그리고 절대 쏴서는 안 되는 '아군(초록)'이 공존하는 실전 환경을 정밀 시뮬레이션합니다. F.C. Donders(1969)의 선택 반응시간 이론을 바탕으로 시각적 판단과 운동 억제의 시냅스를 빈틈없이 단련합니다.",
-      "측정 정확도 안내: 본 드릴은 브라우저의 performance.now() 고해상도 타이머를 활용하여 기기 내부에서 밀리초 단위로 정확히 실행됩니다. 디스플레이 주사율(60Hz/144Hz/240Hz)에 따른 프레임 지연이 발생하므로 5ms 미만의 미세 편차는 하드웨어 측정 노이즈로 간주하시기 바랍니다."
+      "타겟 우선순위(Target Prioritization) 에임 트레이너는 찰나의 순간에 전술적 위협도를 평가하고, 시각적 방해 요소를 필터링하며, 충동적인 격발을 제어하는 운동 억제 능력을 완성하는 고급 지각-인지 에임 드릴입니다. 발로란트, 카운터-스트라이크 2, 레인보우 식스 시즈, 에이펙스 레전드와 같은 정밀 전술 FPS에서는 클러치 승리 여부가 단순한 물리적 플릭 속도뿐 아니라 목표 선정 능력에 의해 좌우됩니다. 다수의 적과 아군이 뒤엉킨 혼전에서 어떤 대상을 가장 먼저 격파하고, 우선순위가 낮은 방해물이나 아군에 대한 사격을 침착하게 억제하는지가 라운드의 성패를 가릅니다.",
+      "운동 억제와 의사결정 통제의 신경학적 기반은 Logan and Cowan(1984)의 정지 신호 패러다임(Stop-Signal Paradigm)으로 설명됩니다. 그들의 연구에 따르면 인간의 행동 실행(Go 프로세스)과 행동 억제(Stop 프로세스)는 전두엽-기저핵 네트워크에서 두 마리의 말이 결승선을 향해 달리는 '경주 모델(Horse-Race Model)'처럼 상호 독립적으로 속도 경쟁을 벌입니다. 사격 억제 훈련을 받지 않은 플레이어는 위협 수준을 검증하기도 전에 검지 손가락을 까딱이는 패닉 사격을 범하게 됩니다.",
+      "선택적 시각 필터링 기전은 Donald E. Broadbent(1958)와 Anne Treisman(1964)의 초기 여과 및 감쇄 모델로 정립되었습니다. 여러 시각 자극이 망막의 인지 자원을 두고 경쟁할 때, 뇌는 하향식 주의 게이팅(Top-Down Attentional Gating; Posner & Petersen, 1990)을 작동시켜 비위협적인 아군 및 배경 무빙을 주변시에서 걸러내고 가장 치명적인 위협 벡터에 중심와 시각을 집중시킵니다.",
+      "본 드릴은 F.C. Donders(1868)의 Go/No-Go 식별 반응시간 모델에 performance.now() 디지털 정밀 크로노메트리(Woods et al., 2015)를 결합하여, 단순한 마우스 조준 감각과 실전 교전 압박 하에서의 즉각적인 전술적 의사결정 속도를 하나로 연결합니다.",
+      "측정 기준 및 하드웨어 지연 시간 안내: 모든 판정 이벤트는 브라우저 내장 performance.now() 고해상도 시계를 통해 로컬 기기 내에서만 정밀 측정되며 외부 서버로 데이터가 전송되지 않습니다. 브라우저 타이머는 스펙터(Spectre) 완화 조치로 약 1ms 단위로 양자화되며, 모니터 디스플레이는 주사율에 맞춰 시각 프레임을 양자화합니다(60Hz=약 16.7ms, 144Hz=약 6.9ms, 240Hz=약 4.1ms, Woods et al., 2015). 마우스 폴링레이트는 125Hz에서 약 8ms, 1000Hz에서 약 1ms의 지연 편차를 추가합니다. 따라서 약 5ms 미만의 차이는 기술적 측정 노이즈로 간주되며, 타인의 장비와 단순 비교하기보다는 동일한 하드웨어 환경에서 본인의 지연 시간 및 억제 성공률 개선도를 추적하십시오."
     ],
     benchmarks: {
       title: "타겟 우선순위 및 위협 평가 레이턴시 벤치마크 기준",
@@ -324,6 +326,7 @@ export default function TargetPrioritizationKoPage() {
         copy={{
           h1Keyword: "타겟 우선순위 에임 연습",
           h1Suffix: " - 위협 평가 & 사격 억제 트레이너",
+          subtitle: "실시간 피드백으로 다중 위협 평가, 시각적 인지 필터링, 사격 반응 억제 능력을 훈련하세요.",
           statScore: "점수",
           statTime: "남은 시간",
           statAccuracy: "정확도",
@@ -341,10 +344,10 @@ export default function TargetPrioritizationKoPage() {
           stageCaption: "최고 위협인 붉은색 타겟을 최우선 사격하고 노란색 타겟을 처리하세요. 아군(초록색)은 절대 사격하지 마세요.",
           rulesTitle: "훈련 규칙 및 점수 산정 방식",
           rulesItems: [
-            { num: "1", text: "고위협 타겟", highlight: "빨강 (+100점 / +0.4초)", result: "가장 먼저 신속히 격파 필수" },
-            { num: "2", text: "중위협 타겟", highlight: "노랑 (+50점 / +0.4초)", result: "타이머 만료 시 빨간색으로 승격" },
-            { num: "3", text: "아군 유닛", highlight: "초록 (사격 금지)", result: "아군 오사/미스 시 콤보 초기화" },
-            { num: "4", text: "레벨 상승", highlight: "매 1,400점마다 +1 레벨", result: "스폰 밀도 및 이동 속도 지속 증가" }
+            { num: "1", text: "고위협 타겟", highlight: "빨강 (+100점 / +0.4초)", result: "최우선 격파" },
+            { num: "2", text: "중위협 타겟", highlight: "노랑 (+50점 / +0.4초)", result: "시간 만료 시 빨강 승격" },
+            { num: "3", text: "아군 유닛", highlight: "초록 (사격 금지)", result: "오사/미스 시 콤보 초기화" },
+            { num: "4", text: "레벨 상승", highlight: "+1 / 1400점", result: "밀도 및 속도 지속 증가" }
           ],
           aboutTitle: "타겟 우선순위 에임 트레이너 소개",
           aboutHeading: "타겟 우선순위(Target Prioritization)란?",
@@ -359,6 +362,7 @@ export default function TargetPrioritizationKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import AngleHoldClient from '@/app/drills/fps/angle-hold-trainer/AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -326,10 +327,10 @@ export default function JapaneseAngleHoldPage() {
     overviewTitle: "置きエイムとプリエイムの仕組み",
     overviewLead: "置きエイムとは、敵が現れる位置にあらかじめ照準を合わせておき、敵が重なった瞬間に撃つ防衛技術です。人間の単純視覚反応時間は約200〜250msですが、敵の行動を判別する判断が加わると選択肢の数に応じて反応時間が対数的に増加します（Donders, 1868; Hick, 1952）。",
     rulesItems: [
-      { num: "1", text: "ターゲット命中", highlight: "+100 PTS (+0.6秒)", result: "× コンボ × レベル倍率" },
-      { num: "2", text: "コンボシステム", highlight: "最大3.0倍スコア", result: "連続命中でより速く厳しいピークが出現" },
-      { num: "3", text: "レベル進行", highlight: "+1レベル / 1400 PTS", result: "露出時間短縮と適応型ターゲット縮小" },
-      { num: "4", text: "見逃し・ミス・早撃ち", highlight: "ペナルティ", result: "コンボリセット（ペナルティ有効時 -0.8秒）" }
+      { num: "1", text: "ピーク命中", highlight: "+100 PTS (+0.6秒)", result: "×コンボ倍率" },
+      { num: "2", text: "ピーク出現", highlight: "角からの奇襲", result: "露出時間短縮" },
+      { num: "3", text: "レベル進行", highlight: "+1レベル / 1400 PTS", result: "適応型難易度" },
+      { num: "4", text: "ミス・早撃ち", highlight: "ペナルティ", result: "コンボリセット (-0.8s)" }
     ],
     aboutCards: [
       { iconBg: "bg-blue-600", title: "対象プレイヤー", text: "VALORANTでサイトを守るアンカー、CS2でチョークポイントを抑えるディフェンダー、およびミリ単位のプリエイム反応を極めたいFPSプレイヤー。" },
@@ -393,6 +394,7 @@ export default function JapaneseAngleHoldPage() {
       </div>
 
       <DrillGuide guide={angleHoldGuideJa} />
+      <DrillFooter />
     </>
   );
 }

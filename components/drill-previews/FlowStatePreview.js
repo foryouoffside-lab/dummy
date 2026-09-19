@@ -3,7 +3,7 @@
 // Flow State Trainer — authentic animated card preview.
 // Recreates the EXACT in-game visuals and mechanics from FlowInductionClient.js:
 // 1. Organic curving trajectory path
-// 2. Neon emerald tactical target (#00ff88) gliding along the flow curve
+// 2. Neon emerald tactical target (#10b981) gliding along the flow curve
 // 3. Player crosshair locked onto target with active tracking rings and continuous scoring feedback.
 
 export default function FlowStatePreview() {
@@ -14,7 +14,7 @@ export default function FlowStatePreview() {
         <svg className="fs-prev-path" viewBox="0 0 300 160" fill="none">
           <path
             d="M 20 80 Q 75 20, 150 80 T 280 80"
-            stroke="rgba(0, 255, 136, 0.14)"
+            stroke="rgba(16, 185, 129, 0.14)"
             strokeWidth="2"
             strokeDasharray="4 6"
           />

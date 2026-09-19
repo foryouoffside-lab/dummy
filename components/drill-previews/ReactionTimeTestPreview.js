@@ -54,7 +54,7 @@ export default function ReactionTimeTestPreview() {
 
     const spawnSparks = (cx, cy) => {
       particles = [];
-      const colors = ['#00ff88', '#38bdf8', '#ffffff', '#22d3ee'];
+      const colors = ['#10b981', '#34d399', '#38bdf8', '#ffffff'];
       for (let i = 0; i < 18; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 80 + 30;
@@ -205,7 +205,7 @@ export default function ReactionTimeTestPreview() {
 
         // Latency Error & Grade
         const subFontSize = Math.round(height * 0.08);
-        ctx.fillStyle = '#00ff88';
+        ctx.fillStyle = '#10b981';
         ctx.font = `bold ${subFontSize}px monospace`;
         ctx.fillText('+18ms  PERFECT', cx, cy + height * 0.09);
 
@@ -217,11 +217,11 @@ export default function ReactionTimeTestPreview() {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
         ctx.fillRect(cx - barW / 2, cy + height * 0.18, barW, barH);
 
-        ctx.fillStyle = '#00ff88';
+        ctx.fillStyle = '#10b981';
         ctx.fillRect(cx - barW / 2, cy + height * 0.18, barW * prog, barH);
 
         // Click Crosshair
-        const chColor = '#00ff88';
+        const chColor = '#10b981';
         ctx.strokeStyle = chColor;
         ctx.fillStyle = chColor;
 

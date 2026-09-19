@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  AlertCircle, Brain, Crosshair,
+  Brain, Crosshair,
   Target, TrendingUp, Volume2, VolumeX,
   Zap, ZapOff, Users
 } from 'lucide-react';
@@ -19,9 +19,7 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
@@ -76,9 +74,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Successful Hit (+100 PTS)", text: "Chain hits to build score and combo multiplier up to 3.0x max." },
-  { title: "180° Edge Spawns & Streak Heat", text: "Targets spawn at extreme left/right edges, shrinking & speeding up as your streak grows." },
-  { title: "Miss / Timeout", text: "Missing a target or letting one time out resets your combo streak. If the time penalty is enabled in settings, it also costs you 0.8 seconds." }
+  { num: "1", text: "Edge Target Hit", highlight: "+100 PTS (+0.6s)", result: "×Combo Mult" },
+  { num: "2", text: "180° Spawns", highlight: "Extreme Peripheral", result: "Faster & Smaller" },
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1750 PTS", result: "Adaptive Scaling" },
+  { num: "4", text: "Miss / Timeout", highlight: "Penalty", result: "Resets Combo (-0.8s)" }
 ];
 
 
@@ -172,31 +171,17 @@ export default function AwarenessDrillClient({ copy = null }) {
     };
   }, []);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    gameActiveRef.current = false;
 
     setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
     setGameState('start');
-  }, []);
-
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
   }, []);
 
   const spawnTarget = useCallback((time, width, height, currentLevel, currentCombo) => {
@@ -237,7 +222,7 @@ export default function AwarenessDrillClient({ copy = null }) {
   }, []);
 
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 4 + 1;
       engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
@@ -362,11 +347,42 @@ export default function AwarenessDrillClient({ copy = null }) {
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, []);
 
+  // Handle ESC / pointer lock drop / fullscreen exit directly
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
-    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+    const handleKeyDown = (e) => {
+      if (e.code === 'Escape') {
+        if (gameState === 'playing' || gameState === 'countdown') {
+          handleExitDrill();
+        }
+      }
+    };
+
+    const handleLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked);
+      if (!isLocked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      setIsFullscreen(isFs);
+      if (!isFs && isFullscreen && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('pointerlockchange', handleLockChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('pointerlockchange', handleLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isFullscreen, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -382,11 +398,8 @@ export default function AwarenessDrillClient({ copy = null }) {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (!containerRef.current || !containerRef.current.contains(e.target)) return;
 
-      if (gameState === 'playing') {
-        if (!pointerLocked && canvasRef.current) {
-          resumeDrill();
-        } else if (pointerLocked) {
-          const eRef = engine.current;
+      if (gameState === 'playing' && pointerLocked) {
+        const eRef = engine.current;
           const ch = eRef.crosshair;
           const tgt = eRef.target;
           const config = getLevelConfig(eRef.level, eRef.combo);
@@ -422,7 +435,7 @@ export default function AwarenessDrillClient({ copy = null }) {
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
               drillAudio.playHit();
-              const hitColor = eRef.combo >= 10 ? '#5eead4' : '#00ff88';
+              const hitColor = eRef.combo >= 10 ? '#34d399' : '#10b981';
               createExplosion(tgt.x, tgt.y, hitColor);
               eRef.hitRings.push(createHitRing(tgt.x, tgt.y, tgt.radius, hitColor));
               createHitMarker(ch.x, ch.y);
@@ -442,8 +455,7 @@ export default function AwarenessDrillClient({ copy = null }) {
             }
           }
         }
-      }
-    };
+      };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mousedown', handleMouseDown);
@@ -451,7 +463,7 @@ export default function AwarenessDrillClient({ copy = null }) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, universalSens, triggerFlash, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash]);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -602,10 +614,8 @@ export default function AwarenessDrillClient({ copy = null }) {
 
       if ((gameState === 'playing' || gameState === 'start') && e.target.active) {
         const tgt = e.target;
-        const progress = Math.min(1, tgt.age / tgt.ttl);
-        const targetColor = e.combo >= 10 ? '#5eead4' : '#00ff88';
+        const targetColor = e.combo >= 10 ? '#34d399' : '#10b981';
 
-        drawPulseRing(ctx, tgt.x, tgt.y, tgt.radius, targetColor, progress);
         drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, true);
       }
 
@@ -625,11 +635,31 @@ export default function AwarenessDrillClient({ copy = null }) {
       }
       ctx.globalAlpha = 1.0;
 
+      // Render dynamic particles
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) {
+          e.particles.splice(i, 1);
+          continue;
+        }
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
-        ctx.strokeStyle = activeColor;
-        ctx.fillStyle = activeColor;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
 
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2); ctx.stroke();
@@ -644,6 +674,7 @@ export default function AwarenessDrillClient({ copy = null }) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -699,6 +730,9 @@ export default function AwarenessDrillClient({ copy = null }) {
               <span data-seo-kw="1">{copy?.h1Keyword || "180° Aim Trainer"}</span>
               {copy?.h1Suffix !== undefined ? copy.h1Suffix : " — Snap Turn Awareness"}
             </h1>
+            <p className="text-sm text-slate-400 font-medium">
+              {copy?.subtitle || "Master rapid peripheral detection, large-angle flick transitions, and snap turn deceleration."}
+            </p>
           </div>
         )}
 
@@ -783,26 +817,8 @@ export default function AwarenessDrillClient({ copy = null }) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
@@ -860,12 +876,9 @@ export default function AwarenessDrillClient({ copy = null }) {
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
                 {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
-                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
-                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
-                  </div>
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
             </DrillAccordion>
@@ -912,7 +925,7 @@ export default function AwarenessDrillClient({ copy = null }) {
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
                       <h4 className="text-xs font-bold text-white">180° Flick Consistency</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Chain rapid full-turn snaps onto shrinking, edge-spawning targets to build the muscle memory for clean blind flicks under pressure.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Chain rapid full-turn snaps onto edge-spawning targets to build the muscle memory for clean blind flicks under pressure.</p>
                   </div>
                 </div>
               </div>
@@ -920,12 +933,26 @@ export default function AwarenessDrillClient({ copy = null }) {
           </div>
         )}
 
-
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+    </div>
+  );
+}
+
+// === Subcomponents ===
+function RuleItem({ num, text, highlight = '', result }) {
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
+        </p>
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
+          {result}
+        </div>
+      </div>
     </div>
   );
 }

@@ -18,7 +18,7 @@ import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
@@ -56,6 +56,33 @@ const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: n
 
 type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
 
+const RULES_ITEMS = [
+  {
+    num: '1',
+    text: 'Timing Accuracy',
+    highlight: '+250 PTS',
+    result: 'Sub-10ms error earns EXACT bonus',
+  },
+  {
+    num: '2',
+    text: 'Combo Stacking',
+    highlight: 'Up to 3.0x',
+    result: 'Consecutive hits multiply point gains',
+  },
+  {
+    num: '3',
+    text: 'Timing Miss',
+    highlight: 'Combo Reset',
+    result: 'Triggers red alert, score safe',
+  },
+  {
+    num: '4',
+    text: 'Unlimited Time',
+    highlight: 'Free Mode',
+    result: 'Play at your pace until you click End Drill',
+  },
+];
+
 interface ReactionTimeTestClientProps {
   copy?: {
     title?: string;
@@ -92,6 +119,7 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
     perfectHits: 0,
     avgReactionTime: 0, // avg error in ms
     finalLevel: 1,
+    maxCombo: 0,
     grade: null as any
   });
 
@@ -100,6 +128,7 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const mousePosRef = useRef<{ x: number; y: number } | null>(null);
 
   const engine = useRef({
     state: 'TARGET', // 'TARGET' | 'TIMER' | 'RESULT'
@@ -154,6 +183,26 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
     onUnexpectedExit: handleExitDrill,
   });
 
+  // Direct Escape and Fullscreen Exit Lifecycle
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown' || isFullscreen)) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isFullscreen, handleExitDrill]);
+
   // Complete Drill Session cleanly when user clicks "End Drill"
   const endGame = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -176,6 +225,7 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
       perfectHits: e.perfectHits,
       avgReactionTime: avgErr,
       finalLevel: e.level,
+      maxCombo: e.maxCombo,
       grade: gradeObj
     });
 
@@ -233,6 +283,7 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
     setUiLevel(startLevel);
     setLiveAvgError(0);
     setIsNewBest(false);
+    mousePosRef.current = null;
 
     engine.current = {
       state: 'TARGET',
@@ -349,7 +400,7 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
           basePts = 25; rating = 'EXACT'; flashColor = '#fbbf24';
           eRef.exactHits++;
         } else if (errorAbs <= tPerfect) {
-          basePts = 10; rating = 'PERFECT'; flashColor = '#00ff88';
+          basePts = 10; rating = 'PERFECT'; flashColor = '#10b981';
           eRef.perfectHits++;
         } else if (errorAbs <= tExcellent) {
           basePts = 8; rating = 'EXCELLENT'; flashColor = '#3b82f6';
@@ -576,6 +627,49 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
       }
       ctx.globalAlpha = 1.0;
 
+      // Tactical Pro White Crosshair (R5)
+      if (mousePosRef.current) {
+        const mx = mousePosRef.current.x;
+        const my = mousePosRef.current.y;
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+
+        // Top
+        ctx.beginPath();
+        ctx.moveTo(mx, my - 4);
+        ctx.lineTo(mx, my - 14);
+        ctx.stroke();
+
+        // Bottom
+        ctx.beginPath();
+        ctx.moveTo(mx, my + 4);
+        ctx.lineTo(mx, my + 14);
+        ctx.stroke();
+
+        // Left
+        ctx.beginPath();
+        ctx.moveTo(mx - 4, my);
+        ctx.lineTo(mx - 14, my);
+        ctx.stroke();
+
+        // Right
+        ctx.beginPath();
+        ctx.moveTo(mx + 4, my);
+        ctx.lineTo(mx + 14, my);
+        ctx.stroke();
+
+        // Center dot
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(mx, my, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
       ctx.restore();
       animationRef.current = requestAnimationFrame(loop);
     };
@@ -721,8 +815,23 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
           {/* CANVAS */}
           <canvas
             ref={canvasRef}
-            onPointerDown={(e) => handleInteraction(e.clientX, e.clientY)}
-            className="block absolute top-0 left-0 w-full h-full z-10 cursor-pointer touch-none"
+            onPointerDown={(e) => {
+              if (canvasRef.current) {
+                const rect = canvasRef.current.getBoundingClientRect();
+                mousePosRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+              }
+              handleInteraction(e.clientX, e.clientY);
+            }}
+            onPointerMove={(e) => {
+              if (canvasRef.current) {
+                const rect = canvasRef.current.getBoundingClientRect();
+                mousePosRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+              }
+            }}
+            onPointerLeave={() => {
+              mousePosRef.current = null;
+            }}
+            className={`block absolute top-0 left-0 w-full h-full z-10 touch-none ${gameState === 'playing' ? 'cursor-none' : 'cursor-pointer'}`}
           />
 
           {/* START CARD */}
@@ -742,77 +851,23 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
             <DrillCountdown value={countdownValue} subtitle={t('reactionTimeTest.getReady', 'GET READY')} />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    {t('reactionTimeTest.newBest', 'NEW BEST')}
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color} font-mono`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1 font-mono">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums font-mono">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-mono">{t('reactionTimeTest.points', 'Points')}</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-
-                {/* 3 Stat Tiles */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white font-mono">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">{t('reactionTimeTest.accuracy', 'Accuracy')}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-cyan-400 font-mono">±{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">{t('reactionTimeTest.avgError', 'Avg Error')}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white font-mono">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">{t('reactionTimeTest.peakLevel', 'Peak Level')}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> {t('reactionTimeTest.playAgain', 'Play Again')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sharePage}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title={t('reactionTimeTest.shareScore', 'Share Score')}
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title={t('reactionTimeTest.returnOptions', 'Return to Options')}
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="cyan"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Avg Error', value: `±${analytics.avgReactionTime}`, suffix: 'ms' },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={sharePage}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -833,31 +888,10 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem
-                  num="1"
-                  text={t('reactionTimeTest.rule1Text', 'Timing Accuracy')}
-                  highlight={t('reactionTimeTest.rule1Highlight', 'Up to +250 PTS')}
-                  result={t('reactionTimeTest.rule1Result', 'Sub-10ms error earns EXACT bonus')}
-                />
-                <RuleItem
-                  num="2"
-                  text={t('reactionTimeTest.rule2Text', 'Combo Stacking')}
-                  highlight={t('reactionTimeTest.rule2Highlight', 'Up to 3.0x')}
-                  result={t('reactionTimeTest.rule2Result', 'Consecutive hits multiply point gains')}
-                />
-                <RuleItem
-                  num="3"
-                  text={t('reactionTimeTest.rule3Text', 'Timing Miss')}
-                  highlight={t('reactionTimeTest.rule3Highlight', 'Combo Reset')}
-                  result={t('reactionTimeTest.rule3Result', 'Triggers red alert, score safe')}
-                />
-                <RuleItem
-                  num="4"
-                  text={t('reactionTimeTest.rule4Text', 'Unlimited Time')}
-                  highlight={t('reactionTimeTest.rule4Highlight', 'Free Mode')}
-                  result={t('reactionTimeTest.rule4Result', 'Play at your pace until you click End Drill')}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-sans">
+                {RULES_ITEMS.map((r) => (
+                  <RuleItem key={r.num} {...r} />
+                ))}
               </div>
             </DrillAccordion>
 
@@ -944,9 +978,6 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
           </section>
         )}
 
-        {/* SITE FOOTER */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
@@ -955,13 +986,15 @@ export default function ReactionTimeTestClient({ copy }: ReactionTimeTestClientP
 // === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0 font-mono">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans min-w-0">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-lg flex-shrink-0 font-mono">
+        {num}
+      </div>
+      <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
+        <p className="text-xs sm:text-sm font-medium text-gray-100 font-sans truncate min-w-0">
           {text}{highlight && <span className="font-black text-white font-mono"> ({highlight})</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left font-mono">
+        <div className="text-[11px] sm:text-xs font-black px-2.5 py-1 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide flex-shrink-0 font-mono">
           {result}
         </div>
       </div>

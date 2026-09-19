@@ -1,6 +1,7 @@
 import PrecisionFlickShotClient from '@/app/drills/motor/hand-eye-coordination/precision-flick-shot/PrecisionFlickShotClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -326,6 +327,26 @@ const guideProps = {
   },
 };
 
+const copyKo = {
+  title: "플릭 에임 연습・마우스 정확도 테스트",
+  subtitle: "동적 타깃 축소 & 불스아이 마이크로 플릭 • 무제한 레벨 스케일링",
+  startButtonText: "훈련 시작",
+  playAgainText: "다시 도전",
+  shareText: "결과 공유",
+  exitText: "나가기",
+  accuracyLabel: "적중률",
+  targetHitsLabel: "타깃 격파",
+  bullseyesLabel: "불스아이",
+  peakLevelLabel: "최고 레벨",
+  rulesTitle: "드릴 조작법 & 점수 획득 규칙",
+  rulesItems: [
+    { num: "1", text: "불스아이 명중", highlight: "+200점 / +0.6초", result: "중심 핵 정밀 타격" },
+    { num: "2", text: "일반 타깃 격파", highlight: "+100점 / +0.6초", result: "주변부 신속 포착 및 격발" },
+    { num: "3", text: "레벨 난이도 상승", highlight: "1400점마다 +1 레벨", result: "타깃 축소 및 생존 시간 단축" },
+    { num: "4", text: "빗맞힘 / 시간 초과", highlight: "콤보 초기화", result: "패널티 적용 시 -0.8초 차감" }
+  ],
+};
+
 export default function PrecisionFlickShotPage() {
   return (
     <>
@@ -353,11 +374,16 @@ export default function PrecisionFlickShotPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <PrecisionFlickShotClient copy={{ title: "정밀 플릭 샷 트레이너" }} />
+      <PrecisionFlickShotClient copy={copyKo} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/ko/drills/motor/hand-eye-coordination/precision-flick-shot" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/precision-flick-shot"
+          locale="ko"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

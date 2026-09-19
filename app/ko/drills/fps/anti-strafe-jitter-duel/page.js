@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from '@/app/drills/fps/anti-strafe-jitter-duel/AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -331,10 +332,10 @@ export default function AntiStrafeJitterKoPage() {
           stageCaption: "급격하게 좌우로 방향을 전환하는 고빈도 ADAD 무빙 목표물 위에 조준선을 지속해서 유지하세요.",
           rulesTitle: "훈련 규칙 & 점수 체계",
           rulesItems: [
-            { num: "1", text: "에임 안착 정렬", highlight: "+10점 / 0.25초", result: "목표물에 조준선을 계속 유지" },
-            { num: "2", text: "연속 트래킹 유지", highlight: "+0.4초 / 초", result: "콤보 배수를 최대 3.0배까지 누적" },
-            { num: "3", text: "난이도 레벨 진행", highlight: "1,400점당 +1레벨", result: "이동 속도와 방향 전환 빈도 지속 증가" },
-            { num: "4", text: "에임 이탈 감점", highlight: "실패 패널티", result: "1.0초 이상 이탈 시 콤보 리셋 (설정 활성화 시 -0.6초)" }
+            { num: "1", text: "조준선 정렬", highlight: "+50점 (+0.4초/초)", result: "콤보 배율 적용" },
+            { num: "2", text: "연속 록온", highlight: "최대 3.0배", result: "최대 배율" },
+            { num: "3", text: "레벨 상승", highlight: "+1 레벨 / 1400점", result: "가변 지터 가속" },
+            { num: "4", text: "이탈 페널티", highlight: "1.0초 타깃 이탈", result: "콤보 초기화 (-0.6초)" }
           ],
           aboutTitle: "무빙 트래킹 에임 훈련 정보",
           aboutHeading: "리액티브 트래킹(무빙 추적)이란 무엇인가요?"
@@ -348,6 +349,7 @@ export default function AntiStrafeJitterKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

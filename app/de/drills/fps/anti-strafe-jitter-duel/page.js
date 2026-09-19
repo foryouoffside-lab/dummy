@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from '@/app/drills/fps/anti-strafe-jitter-duel/AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -335,10 +336,10 @@ export default function AntiStrafeJitterDePage() {
           stageCaption: "Halte dein Fadenkreuz auf unberechenbaren, schnellen ADAD-Zielen. Vermeide Verkrampfung für geschmeidige Richtungswechsel!",
           rulesTitle: "Trainingsregeln & Punktesystem",
           rulesItems: [
-            { num: "1", text: "Zielkontakt", highlight: "+10 PKT pro Tick", result: "Kontinuierliches Fadenkreuz-Halten" },
-            { num: "2", text: "Richtungswechsel", highlight: "Reaktives Tracking", result: "Schnelle sensorische Korrektur" },
-            { num: "3", text: "Level-Progression", highlight: "Alle 1.400 PKT +1 Level", result: "Steigende Frequenz & Geschwindigkeit" },
-            { num: "4", text: "Tracking-Präzision", highlight: "Kein Death-Gripping", result: "Flüssiges Gleiten statt Ruckeln" }
+            { num: "1", text: "Zielerfassung", highlight: "+50 PKT (+0,4s/s)", result: "×Combo-Multiplikator" },
+            { num: "2", text: "Kontinuierlicher Lock", highlight: "Bis zu 3,0×", result: "Maximal-Multiplikator" },
+            { num: "3", text: "Levelprogression", highlight: "+1 Stufe / 1400 PKT", result: "Adaptives Jitter-Strafing" },
+            { num: "4", text: "Abreiß-Strafe", highlight: "1,0s Zielverlust", result: "Setzt Combo zurück (-0,6s)" }
           ],
           aboutTitle: "Über Anti-Strafe Jitter Tracking"
         }}
@@ -351,6 +352,7 @@ export default function AntiStrafeJitterDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

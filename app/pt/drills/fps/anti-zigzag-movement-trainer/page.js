@@ -1,5 +1,6 @@
 import AntiZigzagClient from '@/app/drills/fps/anti-zigzag-movement-trainer/AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -329,18 +330,19 @@ export default function AntiZigzagPtPage() {
           stageCaption: "Mantenha a mira em alvos evasivos com trajetórias em zigue-zague imprevisíveis. Foque no corredor central!",
           rulesTitle: "Regras do Treino & Pontuação",
           rulesItems: [
-            { num: "1", text: "Contato com o Alvo", highlight: "Dano Contínuo", result: "Mantém tempo de mira ativo" },
-            { num: "2", text: "V-Crossover", highlight: "Foque no Centro", result: "Evita overshoot nos pontos de virada" },
-            { num: "3", text: "Progressão de Nível", highlight: "A cada 1.400 PTS +1 Nível", result: "Maior velocidade e frequência de zigue-zague" },
-            { num: "4", text: "Pegada Relaxada", highlight: "Sem Tensão Excessiva", result: "Deslizamento suave em vez de travamentos" }
+            { num: "1", text: "Alinhamento de Mira", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+            { num: "2", text: "Destruição do Alvo", highlight: "+25 PTS Bônus", result: "Reset HP & Respawn" },
+            { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Zigue-Zague Adaptativo" },
+            { num: "4", text: "Fuga do Alvo", highlight: "Tempo Expirado", result: "Reinicia Combo (-0.6s)" }
           ],
           aboutTitle: "Sobre o Treino Anti Zigue-Zague"
         }}
       />
+      <DrillGuide guide={ptGuide} />
       <div className="max-w-6xl mx-auto px-4 w-full">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/anti-zigzag-movement-trainer" locale="pt" />
       </div>
-      <DrillGuide guide={ptGuide} />
+      <DrillFooter />
     </>
   );
 }

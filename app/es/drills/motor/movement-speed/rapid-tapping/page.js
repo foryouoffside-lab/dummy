@@ -2,6 +2,7 @@ import RapidTappingClient from '@/app/drills/motor/movement-speed/rapid-tapping/
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -320,12 +321,39 @@ const guideProps = {
     ],
   },
   faqs: {
-    title: 'Preguntas Frecuentes Sobre el Test de CPS y Velocidad de Clic (FAQ)',
+    title: 'Preguntas Frecuentes sobre CPS y Velocidad de Clic (FAQ)',
     items: faqSchema.mainEntity.map((q) => ({
       q: q.name,
       a: q.acceptedAnswer.text,
     })),
   },
+};
+
+const esCopy = {
+  title: "Test de CPS",
+  desc: "Un test de CPS mide cuántas veces puedes pulsar el botón del ratón en un segundo. El cliqueo estándar con un solo dedo suele rondar los 5–7 clics por segundo (norma de tapping de Halstead, 50–55 golpes/10s). Las puntuaciones superiores provienen de técnicas avanzadas como jitter o butterfly clicking.",
+  score: "Puntuación",
+  timeLeft: "Tiempo Restante",
+  cpsRate: "CPS Actual",
+  bestScore: "Mejor Puntuación",
+  startButtonText: "Comenzar Entrenamiento",
+  startSubtitle: "Entrenador de Velocidad de Clic • Entrada Directa 1:1",
+  getReady: "PREPÁRATE",
+  playAgain: "Entrenar de Nuevo",
+  shareTitle: "Compartir Puntuación",
+  exitTitle: "Salir",
+  avgCps: "CPS Promedio",
+  totalClicks: "Total de Clics",
+  maxDifficulty: "Dificultad Máx.",
+  peakCps: "CPS Máximo",
+  newBest: "NUEVO RÉCORD",
+  rulesTitle: "Instrucciones del Ejercicio y Sistema de Puntos",
+  rulesItems: [
+    { num: "1", text: "Golpe Rápido al Objetivo", highlight: "Objetivo Esmeralda", result: "Cada clic expande el radio y frena el decaimiento" },
+    { num: "2", text: "Umbral de Puntuación", highlight: "+1 Punto cada 10 Clics", result: "Acumula puntuación final de sesión" },
+    { num: "3", text: "Encogimiento Dinámico", highlight: "Acelera con la Puntuación", result: "Exige máxima cadencia y resistencia muscular" },
+    { num: "4", text: "Técnicas de Cliqueo", highlight: "Jitter / Butterfly / Raw", result: "Maximiza la velocidad pura de entrada" }
+  ],
 };
 
 export default function SpanishRapidTappingPage() {
@@ -356,14 +384,14 @@ export default function SpanishRapidTappingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <RapidTappingClient />
+      <RapidTappingClient copy={esCopy} />
 
       <DrillGuide {...guideProps} />
 
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/rapid-tapping" />
+        <RelatedDrills currentCategory="motor" currentHref="/es/drills/motor/movement-speed/rapid-tapping" />
       </div>
+      <DrillFooter />
     </>
   );
 }
-

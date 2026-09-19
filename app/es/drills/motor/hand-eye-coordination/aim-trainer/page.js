@@ -1,6 +1,8 @@
 import AimTrainerClient from '@/app/drills/motor/hand-eye-coordination/aim-trainer/AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
+import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -248,6 +250,38 @@ export default function AimTrainerSpanishPage() {
           title: 'Aim Trainer Online (Entrenador de Puntería)',
           subtitle: 'Objetivos en Movimiento Dinámicos & Precisión de Clic • Niveles Infinitos',
           caption: 'Apunta y haz clic en los objetivos en movimiento lo más rápido y preciso posible antes de que expiren. Basado en la Ley de Fitts.',
+          startButtonText: 'INICIAR ENTRENAMIENTO',
+          playAgainText: 'Jugar de Nuevo',
+          shareText: 'Compartir Puntuación',
+          exitText: 'Salir',
+          rulesTitle: 'Instrucciones & Sistema de Puntuación',
+          aboutTitle: 'Sobre Aim Trainer Elite',
+          rulesItems: [
+            {
+              num: "1",
+              text: "Impacto al Blanco",
+              highlight: "+100 PTS / +0,6s",
+              result: "Detecta y haz clic en blancos móviles"
+            },
+            {
+              num: "2",
+              text: "Combo Continuo",
+              highlight: "Hasta 3,0× Multiplicador",
+              result: "Encadena aciertos limpios sin fallar"
+            },
+            {
+              num: "3",
+              text: "Progresión de Nivel",
+              highlight: "+1 Nivel / 1750 PTS",
+              result: "Los blancos se reducen y aceleran"
+            },
+            {
+              num: "4",
+              text: "Fallo y Expiración",
+              highlight: "Reinicio de Combo",
+              result: "Penalización activa resta -0,8s"
+            }
+          ]
         }}
       />
 
@@ -348,6 +382,9 @@ export default function AimTrainerSpanishPage() {
         </div>
 
         <h3>4 Claves para un Entrenamiento Efectivo de Puntería</h3>
+        <p>
+          Para comprimir sistemáticamente la latencia de adquisición y maximizar la precisión en micro-flicks, aplique estos cuatro protocolos motores basados en la evidencia durante sus sesiones:
+        </p>
         <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
           <li>
             <strong>Flick Inicial Decidido (Woodworth, 1899):</strong> Recorre la mayor parte de la distancia en un solo movimiento fluido y sin titubeos.
@@ -427,6 +464,14 @@ export default function AimTrainerSpanishPage() {
           </div>
         </div>
       </DrillGuide>
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/aim-trainer"
+          locale="es"
+        />
+      </div>
+      <DrillFooter />
     </>
   );
 }

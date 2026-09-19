@@ -1,5 +1,6 @@
 import ReactionSimulatorWrapper from '@/app/drills/reaction-speed/reaction-game/ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
@@ -245,6 +246,30 @@ const faqSchema = {
         text: 'Sessões diárias de 5 a 10 minutos antes de jogar são ideais para aquecer a coordenação motora sem sobrecarregar tendões ou visão.',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'Quais tipos de jogos avaliam o tempo de reação?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'O tempo de reação é testado por cronômetros de clique visual simples (Simple Reaction Time), jogos de interceptação de alvos dinâmicos em queda, jogos de ritmo acelerado e treinadores de mira para FPS táticos que exigem processamento sensorial rápido.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Quais jogos melhoram a coordenação olho-mão mais eficazmente?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Jogos de alvos em queda vertical, títulos de ação rítmica e exercícios de rastreamento visual rápido treinam fortemente a coordenação óculo-manual ao exigir alinhamento espacial imediato entre a fixação visual e o ponteiro do mouse.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Este jogo de reflexo é gratuito e sem cadastro?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sim, o jogo de reflexo da SkillDrills é 100% gratuito, executado diretamente no seu navegador de internet sem necessidade de downloads, cadastros ou anúncios invasivos.',
+      },
+    },
   ],
 };
 
@@ -254,6 +279,7 @@ const reactionGameGuidePt = {
     'Um jogo de reflexo é uma ferramenta interativa criada para testar e condicionar a velocidade de resposta neuromuscular, o rastreamento ocular e a coordenação olho-mão através de estímulos rápidos.',
     'Diferente dos testes simples de clique com luz vermelha e verde, este jogo multi-faixas exige tempo de reação de escolha regido pela Lei de Hick (Hick, 1952): o cérebro precisa localizar esferas em queda livre, calcular sua aceleração e executar o clique antes que alcancem o limite inferior.',
     'Metodologia de Medição & Latência: A telemetria de resposta é registrada localmente pelo navegador via API performance.now(), eliminando atrasos de rede. Monitores padrão de 60Hz impõem até 16,7 ms de atraso de buffer, enquanto painéis de 144Hz (6,9 ms) e 240Hz (4,1 ms) proporcionam maior fidelidade (Woods et al., 2015).',
+    'Metodologia de medição e fatores de hardware: cada evento é registrado com carimbo de alta precisão via performance.now() diretamente no seu dispositivo, sem envio de dados a servidores externos. Os cronômetros dos navegadores são deliberadamente suavizados para cerca de 1 ms por segurança contra vulnerabilidades Spectre, e sua tela quantiza os estímulos conforme a taxa de atualização (16,7 ms a 60 Hz, 6,9 ms a 144 Hz e 4,1 ms a 240 Hz; Woods et al., 2015). A taxa de varredura do mouse (polling rate) adiciona ~8 ms a 125 Hz em comparação a ~1 ms a 1000 Hz. Trate variações inferiores a 5 ms como ruído experimental e compare suas séries sempre no mesmo hardware.',
   ],
   benchmarks: {
     title: 'Tabela de Desempenho e Níveis de Pontuação no Jogo de Reflexo (45 segundos)',
@@ -322,6 +348,7 @@ export default function PortugueseReactionGamePage() {
 
       <ReactionSimulatorWrapper copy={{ title: 'Jogo de Reflexo Online' }} />
       <DrillGuide guide={reactionGameGuidePt} />
+      <DrillFooter />
     </>
   );
 }

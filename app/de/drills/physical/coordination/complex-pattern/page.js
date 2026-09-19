@@ -2,6 +2,7 @@ import ComplexPatternClient from '@/app/drills/physical/coordination/complex-pat
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — Germany (DE / DACH)
@@ -323,7 +324,10 @@ const patternGuide = {
     "Beobachte nach dem Countdown den grün aufleuchtenden Pfad und strukturiere die Wegpunkte.",
     "Klicke nach dem Erlöschen auf den cyanfarbenen Startknoten und starte die Zugbewegung.",
     "Verbinde alle Wegpunkte in der korrekten Reihenfolge und lasse die Maustaste am Zielknoten los."
-  ]
+  ],
+  audience: "E-Sportler (FPS-Gamer für Recoil-Pattern-Control), Teilnehmer an medizinischen/kognitiven Eignungstests (TMS, MedAT Figuren und Fakten lernen) sowie alle, die visuell-räumliches Vorstellungsvermögen und Feinmotorik schulen möchten.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('baddeley1974', 'cowan2001', 'lashley1951', 'woodworth1899', 'woods2015')
 };
 
 export default function ComplexPatternPageDe() {

@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "ターゲット捕捉 エイム練習 – 初弾精度トレーナー | SkillDrills",
@@ -229,10 +230,11 @@ export default function TargetAcquisitionJaPage() {
     title: "ターゲット捕捉 エイム練習 実践マニュアル",
     subtitle: "視覚識別スピード、特徴対比の判別力、そして初弾ヘッドショット精度を科学的プロトコルで極限まで高める",
     intro: [
-      "ターゲット捕捉（Target Acquisition）は、視野内の雑多なビジュアル情報から瞬時に敵の姿を拾い上げ、照準を合わせて初弾を撃ち込むFPSの最重要基礎技術です。Anne TreismanとGarry Gelade（1980）の特徴統合理論が示すように、輝度や輪郭といった基本視覚特徴は、意識的な視線走査を行わずとも視野全体で並列に処理されます。",
-      "さらにJeremy M. Wolfe（1994, 2007）のガイド探索モデル（Guided Search）によると、トップダウンの予測とボトムアップの知覚的顕著性が融合することで、注意の配分が決定されます。本ドリルでターゲットの明暗コントラスト識別を反復することにより、背景のノイズを瞬時に遮断し、敵を発見してから射撃を開始するまでの脳内ディレイを大幅に短縮できます。",
-      "Paul M. Fitts（1954）の運動制御法則、David E. Meyerら（1988）の最適化副運動理論、および高分解能デジタル時間計測（Woods et al., 2015）を統合し、実戦の緊張下でも迷わず初弾を命中させるエイム力を養います。",
-      "計測精度について：本ドリルはブラウザの performance.now() 高分解能タイマーを用い、デバイス上で完結して測定されます。ディスプレイのリフレッシュレート（60Hzなら約16.7ms、144Hzなら約6.9ms、240Hzなら約4.1ms）による表示遅延が生じるため、5ms未満の微小なブレはハードウェア起因の測定ノイズとして扱い、同一環境での推移を比較してください。"
+      "ターゲット捕捉エイムトレーナー（Target Acquisition Aim Trainer）は、一瞬の視覚検出、特徴コントラスト識別、そして初弾必中のヘッドショット精度を鍛え上げるために設計された知覚・認知運動ドリルです。VALORANTやCounter-Strike 2、Rainbow Six SiegeなどのタクティカルFPSでは、射線が通った最初の300ミリ秒で勝敗が決します。敵の危険なシルエットを誰よりも早く発見・識別し、瞬時に照準を吸い付かせた者が撃ち合いを制します。",
+      "視覚探索と物体認識の理論的基盤は、Anne TreismanとGarry Gelade（1980）が提唱した「特徴統合理論（Feature-Integration Theory）」によって確立されました。トレイスマンは、輝度コントラストや色相のポップアウト、輪郭のエッジ方向といった低次視覚特徴が、視野全体にわたって前注意的（Preattentively）かつ並列に抽出されることを実証しました。焦点を絞った空間的注意が特定の座標に向けられて初めて、これらの特徴が統合され、認識可能な敵性脅威として把握されます。",
+      "この並列処理メカニズムを発展させたJeremy M. Wolfe（1994, 2007）の「ガイド探索モデル（Guided Search）」は、トップダウンの認知的予測とボトムアップの感覚的顕著性マップが融合して視覚的注意の優先順位を決定するプロセスを詳述しています。明暗コントラストの識別訓練を反復することで、視覚野は背景の雑音や低コントラストの妨害刺激を瞬時に遮断することを学習し、標的の出現から筋肉の動作開始までの潜時を大幅に短縮します。",
+      "Paul M. Fitts（1954）の運動難易度法則、David E. Meyerら（1988）の確率的最適化サブムーブメント理論、そして高分解能デジタル時間計測（Woods et al., 2015）を統合することで、本ドリルはプレイヤーの認知的躊躇を排除し、鋭い一次弾道フリックの実行と競技プレッシャー下での安定した初弾精度を定着させます。",
+      "測定精度とハードウェア遅延について：すべての判定イベントはブラウザの performance.now() 高分解能クロックを用いてデバイス内でリアルタイムにタイムスタンプが記録され、外部へスコアが送信されることはありません。ブラウザ仕様としてSpectre対策のためタイマー分解能が約1msに丸められている点、およびディスプレイのリフレッシュレート（60Hzで約16.7ms、144Hzで約6.9ms、240Hzで約4.1ms; Woods et al., 2015）による物理的表示量子化が存在します。さらにマウスのポーリングレート（125Hzで約8ms、1000Hzで1ms）も加わるため、5ms未満の微小な差異は測定ノイズとして扱い、他者の環境ではなく同一ハードウェア環境での自己記録比較を行ってください。"
     ],
     benchmarks: {
       title: "ターゲット捕捉・識別レイテンシ ベンチマーク基準",
@@ -319,6 +321,7 @@ export default function TargetAcquisitionJaPage() {
         copy={{
           h1Keyword: "ターゲット捕捉 エイム練習",
           h1Suffix: " - 初弾精度・索敵エイムトレーナー",
+          subtitle: "視覚的ターゲット検出、脅威弁別、初弾フリック精度をリアルタイムフィードバックで鍛えます。",
           statScore: "スコア",
           statTime: "残り時間",
           statAccuracy: "命中率",
@@ -336,10 +339,10 @@ export default function TargetAcquisitionJaPage() {
           stageCaption: "各クラスタ内で最も輝度（不透明度）の高いターゲットを素早く見極めて正確に撃ち抜いてください。",
           rulesTitle: "ドリル手順 & スコアリングシステム",
           rulesItems: [
-            { title: "ターゲット命中 (+100点 / +0.4秒)", text: "最も明るいターゲットから順に射撃。コンボ倍率とレベルボーナスが加算されます。" },
-            { title: "セットクリアボーナス (+400点 × レベル)", text: "セット内の全ターゲットを処理すると次のターゲット群が瞬時に出現。" },
-            { title: "レベル進行 (1,400点ごと)", text: "ターゲット密度の上昇、縮小、および微細な明度差へと難易度がシームレスに深化。" },
-            { title: "誤クリック・ミス減点", text: "誤ったターゲットのクリックや枠外ミスでコンボが0にリセットされます。" }
+            { num: "1", text: "ターゲット命中", highlight: "+100点 (+0.4秒)", result: "コンボ倍率適用" },
+            { num: "2", text: "セットクリア", highlight: "+400点 × レベル", result: "クラスタ即時生成" },
+            { num: "3", text: "レベル進行", highlight: "+1 / 1400点", result: "シームレス難易度深化" },
+            { num: "4", text: "誤クリック / ミス", highlight: "ペナルティ", result: "コンボリセット (-0.6秒)" }
           ],
           aboutTitle: "ターゲット捕捉 エイム練習について",
           aboutHeading: "ターゲット捕捉（Target Acquisition）とは？",
@@ -354,6 +357,7 @@ export default function TargetAcquisitionJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

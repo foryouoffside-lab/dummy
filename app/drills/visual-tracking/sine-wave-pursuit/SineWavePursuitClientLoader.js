@@ -2,4 +2,4 @@
 
 import dynamic from 'next/dynamic';
 
-export default dynamic(() => import('./SineWavePursuitClient'), { ssr: false });
+export default dynamic(() => import('./SineWavePursuitClient'));

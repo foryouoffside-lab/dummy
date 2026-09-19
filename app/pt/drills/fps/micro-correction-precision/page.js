@@ -1,5 +1,6 @@
 import MicroCorrectionClient from '@/app/drills/fps/micro-correction-precision/MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -237,6 +238,7 @@ export default function MicroCorrectionPage() {
   const copyPt = {
     h1Keyword: "Treino de Micro Correção de Mira",
     h1Suffix: " – Precisão de Headshot FPS",
+    subtitle: "Treine a desaceleração terminal e micro-ajustes imediatos para precisão cirúrgica de headshots.",
     statScore: "Pontuação",
     statTime: "Tempo",
     statAccuracy: "Precisão",
@@ -249,15 +251,13 @@ export default function MicroCorrectionPage() {
     getReady: "PREPARE-SE",
     toggleFlash: "Alternar Flash de Erro",
     toggleSound: "Alternar Efeitos Sonoros",
-    pausedTitle: "Jogo Pausado",
-    pausedSubtitle: "Clique na tela para reengajar a trava de cursor do mouse.",
     stageCaption: "Clique no alvo âncora e ajuste instantaneamente a retícula com os dedos para acertar o micro-alvo.",
     rulesTitle: "Instruções do Treino e Sistema de Pontos",
     rulesItems: [
-      { num: "1", text: "Acertar Âncora", highlight: "+10 pts (+0,2s)", result: "Libera o micro-alvo periférico" },
-      { num: "2", text: "Acertar Micro-Alvo", highlight: "até +585 pts (+0,2s)", result: "Escala com precisão e multiplicador de combo" },
-      { num: "3", text: "Subida de Nível", highlight: "a cada 1.400 pontos", result: "Alvos reduzem progressivamente de tamanho" },
-      { num: "4", text: "Erro / Tempo Esgotado", highlight: "Penalidade", result: "Reseta o multiplicador de combo instantaneamente" }
+      { num: "1", text: "Acertar Âncora", highlight: "+10 pts (+0,2s)", result: "Libera micro-alvo" },
+      { num: "2", text: "Acertar Micro", highlight: "até +585 pts", result: "Precisão × Combo" },
+      { num: "3", text: "Subida de Nível", highlight: "+1 Nível / 1.400 pts", result: "Escala adaptativa" },
+      { num: "4", text: "Erro / Tempo", highlight: "Penalidade", result: "Reset combo (-0,6s)" }
     ],
     aboutTitle: "Sobre a Micro Correção de Mira",
     aboutHeading: "O que é a Micro Correção de Mira?",
@@ -374,6 +374,7 @@ export default function MicroCorrectionPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

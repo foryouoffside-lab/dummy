@@ -41,12 +41,7 @@ export const metadata = {
 };
 
 export default function DistractionFighterPageFR() {
-  const sources = pickSources(
-    "Stroop (1935) - Studies of Interference in Serial Verbal Reactions",
-    "MacLeod (1991) - Half a Century of Research on the Stroop Effect",
-    "Logan & Cowan (1984) - On the Ability to Inhibit Thought and Action: A Theory of an Act of Control",
-    "Posner & Petersen (1990) - The Attention System of the Human Brain"
-  );
+  const sources = pickSources('stroop1935', 'macleod1991', 'logan1984', 'posner1990', 'woods2015');
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -206,7 +201,9 @@ export default function DistractionFighterPageFR() {
     intro: [
       "L effet Stroop, documenté pour la première fois par J. Ridley Stroop (1935), est l une des manifestations les plus étudiées de la psychologie cognitive. Lorsque la couleur de la police contredit le texte (par exemple, le mot 'ROUGE' affiché en bleu), la vitesse de réponse chute et le taux d erreur grimpe en flèche.",
       "Ce décalage provient de la dissymétrie de vitesse entre automatismes et processus contrôlés: lire est une compétence hyper-automatisée chez l adulte (MacLeod, 1991). Suivant le modèle de Logan & Cowan (1984), le réflexe de lecture l emporte sur la désignation de la couleur à moins que les structures préfrontales ne déclenchent un freinage inhibiteur précoce.",
-      "Les recherches en imagerie démontrent le rôle central du cortex cingulaire antérieur et du cortex préfrontal dorsolatéral dans la résolution de ce conflit. Un entraînement ciblé consolide l attention sélective et le filtrage des distracteurs sous contrainte de temps."
+      "Les recherches en imagerie démontrent le rôle central du cortex cingulaire antérieur et du cortex préfrontal dorsolatéral dans la résolution de ce conflit. Un entraînement ciblé consolide l attention sélective et le filtrage des distracteurs sous contrainte de temps.",
+      "Méthodologie chronométrique: chaque événement est horodaté via l'horloge haute précision performance.now() du navigateur, directement sur votre terminal. Les navigateurs intègrent une limitation délibérée pour parer aux failles matérielles de type Spectre (résolution d'environ 1 ms), et votre écran quantifie chaque rafraîchissement: environ 16,7 ms par image à 60 Hz, 6,9 ms à 144 Hz et 4,1 ms à 240 Hz (Woods et al., 2015). Évaluez votre progression sur un même matériel plutôt que de comparer des valeurs brutes entre configurations hétérogènes.",
+      "Transparence des données et avertissement éducatif: SkillDrills ne collecte aucune donnée agrégée et ne transmet aucun historique à des serveurs tiers. Vos scores et préférences résident exclusivement dans le localStorage de votre navigateur. Ce module constitue un jeu d'entraînement cognitif à vocation pédagogique et ludique; il ne s'agit pas d'un dispositif médical, d'un outil de diagnostic ou de dépistage du TDAH ou d'autres troubles cognitifs."
     ],
     benchmarks: {
       title: "Repères de Performance au Test de Stroop (Session de 45 Secondes)",
@@ -220,17 +217,39 @@ export default function DistractionFighterPageFR() {
       ],
       note: "Barèmes établis sur des sessions de 45 secondes avec complexité dynamique et délais de réponse rétrécis (Stroop, 1935; Woods et al., 2015)."
     },
-    instructions: [
-      "Observez le mot et touchez le bouton correspondant à la couleur de la police.",
-      "Ignorez délibérément le mot écrit: traitez exclusivement la couleur vue.",
-      "Conservez une cadence régulière pour protéger votre multiplicateur de points.",
-      "Ne précipitez pas vos clics afin d éviter les pénalités de précision."
+    techniques: {
+      title: "4 Stratégies pour Surmonter l'Interférence de Stroop",
+      items: [
+        {
+          name: "Focalisation périphérique sur les contours de lettres",
+          desc: "Ne lisez pas le mot dans sa globalité; fixez l'extrémité d'une seule lettre pour neutraliser le décodage automatique des aires visuo-linguistiques.",
+          tips: "Traitez le signe graphique comme une forme géométrique colorée."
+        },
+        {
+          name: "Inhibition de la subvocalisation interne",
+          desc: "Prononcer mentalement le mot sature la boucle phonologique et retarde l'action. Liez directement le signal chromatique à la réponse motrice du doigt.",
+          tips: "Détendez la mâchoire et maintenez une respiration fluide."
+        },
+        {
+          name: "Gestion du tempo et préservation du combo",
+          desc: "Les clics impulsifs précipités détruisent votre série de multiplicateurs. Un tempo régulier et méthodique garantit le meilleur score final.",
+          tips: "Donnez toujours la priorité à l'exactitude avant la vitesse brute."
+        },
+        {
+          name: "Entraînement fractionné à la résistance aux distracteurs",
+          desc: "L'inhibition cognitive sollicite intensément le cortex préfrontal. Des blocs quotidiens de 3 à 5 minutes favorisent une meilleure régulation de l'attention sans fatigue excessive.",
+          tips: "Idéal comme échauffement neurocognitif avant une session de travail exigeante."
+        }
+      ]
+    },
+    steps: [
+      "Fixez le mot affiché au centre sans chercher à le décoder vocalement.",
+      "Freinez le réflexe de lecture et ciblez uniquement la teinte de l'encre.",
+      "Appuyez sur le bouton de couleur correspondant à l'encre affichée.",
+      "Enchaînez les réponses justes pour alimenter le combo et progresser dans les paliers de difficulté."
     ],
-    tips: [
-      "Concentrez-vous sur l angle d une lettre plutôt que d embrasser tout le mot.",
-      "Ne prononcez pas les couleurs dans votre tête pour ne pas surcharger la boucle phonologique.",
-      "Maintenez un souffle calme durant les montées en difficulté."
-    ],
+    audience: "Étudiants, cadres en open space, esportifs et toute personne souhaitant renforcer son filtrage attentionnel face aux sollicitations numériques.",
+    faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
     sources
   };
 

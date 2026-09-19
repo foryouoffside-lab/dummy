@@ -1,6 +1,7 @@
 import FPSTrackingTrainerClient from '@/app/drills/reaction-speed/fps-tracking-trainer/FPSTrackingTrainerWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -210,11 +211,14 @@ const guideProps = {
   title: 'Entrenador de Tracking FPS — Puntería de Seguimiento y Control Continuo',
   subtitle:
     'Desarrolla la persecución ocular suave, estabilidad en strafes y fluidez cinética frente a blancos con movimiento continuo.',
-  scientificIntro: `El seguimiento visual y motor (tracking) en videojuegos de disparos en primera persona se rige por la interacción del sistema de persecución ocular suave (smooth pursuit) y el control muscular de la extremidad superior (Rashbass, 1961; Krauzlis, 2004). Mientras que los disparos a objetivos estáticos implican saltos sacádicos puntuales, el rastreo dinámico exige compensar de forma ininterrumpida el vector de velocidad retiniana.
-
-Cuando un blanco cruza el campo de visión, el área cortical visual y el lóbulo temporal superior medial (MST) decodifican su velocidad para guiar las órdenes cerebelares hacia los grupos musculares del brazo. La aparición de temblores o trazos discontinuos refleja comúnmente una co-contracción excesiva entre músculos agonistas y antagonistas, lo que obliga al sistema nervioso a realizar constantes saltos correctivos.
-
-Este ejercicio aísla la cinemática del movimiento continuo, permitiendo al tirador relajar la musculatura y optimizar el bucle sensoriomotor ojo-mano. La regularidad en este estímulo reduce el error de posición instantáneo y afianza una precisión estable en combates de media y corta distancia con fuego sostenido.`,
+  intro: {
+    title: 'Entrenador de Tracking FPS y Fundamentos Científicos del Seguimiento Suave',
+    paragraphs: [
+      'El seguimiento visual y motor (tracking) en videojuegos de disparos en primera persona se rige por la interacción del sistema de persecución ocular suave (smooth pursuit) y el control muscular de la extremidad superior (Rashbass, 1961; Krauzlis, 2004). Mientras que los disparos a objetivos estáticos implican saltos sacádicos puntuales, el rastreo dinámico exige compensar de forma ininterrumpida el vector de velocidad retiniana.',
+      'Cuando un blanco cruza el campo de visión, el área cortical visual y el lóbulo temporal superior medial (MST) decodifican su velocidad para guiar las órdenes cerebelares hacia los grupos musculares del brazo. La aparición de temblores o trazos discontinuos refleja comúnmente una co-contracción excesiva entre músculos agonistas y antagonistas, lo que obliga al sistema nervioso a realizar constantes saltos correctivos.',
+      'Este ejercicio aísla la cinemática del movimiento continuo, permitiendo al tirador relajar la musculatura y optimizar el bucle sensoriomotor ojo-mano. En monitores con alta tasa de refresco (Woods et al., 2015), la regularidad en este estímulo reduce el error de posición instantáneo y afianza una precisión estable en combates de media y corta distancia con fuego sostenido (Green & Bavelier, 2003).',
+    ],
+  },
   sources: pickSources('krauzlis2004', 'rashbass1961', 'green2003', 'woods2015'),
   benchmarks: {
     title: 'Tabla de Rendimiento en Precisión de Tracking y Tiempo en Diana',
@@ -243,6 +247,10 @@ Este ejercicio aísla la cinemática del movimiento continuo, permitiendo al tir
       {
         title: 'Sobrecarga en Velocidad Alta (5 min)',
         description: 'Incrementa la velocidad de desplazamiento para desafiar la coordinación visomotora y afinar microajustes.',
+      },
+      {
+        title: 'Control Fluido de Inversiones de Sentido (Strafe Reversals)',
+        description: 'Al observar un cambio brusco de trayectoria, espera la confirmación visual de la inversión y reorienta el cursor guiado por el antebrazo sin tirones de pánico.',
       },
     ],
   },
@@ -290,6 +298,7 @@ export default function EnhancedPage() {
           currentHref="https://skilldrills.online/es/drills/reaction-speed/fps-tracking-trainer"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

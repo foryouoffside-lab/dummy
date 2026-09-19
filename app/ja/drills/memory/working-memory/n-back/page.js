@@ -325,16 +325,7 @@ export default function NBackPageJa() {
 
       <NBackClient copy={nBackClientCopyJa} />
 
-      <DrillGuide
-        lead={guideJa.lead}
-        metrics={guideJa.metrics}
-        benchmarks={guideJa.benchmarks}
-        science={guideJa.science}
-        protocols={guideJa.protocols}
-        sources={guideJa.sources}
-        faqs={guideJa.faqs}
-        related={guideJa.related}
-      />
+      <DrillGuide {...guideJa} />
 
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="memory" currentHref="/drills/memory/working-memory/n-back" locale="ja" />

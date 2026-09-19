@@ -235,12 +235,22 @@ export default function RhythmAnomalyLocalePage() {
         <p dangerouslySetInnerHTML={{ __html: `La voie visuelle primaire se sépare en deux systèmes anatomiques distincts : la voie parvocellulaire (P) et la voie magnocellulaire (M). La voie magnocellulaire comprend des neurones de grand calibre aux axones épais et myélinisés qui projettent à grande vitesse vers la voie dorsale. En raison de sa latence minimale de conduction, la voie M est hautement spécialisée dans le traitement des hautes fréquences temporelles et des micro-déphasages jusqu'à 40–50 Hz (De Lange, 1958; Holcombe, 2009). Lorsqu'une cellule de la grille oscille plus vite que les 35 autres, la différence de phase produit une décharge préattentionnelle automatique dans l'aire V1, générant un effet de saillance instantané (Kelly, 1961; Burr, 1980).` }} />
 
         <h3>Deux limites physiologiques de la vision temporelle : Échantillonnage rapide vs. Liaison corticale</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Dans une revue fondamentale de psychophysique, Holcombe (2009) a démontré que la vision temporelle humaine est bornée par deux seuils indépendants : une <strong>limite sous-corticale d'échantillonnage rapide (~40–50 Hz)</strong>, où les neurones rétiniens et de V1 séparent les scintillements, et une <strong>limite de liaison corticale (~2–5 Hz)</strong>, nettement plus lente, requise pour l'identification consciente et l'association des caractéristiques. Le drill Rhythm Anomaly sollicite activement la passerelle entre ces deux systèmes, exigeant une validation attentionnelle ultra-rapide avant la fin du cycle d'oscillation.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Dans une synthèse magistrale de psychophysique visuelle, Holcombe (2009) a démontré que la perception temporelle humaine est bornée par deux seuils physiologiques distincts :` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Limite sous-corticale d&apos;échantillonnage rapide (~40–50 Hz) :</strong> Les cellules ganglionnaires magnocellulaires rétiniennes et les neurones de l&apos;aire V1 détectent le contraste temporel et le scintillement à des cadences dépassant 40 Hz (De Lange, 1958 ; Kelly, 1961).
+          </li>
+          <li>
+            <strong>Limite corticale de liaison consciente (~2–5 Hz) :</strong> L&apos;identification cognitive formelle et l&apos;assemblage des traits visuels reposent sur des boucles récurrentes lentes oscillant entre 2 et 5 cycles par seconde (Holcombe, 2009).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `Le drill Rhythm Anomaly développe précisément la passerelle fonctionnelle entre ces deux réseaux : l&apos;observateur doit exploiter la sensibilité magnocellulaire précoce pour isoler la cellule discordante, puis opérer une validation attentionnelle descendante (top-down) avant la fin de l&apos;onde de pulsation.` }} />
 
         <h3>Fenêtres d&apos;Intégration Temporelle & Bruit d&apos;Entropie</h3>
         <p dangerouslySetInnerHTML={{ __html: `Le système visuel intègre les signaux lumineux sur des fenêtres d'environ 30 à 100 millisecondes (Burr, 1980; Woods et al., 2015). Les stimuli qui surviennent au sein d'une même fenêtre fusionnent en une seule impression sensorielle. Les éclairs d'entropie aléatoires injectent un bruit stochastique dans cette fenêtre, forçant le cerveau à discriminer une véritable périodicité sinusoïdale d'un simple éclat isolé de luminosité (Burr, 1980; Posner, 1980).` }} />
 
         <h3>Repères de Performance Temporelle (Grille 45s)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `À partir des données de discrimination chronométrique mesurées sur des séries de 45 secondes au sein de la matrice de 36 cellules, les performances sont réparties en cinq paliers d'acuité temporelle :` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

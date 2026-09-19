@@ -21,8 +21,6 @@ import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
@@ -55,7 +53,7 @@ const TIME_PENALTY = 0.8;
 // Bumped from _v2: sessions are no longer a fixed 45s, so scores from the old
 // fixed-length build are not comparable to these and must not share a best.
 const STORAGE_KEY = 'skilldrills_fps_flick_shot_v3';
-const TARGET_COLOR = '#00ff88'; // fixed tactical-sphere color — shared FPS target green
+const TARGET_COLOR = '#10b981'; // fixed tactical-sphere color — shared FPS target emerald
 
 const getSavedData = () => {
   try {
@@ -109,10 +107,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Target Hit", highlight: "+100 PTS (+0.6s)", result: "× Combo × Level Multiplier" },
-  { num: "2", text: "Combo System", highlight: "Up to 3.0x Multiplier", result: "Smaller, faster targets on a hot streak" },
-  { num: "3", text: "Level Progression", highlight: "+1 Level / 1800 PTS", result: "Continuous Adaptive Target Scaling" },
-  { num: "4", text: "Miss / Timeout / Idle", highlight: "Failure Penalty", result: "Combo resets to 0 (-0.8s with Time Penalty enabled)" }
+  { num: "1", text: "Target Hit", highlight: "+100 PTS (+0.6s)", result: "×Combo Mult" },
+  { num: "2", text: "Combo Streak", highlight: "Up to 3.0×", result: "Faster Targets" },
+  { num: "3", text: "Level Up", highlight: "+1 / 1800 PTS", result: "Adaptive Scaling" },
+  { num: "4", text: "Miss / Timeout", highlight: "Penalty", result: "Resets Combo (-0.8s)" }
 ];
 
 const ABOUT_INTRO = [
@@ -262,31 +260,40 @@ export default function ProFlickClient({ copy = null }) {
     };
   }, []);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    gameActiveRef.current = false;
+
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    if (document.pointerLockElement) {
+      try { document.exitPointerLock(); } catch (e) {}
+    }
+    if (document.fullscreenElement) {
+      try { document.exitFullscreen(); } catch (e) {}
+    }
 
     setIsFullscreen(false);
-    if (document.pointerLockElement) {
-      document.exitPointerLock();
-    }
+    setPointerLocked(false);
     setGameState('start');
-  }, []);
+    setUiScore(0);
+    setUiTimeLeft(DRILL_DURATION);
+    setUiAccuracy(100);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
+    const w = engine.current?.logicalWidth || 800;
+    const h = engine.current?.logicalHeight || 450;
+    engine.current = {
+      crosshair: { x: w / 2, y: h / 2, initialized: false },
+      target: { active: false, x: 0, y: 0, radius: 32, spawnTime: 0, ttl: 1300, pulseSeed: 0.5 },
+      score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
+      nextSpawnTime: 0, successfulHits: 0, missedClicks: 0,
+      idleClicks: 0, timeouts: 0, totalActions: 0, flickTimes: [], maxCombo: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+    };
   }, []);
 
   const spawnTarget = useCallback((time, width, height, currentLevel, currentCombo) => {
@@ -311,9 +318,9 @@ export default function ProFlickClient({ copy = null }) {
   }, []);
 
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 4 + 1;
+      const speed = Math.random() * 4 + 1.2;
       engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
     }
   };
@@ -425,11 +432,44 @@ export default function ProFlickClient({ copy = null }) {
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, []);
 
+  // Handle ESC key to immediately exit / quit the drill at any time back to the drill's start page
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (gameState === 'playing' || gameState === 'countdown' || gameState === 'gameOver') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleExitDrill();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [gameState, handleExitDrill]);
+
+  // Pointer lock change: if lock is dropped mid-game (e.g. Esc eaten by browser or Alt-Tab), exit cleanly to start page
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked);
+      if (!isLocked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+  }, [gameState, handleExitDrill]);
+
+  // Fullscreen change: if native fullscreen is closed mid-game, exit cleanly to start page
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [isFullscreen, gameState, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -445,14 +485,11 @@ export default function ProFlickClient({ copy = null }) {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (!containerRef.current || !containerRef.current.contains(e.target)) return;
 
-      if (gameState === 'playing') {
-        if (!pointerLocked && canvasRef.current) {
-          resumeDrill();
-        } else if (pointerLocked) {
-          const eRef = engine.current;
-          const ch = eRef.crosshair;
-          const tgt = eRef.target;
-          const config = getLevelConfig(eRef.level, eRef.combo);
+      if (gameState === 'playing' && pointerLocked) {
+        const eRef = engine.current;
+        const ch = eRef.crosshair;
+        const tgt = eRef.target;
+        const config = getLevelConfig(eRef.level, eRef.combo);
 
           eRef.totalActions++;
 
@@ -490,9 +527,10 @@ export default function ProFlickClient({ copy = null }) {
               eRef.level = Math.max(eRef.level, rawLevel);
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
+              const hitColor = eRef.combo >= 10 ? '#34d399' : TARGET_COLOR;
               drillAudio.playHit();
-              createExplosion(tgt.x, tgt.y, TARGET_COLOR);
-              eRef.hitRings.push(createHitRing(tgt.x, tgt.y, tgt.radius, TARGET_COLOR));
+              createExplosion(tgt.x, tgt.y, hitColor);
+              eRef.hitRings.push(createHitRing(tgt.x, tgt.y, tgt.radius, hitColor));
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -515,7 +553,6 @@ export default function ProFlickClient({ copy = null }) {
             setUiAccuracy(Math.round((eRef.successfulHits / currentTotal) * 100));
           }
         }
-      }
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -524,7 +561,7 @@ export default function ProFlickClient({ copy = null }) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, universalSens, triggerFlash, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash]);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -649,19 +686,24 @@ export default function ProFlickClient({ copy = null }) {
         const tgt = e.target;
         const age = time - tgt.spawnTime;
         const progress = Math.min(1, age / tgt.ttl);
-        const lifePercent = 1 - progress;
-
         drawPulseRing(ctx, tgt.x, tgt.y, tgt.radius, TARGET_COLOR, progress);
 
         drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, TARGET_COLOR);
-
-        const ringColor = lifePercent > 0.5 ? TARGET_COLOR : (lifePercent > 0.25 ? '#eab308' : '#ef4444');
-        ctx.strokeStyle = ringColor;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(tgt.x, tgt.y, tgt.radius + 4 + (Math.max(0, lifePercent) * 10), 0, Math.PI * 2); ctx.stroke();
       }
 
       drawHitRings(ctx, e.hitRings, dt);
+
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= dt * 2.5;
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
 
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
@@ -679,7 +721,10 @@ export default function ProFlickClient({ copy = null }) {
 
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
+        const activeColor = '#ffffff';
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 
@@ -696,6 +741,7 @@ export default function ProFlickClient({ copy = null }) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -743,13 +789,16 @@ export default function ProFlickClient({ copy = null }) {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & Intro */}
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               <span data-seo-kw="1">{copy?.h1Keyword || "Flick Shot Trainer"}</span>
               {copy?.h1Suffix || ""}
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 font-medium">
+              {copy?.subtitle || "Train your snap aim, ballistic muscle memory, and target acquisition with real-time feedback."}
+            </p>
           </div>
         )}
 
@@ -834,26 +883,8 @@ export default function ProFlickClient({ copy = null }) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -898,7 +929,7 @@ export default function ProFlickClient({ copy = null }) {
         {/* Drill Caption */}
         {!isFullscreen && (
           <p className="text-xs text-slate-400 leading-relaxed -mt-2">
-            {copy?.stageCaption || "Snap to and click spawning targets across the screen before their shrinking timer ring expires."}
+            {copy?.stageCaption || "Snap to and click spawning targets across the screen before their timer expires."}
           </p>
         )}
 
@@ -966,24 +997,22 @@ export default function ProFlickClient({ copy = null }) {
           </div>
         )}
 
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
 }
 
-// === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
           {result}
         </div>
       </div>

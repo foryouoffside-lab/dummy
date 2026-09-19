@@ -41,12 +41,7 @@ export const metadata = {
 };
 
 export default function DistractionFighterPagePT() {
-  const sources = pickSources(
-    "Stroop (1935) - Studies of Interference in Serial Verbal Reactions",
-    "MacLeod (1991) - Half a Century of Research on the Stroop Effect",
-    "Logan & Cowan (1984) - On the Ability to Inhibit Thought and Action: A Theory of an Act of Control",
-    "Posner & Petersen (1990) - The Attention System of the Human Brain"
-  );
+  const sources = pickSources('stroop1935', 'macleod1991', 'logan1984', 'posner1990', 'woods2015');
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -206,7 +201,9 @@ export default function DistractionFighterPagePT() {
     intro: [
       "O efeito Stroop, documentado originalmente por J. Ridley Stroop (1935), representa um dos fenômenos mais consolidados na psicologia cognitiva experimental. Quando confrontados com estímulos incongruentes (como a palavra 'VERDE' impressa em tinta vermelha), os tempos de reação sofrem uma desaceleração acentuada acompanhada por um aumento na taxa de erro.",
       "A base mecanicista decorre da velocidade assimétrica de processamento: a leitura semântica é uma rotina altamente automatizada no córtex cerebral adulto (MacLeod, 1991). Pelo modelo de corrida de cavalos de Logan & Cowan (1984), a rota de leitura vence a identificação da cor a menos que mecanismos inibitórios ativos do córtex pré-frontal atuem em tempo hábil para frear o impulso.",
-      "Estudos de neuroimagem demonstram que esse controle executivo é coordenado pelo córtex cingulado anterior (ACC) e pelo córtex pré-frontal dorsolateral (DLPFC). Praticar regularmente o teste treina a capacidade de ignorar interferências visuais e sustentar foco estrito sob estresse temporal."
+      "Estudos de neuroimagem demonstram que esse controle executivo é coordenado pelo córtex cingulado anterior (ACC) e pelo córtex pré-frontal dorsolateral (DLPFC). Praticar regularmente o teste treina a capacidade de ignorar interferências visuais e sustentar foco estrito sob estresse temporal.",
+      "Metodologia cronométrica: cada registro de clique é cronometrado com precisão via performance.now() do navegador, executado localmente no seu dispositivo. Temporizadores em navegadores modernos utilizam atenuação contra ataques como Spectre (resolução aproximada de 1 ms), e a taxa de atualização da sua tela quantiza cada quadro: cerca de 16,7 ms a 60 Hz, 6,9 ms a 144 Hz e 4,1 ms a 240 Hz (Woods et al., 2015). Avalie seu progresso longitudinal no mesmo hardware em vez de comparar números isolados entre telas e periféricos heterogêneos.",
+      "Transparência de dados e aviso educacional: o SkillDrills não coleta dados agregados nem envia seu histórico para servidores remotos. Todas as suas pontuações e preferências ficam salvas apenas no localStorage do seu próprio navegador. Esta aplicação é um jogo de treino cognitivo para fins educativos e recreativos, não sendo um instrumento médico nem teste de diagnóstico para TDAH ou outras condições neurológicas."
     ],
     benchmarks: {
       title: "Parâmetros de Desempenho no Teste de Stroop (Sessão de 45 Segundos)",
@@ -220,17 +217,39 @@ export default function DistractionFighterPagePT() {
       ],
       note: "Pontuações registradas em sessões de 45 segundos com diversidade cromática dinâmica e janelas de resposta reduzidas (Stroop, 1935; Woods et al., 2015)."
     },
-    instructions: [
-      "Observe a palavra e selecione o botão correspondente à cor da tinta da fonte.",
-      "Ignore ativamente a palavra escrita: leia apenas a cor visual.",
-      "Mantenha um ritmo constante para preservar o multiplicador de pontos.",
-      "Evite chutes rápidos que possam quebrar sua sequência de acertos."
+    techniques: {
+      title: "4 Estratégias para Superar a Interferência de Stroop",
+      items: [
+        {
+          name: "Foco periférico no contorno das letras",
+          desc: "Evite ler a palavra inteira; concentre seu olhar na extremidade ou serifa de uma única letra para quebrar o processamento automático da leitura.",
+          tips: "Trate o caractere como uma forma geométrica abstrata colorida."
+        },
+        {
+          name: "Supressão da subvocalização interna",
+          desc: "Falar o nome da cor na mente sobrecarrega a alça fonológica. Crie uma ponte direta entre a percepção visual do pigmento e a ação motora do toque.",
+          tips: "Mantenha a respiração compassada e a musculatura facial relaxada."
+        },
+        {
+          name: "Cadência rítmica e preservação do multiplicador",
+          desc: "Cliques precipitados quebram combos cruciais. Um ritmo estável e seguro maximiza a pontuação líquida sem penalidades de tempo.",
+          tips: "Priorize a exatidão absoluta sobre a velocidade cega."
+        },
+        {
+          name: "Sessões fracionadas de fortalecimento inibitório",
+          desc: "O controle inibitório pré-frontal consome energia neural rapidamente. Práticas curtas diárias de 3 a 5 minutos proporcionam máxima adaptação neuroplástica.",
+          tips: "Excelente exercício de ativação cognitiva antes de blocos de estudo ou trabalho profundo."
+        }
+      ]
+    },
+    steps: [
+      "Fixe o olhar no termo central sem tentar lê-lo linguisticamente.",
+      "Iniba a compreensão semântica e isole a cor física da fonte.",
+      "Selecione o botão inferior que corresponde à cor visual observada.",
+      "Sustente acertos consecutivos para acumular bônus de combo e alcançar os níveis de elite."
     ],
-    tips: [
-      "Isole o traço de uma letra em vez de fitar o termo inteiro.",
-      "Evite vocalizar os nomes das cores na sua mente para não saturar a alça fonológica.",
-      "Mantenha a respiração estável durante as acelerações de nível."
-    ],
+    audience: "Estudantes, profissionais em ambientes de trabalho integrados, atletas de esports e quem busca blindar a mente contra distrações cotidianas.",
+    faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
     sources
   };
 

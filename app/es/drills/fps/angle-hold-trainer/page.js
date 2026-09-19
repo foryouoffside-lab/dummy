@@ -1,5 +1,6 @@
 import AngleHoldClient from '@/app/drills/fps/angle-hold-trainer/AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -299,10 +300,10 @@ export default function SpanishAngleHoldPage() {
     h1Suffix: " — Entrenamiento de Ángulos",
     subtitle: "Entrenamiento de Retención de Esquinas y Defensa contra Peeker's Advantage",
     rulesItems: [
-      { num: "1", text: "Impacto en Objetivo", highlight: "+100 PTS (+0,6s)", result: "× Combo × Multiplicador de Nivel" },
-      { num: "2", text: "Multiplicador de Combo", highlight: "Hasta 3,0x puntos", result: "Rachas más altas generan asomos más agresivos" },
-      { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel por cada 1400 PTS", result: "Ventana de tiempo reducida y blancos más rápidos" },
-      { num: "4", text: "Fallo / Prefire Prematuro", highlight: "Penalización por Error", result: "Reinicio de combo (con penalización: -0,8s)" }
+      { num: "1", text: "Impacto en Objetivo", highlight: "+100 PTS (+0,6s)", result: "×Multiplicador" },
+      { num: "2", text: "Spawns en Esquinas", highlight: "Aparición Rápida", result: "Ventana Menor" },
+      { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Escalado Adaptativo" },
+      { num: "4", text: "Fallo / Prefire", highlight: "Penalización", result: "Reinicio Combo (-0,8s)" }
     ],
     aboutCards: [
       { iconBg: "bg-blue-600", title: "Recomendado para", text: "Defensores de zonas en Valorant, anclajes de CS2, jugadores de R6 Siege y quienes quieran dominar esquinas con disciplina." },
@@ -366,6 +367,7 @@ export default function SpanishAngleHoldPage() {
       </div>
 
       <DrillGuide guide={angleHoldGuideEs} />
+      <DrillFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import RecoilControlClient from '@/app/drills/fps/recoil-control/RecoilControlClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -257,10 +258,10 @@ export default function RecoilControlPage() {
     shareText: "COMPARTIR RESULTADO",
     rulesTitle: "Instrucciones de Entrenamiento y Puntuación",
     rulesItems: [
-      { num: "1", text: "Compensar Subida Inicial", highlight: "+10 pts/tiro", result: "Baja el ratón en los primeros 10 disparos" },
-      { num: "2", text: "Ajuste Horizontal", highlight: "hasta +35 pts/tiro", result: "Corrige las desviaciones laterales del spray" },
-      { num: "3", text: "Subida de Nivel", highlight: "cada 1.500 puntos", result: "Incrementa cadencia y dispersión del arma" },
-      { num: "4", text: "Pérdida de Precisión", highlight: "Reinicia Combo", result: "Disparos fuera del blanco restablecen el combo" }
+      { num: "1", text: "Disparo a la Cabeza", highlight: "+100 PTS / +0.25s", result: "Zona de Mayor Prioridad" },
+      { num: "2", text: "Tiro a Pecho y Extremidades", highlight: "+40 / +20 PTS", result: "Mantiene Racha de Combo" },
+      { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Escala Velocidad y Retroceso" },
+      { num: "4", text: "Disciplina de Cargador", highlight: "<40% Penalización", result: "Reinicia Combo (-0.6s)" }
     ],
     aboutTitle: "Sobre el Entrenamiento de Retroceso",
     aboutHeading: "¿Qué es el Control de Retroceso (Recoil)?",
@@ -371,13 +372,14 @@ export default function RecoilControlPage() {
       <RecoilControlClient copy={copyEs} />
 
       <DrillGuide guide={recoilControlGuide} />
-      <div className="max-w-4xl mx-auto px-4 pb-12">
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills
           currentCategory="fps"
           currentHref="/drills/fps/recoil-control"
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

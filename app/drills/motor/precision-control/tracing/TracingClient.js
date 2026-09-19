@@ -4,7 +4,7 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, BarChart3, LogOut, RefreshCw, Share2,
+  Activity, BarChart3,
   TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
@@ -13,11 +13,11 @@ import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
 import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
-import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
-import DrillFooter from '@/components/drill/DrillFooter';
+import { createHitRing, drawHitRings } from '@/lib/canvasFx';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import DrillResultCard from '@/components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
 
@@ -51,18 +51,29 @@ function getWaveY(xOnScreen, cvsWidth, cvsHeight, scrollOffset, progress = 0) {
   return centerY + mainWave + harmonicWave;
 }
 
-function getGradeForFlow(peakFlow, totalScore) {
-  if (peakFlow >= 90 && totalScore >= 1400) return { letter: 'S+', label: 'Grandmaster Flow', color: 'text-fuchsia-400' };
-  if (peakFlow >= 80) return { letter: 'S', label: 'Peak Flow State', color: 'text-cyan-400' };
-  if (peakFlow >= 60) return { letter: 'A', label: 'Locked-In Tracking', color: 'text-emerald-400' };
-  if (peakFlow >= 35) return { letter: 'B', label: 'Steady Tracking', color: 'text-yellow-400' };
-  return { letter: 'C', label: 'Tracing Complete', color: 'text-orange-400' };
+function getGradeForFlow(peakFlow, totalScore, copy) {
+  let letter, defaultLabel, color;
+  if (peakFlow >= 90 && totalScore >= 1400) { letter = 'S+'; defaultLabel = 'Grandmaster Flow'; color = 'text-fuchsia-400'; }
+  else if (peakFlow >= 80) { letter = 'S'; defaultLabel = 'Peak Flow State'; color = 'text-cyan-400'; }
+  else if (peakFlow >= 60) { letter = 'A'; defaultLabel = 'Locked-In Tracking'; color = 'text-emerald-400'; }
+  else if (peakFlow >= 35) { letter = 'B'; defaultLabel = 'Steady Tracking'; color = 'text-yellow-400'; }
+  else { letter = 'C'; defaultLabel = 'Tracing Complete'; color = 'text-orange-400'; }
+  const label = copy?.gradeLabels?.[letter] || defaultLabel;
+  return { letter, label, color };
 }
+
+// Canonical single-line Rules & Scoring Formula
+const RULES_ITEMS = [
+  { num: '1', text: 'Trace Corridor', highlight: 'Emerald Wave', result: '+1 PT / locked frame' },
+  { num: '2', text: 'Speed Ramps', highlight: 'Progressive Wave', result: '2.2 → 3.8 px/f over 45s' },
+  { num: '3', text: 'Flow Integrity', highlight: 'Super Flow', result: '4s Lock-on yields +5 Bonus' },
+  { num: '4', text: 'Strict Tracking', highlight: 'Tolerance Zone', result: 'Deviation Resets Streak' },
+];
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export default function FineMotorClient({ copy } = {}) {
+export default function TracingClient({ copy } = {}) {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -103,6 +114,7 @@ export default function FineMotorClient({ copy } = {}) {
   const animationRef = useRef(null);
   const timerRef = useRef(null);
   const feedbackTimerRef = useRef(null);
+  const countdownTimeoutsRef = useRef([]);
   
   // === Game Logic Engine Refs ===
   const virtualCrosshair = useRef({ x: 0, y: 0 });
@@ -115,13 +127,58 @@ export default function FineMotorClient({ copy } = {}) {
   const focusTimerRef = useRef(0);
   const distractionTimerRef = useRef(0);
 
-  // Per-instance mutable wave state (was module-level `let`, which leaked
-  // across mounts/instances instead of resetting per drill session)
+  // Per-instance mutable wave state
   const currentSpeedRef = useRef(baseSpeed);
   const pointsRef = useRef([]);
   const offsetRef = useRef(0);
   const isOffPathRef = useRef(false);
   const globalTimeRef = useRef(0);
+  const particlesRef = useRef([]);
+  const hitRingsRef = useRef([]);
+
+  const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
+    const id = Date.now() + Math.random();
+    setFlashes((f) => [...f, { id }]);
+    setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
+  }, []);
+
+  const triggerSuperFlowExplosion = useCallback((x, y) => {
+    const isHighFlow = flowRef.current >= 80;
+    for (let i = 0; i < 14; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 3.5;
+      particlesRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.9,
+        size: 2.5,
+        color: isHighFlow ? '#34d399' : '#10b981'
+      });
+    }
+    createHitRing(hitRingsRef.current, x, y, isHighFlow ? '#34d399' : '#10b981', 45);
+    drillAudio.playHit();
+  }, []);
+
+  const triggerDeviationExplosion = useCallback((x, y) => {
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.0 + Math.random() * 3.0;
+      particlesRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.7,
+        size: 2.0,
+        color: '#ef4444'
+      });
+    }
+    triggerFlash();
+    drillAudio.playPenalty();
+  }, [triggerFlash]);
 
   // === Initialization & Local Storage ===
   useEffect(() => {
@@ -142,13 +199,6 @@ export default function FineMotorClient({ copy } = {}) {
     }, 1200);
   }, []);
 
-  const triggerFlash = useCallback(() => {
-    if (!drillFlash.isEnabled()) return;
-    const id = Date.now() + Math.random();
-    setFlashes((f) => [...f, { id }]);
-    setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
-  }, []);
-
   // === Core Game Management ===
   const endGame = useCallback(() => {
     setGameState('gameOver');
@@ -157,7 +207,7 @@ export default function FineMotorClient({ copy } = {}) {
 
     const finalScore = scoreRef.current;
     const peakFlow = Math.floor(flowRef.current);
-    const grade = getGradeForFlow(peakFlow, finalScore);
+    const grade = getGradeForFlow(peakFlow, finalScore, copy);
 
     setAnalytics({
       peakFlow,
@@ -174,10 +224,11 @@ export default function FineMotorClient({ copy } = {}) {
       }
       return prev;
     });
-  }, []);
+  }, [copy]);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
     setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
@@ -185,15 +236,9 @@ export default function FineMotorClient({ copy } = {}) {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
   const shareScore = useCallback(async () => {
-    const url = 'https://skilldrills.online/drills/motor/precision-control/tracing';
+    const url = copy?.shareUrl || 'https://skilldrills.online/drills/motor/precision-control/tracing';
+    const drillName = copy?.shareDrillName || 'Wave Tracing Trainer';
     try {
       const canvas = generateShareCard({
         score: analytics.totalScore,
@@ -201,20 +246,26 @@ export default function FineMotorClient({ copy } = {}) {
         accuracy: `${analytics.peakFlow}%`,
         rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Tracing Complete', emoji: '🌊' },
         newBest: isNewBest,
-        drillName: 'Wave Tracing Trainer',
+        drillName,
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch {
-      const text = `🌊 I scored ${analytics.totalScore} PTS (${analytics.peakFlow}% Flow) on Wave Tracing Trainer! Test your hand-eye coordination at skilldrills.online!`;
+      let text = `🌊 I scored ${analytics.totalScore} PTS (${analytics.peakFlow}% Flow) on ${drillName}! Test your hand-eye coordination at skilldrills.online!`;
+      if (copy?.shareTextTemplate) {
+        text = copy.shareTextTemplate
+          .replace('{score}', analytics.totalScore)
+          .replace('{flow}', analytics.peakFlow)
+          .replace('{drillName}', drillName);
+      }
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'My Wave Tracing Trainer Score', text, url }).catch(() => {});
+        navigator.share({ title: copy?.shareTitle || `${drillName} Score`, text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
+        alert(copy?.copiedAlert || 'Score card copied to clipboard!');
       }
     }
-  }, [analytics, bestScore, isNewBest]);
+  }, [analytics, bestScore, isNewBest, copy]);
 
   const startActualDrill = useCallback(() => {
     setGameState('playing');
@@ -229,6 +280,8 @@ export default function FineMotorClient({ copy } = {}) {
     globalTimeRef.current = 0;
     isOffPathRef.current = false;
     currentSpeedRef.current = baseSpeed;
+    particlesRef.current = [];
+    hitRingsRef.current = [];
 
     setScore(0);
     setFlowState(100);
@@ -260,20 +313,58 @@ export default function FineMotorClient({ copy } = {}) {
 
     setIsNewBest(false);
     setFeedback('');
+    setTimeLeft(DRILL_DURATION);
+    setScore(0);
+    setFlowState(100);
 
     setIsFullscreen(true);
+
+    countdownTimeoutsRef.current.forEach(clearTimeout);
 
     setGameState('countdown');
     setCountdownValue(3);
 
-    setTimeout(() => setCountdownValue(2), 1000);
-    setTimeout(() => setCountdownValue(1), 2000);
-    setTimeout(() => {
+    const t1 = setTimeout(() => setCountdownValue(2), 700);
+    const t2 = setTimeout(() => setCountdownValue(1), 1400);
+    const t3 = setTimeout(() => setCountdownValue('GO'), 2100);
+    const t4 = setTimeout(() => {
       startActualDrill();
-    }, 3000);
+    }, 2600);
+
+    countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, [startActualDrill]);
 
+  // Direct exit listeners on Escape, pointer lock loss, or fullscreen loss
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked || isTouchOnly);
+      if (gameState === 'playing' && !isLocked && !isTouchOnly) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      const isFs = Boolean(document.fullscreenElement);
+      setIsFullscreen(isFs);
+      if (!isFs && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isTouchOnly, handleExitDrill]);
 
   // Strict Timer Management
   useEffect(() => {
@@ -301,12 +392,6 @@ export default function FineMotorClient({ copy } = {}) {
   useTouchAim({ active: isTouchOnly && gameState === 'playing', canvasRef, onMove: aimAt });
 
   // Raw Mouse Input Listeners
-  useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
-    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
-
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (gameState !== 'playing' || !pointerLocked || !canvasRef.current) return;
@@ -365,6 +450,7 @@ export default function FineMotorClient({ copy } = {}) {
           if (isOffPathRef.current) {
             showFeedback("RE-ENGAGED! +10", "success");
             scoreRef.current += 10;
+            triggerSuperFlowExplosion(ch.x, ch.y);
           }
           isOffPathRef.current = false;
 
@@ -372,6 +458,22 @@ export default function FineMotorClient({ copy } = {}) {
           streakRef.current += 1;
           if (streakRef.current > bestStreakRef.current) {
             bestStreakRef.current = streakRef.current;
+          }
+
+          // Subtle tracking particle stream
+          if (Math.random() < 0.35) {
+            const isHighFlow = flowRef.current >= 80;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 0.5 + Math.random() * 1.5;
+            particlesRef.current.push({
+              x: ch.x + (Math.random() - 0.5) * 6,
+              y: ch.y + (Math.random() - 0.5) * 6,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              life: 0.5,
+              size: 2.0,
+              color: isHighFlow ? '#34d399' : '#10b981'
+            });
           }
 
           flowRef.current = Math.min(100, flowRef.current + dt * 15);
@@ -382,12 +484,13 @@ export default function FineMotorClient({ copy } = {}) {
             scoreRef.current += 5;
             flowRef.current = Math.min(100, flowRef.current + 10);
             showFeedback("SUPER FLOW! +5", "success");
+            triggerSuperFlowExplosion(ch.x, ch.y);
             focusTimerRef.current = 0;
           }
         } else {
           if (!isOffPathRef.current) {
             showFeedback("OFF PATH!", "warning");
-            triggerFlash();
+            triggerDeviationExplosion(ch.x, ch.y);
           }
           isOffPathRef.current = true;
           streakRef.current = 0;
@@ -435,16 +538,19 @@ export default function FineMotorClient({ copy } = {}) {
       ctx.fillStyle = '#05060b';
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-      ctx.strokeStyle = 'rgba(244, 63, 94, 0.04)';
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
       ctx.lineWidth = 1;
       for(let i = 0; i < cvs.width; i+= 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
       for(let j = 0; j < cvs.height; j+= 50) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
 
+      // Tactical Emerald Path / Dynamic Wave Corridor
       if (points.length > 0) {
         ctx.beginPath();
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.8;
         ctx.lineJoin = "round";
-        ctx.strokeStyle = isOffPath ? "#ef4444" : "#f43f5e";
+        const isHighCombo = streakRef.current >= 60 || flowRef.current >= 80;
+        const waveColor = isOffPath ? "#ef4444" : (isHighCombo ? "#34d399" : "#10b981");
+        ctx.strokeStyle = waveColor;
 
         ctx.moveTo(0, points[0]);
         for (let i = 1; i < points.length; i += 2) {
@@ -453,33 +559,79 @@ export default function FineMotorClient({ copy } = {}) {
 
         if (!isOffPath) {
           ctx.shadowBlur = 10;
-          ctx.shadowColor = "#f43f5e";
+          ctx.shadowColor = waveColor;
         }
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
 
+      // Draw particles with delta-time alpha decay
+      const particles = particlesRef.current;
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Draw hit rings
+      drawHitRings(ctx, hitRingsRef.current, dt);
+
+      // Tactical Pro White Crosshair
       const ch = virtualCrosshair.current;
       if (gameState === 'playing' || gameState === 'start') {
-        ctx.beginPath();
-        ctx.arc(ch.x, ch.y, 8, 0, Math.PI * 2);
-        ctx.fillStyle = isOffPath ? "#64748b" : "#00ff88";
-        ctx.fill();
+        const radius = 14;
+        const gap = 5;
+        const dotRadius = 2;
 
-        ctx.strokeStyle = "#475569";
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1.5;
+
+        // Top line
         ctx.beginPath();
-        ctx.moveTo(ch.x - 18, ch.y); ctx.lineTo(ch.x + 18, ch.y);
-        ctx.moveTo(ch.x, ch.y - 18); ctx.lineTo(ch.x, ch.y + 18);
+        ctx.moveTo(ch.x, ch.y - radius);
+        ctx.lineTo(ch.x, ch.y - gap);
         ctx.stroke();
 
-        if (!isOffPath) {
-          ctx.beginPath();
-          ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2);
-          ctx.strokeStyle = "#00ff88";
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
+        // Bottom line
+        ctx.beginPath();
+        ctx.moveTo(ch.x, ch.y + gap);
+        ctx.lineTo(ch.x, ch.y + radius);
+        ctx.stroke();
+
+        // Left line
+        ctx.beginPath();
+        ctx.moveTo(ch.x - radius, ch.y);
+        ctx.lineTo(ch.x - gap, ch.y);
+        ctx.stroke();
+
+        // Right line
+        ctx.beginPath();
+        ctx.moveTo(ch.x + gap, ch.y);
+        ctx.lineTo(ch.x + radius, ch.y);
+        ctx.stroke();
+
+        // Center dot
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(ch.x, ch.y, dotRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
       }
 
       animationRef.current = requestAnimationFrame(loop);
@@ -491,20 +643,20 @@ export default function FineMotorClient({ copy } = {}) {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, showFeedback, triggerFlash]);
+  }, [gameState, pointerLocked, showFeedback, triggerSuperFlowExplosion, triggerDeviationExplosion]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title & AIO Header */}
+        {/* Title & Scientific Header */}
         {!isFullscreen && (
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               <span data-seo-kw="1">{copy?.title || "Mouse Tracing Game"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              A mouse tracing game asks you to keep the cursor on a path that keeps moving, which measures continuous tracking rather than one-off accuracy. The eye follows a smoothly moving target accurately up to roughly 30&deg;/s; past that it falls behind and has to catch up with saccades (Krauzlis, 2004; Rashbass, 1961), and the hand can only stay on a line the eye is still tracking. The path itself is a Steering Law corridor: time to stay inside it scales with its length divided by its width (Accot &amp; Zhai, 1997).
+              {copy?.description || "A mouse tracing game asks you to keep the cursor on a path that keeps moving, which measures continuous tracking rather than one-off accuracy. The eye follows a smoothly moving target accurately up to roughly 30°/s; past that it falls behind and has to catch up with saccades (Krauzlis, 2004; Rashbass, 1961), and the hand can only stay on a line the eye is still tracking. The path itself is a Steering Law corridor: time to stay inside it scales with its length divided by its width (Accot & Zhai, 1997)."}
             </p>
           </div>
         )}
@@ -513,10 +665,10 @@ export default function FineMotorClient({ copy } = {}) {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Flow Score", val: score },
-              { label: "Time Left", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
-              { label: "Flow Integrity", val: `${flowState}%`, color: "text-rose-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.statFlowScore || "Flow Score", val: score },
+              { label: copy?.statTimeLeft || "Time Left", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
+              { label: copy?.statFlowIntegrity || "Flow Integrity", val: `${flowState}%`, color: "text-emerald-400" },
+              { label: copy?.statBestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -529,7 +681,7 @@ export default function FineMotorClient({ copy } = {}) {
         {/* Dynamic Feedback Banner */}
         {feedback && (
           <div className="h-6 flex justify-center items-center pointer-events-none z-50">
-            <div className={`animate-in zoom-in-75 fade-in duration-150 px-4 py-1 rounded-full text-white font-black tracking-widest text-xs shadow-xl ${feedbackType === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/50 shadow-green-500/20' : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 shadow-yellow-500/20'}`}>
+            <div className={`animate-in zoom-in-75 fade-in duration-150 px-4 py-1 rounded-full text-white font-black tracking-widest text-xs shadow-xl ${feedbackType === 'success' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-emerald-500/20' : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 shadow-yellow-500/20'}`}>
               {feedback}
             </div>
           </div>
@@ -553,11 +705,11 @@ export default function FineMotorClient({ copy } = {}) {
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statFlowScore || "Score"}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{score}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.statTimeLeft || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
               </div>
             </>
@@ -592,25 +744,8 @@ export default function FineMotorClient({ copy } = {}) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
-            </div>
-          )}
-
-          {/* Paused Overlay */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                if (canvasRef.current) canvasRef.current.requestPointerLock(); 
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-                <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
-                <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
-              </div>
             </div>
           )}
 
@@ -625,9 +760,10 @@ export default function FineMotorClient({ copy } = {}) {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Activity}
-              accent="red"
-              title="Mouse Tracing Game"
-              subtitle="Raw Input Continuous Tracking • 45s Timer"
+              accent="emerald"
+              title={copy?.title || "Mouse Tracing Game"}
+              subtitle={copy?.subtitle || "Raw Input Continuous Tracking • 45s Timer"}
+              startButtonText={copy?.startBtn || "Start Drill"}
               isTouchOnlyDevice={false}
               onStart={startGame}
             />
@@ -635,108 +771,70 @@ export default function FineMotorClient({ copy } = {}) {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.countdownSubtitle || "GET READY"} />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Standardized DrillResultCard */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(244,63,94,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {analytics.totalScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Flow Score</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.totalScore}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Flow Score</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-amber-400">{analytics.maxStreak}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Streak Frames</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-rose-400">{analytics.peakFlow}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Flow State</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={startGame}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Train Again
-                  </button>
-                  <button
-                    onClick={shareScore}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit Drill & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={analytics.totalScore}
+              isNewBest={isNewBest}
+              playAgainText={copy?.trainAgain || "Train Again"}
+              shareText={copy?.shareTitle || "Share Score"}
+              exitText={copy?.exitTitle || "Exit"}
+              stats={[
+                { value: analytics.totalScore, label: copy?.statFlowScore || "Flow Score" },
+                { value: `${analytics.maxStreak}f`, label: copy?.maxStreakLabel || "Max Streak Frames" },
+                { value: `${analytics.peakFlow}%`, label: copy?.peakFlowLabel || "Peak Flow State" },
+                { value: `${bestScore}`, label: copy?.bestScoreLabel || "Personal Best" },
+              ]}
+              onPlayAgain={startGame}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Trace the exact" highlight="glowing red wave" result="+1 PT / frame locked-on" />
-                <RuleItem num="2" text="Scroll speed ramps" highlight="Dynamically" result="3.6 → 7.2 over 45s" />
-                <RuleItem num="3" text="Continuous Flow" highlight="Re-acquire Target" result="Wave never stops!" />
-                <RuleItem num="4" text="Strict Tracking" highlight="Desktop Exclusive" result="1:1 Raw Mouse Input" />
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
+                  <RuleItem
+                    key={i}
+                    num={item.num}
+                    text={item.text}
+                    highlight={item.highlight}
+                    result={item.result}
+                  />
+                ))}
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Mouse Tracing Game"
+              title={copy?.aboutTitle || "About Mouse Tracing Game"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-rose-400" /> Continuous Wave Tracking &amp; Flow Endurance
+                    <Activity className="w-4 h-4 text-emerald-400" /> {copy?.aboutHeading || "Continuous Wave Tracking & Flow Endurance"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    The <strong>Mouse Tracing Game</strong> develops dynamic hand-eye coordination, fine motor path precision, and smooth pursuit visual tracking. By challenging you to guide your cursor along a continuously scrolling sinusoidal wave filament with a 22px tolerance band, it isolates the micro-stabilizing muscles in your wrist and forearm required for fluid tracking in tactical shooters and digital illustration.
+                    {copy?.aboutP1 || "The Mouse Tracing Game develops dynamic hand-eye coordination, fine motor path precision, and smooth pursuit visual tracking. By challenging you to guide your cursor along a continuously scrolling sinusoidal wave filament with a 22px tolerance band, it isolates the micro-stabilizing muscles in your wrist and forearm required for fluid tracking in tactical shooters and digital illustration."}
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    Grounded in Johnny Accot &amp; Shumin Zhai&apos;s (1997) Steering Law, dynamic trajectory navigation requires continuous velocity modulation. As scroll speed accelerates from 2.2 to 4.5+ px/frame over 45 seconds, the drill engages Robert Woodworth&apos;s (1899) closed-loop current control mechanism, demanding continuous visual-motor error correction and smooth pursuit eye movements (Krauzlis 2004, Rashbass 1961) to sustain peak flow integrity.
+                    {copy?.aboutP2 || "Grounded in Johnny Accot & Shumin Zhai's (1997) Steering Law, dynamic trajectory navigation requires continuous velocity modulation. As scroll speed accelerates from 2.2 to 3.8+ px/frame over 45 seconds, the drill engages Robert Woodworth's (1899) closed-loop current control mechanism, demanding continuous visual-motor error correction and smooth pursuit eye movements (Krauzlis 2004, Rashbass 1961) to sustain peak flow integrity."}
                   </p>
                 </div>
 
@@ -744,49 +842,45 @@ export default function FineMotorClient({ copy } = {}) {
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.audienceTitle || "Target Audience"}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, graphic designers, digital artists, and individuals seeking to improve hand stability and reduce hand tremors.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.audienceText || "Esports athletes, graphic designers, digital artists, and individuals seeking to improve hand stability and reduce hand tremors."}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.benefitsTitle || "Mechanical Benefits"}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Fine motor control, continuous hand stability, flow state endurance, and smooth pursuit tracking mastery.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.benefitsText || "Fine motor control, continuous hand stability, flow state endurance, and smooth pursuit tracking mastery."}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Telemetry Tracked</h4>
+                      <h4 className="text-xs font-bold text-white">{copy?.telemetryTitle || "Telemetry Tracked"}</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Flow Score, peak flow state percentage, and maximum survival tracking streak frames.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{copy?.telemetryText || "Flow Score, peak flow state percentage, and maximum survival tracking streak frames."}</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
           </div>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
 }
 
-// === Subcomponents ===
-
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black text-rose-400"> {highlight}</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-rose-400 whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
           {result}
         </div>
       </div>

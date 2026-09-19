@@ -2,6 +2,8 @@ import ProFlickClient from '@/app/drills/fps/flick-shot-training/ProFlickClientL
 import DrillGuide from '@/components/drill/DrillGuide';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: "Entraînement Flick Shot – Tir Réflexe et Visée | SkillDrills",
@@ -212,7 +214,7 @@ export default function FlickShotFrPage() {
         "@type": "HowToStep",
         "position": 3,
         "name": "Impulsion Balistique Directe et Clic Immédiat",
-        "text": "Propulsez le curseur en ligne directe vers le centre de la cible et cliquez avant la réduction complète de l'anneau."
+        "text": "Propulsez le curseur en ligne directe vers le centre de la cible et cliquez avant l'expiration du temps de la cible."
       },
       {
         "@type": "HowToStep",
@@ -284,7 +286,23 @@ export default function FlickShotFrPage() {
           desc: "Un arrêt immédiat repose sur l'action simultanée des fléchisseurs et extenseurs combinée au frottement de la main sur le tapis."
         }
       ]
-    }
+    },
+    steps: [
+      "Cliquez sur Démarrer le Drill pour lancer l'arène de flick shot en plein écran.",
+      "Fixez votre regard au centre du réticule.",
+      "Dès l'apparition de la cible, propulsez vivement la souris vers son centre et cliquez instantanément.",
+      "Évitez les glissements lents : focalisez-vous sur une accélération franche suivie d'un freinage net sur la cible.",
+      "Analysez votre taux de précision, votre temps moyen d'acquisition et votre rang sur le récapitulatif."
+    ],
+    audience: "Compétiteurs de FPS tactiques (Valorant, CS2, Rainbow Six Siege), joueurs de Battle Royale (Apex Legends, Fortnite) et tout joueur cherchant une précision chirurgicale sur le premier tir.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'elliott2010', 'fitts1954', 'schmidt1979'),
+    related: [
+      { href: "/fr/drills/fps/180-degree-awareness", label: "Conscience Spatiale 180°" },
+      { href: "/fr/drills/fps/angle-hold-trainer", label: "Placement du Réticule et Tenue d'Angle" },
+      { href: "/fr/drills/reaction-speed/reaction-time-test", label: "Test de Temps de Réaction" },
+      { href: "/fr/drills/motor/movement-speed/rapid-tapping", label: "Test CPS et Vitesse de Clic" }
+    ]
   };
 
   return (
@@ -316,7 +334,33 @@ export default function FlickShotFrPage() {
       <ProFlickClient
         copy={{
           h1Keyword: "Entraînement Flick Shot",
-          h1Suffix: " – Tir Réflexe et Précision"
+          h1Suffix: " – Tir Réflexe et Précision",
+          subtitle: "Entraînez votre snap aim, mémoire motrice balistique, acquisition de cibles et freinage de souris avec analyse en temps réel.",
+          statScore: "Score",
+          statTime: "Temps Restant",
+          statAccuracy: "Précision",
+          statBestScore: "Meilleur Score",
+          statAvgFlick: "Flick Moyen",
+          statMaxCombo: "Combo Max",
+          statPeakLevel: "Niveau Max",
+          startTitle: "Pro Flick Trainer",
+          startSubtitle: "Flicks Balistiques & Acquisition de Cibles • Progression Dynamique Infinie",
+          getReady: "Préparez-vous",
+          toggleFlash: "Flash de Tir Manqué",
+          toggleSound: "Effets Sonores",
+          pausedTitle: "En Pause",
+          pausedSubtitle: "Cliquez pour reprendre — Le verrouillage du curseur sera réactivé.",
+          stageCaption: "Visez rapidement les cibles aléatoires et tirez avec précision avant l'expiration du temps imparti.",
+          rulesTitle: "Règles d'Entraînement & Système de Score",
+          rulesItems: [
+            { num: "1", text: "Cible Touchée", highlight: "+100 PTS (+0,6s)", result: "×Multiplicateur Combo" },
+            { num: "2", text: "Série de Combos", highlight: "Jusqu'à 3.0×", result: "Cibles Plus Rapides" },
+            { num: "3", text: "Niveau Supérieur", highlight: "+1 / 1800 PTS", result: "Progression Adaptative" },
+            { num: "4", text: "Tir Manqué / Expiration", highlight: "Pénalité", result: "Réinitialise Combo (-0,8s)" }
+          ],
+          aboutTitle: "À Propos du Pro Flick Trainer",
+          aboutHeading: "Qu'est-ce que le Flick Aim ?",
+          aboutText: "Le flick aim est la capacité neuromotrice à propulser le réticule en une seule impulsion balistique directe vers la cible et à le stabiliser instantanément. Selon la loi de Fitts (1954), la difficulté dépend de la distance et de la taille. La maîtrise réside dans le freinage mécanique antagoniste sur le tapis (Elliott et al., 2010)."
         }}
       />
       <DrillGuide guide={flickGuide} />
@@ -327,6 +371,7 @@ export default function FlickShotFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

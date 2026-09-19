@@ -1,6 +1,8 @@
-import FlowStateClient from '@/app/drills/fps/flow-state/FlowInductionClient';
+import FlowStateClient from '@/app/drills/fps/flow-state/FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 
 export const metadata = {
@@ -242,10 +244,10 @@ export default function FlowStateFrPage() {
     stageCaption: "Suivez la trajectoire des courbes de Bézier avec régularité et gardez un rythme de visée constant.",
     rulesTitle: "Règles d'Entraînement et Attribution des Points",
     rulesItems: [
-      { num: "1", text: "Alignement Continu", highlight: "+10 PTS (+0,4s/s)", result: "Présence continue sur la zone cible" },
-      { num: "2", text: "Multiplicateur de Flow", highlight: "Jusqu'à 3,0x points", result: "Augmente avec les séries ininterrompues" },
-      { num: "3", text: "Progression en Niveaux", highlight: "+1 Niveau / 1400 PTS", result: "La vitesse s'adapte à votre maîtrise" },
-      { num: "4", text: "Rupture de Focus", highlight: "Réinitialisation Combo", result: "1,0s hors cible réinitialise le multiplicateur" }
+      { num: "1", text: "Alignement Continu", highlight: "+10 PTS (+0,4s/s)", result: "Verrouillage constant sur la cible" },
+      { num: "2", text: "Multiplicateur de Flow", highlight: "Jusqu'à 3,0x points", result: "Chaîne de focus ininterrompue" },
+      { num: "3", text: "Progression en Niveaux", highlight: "+1 Niveau / 1400 PTS", result: "Vitesse Bézier adaptative" },
+      { num: "4", text: "Rupture de Focus", highlight: "1,0s hors cible", result: "Réinitialisation combo (-0,6s)" }
     ],
     aboutTitle: "À Propos de l'Entraîneur d'État de Flow FPS"
   };
@@ -311,7 +313,24 @@ export default function FlowStateFrPage() {
           desc: "En délaissant l'analyse consciente pour un schéma moteur automatique, le système nerveux économise son énergie et agit à sa vitesse biologique maximale."
         }
       ]
-    }
+    },
+    steps: [
+      "Sélectionnez votre sensibilité de jeu habituelle via le sélecteur universel pour garantir un transfert 1:1 de votre mémoire musculaire.",
+      "Cliquez sur 'Lancer' pour activer le plein écran avec verrouillage direct du pointeur (Pointer Lock) sans accélération de la souris.",
+      "Fixez votre attention visuelle sur la cible en mouvement le long de courbes de Bézier continues et fluides.",
+      "Maintenez le réticule au centre de la cible pour charger la jauge de Flow et entrer dans la Zone.",
+      "Enchaînez des séries de concentration ininterrompues pour multiplier vos points et forger une endurance mentale résistante à la fatigue.",
+    ],
+    audience: "Joueurs compétitifs de FPS et de jeux de tir tactiques (Valorant, CS2, Apex Legends, Overwatch 2, Warzone), athlètes eSport en échauffement de tournoi et passionnés de performance cognitive souhaitant développer l'attention soutenue.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'krauzlis2004', 'posner1990', 'green2003', 'dietrich2004'),
+    related: [
+      { href: "/fr/drills/fps/fps-tracking-trainer", label: "Entraîneur de Tracking FPS" },
+      { href: "/fr/drills/fps/anti-zigzag-movement-trainer", label: "Entraîneur Anti-Zigzag" },
+      { href: "/fr/drills/fps/anti-strafe-jitter-duel", label: "Duel Anti-Strafe Jitter" },
+      { href: "/fr/drills/fps/flick-shot-training", label: "Entraînement au Flick Shot" },
+      { href: "/fr/drills/reaction-speed/visual-tracking-speed-test", label: "Test de Vitesse de Tracking Visuel" }
+    ]
   };
 
   return (
@@ -345,6 +364,7 @@ export default function FlowStateFrPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/flow-state" locale="fr" />
       </div>
       <DrillGuide guide={flowStateGuide} />
+      <DrillFooter />
     </>
   );
 }

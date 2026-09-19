@@ -1,6 +1,7 @@
 import PrecisionFlickShotClient from '@/app/drills/motor/hand-eye-coordination/precision-flick-shot/PrecisionFlickShotClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -326,6 +327,26 @@ const guideProps = {
   },
 };
 
+const copyFr = {
+  title: "Flick Shot de Précision – Test de Visée et Précision Souris",
+  subtitle: "Déclin des Cibles & Micro-Flicks Plein Centre • Progression Infinie",
+  startButtonText: "DÉMARRER LE DRILL",
+  playAgainText: "Rejouer",
+  shareText: "Partager le score",
+  exitText: "Quitter",
+  accuracyLabel: "Précision",
+  targetHitsLabel: "Cibles touchées",
+  bullseyesLabel: "Plein centre (Mouche)",
+  peakLevelLabel: "Niveau Max",
+  rulesTitle: "Instructions du Drill & Système de Score",
+  rulesItems: [
+    { num: "1", text: "Tir Plein Centre", highlight: "+200 PTS / +0,6s", result: "Précision millimétrique du noyau" },
+    { num: "2", text: "Tir Standard", highlight: "+100 PTS / +0,6s", result: "Acquisition périphérique rapide" },
+    { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau / 1400 PTS", result: "Les cibles rétrécissent et expirent plus vite" },
+    { num: "4", text: "Tir Manqué / Expiration", highlight: "Combo réinitialisé", result: "Pénalité de temps : -0,8s" }
+  ],
+};
+
 export default function PrecisionFlickShotPage() {
   return (
     <>
@@ -353,11 +374,16 @@ export default function PrecisionFlickShotPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <PrecisionFlickShotClient copy={{ title: "Flick Shot de Précision" }} />
+      <PrecisionFlickShotClient copy={copyFr} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/fr/drills/motor/hand-eye-coordination/precision-flick-shot" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/precision-flick-shot"
+          locale="fr"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

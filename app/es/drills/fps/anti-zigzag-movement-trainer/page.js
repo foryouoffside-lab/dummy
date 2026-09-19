@@ -1,5 +1,6 @@
 import AntiZigzagClient from '@/app/drills/fps/anti-zigzag-movement-trainer/AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -329,18 +330,19 @@ export default function AntiZigzagEsPage() {
           stageCaption: "Mantén tu retícula sobre objetivos esquivos con patrones en zigzag impredecibles. ¡Concéntrate en el eje central!",
           rulesTitle: "Reglas de Entrenamiento & Puntuación",
           rulesItems: [
-            { num: "1", text: "Contacto con Objetivo", highlight: "Daño Continuo", result: "Mantiene el tiempo de retícula activo" },
-            { num: "2", text: "V-Crossover", highlight: "Foco en el Centro", result: "Evita el overshoot en los giros externos" },
-            { num: "3", text: "Progresión de Nivel", highlight: "Cada 1.400 PTS +1 Nivel", result: "Mayor velocidad y frecuencia de zigzag" },
-            { num: "4", text: "Agarre Relajado", highlight: "Sin Tensión Muscular", result: "Deslizamiento continuo sin sacudidas" }
+            { num: "1", text: "Alineación de Mira", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+            { num: "2", text: "Destrucción de Objetivo", highlight: "+25 PTS Bonus", result: "Reset HP & Respawn" },
+            { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Zigzag Adaptativo" },
+            { num: "4", text: "Escape de Objetivo", highlight: "Tiempo Expirado", result: "Reinicia Combo (-0.6s)" }
           ],
           aboutTitle: "Acerca del Entrenamiento de Tracking Anti-Zigzag"
         }}
       />
+      <DrillGuide guide={esGuide} />
       <div className="max-w-6xl mx-auto px-4 w-full">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/anti-zigzag-movement-trainer" locale="es" />
       </div>
-      <DrillGuide guide={esGuide} />
+      <DrillFooter />
     </>
   );
 }

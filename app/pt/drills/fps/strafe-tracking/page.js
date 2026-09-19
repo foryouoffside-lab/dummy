@@ -1,6 +1,7 @@
 import StrafeTrackingClient from '@/app/drills/fps/strafe-tracking/StrafeTrackingClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -318,18 +319,10 @@ export default function StrafeTrackingPtPage() {
     bottomCaption: "Mantenha a retícula sobre o alvo luminoso enquanto ele inverte bruscamente de sentido e varia de aceleração pelo cenário.",
     rulesTitle: "Instruções do Treino e Calibração",
     rulesItems: [
-      {
-        name: "Calibração 1:1 de Sensibilidade",
-        desc: "Selecione seu jogo principal e insira seu DPI exato no painel de configurações para obter resposta idêntica à do seu jogo."
-      },
-      {
-        name: "Leitura de Desaceleração",
-        desc: "Observe as quebras de velocidade antes da mudança de direção; evite antecipar movimentos às cegas para não errar por sobrepasso."
-      },
-      {
-        name: "Fluidez no Deslize do Mouse",
-        desc: "Use o antebraço para perseguição contínua e micro-ajustes rápidos no punho ao ocorrerem inversões curtas de trajeto."
-      }
+      { num: "1", text: "Alinhamento de Mira", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+      { num: "2", text: "Combo Contínuo", highlight: "Até 3.0×", result: "Multiplicador Máx" },
+      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Strafe Adaptativo" },
+      { num: "4", text: "Penalidade Fora do Alvo", highlight: "1.0s Fora do Alvo", result: "Reinicia Combo (-0.6s)" }
     ],
     aboutTitle: "Sobre o Strafe Tracking Reativo",
     whatIsTitle: "O que é o Treino de Strafe Tracking?",
@@ -385,6 +378,7 @@ export default function StrafeTrackingPtPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/strafe-tracking" locale="pt" />
       </div>
+      <DrillFooter />
     </>
   );
 }

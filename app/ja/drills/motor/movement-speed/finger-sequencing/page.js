@@ -2,6 +2,7 @@ import FingerSequencingClient from '@/app/drills/motor/movement-speed/finger-seq
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -300,6 +301,31 @@ const guideProps = {
   },
 };
 
+const jaCopy = {
+  title: "シーケンスエイム練習",
+  desc: "シーケンス・ターゲットスイッチングは、最も近い目標ではなく指定された順序でノードを素早く正確に撃ち抜く高度なエイム練習です。Lashley(1951)およびKeele(1968)の一連の運動プログラミング理論に基づき、軌道計画とマイクロフリックの連動精度を鍛え上げます。",
+  score: "スコア",
+  timeLeft: "残り時間",
+  accuracy: "命中率",
+  bestScore: "自己ベスト",
+  startButtonText: "トレーニング開始",
+  startSubtitle: "指先精密制御・連続シーケンス軌道 • 1:1 生マウス入力対応",
+  getReady: "準備してください",
+  rulesTitle: "訓練手順とスコア換算方式",
+  rulesItems: [
+    { num: "1", text: "順序付きノード打鍵", highlight: "エメラルドシーケンス", result: "+150点 × コンボ (+0.6秒)" },
+    { num: "2", text: "コンボ倍率", highlight: "最大3.0倍", result: "連続命中によりスコア加速" },
+    { num: "3", text: "レベル進行", highlight: "連続難易度上昇", result: "ターゲット縮小と分散拡大" },
+    { num: "4", text: "ミス / タイムアウト", highlight: "コンボリセット", result: "設定時ペナルティ -0.8秒減点" }
+  ],
+  chainsCleared: "完了チェイン",
+  peakLevel: "最高レベル",
+  maxCombo: "最大コンボ",
+  playAgain: "もう一度挑戦",
+  shareTitle: "スコアを共有",
+  exitTitle: "終了"
+};
+
 export default function JapaneseFingerSequencingPage() {
   return (
     <>
@@ -327,11 +353,12 @@ export default function JapaneseFingerSequencingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient copy={{ title: 'シーケンスエイム練習' }} />
+      <FingerSequencingClient copy={jaCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/finger-sequencing" />
+        <RelatedDrills currentCategory="motor" currentHref="/ja/drills/motor/movement-speed/finger-sequencing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

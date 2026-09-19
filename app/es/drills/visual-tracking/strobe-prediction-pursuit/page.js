@@ -41,12 +41,7 @@ export const metadata = {
 };
 
 export default function StrobePredictionPursuitPageES() {
-  const sources = pickSources([
-    "Appelbaum et al. (2011) - Improved Visual Cognition Through Stroboscopic Training",
-    "Mitroff et al. (2013) - Enhancing Athletic Visual Skills Through Stroboscopic Training",
-    "Smith & Mitroff (2016) - Stroboscopic Training Enhances Anticipatory Timing",
-    "Bennett et al. (2007) - Extrapolation of Accelerated Motion in Visual Trajectory Prediction"
-  ]);
+  const sources = pickSources('appelbaum2011', 'bennett2007', 'mitroff2013', 'smith2016', 'woods2015', 'leigh2015');
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -203,7 +198,12 @@ export default function StrobePredictionPursuitPageES() {
 
   const guide = {
     title: "Guía Científica de Visión Estroboscópica y Predicción Visomotora",
-    intro: "El entrenamiento estroboscópico opera privando transitoriamente a la retina de estimulación lumínica continua. Cuando la imagen desaparece en ciclos periódicos, las áreas corticales parietales y el cerebelo no pueden depender de la corrección de errores en tiempo real. En su lugar, el sistema nervioso central debe activar un modelo motor feedforward que calcula la posición futura estimada del objeto a partir de su inercia y velocidad angular previa. Esta demanda cognitiva estimula la neuroplasticidad en los circuitos oculomotores, optimizando el tiempo de anticipación espacial en situaciones dinámicas reales.",
+    intro: [
+      "El entrenamiento visual estroboscópico es un protocolo neurovisual respaldado empíricamente donde la percepción visual continua se interrumpe de forma rítmica mediante intervalos de oclusión total. Al suprimir la retroalimentación sensorial ininterrumpida, el sistema nervioso central se ve forzado a operar con conjuntos incompletos de información cinemática, obligando a las redes cerebelosas y corticales a computar modelos internos predictivos feedforward del movimiento (Appelbaum et al., 2011; Mitroff et al., 2013).",
+      "Cuando un objetivo en movimiento se sumerge en una fase de oscuridad, el deslizamiento retiniano desciende instantáneamente a cero. En observadores no entrenados, el seguimiento ocular lento decae y se detiene entre los 100 y 200 milisegundos, derivando en sacadas de búsqueda erráticas al reaparecer el estímulo. Investigaciones pioneras de Bennett et al. (2007) y Leigh & Zee (2015) demuestran que la oclusión periódica condiciona las vías de memoria de velocidad en los campos oculares frontales (FEF) y el flóculo cerebeloso, permitiendo sostener el impulso oculomotor continuo a través de la brecha oscura y acelerar con precisión hacia las coordenadas de reaparición.",
+      "En el deporte de alto rendimiento (béisbol, tenis, hockey sobre hielo y tiro de precisión), las gafas estroboscópicas con lentes de cristal líquido se han consolidado como un equipo esencial de acondicionamiento neuromuscular (Smith & Mitroff, 2016). Strobe Prediction Pursuit traslada este método de élite al navegador web mediante ciclos de 60 fotogramas visibles y 30 fotogramas ocluidos. En pantallas con alta tasa de refresco (144 Hz o superior) que garantizan una cadencia temporal milimétrica (Woods et al., 2015), este ejercicio fortalece la transición entre la captación foveal y la ejecución motora anticipatoria.",
+      "Metodología y privacidad de datos: todas las trayectorias e interacciones se calculan y cronometran en tiempo real en el cliente. SkillDrills no almacena ni recopila datos de los usuarios en servidores remotos; sus marcas y configuraciones residen únicamente en el almacenamiento local (localStorage) de su navegador. Este simulador es una herramienta de entrenamiento cognitivo y desarrollo de reflejos con fines formativos, no constituyendo un instrumento diagnóstico médico."
+    ],
     benchmarks: {
       title: "Valores de Referencia de Eficiencia Oculomotora Estroboscópica",
       headers: ["Nivel de Habilidad", "Precisión en Oscuridad (%)", "Error Medio (px)", "Latencia de Reajuste (ms)", "Rango Percentil"],
@@ -214,19 +214,44 @@ export default function StrobePredictionPursuitPageES() {
         ["Élite / Atleta de Alto Rendimiento", "79% – 89%", "20 – 34 px", "95 – 149 ms", "85% – 97%"],
         ["Maestría Visomotora / Nivel Pro", "90%+", "< 20 px", "< 95 ms", "98% – 100%"]
       ],
-      note: "Parámetros registrados a velocidad 1.0x con ciclos estroboscópicos de 400ms encendido / 400ms apagado a 60 fotogramas por segundo."
+      note: "Parámetros registrados a velocidad 1.0x con ciclos estroboscópicos de 400ms encendido / 400ms apagado a 60 fotogramas por segundo (Appelbaum et al., 2011; Bennett et al., 2007)."
     },
-    instructions: [
+    techniques: {
+      title: "4 Técnicas Fundamentales para Dominar la Oclusión Estroboscópica",
+      items: [
+        {
+          name: "Mantenimiento Activo de la Memoria de Velocidad",
+          desc: "Durante la ráfaga de fotogramas iluminados, concentre la fijación foveal en codificar el vector de velocidad instantáneo y la curvatura en la memoria motora cerebelosa.",
+          tips: "No relaje la musculatura ocular al desaparecer el objetivo; continúe guiando la mirada a la misma velocidad angular."
+        },
+        {
+          name: "Proyección Cinemática de la Trayectoria Invisible",
+          desc: "Extrapole mentalmente la trayectoria oculta como si el objetivo cruzara un túnel cubierto, manteniendo el curso sin desviar el eje de atención.",
+          tips: "Visualice mentalmente una estela brillante que prolonga la trayectoria a través del vacío."
+        },
+        {
+          name: "Aterrizaje Foveal Pre-Destello",
+          desc: "Justo antes de completarse el intervalo de oscuridad, oriente el punto de mira hacia las coordenadas previstas de salida para suprimir sacadas de recuperación.",
+          tips: "Siga el ritmo estroboscópico interiormente como un metrónomo para anticipar el milisegundo exacto de reaparición."
+        },
+        {
+          name: "Inhibición del Bloqueo Sacádico",
+          desc: "Reprime el reflejo primario de congelar los ojos o disparar micromovimientos de búsqueda durante el apagón. Confíe en la inercia del modelo feedforward.",
+          tips: "Conserve los músculos extraoculares distendidos y fluidos para asegurar una transición suave."
+        }
+      ]
+    },
+    steps: [
       "Fije la mirada en el objetivo y acompáñelo de forma continua durante la fase iluminada inicial.",
-      "Al producirse el corte estroboscópico, continúe desplazando el cursor hacia la posición donde estima que viajará el objetivo.",
+      "Al producirse el corte estroboscópico, continúe desplazando la vista hacia la posición donde estima que viajará el objetivo.",
       "Cuando vuelva a encenderse la luz, compruebe su precisión relativa y sincronice la velocidad sin sacadas violentas.",
       "Avance en dificultad aumentando la velocidad del objetivo una vez alcance con soltura una precisión superior al 70%."
     ],
-    tips: [
-      "Nunca detenga el cursor durante el apagón: la extrapolación motora activa es la clave biológica del ejercicio.",
-      "Procure realizar un barrido suave y armonioso en lugar de pequeñas correcciones bruscas.",
-      "Conserve un parpadeo natural entre rondas para asegurar una hidratación corneal adecuada."
-    ],
+    audience: "Deportistas de raqueta y pelota, pilotos, jugadores de esports (FPS y MOBA) y profesionales que busquen maximizar la anticipación visoespacial y la memoria de velocidad.",
+    faqs: faqSchema.mainEntity.map(item => ({
+      q: item.name,
+      a: item.acceptedAnswer.text
+    })),
     sources
   };
 

@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from './AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -323,10 +324,17 @@ export default function AntiStrafeJitterPage() {
       <AntiStrafeJitterClient
         copy={{
           h1Keyword: "Anti-Strafe Jitter Trainer",
-          h1Suffix: " - Reactive Tracking Aim"
+          h1Suffix: " - Reactive Tracking Aim",
+          rulesItems: [
+            { num: "1", text: "Tracking Alignment", highlight: "+50 PTS (+0.4s/s)", result: "×Combo Mult" },
+            { num: "2", text: "Continuous Combo", highlight: "Up to 3.0×", result: "Max Multiplier" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Jitter" },
+            { num: "4", text: "Off-Target Penalty", highlight: "1.0s Off-Target", result: "Resets Combo (-0.6s)" }
+          ]
         }}
       />
       <DrillGuide guide={antiStrafeGuide} />
+      <DrillFooter />
     </>
   );
 }

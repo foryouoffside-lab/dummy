@@ -64,12 +64,12 @@ export default function AimTrainerPreview() {
         radius,
         age: Math.random() * 0.8,
         ttl: 2.2 + Math.random() * 0.8,
-        color: '#00ff88',
+        color: '#10b981',
       };
     };
 
     const spawnHitBurst = (x, y) => {
-      const colors = ['#00ff88', '#22c55e', '#86efac', '#ffffff'];
+      const colors = ['#10b981', '#34d399', '#6ee7b7', '#ffffff'];
       for (let i = 0; i < 14; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 1.0 + Math.random() * 2.8;
@@ -90,7 +90,7 @@ export default function AimTrainerPreview() {
         y,
         r: 14,
         life: 1.0,
-        color: '#00ff88',
+        color: '#10b981',
       });
 
       state.hitMarkers.push({
@@ -276,7 +276,7 @@ export default function AimTrainerPreview() {
       }
 
       // Subtle atmospheric emerald grid (matching client)
-      ctx.strokeStyle = 'rgba(34, 197, 94, 0.04)';
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
       ctx.lineWidth = 1;
       const gridSize = 32;
       for (let x = 0; x < width; x += gridSize) {

@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
+  Activity, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
   Timer, TrendingUp, Volume2, VolumeX,
   Share2, LogOut,
@@ -21,13 +21,11 @@ import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
@@ -73,10 +71,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Airborne Target", highlight: "Destroy Target (+100 PTS / +0.4s)", result: "Track Parabolic Trajectory" },
-  { num: "2", text: "Height Bonus", highlight: "Up to +75 PTS", result: "Higher Destructions Award More Points" },
-  { num: "3", text: "Failure Rule", highlight: "Failure Penalty", result: "Dropping target resets combo streak (-0.6s with Time Penalty enabled)" },
-  { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Gravity & Speed" }
+  { num: "1", text: "Airborne Target", highlight: "+100 PTS (+0.4s)", result: "×Combo Mult" },
+  { num: "2", text: "Apex Elevation", highlight: "Up to +75 PTS", result: "Height Bonus" },
+  { num: "3", text: "Level Up", highlight: "+1 / 1400 PTS", result: "Adaptive Gravity" },
+  { num: "4", text: "Dropped Target", highlight: "Penalty", result: "Resets Combo (-0.6s)" }
 ];
 
 const ABOUT_INTRO = [
@@ -211,7 +209,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
       maxHp: cfg.maxHp,
       hp: cfg.maxHp,
       gravity,
-      color: '#ef4444',
+      color: '#10b981',
       spawnTime: performance.now(),
       nextEvasionTime: performance.now() + 800 + Math.random() * 600
     };
@@ -219,10 +217,18 @@ export default function VerticalAirTrackClient({ copy = null }) {
 
   const createExplosion = useCallback((x, y, color) => {
     const e = engine.current;
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.5 + Math.random() * 4.5;
-      e.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
+      e.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        radius: Math.random() * 2.2 + 1.2,
+        color
+      });
     }
   }, []);
 
@@ -231,7 +237,15 @@ export default function VerticalAirTrackClient({ copy = null }) {
     for (let i = 0; i < 3; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1 + Math.random() * 3;
-      e.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1, life: 0.7, color: '#38bdf8' });
+      e.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        life: 0.7,
+        radius: Math.random() * 1.5 + 1.0,
+        color: '#34d399'
+      });
     }
   }, []);
 
@@ -336,6 +350,9 @@ export default function VerticalAirTrackClient({ copy = null }) {
     const t4 = setTimeout(() => {
       startingRef.current = false;
       setGameState('playing');
+      if (canvasRef.current && !document.pointerLockElement) {
+        canvasRef.current.requestPointerLock().catch(() => {});
+      }
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
@@ -346,32 +363,53 @@ export default function VerticalAirTrackClient({ copy = null }) {
     }
   }, [spawnTarget]);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    if (engine.current) engine.current.isFiring = false;
     setIsFullscreen(false);
-    if (document.pointerLockElement) document.exitPointerLock();
+    if (document.pointerLockElement) {
+      document.exitPointerLock();
+    }
     setGameState('start');
   }, []);
 
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
-
+  // Pointer lock change listener — exit drill on pointer lock loss
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handlePointerLockChange = () => {
+      const locked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(locked);
+      if (!locked) {
+        if (engine.current) engine.current.isFiring = false;
+        if (gameState === 'playing' || gameState === 'countdown') {
+          handleExitDrill();
+        }
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+  }, [gameState, handleExitDrill]);
+
+  // Escape key & fullscreenchange exit handlers
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isFullscreen, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -387,11 +425,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
     const handleMouseDown = (e) => {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (!containerRef.current || !containerRef.current.contains(e.target)) return;
-      if (gameState !== 'playing') return;
-      if (!pointerLocked) {
-        resumeDrill();
-        return;
-      }
+      if (gameState !== 'playing' || !pointerLocked) return;
       engine.current.isFiring = true;
     };
 
@@ -409,7 +443,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [gameState, pointerLocked, universalSens, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens]);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -430,7 +464,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
           backdropCacheRef.current = createBackdropCache(width, height, (bCtx, w, h) => {
             bCtx.fillStyle = '#050508';
             bCtx.fillRect(0, 0, w, h);
-            bCtx.strokeStyle = 'rgba(239, 68, 68, 0.04)';
+            bCtx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
             bCtx.lineWidth = 1;
             const cx = w / 2, cy = h / 2;
             bCtx.beginPath();
@@ -497,11 +531,11 @@ export default function VerticalAirTrackClient({ copy = null }) {
           if (t.x - t.radius < 0) {
             t.x = t.radius;
             t.vx = -t.vx * 0.85;
-            createExplosion(t.x, t.y, '#ef4444');
+            createExplosion(t.x, t.y, '#10b981');
           } else if (t.x + t.radius > width) {
             t.x = width - t.radius;
             t.vx = -t.vx * 0.85;
-            createExplosion(t.x, t.y, '#ef4444');
+            createExplosion(t.x, t.y, '#10b981');
           }
 
           // Unpredictable Evasions
@@ -589,9 +623,11 @@ export default function VerticalAirTrackClient({ copy = null }) {
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
               setLevel(Math.floor(e.level));
 
+              const isStreak = e.combo >= 10;
+              const hitColor = isStreak ? '#34d399' : '#10b981';
               drillAudio.playHit();
-              createExplosion(hitTarget.x, hitTarget.y, '#00ff88');
-              e.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, '#00ff88'));
+              createExplosion(hitTarget.x, hitTarget.y, hitColor);
+              e.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, hitColor));
               createHitMarker(hitTarget.x, hitTarget.y);
               
               e.targets = e.targets.filter(t => t.id !== hitTarget.id);
@@ -626,12 +662,10 @@ export default function VerticalAirTrackClient({ copy = null }) {
 
       // Render Targets
       if (gameState === 'playing' || gameState === 'start') {
-        const ch = e.crosshair;
-        e.targets.forEach(t => {
-          const isHovered = Math.hypot(ch.x - t.x, ch.y - t.y) <= t.radius;
-          const targetColor = isHovered ? '#00ff88' : '#ef4444';
+        const isStreak = e.combo >= 10;
+        const targetColor = isStreak ? '#34d399' : '#10b981';
 
-          drawPulseRing(ctx, t.x, t.y, t.radius, targetColor, 0.4);
+        e.targets.forEach(t => {
           drawTacticalTarget(ctx, t.x, t.y, t.radius, targetColor, true);
 
           ctx.save();
@@ -645,7 +679,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
           ctx.fillRect(hbX, hbY, hbW, hbH);
           
           const hpPct = Math.max(0, t.hp / t.maxHp);
-          ctx.fillStyle = isHovered ? '#00ff88' : '#ef4444';
+          ctx.fillStyle = targetColor;
           ctx.fillRect(hbX, hbY, hbW * hpPct, hbH);
           ctx.restore();
         });
@@ -662,14 +696,14 @@ export default function VerticalAirTrackClient({ copy = null }) {
         ctx.beginPath();
         ctx.moveTo(width / 2, height);
         ctx.lineTo(ch.x, ch.y);
-        ctx.strokeStyle = isHitting ? 'rgba(0, 255, 136, 0.4)' : 'rgba(239, 68, 68, 0.3)';
+        ctx.strokeStyle = isHitting ? 'rgba(16, 185, 129, 0.45)' : 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 6;
         ctx.stroke();
 
         ctx.beginPath();
         ctx.moveTo(width / 2, height);
         ctx.lineTo(ch.x, ch.y);
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = isHitting ? '#34d399' : '#ffffff';
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
@@ -679,11 +713,13 @@ export default function VerticalAirTrackClient({ copy = null }) {
         const p = e.particles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.life -= dt * 2.2;
+        p.life -= dt * 2.5;
         if (p.life <= 0) { e.particles.splice(i, 1); continue; }
-        ctx.globalAlpha = p.life;
+        ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius || 2, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       drawHitRings(ctx, e.hitRings, dt);
@@ -703,12 +739,14 @@ export default function VerticalAirTrackClient({ copy = null }) {
       }
       ctx.globalAlpha = 1.0;
 
-      // Crosshair
+      // Tactical Pro White Crosshair
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start' || gameState === 'countdown')) {
-        const activeColor = pointerLocked ? '#ef4444' : '#eab308';
-        ctx.fillStyle = activeColor;
-        ctx.strokeStyle = activeColor;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#ffffff';
 
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -727,6 +765,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
         ctx.beginPath();
         ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -789,7 +828,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
             {[
               { label: copy?.statScore || "Score", val: score },
               { label: copy?.statTime || "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
-              { label: copy?.statAccuracy || "Accuracy", val: `${accuracy}%`, color: "text-red-400" },
+              { label: copy?.statAccuracy || "Accuracy", val: `${accuracy}%`, color: "text-emerald-400" },
               { label: copy?.statBestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
@@ -843,7 +882,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Miss Flash"
               >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+                {flashEnabled ? <Zap className="w-4 h-4 text-emerald-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
@@ -857,36 +896,18 @@ export default function VerticalAirTrackClient({ copy = null }) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
             </div>
           )}
 
           {/* Countdown Overlay */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
-          )}
-
-          {/* Pause Overlay */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -894,9 +915,10 @@ export default function VerticalAirTrackClient({ copy = null }) {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Crosshair}
-              accent="redOrange"
+              accent="emerald"
               title={copy?.startTitle || "Vertical Air-Track"}
               subtitle={copy?.startSubtitle || "Hardware Raw Input • Endless Level Progression"}
+              startButtonText={copy?.startButtonText}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -905,7 +927,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
           {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
             <DrillResultCard
-              accent="red"
+              accent="emerald"
               grade={analytics.grade}
               score={score}
               isNewBest={isNewBest}
@@ -915,6 +937,9 @@ export default function VerticalAirTrackClient({ copy = null }) {
                 { value: `${analytics.bestCombo}x`, label: copy?.statMaxCombo || "Max Combo" },
                 { value: `Lv. ${analytics.levelReached}`, label: copy?.statPeakLevel || "Peak Level" },
               ]}
+              playAgainText={copy?.playAgainText}
+              shareText={copy?.shareText}
+              exitText={copy?.exitText}
               onPlayAgain={enterDrill}
               onShare={shareDrillLink}
               onExit={handleExitDrill}
@@ -951,16 +976,16 @@ export default function VerticalAirTrackClient({ copy = null }) {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
+              <div className="space-y-8 font-sans">
                 <section>
-                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-red-400" /> What Is Vertical Air-Track?
+                  <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                    <Crosshair className="w-4 h-4 text-emerald-400" /> What Is Vertical Air-Track?
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300 mb-3">
                     Vertical aim is tracking a target moving along the Y-axis, usually on a falling arc. Smooth pursuit follows accurately to roughly 30&deg;/s (Krauzlis, 2004), and skilled interceptors predict where a target will be rather than chasing where it currently is (Land &amp; McLeod, 2000).
                   </p>
-                  {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                  {ABOUT_INTRO.map((para, i, arr) => (
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < arr.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
@@ -968,7 +993,7 @@ export default function VerticalAirTrackClient({ copy = null }) {
                   {ABOUT_CARDS.map((card, i) => (
                     <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-emerald-600'} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
                         <h4 className="text-xs font-bold text-white">{card.title}</h4>
@@ -980,8 +1005,8 @@ export default function VerticalAirTrackClient({ copy = null }) {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                      <section.icon className="w-4 h-4 text-red-400" /> {section.title}
+                    <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                      <section.icon className="w-4 h-4 text-emerald-400" /> {section.title}
                     </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
@@ -993,9 +1018,6 @@ export default function VerticalAirTrackClient({ copy = null }) {
           </div>
         )}
       </main>
-
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
@@ -1003,13 +1025,15 @@ export default function VerticalAirTrackClient({ copy = null }) {
 // === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
           {result}
         </div>
       </div>

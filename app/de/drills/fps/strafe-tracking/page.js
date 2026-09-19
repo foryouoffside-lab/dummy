@@ -1,6 +1,7 @@
 import StrafeTrackingClient from '@/app/drills/fps/strafe-tracking/StrafeTrackingClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -242,10 +243,11 @@ export default function StrafeTrackingDePage() {
     heading: "Strafe Tracking Guide & Biomechanische Benchmarks",
     subtitle: "Wissenschaftliche Trainingsmethodik für reaktive Blickfolgebewegungen, minimale Umkehrlatenz und maximale Verweildauer auf unberechenbaren Zielen",
     intro: [
-      "Strafe Tracking (Tracking Aiming) ist die mechanische Schlüsselkompetenz in agilen First-Person-Shootern wie Apex Legends, Overwatch 2, The Finals und Call of Duty. Während Taktik-Shooter vor allem Flick-Präzision fordern, erfordern Spiele mit hoher Time-to-Kill (High TTK), dass das Fadenkreuz lückenlos auf einem sich heftig windenden Gegner haften bleibt.",
-      "Aus Sicht der okulomotorischen und sensomotorischen Neurowissenschaft stützt sich das Tracking auf zwei kooperierende Systeme (Rashbass, 1961; Krauzlis, 2004): die glatte Blickfolgebewegung (Smooth Pursuit) für konstante Geschwindigkeiten und schnelle Aufholsakkaden (Catch-up Saccades), um plötzliche Richtungswechsel zu kompensieren. Die menschliche Reiz-Reaktions-Schleife benötigt bei unerwarteten Richtungswechseln eine Mindestlatenz von etwa 130 bis 160 ms (Lisberger, 2010).",
-      "Erfolgreiches Strafe Tracking basiert auf der sogenannten 'Smoothness' – der Fähigkeit, mikroskopisches Handzittern und ruckartige Überkorrekturen zu dämpfen. Wer versucht, den Gegner vorab zu erraten, übersteuert fast immer. Elite-Spieler reagieren stattdessen mit seidenweichen, isometrischen Zügen auf tatsächliche visuelle Feedbacksignale.",
-      "Hinweis zur Messgenauigkeit: Dieser Drill nutzt die hochauflösende Browser-Schnittstelle performance.now() für Latenz- und Zeit-auf-Ziel-Messungen (Time on Target) im Sub-Millisekundenbereich. Die Bildausgabe unterliegt der Bildwiederholrate deines Monitors (60Hz, 144Hz, 240Hz), wodurch flüssiges Tracking auf High-Refresh-Displays spürbar begünstigt wird."
+      "Der Strafe Tracking Aim Trainer ist ein spezialisiertes neuromuskuläres Trainingsmodul zur gezielten Isolierung und Verfeinerung des reaktiven lateralen Trackings gegen unberechenbare ADAD-Ausweichbewegungen. In modernen kompetitiven First-Person-Shootern – allen voran Apex Legends, Overwatch 2, The Finals und Call of Duty – entscheiden Schusswechsel primär über das Tracking-Uptime-Verhältnis: den kontinuierlichen prozentualen Zeitanteil, in dem das Fadenkreuz lückenlos auf dem gegnerischen Modell einrastet, während dieser unregelmäßige Richtungswechsel, Duck-Spams und unvorhersehbare Strafe-Ketten vollführt.",
+      "Das neurophysiologische Fundament der visuellen Bewegungsfolge wurde maßgeblich von Richard J. Krauzlis (2004) entschlüsselt. Er zeigte auf, wie das Gehirn glatte Blickfolgebewegungen (Smooth Pursuit) über reziproke neuronale Schaltkreise zwischen dem primären visuellen Bewegungskortex (MT/V5), dem medialen superioren temporalen Areal (MST) und dem frontalen Augenfeld (FEF) steuert. Registrieren diese Areale Zielbewegungen, berechnen sie in Echtzeit den retinalen Geschwindigkeitsfehler (Retinal Velocity Error), um okulomotorische und manuelle motorische Systeme synchron auf Verfolgungskurs zu halten.",
+      "In einer klassischen Entdeckung der visuellen Psychophysik bewies Cyril Rashbass (1961), dass glatte Blickfolgebewegungen und Sakkaden von fundamental getrennten physiologischen Subsystemen gesteuert werden: Sakkaden reagieren auf Positionsverschiebungen, wohingegen Smooth Pursuit ausschließlich auf retinale Geschwindigkeitsdifferenzen (Retinal Slip) anspricht. Versuchen Spieler im Schusswechsel, gegnerische Richtungswechsel vorab zu 'erraten', provozieren sie unwillkürliche Aufholsakkaden, die unweigerlich zu massivem Übersteuern (Overshoot) und ruckartigem Zielzittern führen.",
+      "Durch die Synthese von Michael I. Posners (1990) Modell der orientierenden Aufmerksamkeit, den räumlichen Tracking-Paradigmen von C. Shawn Green & Daphne Bavelier (2003) sowie digitaler Niedriglatenz-Chronometrie (Woods et al., 2015) trainiert dieser Drill Spieler darauf, voreiliges Raten konsequent zu unterdrücken, isometrische Unterarmspannungen abzubauen und rein reaktive, seidenweiche Blickfolgebewegungen über hochdynamische Geschwindigkeitsvektoren zu etablieren.",
+      "Messmethodik & Hardware-Einflüsse: Jedes Ereignis wird über die hochauflösende Schnittstelle performance.now() des Browsers lokal auf deinem Endgerät erfasst – es werden keinerlei Leistungsdaten übertragen. Browser-Timer werden aus Sicherheitsgründen (Spectre-Schutz) meist auf ca. 1 ms gerundet, während dein Bildschirm jeden Stimulus entsprechend seiner Bildwiederholrate quantisiert – etwa 16,7 ms pro Frame bei 60 Hz, 6,9 ms bei 144 Hz und 4,1 ms bei 240 Hz (Woods et al., 2015). Die Abfragerate der Maus (Polling Rate) steuert ca. 8 ms bei 125 Hz gegenüber 1 ms bei 1000 Hz bei. Betrachte Abweichungen unter 5 ms daher als normales Messrauschen und vergleiche Fortschritte stets auf demselben Hardware-Setup."
     ],
     benchmarks: {
       title: "Strafe-Tracking & Verweildauer-Benchmarks (Time on Target Norms)",
@@ -293,7 +295,7 @@ export default function StrafeTrackingDePage() {
     ],
     audience: "Shooter-Spieler in Apex Legends, Overwatch 2, CS2, Warzone und The Finals, die ihr kontinuierliches Zielverfolgungsverhalten, ihre Richtungswechsel-Reaktionszeit und ihre Zielsicherheit bei beweglichen Gegnern perfektionieren wollen.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-    sources: pickSources('rashbass1961', 'krauzlis2004', 'lisberger2010', 'woods2015', 'fitts1954'),
+    sources: pickSources('woods2015', 'krauzlis2004', 'posner1990', 'green2003', 'rashbass1961', 'land2000', 'lisberger2010'),
     related: [
       { href: "/de/drills/fps/flick-shot-training", label: "Flick Shot Training Online" },
       { href: "/de/drills/fps/recoil-control", label: "Recoil Control lernen" },
@@ -329,10 +331,10 @@ export default function StrafeTrackingDePage() {
     bottomCaption: "Halte das Fadenkreuz kontinuierlich auf dem Target, während es am Boden unregelmäßig die Richtung wechselt, um deine Tracking-Ausdauer zu maximieren.",
     rulesTitle: "Trainingsregeln & Punktesystem",
     rulesItems: [
-      { num: "1", text: "Zielverfolgung", highlight: "Reaktiver Zeitzugewinn (+0,4s/s)", result: "Halte das Fadenkreuz im Zielzentrum" },
-      { num: "2", text: "Zeitverlängerung", highlight: "45s Startzeit", result: "Hohe Tracking-Genauigkeit verlängert die Runde dynamisch" },
-      { num: "3", text: "Abriss-Strafe", highlight: "Fehlversuch-Strafe", result: "Über 1s Zielverlust setzt den Combo-Multiplikator zurück" },
-      { num: "4", text: "Levelaufstieg", highlight: "+1 Level je 1.400 Punkte", result: "Höhere Zielgeschwindigkeit und schnellere Richtungswechsel" }
+      { num: "1", text: "Zielerfassung", highlight: "+50 PKT (+0,4s/s)", result: "×Combo-Multiplikator" },
+      { num: "2", text: "Kontinuierlicher Lock", highlight: "Bis zu 3,0×", result: "Maximal-Multiplikator" },
+      { num: "3", text: "Levelprogression", highlight: "+1 Stufe / 1400 PKT", result: "Adaptives Strafing" },
+      { num: "4", text: "Abreiß-Strafe", highlight: "1,0s Zielverlust", result: "Setzt Combo zurück (-0,6s)" }
     ],
     aboutTitle: "Über das Strafe Tracking Training",
     whatIsTitle: "Was ist Strafe Tracking (Aim Tracking)?",
@@ -380,6 +382,7 @@ export default function StrafeTrackingDePage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/strafe-tracking" locale="de" />
       </div>
+      <DrillFooter />
     </>
   );
 }

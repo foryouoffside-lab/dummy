@@ -1,6 +1,7 @@
 import TargetPrioritizationClient from '@/app/drills/fps/target-prioritization/TargetPrioritizationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -293,13 +294,14 @@ export default function TargetPrioritizationPtPage() {
   const copyPt = {
     h1Keyword: "Treino de Priorização de Alvos",
     h1Suffix: " – Tomada de Decisão FPS",
+    subtitle: "Treine avaliação de ameaças, filtragem cognitiva e inibição de disparo com métricas em tempo real.",
     statScore: "Pontuação",
     statTime: "Tempo",
     statAccuracy: "Precisão",
     statBestScore: "Recorde",
     statThreatsCleared: "Ameaças Eliminadas",
     statMaxCombo: "Combo Máximo",
-    statPeakLevel: "Nível Máximo",
+    statPeakLevel: "Nivel Máximo",
     startTitle: "Priorização de Alvos Pro",
     startSubtitle: "Avaliação de Ameaças · Filtragem Cognitiva · Dificuldade Dinâmica",
     getReady: "PREPARE-SE",
@@ -310,10 +312,10 @@ export default function TargetPrioritizationPtPage() {
     stageCaption: "Elimine primeiro os alvos vermelhos de maior ameaça e depois os amarelos. Segure o disparo contra aliados verdes!",
     rulesTitle: "Instruções do Treino e Sistema de Pontos",
     rulesItems: [
-      { num: "1", text: "Ameaça Primária", highlight: "Vermelho (+100 PTS / +0,4s)", result: "Deve ser eliminada com prioridade absoluta" },
-      { num: "2", text: "Ameaça Secundária", highlight: "Amarelo (+50 PTS / +0,4s)", result: "Escala para vermelho se não for neutralizada" },
-      { num: "3", text: "Aliado Verde", highlight: "Verde (NÃO ATIRAR)", result: "Disparo amigo, alvo errado ou erro zera o combo" },
-      { num: "4", text: "Evolução de Nível", highlight: "A cada 1.400 PTS +1 Nível", result: "Aumento contínuo de densidade e ritmo de alvos" }
+      { num: "1", text: "Alvo de Alta Ameaça", highlight: "Vermelho (+100 PTS / +0,4s)", result: "Prioridade Máxima" },
+      { num: "2", text: "Ameaça Média", highlight: "Amarelo (+50 PTS / +0,4s)", result: "Escala para Vermelho" },
+      { num: "3", text: "Unidade Amiga", highlight: "Verde (NÃO DISPARAR)", result: "Tiro amigo ou erro zera combo" },
+      { num: "4", text: "Subir de Nível", highlight: "+1 / 1400 PTS", result: "Escalonamento Contínuo" }
     ],
     aboutTitle: "Sobre a Priorização de Alvos no FPS",
     aboutHeading: "O que é Priorização de Alvos?",
@@ -355,6 +357,7 @@ export default function TargetPrioritizationPtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,8 @@ import InstantResponseClient from '@/app/drills/fps/instant-response/InstantResp
 import DrillGuide from '@/components/drill/DrillGuide';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import { pickSources } from '@/lib/drillSources';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Temps de Réaction FPS – Vitesse et Réflexe | SkillDrills",
@@ -242,10 +244,10 @@ export default function InstantResponseFrPage() {
     stageCaption: "Cliquez dès que la cible centrale s'allume en vert. Retenez votre tir lors des feintes.",
     rulesTitle: "Règles d'Entraînement et Attribution des Points",
     rulesItems: [
-      { num: "1", text: "Tir sur Flash", highlight: "+100 PTS", result: "Clic rapide dès l'allumage vert" },
-      { num: "2", text: "Bonus Vitesse", highlight: "Jusqu'à +150 PTS", result: "Réactions rapides sous les 160 ms" },
-      { num: "3", text: "Progression Niveau", highlight: "+1 Niveau / 1400 PTS", result: "La fenêtre de réaction se réduit à chaque étape" },
-      { num: "4", text: "Tir Anticipé", highlight: "Faute / Reset", result: "Réinitialise le combo en cas de clic prématuré" }
+      { num: "1", text: "Tir sur Flash", highlight: "+100 PTS (+0.6s)", result: "×Multiplicateur Combo" },
+      { num: "2", text: "Bonus Vitesse", highlight: "Tir Sub-150ms", result: "Jusqu'à +150 PTS" },
+      { num: "3", text: "Progression Niveau", highlight: "+1 Niveau / 1400 PTS", result: "Fenêtres Adaptatives" },
+      { num: "4", text: "Tir Anticipé / Erreur", highlight: "Pénalité", result: "Reset Combo (-0.8s)" }
     ],
     aboutTitle: "À Propos du Test de Temps de Réaction FPS",
     aboutHeading: "Comment fonctionne la mesure des réflexes en jeu de tir ?"
@@ -312,7 +314,24 @@ export default function InstantResponseFrPage() {
           desc: "À haut niveau, retenir son tir lors d'une feinte est primordial. Les circuits préfrontaux entraînés bloquent le geste avant l'erreur."
         }
       ]
-    }
+    },
+    steps: [
+      "Configurez votre sensibilité habituelle pour préserver une mémoire musculaire constante.",
+      "Cliquez sur 'Démarrer le Drill' pour activer le plein écran et le Pointer Lock du navigateur.",
+      "Fixez votre regard sur le réticule central, l'index légèrement en appui sur le commutateur de souris.",
+      "Cliquez instantanément dès l'apparition du signal vert, en réprimant tout clic prématuré.",
+      "Examinez votre temps moyen de réaction, votre écart-type de régularité et vos séries de combo."
+    ],
+    audience: "Joueurs de FPS compétitifs et tactiques (Valorant, CS2, Rainbow Six Siege, Apex Legends, Overwatch 2), compétiteurs d'esport et athlètes entraînant leur vivacité réflexe.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'posner1990', 'donders1969', 'hick1952'),
+    related: [
+      { href: "/fr/drills/fps/angle-hold-trainer", label: "Placement du Réticule et Tenue d'Angle" },
+      { href: "/fr/drills/fps/flick-shot-training", label: "Entraînement Flick Shot" },
+      { href: "/fr/drills/fps/180-degree-awareness", label: "Conscience Spatiale 180°" },
+      { href: "/fr/drills/reaction-speed/reaction-time-test", label: "Test de Temps de Réaction" },
+      { href: "/fr/drills/reaction-speed/reflex-training-drill", label: "Entraînement aux Réflexes" }
+    ]
   };
 
   return (
@@ -350,6 +369,7 @@ export default function InstantResponseFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

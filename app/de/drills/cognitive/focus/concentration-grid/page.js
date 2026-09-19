@@ -240,22 +240,25 @@ export default function ConcentrationGridPageDe() {
   const concentrationGridGuide = {
     heading: "Leitfaden für Schulte-Tabellen & Peripheres Sehtraining",
     intro: [
-      "Die Schulte-Tabelle (Schulte Table) ist ein traditionsreiches kognitives Trainings- und Diagnosewerkzeug, das 1962 von dem deutschen Psychiater Walter Schulte an der Universität Tübingen entwickelt wurde. Ursprünglich zur Untersuchung der Aufmerksamkeitsökonomie und psychischen Leistungsfähigkeit konzipiert, zählt das Konzentrationsgitter heute weltweit zu den wirksamsten Methoden für das Training der visuellen Suchgeschwindigkeit, der Blickspannenerweiterung und der Sakkadenkontrolle.",
-      "Beim Lesen und bei der visuellen Orientierung unterscheidet die Kognitionspsychologie zwischen fovealem Sehen (dem scharfen Zentrum des Blickfeldes) und parafovealer bzw. peripherer Wahrnehmung (Rayner, 1998). Konventionelle Leser fixieren nahezu jedes Wort einzeln, was zu hohen Sakkadenfrequenzen und langsamer Informationsaufnahme führt. Das Training auf expandierenden Schulte-Gittern zwingt das visuelle System, mehrere Ziffern simultan im peripheren Gesichtsfeld zu verarbeiten und die Notwendigkeit motorischer Augenbewegungen zu minimieren.",
-      "Nach der Feature-Integration-Theorie von Anne Treisman & Garry Gelade (1980) sowie Jeremy M. Wolfes Guided-Search-Modell (2007) erfordert die Suche nach Zielzahlen inmitten dichter Distraktoren eine effiziente Vorfilterung. Das Gitter erzeugt eine gezielte visuelle Enge (Crowding), die das Gehirn lehrt, irrelevante Ziffern im Arbeitsgedächtnis zu unterdrücken und die Zielziffer mit minimaler Latenz zu lokalisieren.",
-      "Alle Zeit- und Reaktionsmessungen im SkillDrills Konzentrationsgitter basieren auf der hochpräzisen performance.now() Schnittstelle (Woods et al., 2015), um verlässliche, geräteübergreifende Leistungsauswertungen sicherzustellen."
+      "Die Schulte-Tabelle (Schulte Table) ist ein traditionsreiches kognitives Trainings- und Diagnosewerkzeug, das 1962 von dem deutschen Psychiater Walter Schulte an der Universität Tübingen entwickelt wurde. Ursprünglich zur Untersuchung der Aufmerksamkeitsökonomie und psychischen Leistungsfähigkeit konzipiert, fordert das klassische Raster Probanden auf, die Ziffern 1 bis 25 in aufsteigender Reihenfolge auf einem 5x5-Gitter zu lokalisieren, während der Blick im Idealfall auf der Mitte fixiert bleibt.",
+      "In der angewandten Sportpsychologie entwickelte sich daraus das 'Konzentrationsgitter' (Harris & Harris, 1984), das von Spitzentrainern im Tennis, Motorsport und Baseball eingesetzt wird, um Blickgeschwindigkeit und mentale Gegenwärtigkeit unter Zeitdruck zu schulen. Eine ereigniskorrelierte Potenzialstudie (ERP) an Kindern zeigte, dass die sequentielle Zahlensuche im Schulte-Gitter signifikant höhere neuronale Ressourcen beansprucht als die Einzelsuche und dass zusätzliche Farbdistraktoren die Latenzen im EEG messbar verzögern (Lu et al., 2022).",
+      "Der SkillDrills Schulte-Tabellen-Trainer transformiert diesen statischen Test in eine moderne, hochdynamische Continuous Performance Task. Anstelle einer einzelnen isolierten Matrix erweitert sich das Gitter bei jedem Abschluss dynamisch von 3x3 bis zu 8x8, wobei ab Stufe 5x5 leichte Rotationsverzerrungen hinzutreten. Dies fordert die maximale funktionelle Blickspanne und die parafoveale Koordination innerhalb eines fixen 45-Sekunden-Zeitfensters.",
+      "Messmethodik und Präzision: Jedes Klick- und Touch-Ereignis wird clientseitig über die hochauflösende performance.now() API des Browsers erfasst. Moderne Browser vergröbern Zeitgeber aus Sicherheitsgründen (Spectre-Mitigation) auf rund 1 ms, während Displays Änderungen auf ihre Bildwiederholrate quantisieren (ca. 16,7 ms pro Frame bei 60 Hz, Woods et al., 2015). Vergleichen Sie Ihre Resultate am besten auf derselben Hardwarekonfiguration.",
+      "Datentransparenz: SkillDrills erhebt und überträgt keinerlei aggregierte Nutzerdaten. Alle Bestwerte und Einstellungen verbleiben ausschließlich im lokalen Speicher (localStorage) Ihres Webbrowsers. Sämtliche Richtwerte und Interpretationen stützen sich auf die in den Quellen aufgeführten wissenschaftlichen Fachpublikationen.",
+      "Diese Übung ist ein kostenloses Trainingsspiel für Sport, Studium und persönliche Leistungssteigerung. Sie stellt kein medizinisches Diagnoseinstrument, kein therapeutisches Hilfsmittel und kein Screening-Verfahren für ADHS oder Aufmerksamkeitsstörungen dar. Bei gesundheitlichen oder neuropsychologischen Beschwerden wenden Sie sich bitte an qualifizierte Mediziner."
     ],
     benchmarks: {
-      title: "Schulte-Tabelle (5x5 Gitter) Leistungsklassen & Richtwerte",
-      headers: ["Leistungsstufe", "Absolvierungszeit (5x5 Gitter)", "Sakkadische Blickspanne", "Kognitive Einordnung"],
+      title: "Schulte-Tabelle & Konzentrationsgitter Leistungsklassen (45-Sekunden-Lauf)",
+      headers: ["Leistungsstufe", "Punktzahl (45s)", "Maximales Gitter", "Suchlatenz", "Neurokognitive Bewertung"],
       rows: [
-        ["Tier 1 (Master / Speed-Reading-Elite)", "Unter 22 Sekunden", "Vollständig peripher (Zentrale Fixation)", "Hervorragende parafoveale Erfassung; liest 600+ Wörter pro Minute mühelos"],
-        ["Tier 2 (Fortgeschritten / Athleten-Niveau)", "22 – 32 Sekunden", "Breite Blickspanne, minimale Sakkaden", "Sehr schnelle visuelle Suche; ideal für dynamische E-Sport- und Ballsportarten"],
-        ["Tier 3 (Guter Durchschnitt)", "32 – 45 Sekunden", "Mittlere Blickspanne mit Teilsakkaden", "Solide Aufmerksamkeitsausdauer; normale Lesegeschwindigkeit von 250–350 WpM"],
-        ["Tier 4 (Basis / Gelegenheitsnutzer)", "45 – 60 Sekunden", "Häufige serielle Einzelfixationen", "Konzentriertes Einzelsuchen; Neigung zu visueller Ermüdung bei längeren Texten"],
-        ["Tier 5 (Anfänger / Visuelle Ermüdung)", "Über 60 Sekunden", "Enges Tunnelsehen, isolierte Sprünge", "Stark fragmentierter Suchpfad; erfordert kontinuierliches Basistraining"]
+        ["S+ (Elite)", "8.000+ PTS", "7x7+ (49+ Felder)", "< 300 ms / Ziffer", "Weltklasse-Suchgeschwindigkeit, herausragende periphere Blickspanne und sofortige Rotationsinvarianz."],
+        ["S (Master)", "6.000 – 7.999 PTS", "6x6 (36 Felder)", "300 – 450 ms / Ziffer", "Exzellente visuelle Sucheffizienz; nahtloses parafoveales Caching und minimale Fixationspausen."],
+        ["A (Fortgeschritten)", "4.500 – 5.999 PTS", "5x5 (25 Felder)", "450 – 600 ms / Ziffer", "Starke visuelle Feldverarbeitung; konsistente paarweise Vorausschau bei mittlerer Gitterdichte."],
+        ["B (Kompetent)", "3.000 – 4.499 PTS", "4x4 (16 Felder)", "600 – 800 ms / Ziffer", "Überdurchschnittliche Suchdisziplin; gelegentliche zentrale Refixationspausen bei größeren Rastern."],
+        ["C (Mittelstufe)", "1.800 – 2.999 PTS", "3x3 (9 Felder)", "800 – 1.100 ms / Ziffer", "Solide Grundleistung; stützt sich überwiegend auf serielle foveale Einzelsakkaden."],
+        ["D (In Entwicklung)", "< 1.800 PTS", "3x3 (teilweise)", "> 1.100 ms / Ziffer", "Visuelle Enge (Crowding); erhöhte Sakkadenzahl und zögerliche Zifferndiskrimination."]
       ],
-      note: "Die Richtwerte beziehen sich auf ein standardisiertes 5x5-Gitter mit den Ziffern 1 bis 25 bei ruhiger zentraler Fixation (Rayner, 1998; Lu et al., 2022)."
+      note: "Diese Leistungsstufen basieren auf empirischen Forschungsarbeiten zur visuellen Suche und Aufmerksamkeit (Lu et al., 2022; Treisman & Gelade, 1980; Rayner, 1998; Wolfe, 2007). Individuelle Ergebnisse variieren je nach Bildwiederholfrequenz, Eingabemethode und Augenermüdung."
     },
     techniques: {
       title: "Wissenschaftliche Methoden für maximale Schulte-Gitter-Leistung",
@@ -291,7 +294,7 @@ export default function ConcentrationGridPageDe() {
     ],
     audience: "Schnellleser, Schüler und Studierende zur Konzentrationssteigerung sowie E-Sportler und Athleten, die ihre periphere Reaktionsbereitschaft optimieren wollen.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-    sources: pickSources('rayner1998', 'treisman1980', 'wolfe2007', 'woods2015'),
+    sources: pickSources('lu2022', 'treisman1980', 'rayner1998', 'rayner2016', 'wolfe2007', 'woods2015'),
     related: [
       { href: "/de/drills/cognitive/processing-speed/symbol-matching", label: "Symbol Matching Speed Test" },
       { href: "/de/drills/cognitive/attention/concentration-stamina", label: "Konzentrations-Ausdauer Test" },

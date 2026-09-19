@@ -1,6 +1,7 @@
 import TargetSwitchingSwarmClient from '@/app/drills/fps/target-switching-swarm/TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -294,6 +295,7 @@ export default function TargetSwitchingSwarmEsPage() {
         copy={{
           h1Keyword: "Entrenamiento de Target Switching FPS",
           h1Suffix: " – Cambio Rápido de Blanco y Spray Transfer",
+          subtitle: "Entrena transiciones rápidas entre objetivos, spray transfers e indexación visual sin pausas de reajuste.",
           statScore: "Puntos",
           statTime: "Tiempo",
           statAccuracy: "Precisión",
@@ -303,18 +305,15 @@ export default function TargetSwitchingSwarmEsPage() {
           statPeakLevel: "Nivel Máximo",
           startTitle: "Target Switching Swarm",
           startSubtitle: "Entrada Raw de Hardware • Progresión Continua",
-          getReady: "PREPÁRATE",
-          pausedTitle: "PAUSADO",
-          pausedSubtitle: "Haz clic para reanudar – el bloqueo del cursor se reactivará.",
-          stageCaption: "Cambia rápidamente entre blancos y elimina el enjambre antes de que sus temporizadores expiren. ¡No falles para encadenar combos!",
+          stageCaption: "Cambia rápidamente entre blancos y elimina el enjambre antes de que expire el temporizador. ¡No falles para encadenar combos!",
           rulesTitle: "Reglas del Ejercicio y Sistema de Puntos",
+          aboutTitle: "Sobre el Target Switching en Juegos FPS",
           rulesItems: [
-            { num: "1", text: "Eliminación de Blanco", highlight: "+100 PTS / +0,35s", result: "Extiende el tiempo de ronda" },
-            { num: "2", text: "Penalización por Fallo", highlight: "Reinicio de Combo (-0,6s)", result: "Reinicia el multiplicador" },
-            { num: "3", text: "Progresión de Nivel", highlight: "Cada 1.400 PTS +1 Nivel", result: "Mayor densidad y velocidad" },
-            { num: "4", text: "Transición Inmediata", highlight: "Sin pausa de confirmación", result: "Maximiza bajas por minuto" }
-          ],
-          aboutTitle: "Sobre el Target Switching en Juegos FPS"
+            { num: "1", text: "Destrucción de Blanco", highlight: "Blancos Cian (+100 PTS / +0,35s)", result: "+100 PTS / +0,35s" },
+            { num: "2", text: "Enjambre Dinámico", highlight: "Reaparición Inmediata", result: "Enjambre Continuo" },
+            { num: "3", text: "Penalización por Fallo", highlight: "Tiro Fallido / Tiempo Agotado", result: "Reinicio de Combo" },
+            { num: "4", text: "Progresión de Nivel", highlight: "+1 Nivel / 2.100 PTS", result: "Más Rápido y Pequeño" }
+          ]
         }}
       />
       <DrillGuide guide={targetSwitchingGuide} />
@@ -325,6 +324,7 @@ export default function TargetSwitchingSwarmEsPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

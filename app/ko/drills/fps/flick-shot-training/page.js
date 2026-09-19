@@ -1,5 +1,6 @@
 import ProFlickClient from '@/app/drills/fps/flick-shot-training/ProFlickClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -214,7 +215,7 @@ export default function FlickShotKoPage() {
         "@type": "HowToStep",
         "position": 3,
         "name": "탄도 플릭 가속 및 원탭 클릭",
-        "text": "단일 가속 곡선으로 조준선을 타겟 중심으로 날카롭게 이동시키고 타이머 링이 닫히기 전 클릭합니다."
+        "text": "단일 가속 곡선으로 조준선을 타겟 중심으로 날카롭게 이동시키고 제한 시간이 만료되기 전 신속히 클릭합니다."
       },
       {
         "@type": "HowToStep",
@@ -319,6 +320,7 @@ export default function FlickShotKoPage() {
         copy={{
           h1Keyword: "플릭 에임 연습",
           h1Suffix: " - 플릭샷 & 스냅 에임 트레이너",
+          subtitle: "실시간 피드백으로 스냅 에임, 탄도 운동 기억, 타겟 포착 및 마우스 제동력을 훈련하세요.",
           statScore: "점수",
           statTime: "남은 시간",
           statAccuracy: "정확도",
@@ -333,13 +335,13 @@ export default function FlickShotKoPage() {
           toggleSound: "효과음 켜기/끄기",
           pausedTitle: "일시 정지됨",
           pausedSubtitle: "클릭하여 계속하기 — 마우스 커서 락이 다시 활성화됩니다.",
-          stageCaption: "화면 무작위 위치에 나타나는 목표물로 신속히 플릭하여 타이머 링이 줄어들기 전에 사격하세요.",
+          stageCaption: "화면 무작위 위치에 나타나는 목표물을 제한 시간이 만료되기 전에 신속히 끌어치기(플릭)하여 타격하세요.",
           rulesTitle: "훈련 규칙 및 점수 산정 방식",
           rulesItems: [
-            { num: "1", text: "타겟 명중", highlight: "+100점 / +0.4초", result: "빠른 플릭일수록 높은 점수" },
-            { num: "2", text: "시간 보너스", highlight: "+0.4초 추가", result: "연속 타격 시 제한 시간 연장" },
-            { num: "3", text: "시간 초과 / 빗나간 클릭", highlight: "미스 페널티", result: "콤보 즉시 초기화" },
-            { num: "4", text: "레벨 상승", highlight: "매 1,400점마다 +1 레벨", result: "타겟 크기 축소 및 수명 단축" }
+            { num: "1", text: "타겟 명중", highlight: "+100점 (+0.6초)", result: "콤보 배수 적용" },
+            { num: "2", text: "콤보 스트릭", highlight: "최대 3.0배", result: "타겟 가속 및 축소" },
+            { num: "3", text: "레벨 상승", highlight: "+1 / 1800점", result: "적응형 난이도" },
+            { num: "4", text: "미스 / 시간 초과", highlight: "페널티", result: "콤보 초기화 (-0.8초)" }
           ],
           aboutTitle: "Pro 플릭 트레이너 소개",
           aboutHeading: "플릭 에임(Flick Aim)이란?",
@@ -354,6 +356,7 @@ export default function FlickShotKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

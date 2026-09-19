@@ -1,6 +1,7 @@
 import TargetAcquisitionClient from '@/app/drills/fps/target-acquisition/TargetAcquisitionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -293,6 +294,7 @@ export default function TargetAcquisitionPtPage() {
   const copyPt = {
     h1Keyword: "Treino de Aquisição de Alvos",
     h1Suffix: " – Primeiro Tiro FPS",
+    subtitle: "Treine detecção visual de alvos, discriminação de ameaças e precisão do primeiro disparo com métricas em tempo real.",
     statScore: "Pontuação",
     statTime: "Tempo",
     statAccuracy: "Precisão",
@@ -310,18 +312,10 @@ export default function TargetAcquisitionPtPage() {
     stageCaption: "Identifique e clique no alvo mais brilhante (maior opacidade) de cada conjunto o mais rápido e preciso possível.",
     rulesTitle: "Instruções do Treino e Pontuação",
     rulesItems: [
-      {
-        title: "Disparo no Alvo Correto (+100 PTS / +0,4s)",
-        text: "Clique no alvo mais brilhante primeiro. Multiplicadores de combo e bônus de nível são acumulados continuamente."
-      },
-      {
-        title: "Disparo Incorreto ou Ordem Errada (-50 PTS / -1,0s)",
-        text: "Clicar em um alvo menos brilhante antes do principal reinicia seu combo e consome tempo do cronômetro."
-      },
-      {
-        title: "Conjunto Completo Eliminado (+400 PTS)",
-        text: "Limpar todos os alvos na ordem correta confere bônus expressivo e gera uma nova formação de maior dificuldade."
-      }
+      { num: "1", text: "Alvo Atingido", highlight: "+100 PTS (+0,4s)", result: "×Multiplicador Combo" },
+      { num: "2", text: "Conjunto Limpo", highlight: "+400 PTS × Nível", result: "Novo Agrupamento" },
+      { num: "3", text: "Subir de Nível", highlight: "+1 / 1400 PTS", result: "Escalonamento Contínuo" },
+      { num: "4", text: "Alvo Incorreto / Erro", highlight: "Penalidade", result: "Zera Combo (-0,6s)" }
     ],
     aboutTitle: "Sobre o Treino de Aquisição de Alvos",
     aboutHeading: "O que é Aquisição de Alvos?",
@@ -363,6 +357,7 @@ export default function TargetAcquisitionPtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import MarketDoorsPursuitWrapper from './MarketDoorsPursuitWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -313,6 +314,7 @@ export default function EnhancedPage() {
       />
       <MarketDoorsPursuitWrapper copy={{ title: "Corner Checking Trainer" }} />
       <DrillGuide {...guideProps} />
+      <DrillFooter />
     </>
   );
 }

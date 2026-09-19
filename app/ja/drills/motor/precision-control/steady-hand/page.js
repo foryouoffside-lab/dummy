@@ -2,6 +2,7 @@ import SteadyHandClient from '@/app/drills/motor/precision-control/steady-hand/S
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -339,7 +340,13 @@ const jaCopy = {
   shareTitle: 'スコアをシェア',
   exitTitle: '終了して戻る',
   rulesTitle: '操作方法とスコア算出ルール',
-  rule1Text: '発光する青い',
+  rulesItems: [
+    { num: '1', text: '発光するエメラルド', highlight: '電撃コースを正確に追従', result: 'ゴール到達で45秒にリセット' },
+    { num: '2', text: '周回クリア', highlight: '無限難易度上昇', result: '通路が狭窄化＆屈曲増加' },
+    { num: '3', text: '壁への接触', highlight: 'スタート地点へ即リセット', result: '周回ペナルティ＆エラー加算' },
+    { num: '4', text: '高精度マウス操作', highlight: 'PCブラウザ推奨', result: '1:1生ポインター入力対応' },
+  ],
+  rule1Text: '発光するエメラルド',
   rule1Highlight: '電撃コースを正確に追従',
   rule1Result: 'ゴール到達で45秒にリセット',
   rule2Text: '周回クリア',
@@ -406,6 +413,7 @@ export default function JapaneseSteadyHandPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" locale="ja" />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import TargetPrioritizationClient from '@/app/drills/fps/target-prioritization/TargetPrioritizationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -293,6 +294,7 @@ export default function TargetPrioritizationEsPage() {
   const copyEs = {
     h1Keyword: "Priorización de Objetivos FPS",
     h1Suffix: " – Toma de Decisiones",
+    subtitle: "Entrena evaluación de amenazas, filtrado cognitivo e inhibición de disparo con métricas en tiempo real.",
     statScore: "Puntuación",
     statTime: "Tiempo",
     statAccuracy: "Precisión",
@@ -310,10 +312,10 @@ export default function TargetPrioritizationEsPage() {
     stageCaption: "Elimina primero los objetivos rojos de alta amenaza y luego los amarillos. ¡Contén el disparo ante aliados verdes!",
     rulesTitle: "Instrucciones del Ejercicio y Puntuación",
     rulesItems: [
-      { num: "1", text: "Amenaza Primaria", highlight: "Rojo (+100 PTS / +0,4s)", result: "Debe eliminarse con prioridad absoluta" },
-      { num: "2", text: "Amenaza Secundaria", highlight: "Amarillo (+50 PTS / +0,4s)", result: "Escala a rojo si no se neutraliza a tiempo" },
-      { num: "3", text: "Aliado Verde", highlight: "Verde (NO DISPARAR)", result: "Fuego amigo, blanco incorrecto o fallo reinicia el combo" },
-      { num: "4", text: "Progresión de Nivel", highlight: "Cada 1.400 PTS +1 Nivel", result: "Incremento constante de velocidad y densidad de blancos" }
+      { num: "1", text: "Diana de Alta Amenaza", highlight: "Rojo (+100 PTS / +0,4s)", result: "Prioridad Máxima" },
+      { num: "2", text: "Amenaza Media", highlight: "Amarillo (+50 PTS / +0,4s)", result: "Escala a Rojo tras tiempo" },
+      { num: "3", text: "Unidad Aliada", highlight: "Verde (NO DISPARAR)", result: "Fallo o fuego amigo reinicia combo" },
+      { num: "4", text: "Subida de Nivel", highlight: "+1 / 1400 PTS", result: "Escalado Dinámico Continuo" }
     ],
     aboutTitle: "Sobre la Priorización de Blancos en FPS",
     aboutHeading: "¿Qué es la Priorización de Objetivos?",
@@ -355,6 +357,7 @@ export default function TargetPrioritizationEsPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

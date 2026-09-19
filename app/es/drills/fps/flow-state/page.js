@@ -1,6 +1,8 @@
-import FlowStateClient from '@/app/drills/fps/flow-state/FlowInductionClient';
+import FlowStateClient from '@/app/drills/fps/flow-state/FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 
 export const metadata = {
@@ -242,10 +244,10 @@ export default function FlowStateEsPage() {
     stageCaption: "Sigue la trayectoria de curvas Bézier sin perder la cadencia y mantén un ritmo de puntería continuo.",
     rulesTitle: "Reglas de Entrenamiento y Puntuación",
     rulesItems: [
-      { num: "1", text: "Alineación Continua", highlight: "+10 PTS (+0,4s/s)", result: "Permanencia ininterrumpida sobre el blanco" },
-      { num: "2", text: "Multiplicador de Flow", highlight: "Hasta 3,0x puntos", result: "Crece con secuencias sostenidas de concentración" },
-      { num: "3", text: "Subida de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "La velocidad se calibra según tu rendimiento" },
-      { num: "4", text: "Pérdida de Foco", highlight: "Reinicio de Combo", result: "1,0s fuera del objetivo reinicia el multiplicador" }
+      { num: "1", text: "Alineación Continua", highlight: "+10 PTS (+0,4s/s)", result: "Foco continuo sobre el blanco" },
+      { num: "2", text: "Multiplicador de Flow", highlight: "Hasta 3,0x puntos", result: "Cadena de concentración" },
+      { num: "3", text: "Subida de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Velocidad Bézier adaptativa" },
+      { num: "4", text: "Pérdida de Foco", highlight: "1,0s fuera de zona", result: "Reinicio de racha (-0,6s)" }
     ],
     aboutTitle: "Acerca del Entrenador de Estado de Flow y Foco FPS"
   };
@@ -259,59 +261,76 @@ export default function FlowStateEsPage() {
       "Medición técnica en tu dispositivo: cada evento se registra de forma local mediante el temporizador de alta resolución de tu navegador, sin transferir datos a servidores ajenos. Ten en cuenta que los navegadores limitan la resolución a ~1 ms para evitar ataques de temporización, y los monitores muestran cuadros a frecuencias concretas (16.7 ms a 60 Hz frente a 4.1 ms a 240 Hz). Por tanto, evalúa tu progreso comparando sesiones en el mismo equipo."
     ],
     benchmarks: {
-      title: "Fases de Inducción de Flow y Niveles de Resistencia Atencional",
-      headers: ["Nivel", "Dimensión del Flow", "Indicador Fisiológico", "Mecanismo Cognitivo", "Objetivo Práctico"],
+      title: "Niveles de Inducción al Flow y Umbrales de Resistencia de la Atención",
+      headers: ["Nivel", "Dimensión del Flow", "Indicador Fisiológico", "Mecanismo Cognitivo", "Objetivo de Rendimiento"],
       rows: [
-        ["Nivel 1", "Orientación Atencional", "Filtrado sensorial y fijación ocular", "La red de alerta de Posner inhibe estímulos ambientales", "Contacto foveal con el objetivo en menos de 200 ms"],
-        ["Nivel 2", "Equilibrio Reto-Habilidad", "Calibración dinámica de velocidad", "Canal de Csikszentmihalyi: velocidad adaptada a la destreza", "Sostener entre 70% y 80% de permanencia sobre el objetivo"],
-        ["Nivel 3", "Seguimiento Suave Foveal", "Alineación continua de velocidad", "Vías corticoestriatales de Krauzlis suprimen sacadas innecesarias", "Más de 85% de seguimiento estable en curvas Bézier complejas"],
-        ["Nivel 4", "Hipofrontalidad Transitoria", "Desconexión relativa del DLPFC", "Hipótesis de Dietrich: automatización refleja sin autocrítica", "Más de 30 segundos continuos en flow sin vacilar"],
-        ["Nivel 5", "Resistencia Máxima de Foco", "Tolerancia a la fatiga ejecutiva", "La red ejecutiva previene la degradación del tiempo de respuesta", "Completar más de 60 segundos manteniendo el multiplicador máximo"]
+        ["Nivel 1", "Orientación Atencional", "Filtrado sensorial y fijación foveal", "La red de alerta de Posner inhibe estímulos distractores", "Alineación foveal con el objetivo en menos de 200 ms"],
+        ["Nivel 2", "Equilibrio Reto-Habilidad", "Ajuste dinámico de velocidad", "Canal de Csikszentmihalyi: velocidad acoplada a la capacidad motora", "Mantener entre 70% y 80% de permanencia sobre el objetivo"],
+        ["Nivel 3", "Seguimiento Ocular Suave", "Sincronización de velocidad foveal", "Las vías corticoestriadas de Krauzlis eliminan sacádicos de alcance", "Lograr >85% de permanencia continua en curvas Bézier compuestas"],
+        ["Nivel 4", "Hipofrontalidad Transitoria", "Modulación a la baja del DLPFC", "Hipótesis de Dietrich: autorregulación motora sin vacilación consciente", "Encadenar >30 segundos ininterrumpidos en flow sin dudar"],
+        ["Nivel 5", "Resistencia de Atención Máxima", "Inmunidad al agotamiento mental", "La red ejecutiva previene la degradación cronométrica ante fatiga", "Completar secuencias de más de 60 segundos al multiplicador máximo"]
       ],
-      note: "Métricas sintetizadas a partir de la psicología del flow (Csikszentmihalyi, 1975, 1990), neurociencia cognitiva (Dietrich, 2004), seguimiento ocular suave (Krauzlis, 2004) y redes de atención humana (Posner & Petersen, 1990)."
+      note: "Métricas sintetizadas a partir de la psicología del flow (Csikszentmihalyi, 1975, 1990), mecanismos neurocognitivos del flow (Dietrich, 2004), neurofisiología del seguimiento ocular suave (Krauzlis, 2004) y la teoría de redes de atención (Posner & Petersen, 1990)."
     },
     techniques: {
-      title: "Protocolos para Estimular el Estado de Flow en Shooters",
+      title: "Protocolos Basados en Evidencia para Inducir el Flow en Shooters",
       items: [
         {
-          name: "Seguimiento Predictivo Tangencial",
-          desc: "Evita mirar por detrás del centro del blanco; dirige la vista de 2 a 3 grados por delante en el vector de movimiento. Este enfoque anticipatorio reduce el sobreesfuerzo muscular.",
-          tips: "Presta atención a las variaciones graduales en la curva de avance."
+          name: "Guía Visual Tangencial Predictiva",
+          desc: "En lugar de perseguir el centro del blanco con retraso, ubica tu atención de 2 a 3 grados por delante sobre el vector de velocidad instantánea. Esta proyección visual anticipatoria activa el seguimiento suave predictivo (Krauzlis, 2004), suprimiendo los sacádicos de corrección y atenuando la fatiga ocular.",
+          tips: "Dirige la vista ligeramente por delante del objetivo anticipando la trayectoria."
         },
         {
-          name: "Relajación Muscular y Respiración Profunda",
-          desc: "La sobretensión del antebrazo degrada el pulso fino. Emplea respiraciones pausadas antes de rondas decisivas para calmar el sistema autónomo.",
-          tips: "Afloja la fuerza de agarre del ratón al inicio de giros amplios."
+          name: "Reducción del Diálogo Interno (Hipofrontalidad)",
+          desc: "Alcanzar el flow requiere acallar el córtex prefrontal dorsolateral (Dietrich, 2004). Pensamientos como '¿estoy fallando?' o 'pierdo la mira' reactivan la supervisión consciente y bloquean la memoria muscular. Cambia la autoevaluación por una respiración rítmica y una ejecución libre de dudas.",
+          tips: "Sincroniza la respiración diafragmática con las transiciones de dirección para calmar la activación autonómica."
         },
         {
-          name: "Eliminación del Diálogo Interno",
-          desc: "Pensar en el resultado en pleno tiroteo reanima el DLPFC y entorpece los reflejos. Dirige toda la atención únicamente a la trayectoria del enemigo.",
-          tips: "Interpreta los fallos como simples datos para corregir, no como errores graves."
+          name: "Calibración Óptima del Desafío",
+          desc: "El flow se rompe si la prueba es demasiado sencilla (provocando desatención) o exageradamente compleja (generando tensión y bloqueo). Regula tu ritmo para que tu precisión ronde entre el 70% y el 80%, habitando el punto dulce definido por Csikszentmihalyi (1990).",
+          tips: "Si sufres pérdidas reiteradas de foco antes de 5 segundos, reduce la velocidad hasta enlazar cadenas de 20 segundos."
         },
         {
-          name: "Gestión de Descansos e Hidratación",
-          desc: "El cerebro gasta reservas metabólicas elevadas durante rachas intensas. Breves tragos de agua y pausas de 60 segundos despejan la agudeza mental.",
-          tips: "Toma un breve descanso cada 45 o 60 minutos de juego competitivo."
+          name: "Liberación de Tensión en Antebrazo y Agarre",
+          desc: "El tracking continuo genera contracción isométrica acumulada en mano y flexores del antebrazo. El exceso de fuerza crispa la motricidad fina y genera trayectorias espasmódicas. Relaja la presión sobre el ratón en cada viraje pronunciado.",
+          tips: "Sostén el ratón con la presión justa; la rigidez muscular arruina el seguimiento fluido."
         }
       ]
     },
     scientificPrinciples: {
-      title: "Fundamentos Psicológicos y Neurales del Flow",
+      title: "Fundamentos Psicológicos y Motores del Estado de Flow",
       items: [
         {
           name: "El Canal de Flow de Csikszentmihalyi",
-          desc: "Las tareas demasiado sencillas generan desinterés, mientras que las excesivamente complejas provocan ansiedad. El estado de flow reside en la franja donde la dificultad desafía las destrezas al límite."
+          desc: "Cuando la tarea resulta elemental sobreviene el tedio; si supera con creces la habilidad surge la ansiedad. El flow habita en el canal intermedio donde el desafío expande la capacidad al límite."
         },
         {
-          name: "Modelo de Redes Atencionales de Posner",
-          desc: "La atención humana coordina redes de alerta, orientación y control ejecutivo. El entrenamiento continuado silencia interferencias secundarias y refuerza el enfoque motor."
+          name: "Redes de Atención de Posner",
+          desc: "La cognición visual moviliza subsistemas de alerta, orientación y control ejecutivo. Entrenar el foco sostenido optimiza estas redes y suprime las interferencias periféricas."
         },
         {
           name: "Eficiencia Subcortical del Movimiento",
           desc: "Al sustituir la supervisión deliberada por la ejecución motora automática, el sistema nervioso ahorra energía y responde a la velocidad máxima permitida por la fisiología."
         }
       ]
-    }
+    },
+    steps: [
+      "Selecciona tu sensibilidad dentro del juego usando el selector universal para asegurar la transferencia 1:1 de memoria muscular.",
+      "Haz clic en 'Iniciar' para activar la pantalla completa con Pointer Lock directo y sin aceleración del ratón del sistema.",
+      "Fija la atención visual en el blanco móvil a medida que recorre curvas Bézier continuas y orgánicas por el lienzo.",
+      "Mantén la retícula continuamente dentro del radio del objetivo para recargar la barra de Flow y entrar en la Zona.",
+      "Sostén rachas ininterrumpidas de concentración para multiplicar tu puntuación y forjar una resistencia atencional a prueba de fatiga."
+    ],
+    audience: "Jugadores competitivos de FPS y shooters tácticos (Valorant, CS2, Apex Legends, Overwatch 2, Warzone), profesionales de eSports en fases de calentamiento y deportistas cognitivos que entrenan la atención sostenida y la resistencia al cansancio mental.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'krauzlis2004', 'posner1990', 'green2003', 'dietrich2004'),
+    related: [
+      { href: "/es/drills/fps/fps-tracking-trainer", label: "Entrenador de Tracking FPS" },
+      { href: "/es/drills/fps/anti-zigzag-movement-trainer", label: "Entrenador Anti-Zigzag" },
+      { href: "/es/drills/fps/anti-strafe-jitter-duel", label: "Duelo de Jitter Anti-Strafe" },
+      { href: "/es/drills/fps/flick-shot-training", label: "Entrenamiento de Flick Shot" },
+      { href: "/es/drills/reaction-speed/visual-tracking-speed-test", label: "Test de Velocidad de Seguimiento Visual" }
+    ]
   };
 
   return (
@@ -345,6 +364,7 @@ export default function FlowStateEsPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/flow-state" locale="es" />
       </div>
       <DrillGuide guide={flowStateGuide} />
+      <DrillFooter />
     </>
   );
 }

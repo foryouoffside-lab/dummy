@@ -1,6 +1,7 @@
 import StrafeTrackingClient from '@/app/drills/fps/strafe-tracking/StrafeTrackingClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -333,10 +334,10 @@ export default function StrafeTrackingPageKo() {
     bottomCaption: "좌우로 격렬하게 무빙하는 타깃을 조준선 중심에 유지하며 방향 전환에 대한 반응 추적력을 단련하세요.",
     rulesTitle: "훈련 규칙 및 설정",
     rulesItems: [
-      { num: "1", text: "타깃 추적 지속", highlight: "순수 반응형 (+0.4초/초)", result: "조준선을 타깃 중앙에 유지" },
-      { num: "2", text: "시간 연장 시스템", highlight: "45초 기본 시간", result: "정확한 추적 시 제한 시간 무제한 증가" },
-      { num: "3", text: "이탈 페널티", highlight: "실패 페널티", result: "1초 이탈 시 콤보 리셋 (페널티 활성화 시 -0.6초)" },
-      { num: "4", text: "난이도 상승", highlight: "+1 레벨 / 1400점", result: "타깃 속도 및 반전 빈도 단계적 상승" }
+      { num: "1", text: "조준선 정렬", highlight: "+50점 (+0.4초/초)", result: "콤보 배율 적용" },
+      { num: "2", text: "연속 록온", highlight: "최대 3.0배", result: "최대 배율" },
+      { num: "3", text: "레벨 상승", highlight: "+1 레벨 / 1400점", result: "가변 무빙 가속" },
+      { num: "4", text: "이탈 페널티", highlight: "1.0초 타깃 이탈", result: "콤보 초기화 (-0.6초)" }
     ],
     aboutTitle: "에임 트래킹 연습(스트레이프 추적) 소개",
     whatIsTitle: "에임 트래킹(Tracking Aim) 훈련이란?",
@@ -393,6 +394,7 @@ export default function StrafeTrackingPageKo() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/strafe-tracking" locale="ko" />
       </div>
+      <DrillFooter />
     </>
   );
 }

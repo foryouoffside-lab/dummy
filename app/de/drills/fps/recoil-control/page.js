@@ -1,6 +1,7 @@
 import RecoilControlClient from '@/app/drills/fps/recoil-control/RecoilControlClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -242,10 +243,11 @@ export default function RecoilControlDePage() {
     heading: "Recoil Control Guide & Biomechanische Benchmarks",
     subtitle: "Wissenschaftliche Trainingsmethodik für ballistische Zugkompensation, Muskelgedächtnis und maximale Trefferdichte bei Dauerfeuer",
     intro: [
-      "Die Beherrschung des Waffenrückstoßes (Recoil Control) entscheidet in kompetitiven First-Person-Shootern wie Counter-Strike 2, Valorant und Apex Legends über Sieg oder Niederlage im direkten Feuergefecht. Während Einzelschuss-Flicks das Fadenkreuz auf das Ziel setzen, garantiert die kontinuierliche Rückstoßkompensation, dass auch alle Folgeschüsse ihr Ziel treffen.",
-      "Aus Sicht der Bewegungswissenschaft ist die Rückstoßkontrolle ein hochgradig spezialisiertes motorisches Programm (Schmidt & Lee, 2011). Da die Geschosskadenz mit bis zu 600 bis 900 Schuss pro Minute viel zu hoch ist für eine rein visuelle Reaktionssteuerung (die mindestens 180 ms Latenz benötigt), muss die Ausgleichsbewegung als vorprogrammiertes Open-Loop-Verhaltensmuster im motorischen Kortex verankert sein.",
-      "Wie Schmidt et al. (1979) in der Impuls-Variabilitäts-Theorie nachwiesen, nimmt die Streuung eines Muskels mit zunehmender Geschwindigkeit und Kraftanstrengung logarithmisch zu. Wer die Maus ruckartig nach unten reißt, verfehlt das Ziel. Meisterhafte Rückstoßkontrolle beruht auf einer seidenweichen, isometrischen Abwärtsführung mit minimalem mechanischem Kraftaufwand.",
-      "Hinweis zur Messgenauigkeit: Dieser Drill nutzt die hochauflösende Browser-Schnittstelle performance.now() für Sub-Millisekunden-Messungen des Mauseingabestroms. Dadurch werden selbst feinste Abweichungen in der vertikalen und horizontalen Kompensationskurve in Echtzeit analysiert."
+      "Der Recoil Control Trainer ist ein empirisches sensomotorisches Trainingsmodul zur systematischen Ausbildung des Muskelgedächtnisses gegen waffenspezifische Spray-Patterns, vertikale Steiggeschwindigkeit und horizontales Verziehen in First-Person-Shootern. In modernen Taktik- und Battle-Royale-Titeln wie Counter-Strike 2, VALORANT, Apex Legends und PUBG entscheiden Schusswechsel selten nur über den ersten Einzelschuss (First-Bullet-Accuracy). Sobald Gegner unberechenbare Ausweichbewegungen vollführen, sichert nur ein präzise kontrolliertes Dauerfeuer mit extrem enger Geschossgruppierung den Duellsieg.",
+      "Das motorische Lernframework zur Beherrschung schneller Rückstoßkompensation basiert auf der Theorie des Generalisierten Motorischen Programms (GMP) von Richard A. Schmidt und Timothy D. Lee (Schmidt & Lee, 2011). Da 10-Schuss-Feuerstöße in weniger als 700 Millisekunden ablaufen – weitaus schneller, als die geschlossene visuelle Feedbackschleife des menschlichen Gehirns einzelne Einschläge verarbeiten kann –, aktivieren Spitzenspieler ein vorstrukturiertes Open-Loop-Bewegungsprogramm mit unveränderlichen relativen Timing- und Kraftparametern.",
+      "Dieser Bewegungsablauf folgt Robert S. Woodworths (1899) klassischem Zwei-Komponenten-Modell des Zielens sowie David E. Meyers (1988) optimiertem Submovement-Modell: Auf eine initiale, ballistische Abwärtszugbewegung der Maus (Open-Loop-Phase) folgen feinmotorische Korrekturbewegungen (Submovements), um horizontale Abweichungen und dynamische Bewegungen des Ziels in Echtzeit auszugleichen.",
+      "Die motorische Treffsicherheit unterliegt Fitts' Gesetz (Fitts, 1954) sowie der Impuls-Variabilitäts-Theorie von Schmidt et al. (1979): Mit steigender Geschwindigkeit und Kraftanstrengung beim Herunterziehen der Maus nimmt die neuromuskuläre Streuung logarithmisch zu. Durch hochauflösende digitale Chronometrie mittels performance.now() (Woods et al., 2015) isoliert dieser Drill exakt jene konstante, feinfühlige Zuggeschwindigkeit, die erforderlich ist, um das Streubild auf ein Minimum zu komprimieren.",
+      "Messmethodik & Hardware-Latenzen: Jede Mauseingabe wird lokal über die Schnittstelle performance.now() des Browsers horodatiert – es werden keinerlei Daten an externe Server übertragen. Browser-Timer werden zum Schutz vor Spectre-Angriffen meist auf ca. 1 ms gerundet, während Monitore die visuelle Darstellung an ihre Bildwiederholrate koppeln (ca. 16,7 ms bei 60 Hz, 6,9 ms bei 144 Hz und 4,1 ms bei 240 Hz) (Woods et al., 2015). Die USB-Abfragerate der Maus trägt ca. 8 ms bei 125 Hz gegenüber 1 ms bei 1000 Hz bei. Betrachte Unterschiede von unter 5 ms als technisches Messrauschen und vergleiche deine Resultate stets auf demselben Hardware-Setup."
     ],
     benchmarks: {
       title: "Rückstoß-Kompensation & Trefferdichte-Benchmarks (Accuracy Norms)",
@@ -327,10 +329,10 @@ export default function RecoilControlDePage() {
     bottomCaption: "Ziehe die Maus synchron zum einsetzenden Waffenrückstoß gleichmäßig nach unten, um die Schüsse präzise im Zielzentrum zu bündeln.",
     rulesTitle: "Trainingsregeln & Punktesystem",
     rulesItems: [
-      { num: "1", text: "Headshot-Treffer", highlight: "+100 Punkte / +0,25s", result: "Höchste Punkteausbeute" },
-      { num: "2", text: "Körper- und Armtreffer", highlight: "+40 / +20 Punkte", result: "Hält die Trefferserie aktiv" },
-      { num: "3", text: "Levelaufstieg", highlight: "+1 Level je 1.400 Punkte", result: "Höhere Zielgeschwindigkeit und stärkere Rückstoßamplitude" },
-      { num: "4", text: "Magazindisziplin", highlight: "Fehlversuch-Strafe", result: "Unter 40 % Magazingenauigkeit wird der Combo-Multiplikator zurückgesetzt" }
+      { num: "1", text: "Kopftreffer-Präzision", highlight: "+100 PKT / +0,25s", result: "Höchste Prioritätszone" },
+      { num: "2", text: "Brust- & Beintreffer", highlight: "+40 / +20 PKT", result: "Hält Kombo-Serie" },
+      { num: "3", text: "Level-Progression", highlight: "+1 Level / 1400 PKT", result: "Tempo & Rückstoß steigen" },
+      { num: "4", text: "Magazin-Disziplin", highlight: "<40% Treffer-Strafe", result: "Setzt Kombo zurück (-0,6s)" }
     ],
     aboutTitle: "Über den Recoil Control Trainer",
     whyMattersTitle: "Warum Rückstoßkontrolle über den Duellausgang entscheidet",
@@ -388,6 +390,7 @@ export default function RecoilControlDePage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/recoil-control" locale="de" />
       </div>
+      <DrillFooter />
     </>
   );
 }

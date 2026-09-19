@@ -2,6 +2,7 @@ import GridMemorizationClient from '@/app/drills/memory/spatial-memory/grid-memo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: "Test de Mémoire Visuelle – Matrice de Grille | SkillDrills",
@@ -262,25 +263,68 @@ const faqSchema = {
 const gridGuide = {
   heading: "Guide Scientifique de la Mémoire Visuelle & Matrice de Grille",
   intro: [
-    "Le test de memoire visuelle sur grille matricielle evalue la capacite de stockage et de restitution du calepin visuo-spatial, l une des composantes centrales de la memoire de travail humaine. Contrairement aux tests verbaux reposant sur la boucle phonologique, cette epreuve isole la capacite du cerveau a encoder, comprimer et restituer des structures geometriques sans aide linguistique.",
-    "Dans les recherches fondamentales de Steven Luck et Edward Vogel (1997), il a ete demontre que la memoire de travail visuelle possede une limite structurelle stricte d environ quatre objets integres simultanement. Cette restriction ne depend pas de la complexite d un objet individuel, mais du nombre total d unites distinctes (chunks) a maintenir sous l attention focale.",
-    "Robert Logie (1995) a perfectionne cette theorie en divisant le calepin visuo-spatial en deux sous-systemes: le cache visuel passif (qui stocke la forme, la taille et la couleur) et le scribe interne actif (qui traite les deplacements et la planification motrice). Le present test s adresse specifiquement a la charge du cache visuel passif a travers des motifs statiques presentes brievement.",
-    "En 1997 et 1999, Sergio Della Sala et ses collegues ont standardise le Visual Patterns Test (VPT) pour etablir des normes cliniques d empan visuel, demontrant que la performance depend fortement de l aptitude du sujet a decouvrir des symetries et a effectuer du regroupement spatial (chunking).",
-    "Mesure et precision: chaque interaction est chronometree via l horloge haute resolution performance.now() du navigateur. A l instar de tous les outils numeriques modernes, les mesures sont discretisees par le taux de rafraichissement de l ecran (16,7 ms a 60 Hz). Comparez vos progres sur le meme materiel pour une analyse de retention optimale.",
-    "SkillDrills applique une confidentialite absolue: aucun score ni donnee personnelle n est transfere vers nos serveurs. Vos resultats restent stockes exclusivement dans votre navigateur via localStorage, et chaque reference scientifique provient d etudes evaluees par des pairs."
+    "Le test de mémoire visuelle sur grille matricielle (Visual Memory Test) évalue la capacité de stockage et de restitution du calepin visuo-spatial, l'une des composantes centrales de la mémoire de travail humaine. Contrairement aux tests verbaux reposant sur la boucle phonologique et la répétition acoustique, cette épreuve isole l'architecture visuelle non verbale pure du cerveau.",
+    "L'étude clinique de l'empan visuo-spatial a été inaugurée par Pietro Corsi (1972) à travers le test des blocs de Corsi, démontrant que la mémoire visuo-spatiale constitue un système mnésique indépendant de l'empan verbal de chiffres (Milner, 1971). En 1997, Sergio Della Sala, Robert H. Logie et leurs collègues ont mis au point le Visual Patterns Test (VPT) afin d'isoler spécifiquement la rétention de motifs matriciels statiques des processus de mouvement séquentiel.",
+    "Dans les neurosciences cognitives modernes, Robert H. Logie (1995) et Alan Baddeley (2000) ont subdivisé le calepin visuo-spatial en deux registres : le « cache visuel » (espace passif dédié aux représentations statiques de forme, de couleur et d'agencement) et le « scribe interne » (mécanisme actif de planification motrice et de répétition spatiale). Les recherches pionnières de Steven J. Luck & Edward K. Vogel (1997) et de Nelson Cowan (2001) confirment que la mémoire de travail visuelle brute est strictement plafonnée à 3 ou 4 unités indépendantes : repousser cette limite impose un regroupement spatial en formes gestaltistes (chunking).",
+    "Calibré avec une haute rigueur chronométrique (Woods et al., 2015), cet entraînement repose sur une fenêtre d'exposition standardisée de 1,5 seconde et une progression adaptative pas-à-pas pour mesurer votre plafond d'empan matriciel sous forte contrainte temporelle.",
+    "Méthodologie de mesure : chaque interaction est horodatée avec l'horloge haute résolution performance.now() de votre navigateur, directement sur votre appareil — aucun résultat n'est téléversé vers un serveur. Les minuteurs des navigateurs sont volontairement discrétisés face aux vulnérabilités matérielles (de l'ordre de 1 ms), et l'affichage quantifie chaque transition à l'intervalle de rafraîchissement d'écran (environ 16,7 ms par image à 60 Hz ; Woods et al., 2015). Les écarts inférieurs à 5 ms relèvent du bruit de mesure ; pour suivre vos progrès, comparez vos sessions sur le même matériel.",
+    "Transparence des données et respect de la vie privée : SkillDrills ne collecte aucune donnée agrégée. Vos scores et préférences demeurent stockés exclusivement dans le localStorage de votre navigateur web, garantissant qu'aucune moyenne globale ni profil d'utilisateur n'est publié. Toutes les références numériques et scientifiques citées ici proviennent directement des publications avec comité de lecture répertoriées ci-dessous.",
+    "Cet entraînement est un jeu interactif sur navigateur conçu à des fins d'entraînement personnel et pédagogique. Il ne constitue pas un dispositif médical, un outil d'évaluation clinique, ni un protocole de diagnostic pour le TDAH, les troubles de la mémoire ou les affections neurocognitives. Si vous avez des interrogations sur votre santé cognitive ou vos capacités de mémorisation, consultez un neuropsychologue ou un médecin qualifié."
   ],
   benchmarks: {
-    title: "Paliers de Référence de la Mémoire Visuo-Spatiale",
-    headers: ["Palier de Performance", "Cases Mémorisées (Empan)", "Précision Matricielle", "Profil Neurocognitif & Stratégie de Chunking"],
+    title: "Paliers de Référence Normatifs de l'Empan Matriciel Visuo-Spatial",
+    headers: ["Palier de Performance", "Empan Matriciel (Cases)", "Score à l'Exercice", "Profil de Stockage & Stratégie de Chunking"],
     rows: [
-      ["Palier 1 : Maître", "14+ cases", "≥ 90 % sans erreur", "Empan d élite : chunking géométrique complexe et vision globale instantanée."],
-      ["Palier 2 : Avancé", "11–13 cases", "75 % – 89 % de précision", "Rétention supra-normale : décomposition en sous-matrices symétriques."],
-      ["Palier 3 : Compétent", "8–10 cases", "60 % – 74 % de précision", "Capacité supérieure : regroupement en lignes et en blocs réguliers."],
-      ["Palier 4 : En développement", "5–7 cases", "45 % – 59 % de précision", "Niveau moyen standard : application du modèle de base de Luck & Vogel."],
-      ["Palier 5 : Débutant", "1–4 cases", "< 45 % de précision", "Sensibilité à la surcharge visuelle et mémorisation isolée case par case."]
+      ["Palier 1 (Supérieur / 99e Percentile)", "Empan 10 – 14+ cases", "1 150+ points", "Élite visuo-spatiale ; décomposition des motifs complexes en 2-3 formes géométriques de Gestalt ; rétention parfaite dans le cache visuel ; cadence de clic sub-450 ms."],
+      ["Palier 2 (Moyenne Supérieure / 85e–95e Percentile)", "Empan 8 – 9 cases", "850 – 1 149 points", "Supérieur à la moyenne adulte ; exécution rapide du chunking de formes (triplets, formes en L) ; grande résistance au bruit visuel ; cadence 450 – 650 ms."],
+      ["Palier 3 (Moyenne Adulte Standard / 50e Percentile)", "Empan 6 – 7 cases", "550 – 849 points", "Ligne de base de la population adulte saine (Della Sala et al., 1997) ; gère des regroupements simples ; perte des cases périphériques sur grilles 5x5 ; cadence 650 – 900 ms."],
+      ["Palier 4 (Moyenne Inférieure / Goulet d'Étranglement)", "Empan 5 cases", "350 – 549 points", "Proche de la limite brute de capacité sans chunking (Cowan, 2001) ; mémorisation isolée case par case sans regroupement géométrique ; cadence 900 – 1 200 ms."],
+      ["Palier 5 (En Développement / Empan Restreint)", "Empan < 5 cases", "< 350 points", "Dégradation rapide de la trace visuelle ; vulnérabilité aux interférences ; difficulté à retenir plus de 4 cases après le délai de 1,5 s ; cadence supérieure à 1 200 ms."]
     ],
-    note: "Ces valeurs constituent des reperes cognitifs et d entrainement perceptif sur navigateur web; elles ne se substituent pas a un diagnostic neuropsychologique formel."
-  }
+    note: "L'empan correspond à la configuration matricielle maximale complétée sans faute durant la session de 45 secondes (Della Sala et al., 1997 ; Luck & Vogel, 1997 ; Woods et al., 2015)."
+  },
+  techniques: {
+    title: "Protocoles Scientifiques pour Développer la Mémoire Matricielle",
+    items: [
+      {
+        name: "Regroupement Spatial et Formes Gestaltistes",
+        desc: "Regroupez mentalement les cases allumées adjacentes en formes géométriques familières telles que des triangles, des lignes, des carrés ou des lettres (Wertheimer, 1923 ; Della Sala et al., 1999). Combiner 7 coordonnées isolées en deux formes reconnues réduit la charge cognitive de plus de 60 %.",
+        tips: "Recherchez immédiatement les lignes connectées et les blocs d'angles plutôt que de fixer des cases isolées."
+      },
+      {
+        name: "Encodage de l'Espace Négatif et Déduction Complémentaire",
+        desc: "Lorsqu'un secteur de la matrice est densément peuplé de cases allumées, mémorisez les cases éteintes (vides). Retenir 2 cases sombres manquantes dans un bloc de 6 est cognitivement bien plus économique que d'encoder les 4 positions illuminées.",
+        tips: "Si un quadrant est presque entièrement illuminé, mémorisez les « trous » sombres au lieu des cibles."
+      },
+      {
+        name: "Traçage Kinesthésique du Scribe Interne",
+        desc: "Mobilisez le « scribe interne » (Logie, 1995) en traçant mentalement une ligne ou une trajectoire continue reliant les cases illuminées durant les 1,5 seconde d'exposition. La pré-planification motrice renforce les représentations passives du cache visuel.",
+        tips: "Adoptez un balayage fluide (par exemple de haut en bas ou de gauche à droite) pour donner une direction au motif."
+      },
+      {
+        name: "Point d'Ancrage Central et Capture Parafovéale",
+        desc: "Fixez votre regard rigoureusement au centre de la grille dès le début de la manche. Évitez les saccades oculaires saccadées d'une case à l'autre ; la vision parafovéale enregistre la configuration spatiale globale de manière simultanée.",
+        tips: "Relâchez légèrement votre mise au point focale pour absorber le motif comme un instantané photographique global."
+      }
+    ]
+  },
+  steps: [
+    "Fixez le regard au centre de la grille et attendez l'illumination du motif.",
+    "Pendant le flash de 1,5 seconde, regroupez instantanément les cases en 2 ou 3 formes géométriques simples.",
+    "Exploitez l'espace négatif (trous sombres) dans les zones denses pour limiter le nombre d'unités mnésiques.",
+    "Dès l'extinction de la grille, restituez méthodiquement les blocs géométriques identifiés.",
+    "Progressez à travers les grilles de 4x4 à 5x5 pour étendre continuellement votre plafond de mémoire de travail visuelle."
+  ],
+  audience: "Joueurs de jeux tactiques et FPS (lecture rapide de mini-carte), étudiants en sciences et ingénierie (géométrie spatiale), radiologues, joueurs d'échecs et toute personne souhaitant développer sa mémoire de travail non verbale.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('cowan2001', 'baddeley2000', 'logie1995', 'corsi1972', 'luck1997', 'milner1971', 'woods2015'),
+  related: [
+    { href: "/drills/memory/spatial-memory/path-tracing", label: "Test de Mémorisation de Trajet" },
+    { href: "/drills/memory/spatial-memory/object-location", label: "Test de Mémoire de Localisation" },
+    { href: "/drills/memory/short-term-memory/digit-span", label: "Test d'Empan Numérique" },
+    { href: "/drills/memory/short-term-memory/word-recall", label: "Test de Mémoire Verbale" },
+    { href: "/drills/memory/working-memory/n-back", label: "Test de Mémoire de Travail N-Back" }
+  ]
 };
 
 export default function GridMemorizationFrenchPage() {

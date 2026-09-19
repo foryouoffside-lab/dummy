@@ -233,12 +233,22 @@ export default function RhythmAnomalyLocalePage() {
         <p dangerouslySetInnerHTML={{ __html: `Die primäre Sehbahn teilt sich anatomisch in zwei parallele Systeme: den parvozellulären (P) Pfad und den magnozellulären (M) Pfad. Das magnozelluläre System besteht aus großzelligen Ganglienzellen mit dicken, stark myelinisierten Axonen und extrem kurzer Leitungszeit. Dadurch ist der M-Pfad auf hohe zeitliche Frequenzen spezialisiert und registriert feinste Helligkeitsoszillationen und Phasenverschiebungen bis zu 40–50 Hz (De Lange, 1958; Holcombe, 2009). Pulsiert eine Zelle in der 36-Zellen-Matrix geringfügig schneller oder phasenverschoben zu den 35 Nachbarzellen, löst der zeitliche Frequenzunterschied eine sofortige, vorattentive Entladung in V1-Neuronen aus, die als automatisches visuelles 'Pop-out' wahrgenommen wird (Kelly, 1961; Burr, 1980).` }} />
 
         <h3>Zwei physiologische Grenzen des temporalen Sehens: Abtastung vs. Bindung</h3>
-        <p dangerouslySetInnerHTML={{ __html: `In einer grundlegenden Übersichtsarbeit wies Holcombe (2009) nach, dass die zeitliche Informationsverarbeitung des Menschen durch zwei getrennte Schwellenwerte begrenzt wird: Eine <strong>subkortikale Abtastgrenze (~40–50 Hz)</strong>, bei der retinale und frühe striäre Neuronen Luminanzflimmern trennen können, und eine wesentlich langsamere <strong>kortikale Bindungsgrenze (~2–5 Hz)</strong>, die für das bewusste Erkennen und semantische Zuordnen von Objekten erforderlich ist. Der Rhythm Anomaly Drill trainiert genau die Schnittstelle zwischen beiden Systemen: Das unbewusste magnozelluläre Signal muss blitzschnell von frontoparietalen Aufmerksamkeitsnetzwerken verifiziert werden, bevor der nächste Pulszyklus beginnt.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `In einer grundlegenden Übersichtsarbeit wies Holcombe (2009) nach, dass die zeitliche Informationsverarbeitung des menschlichen Sehsystems durch zwei fundamentale physiologische Schwellenwerte begrenzt wird:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Subkortikale Abtastgrenze (~40–50 Hz):</strong> Retinale M-Ganglienzellen und frühe striäre V1-Neuronen registrieren Luminanzflimmern und hochfrequente Kontrastwechsel bis über 40 Hz (De Lange, 1958; Kelly, 1961).
+          </li>
+          <li>
+            <strong>Kortikale Bindungsgrenze (~2–5 Hz):</strong> Die bewusste Identifikation, Merkmalsverknüpfung und semantische Zuordnung erfordert rekurrente kortikale Feedbackschleifen, die mit lediglich 2 bis 5 Zyklen pro Sekunde operieren (Holcombe, 2009).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `Der Rhythm Anomaly Drill trainiert gezielt die funktionelle Brücke zwischen diesen beiden Regelkreisen: Beobachter müssen die unbewusste magnozelluläre Flimmerempfindlichkeit nutzen, um den anomalen Puls-Kandidaten zu isolieren, und unmittelbar eine gezielte top-down Aufmerksamkeitsbestätigung abschließen, bevor die Frequenzphase wechselt.` }} />
 
         <h3>Temporale Integrationsfenster & stochastisches Rauschfiltern</h3>
         <p dangerouslySetInnerHTML={{ __html: `Das visuelle System integriert Photonen über zeitliche Zeitfenster von etwa 30 bis 100 Millisekunden (Burr, 1980; Woods et al., 2015). Reize, die innerhalb desselben Zeitfensters eintreffen, verschmelzen zu einem einzigen kontinuierlichen Sinneseindruck. Die stochastischen 'Entropie-Blitze' im Drill streuen unvorhersehbare Luminanzpeaks ein. Dadurch wird das Gehirn gezwungen, echte periodische Sinus-Phasenverschiebungen von unbedeutenden Helligkeitsspitzen zu unterscheiden und das sensorische Signal-Rausch-Verhältnis aktiv zu maximieren (Burr, 1980; Posner, 1980).` }} />
 
         <h3>Temporale Leistungsstandards (45s-Rhythmus-Matrix)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Basierend auf empirischen Zeitreihenmessungen über 45-Sekunden-Durchgänge auf der pulsierenden 36-Zellen-Matrix wird die individuelle temporale Auflösung in fünf standardisierte Leistungsstufen eingeteilt:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

@@ -1,6 +1,7 @@
 import StrafeTrackingClient from '@/app/drills/fps/strafe-tracking/StrafeTrackingClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -333,10 +334,10 @@ export default function StrafeTrackingPageJa() {
     bottomCaption: "フロア上を左右に激しく切り返すターゲットに照準を合わせ続け、不規則なストレイフへの追従力を鍛えてください。",
     rulesTitle: "ドリルルールと設定",
     rulesItems: [
-      { num: "1", text: "ターゲット追従", highlight: "純粋リアクティブ (+0.4秒/秒)", result: "照準をターゲット中央に維持" },
-      { num: "2", text: "時間延長システム", highlight: "45秒 初期タイム", result: "高精度追従で制限時間を無制限延長" },
-      { num: "3", text: "追従途切れペナルティ", highlight: "失敗ペナルティ", result: "1秒外れるとコンボリセット（ペナルティ有効時 -0.6秒）" },
-      { num: "4", text: "レベル進行", highlight: "+1レベル / 1400 PTS", result: "標的速度 & 切り返し頻度の段階的上昇" }
+      { num: "1", text: "照準のアライメント", highlight: "+50 PTS (+0.4秒/秒)", result: "×コンボ倍率" },
+      { num: "2", text: "連続トラッキング", highlight: "最大 3.0×", result: "最大倍率" },
+      { num: "3", text: "レベル進行", highlight: "+1 レベル / 1400 PTS", result: "可変ストレイフ加速" },
+      { num: "4", text: "ロック外れペナルティ", highlight: "1.0秒 ロック外れ", result: "コンボリセット (-0.6秒)" }
     ],
     aboutTitle: "追いエイム練習（ストレイフトラッキング）について",
     whatIsTitle: "追いエイム（トラッキング）トレーニングとは？",
@@ -393,6 +394,7 @@ export default function StrafeTrackingPageJa() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/strafe-tracking" locale="ja" />
       </div>
+      <DrillFooter />
     </>
   );
 }

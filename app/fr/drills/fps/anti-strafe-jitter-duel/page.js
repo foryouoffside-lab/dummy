@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from '@/app/drills/fps/anti-strafe-jitter-duel/AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -302,10 +303,10 @@ export default function AntiStrafeJitterFrPage() {
     stageCaption: "Maintenez le réticule sur les cibles rapides en ADAD. Relâchez la main pour inverser la trajectoire en souplesse !",
     rulesTitle: "Règles d'Entraînement et Points",
     rulesItems: [
-      { num: "1", text: "Contact de Visée", highlight: "+10 PTS par tick", result: "Maintien continu sur la cible" },
-      { num: "2", text: "Inversion de Sens", highlight: "Tracking Réactif", result: "Réponse sensorielle immédiate" },
-      { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau tous les 1 400 PTS", result: "Vitesse et fréquence accrues" },
-      { num: "4", text: "Stabilité du Geste", highlight: "Sans Death Grip", result: "Glisse fluide sans à-coups" }
+      { num: "1", text: "Alignement de Visée", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+      { num: "2", text: "Combo Continu", highlight: "Jusqu'à 3.0×", result: "Multiplicateur Max" },
+      { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau / 1400 PTS", result: "Jitter Adaptatif" },
+      { num: "4", text: "Pénalité Hors Cible", highlight: "1.0s Hors Cible", result: "Réinitialise Combo (-0.6s)" }
     ],
     aboutTitle: "À Propos du Tracking Réactif Anti-Strafe"
   };
@@ -345,6 +346,7 @@ export default function AntiStrafeJitterFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

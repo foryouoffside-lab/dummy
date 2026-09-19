@@ -2,6 +2,7 @@ import FineMotorClient from '@/app/drills/motor/precision-control/tracing/Tracin
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -285,6 +286,29 @@ const guideProps = {
   },
 };
 
+const koCopy = {
+  title: "마우스 트레이싱 게임",
+  subtitle: "원시 마우스 입력 연속 궤적 추적 • 45초 타이머",
+  startButtonText: "훈련 시작",
+  trainAgain: "다시 훈련",
+  shareTitle: "결과 공유",
+  exitTitle: "나가기",
+  statFlowScore: "플로우 점수",
+  statTimeLeft: "남은 시간",
+  statFlowIntegrity: "플로우 안정도",
+  statBestScore: "최고 점수",
+  maxStreakLabel: "최대 연속 프레임",
+  peakFlowLabel: "피크 플로우 상태",
+  bestScoreLabel: "개인 최고 점수",
+  rulesTitle: "훈련 가이드 및 점수 규칙",
+  rulesItems: [
+    { num: "1", text: "궤적 추종", highlight: "에메랄드 파형", result: "경로 유지 시 프레임당 +1점" },
+    { num: "2", text: "속도 가속", highlight: "점진적 가속", result: "45초간 2.2 → 3.8 px/f 증속" },
+    { num: "3", text: "플로우 보너스", highlight: "슈퍼 플로우", result: "4초 연속 유지 시 +5점 추가" },
+    { num: "4", text: "정밀 제어", highlight: "데스크톱 전용", result: "1:1 하드웨어 원시 마우스 입력" }
+  ],
+};
+
 export default function LocalizedMotorPage() {
   return (
     <>
@@ -312,11 +336,12 @@ export default function LocalizedMotorPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FineMotorClient copy={{ title: "마우스 트레이싱 게임・정밀 궤적 추적 테스트 – 마우스 미세 제어 능력 측정" }} />
+      <FineMotorClient copy={koCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/ko/drills/motor/precision-control/tracing" />
+        <RelatedDrills currentCategory="motor" currentHref="/ko/drills/motor/precision-control/tracing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from '@/app/drills/fps/anti-strafe-jitter-duel/AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -302,10 +303,10 @@ export default function AntiStrafeJitterEsPage() {
     stageCaption: "Mantén el retículo sobre blancos rápidos en ADAD. ¡Relaja la mano para cambiar de dirección con soltura!",
     rulesTitle: "Reglas de Entrenamiento y Puntuación",
     rulesItems: [
-      { num: "1", text: "Contacto de Mira", highlight: "+10 PTS por tick", result: "Retención constante del blanco" },
-      { num: "2", text: "Cambio de Sentido", highlight: "Tracking Reactivo", result: "Respuesta sensorial inmediata" },
-      { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel cada 1.400 PTS", result: "Mayor velocidad y frecuencia" },
-      { num: "4", text: "Estabilidad de Mira", highlight: "Sin Death Grip", result: "Deslizamiento continuo y suave" }
+      { num: "1", text: "Alineación de Mira", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+      { num: "2", text: "Combo Continuo", highlight: "Hasta 3.0×", result: "Multiplicador Máx" },
+      { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Jitter Adaptativo" },
+      { num: "4", text: "Penalización de Desvío", highlight: "1.0s Fuera del Blanco", result: "Reinicia Combo (-0.6s)" }
     ],
     aboutTitle: "Sobre el Tracking Reactivo Anti-Strafe"
   };
@@ -345,6 +346,7 @@ export default function AntiStrafeJitterEsPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

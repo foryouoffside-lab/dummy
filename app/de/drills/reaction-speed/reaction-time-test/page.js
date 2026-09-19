@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from '@/app/drills/reaction-speed/reaction-time-test/ReactionTimeTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -248,6 +249,38 @@ const faqSchema = {
         text: 'Ja, das Testfeld ist vollständig responsiv für Touchscreens optimiert und funktioniert auf iOS und Android im Hoch- sowie Querformat ohne Installation.',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'Ist dieser Online-Reaktionstest völlig kostenlos?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ja, alle Reaktions- und Kognitionstests auf SkillDrills sind zu 100 % kostenlos im Browser nutzbar – ohne Registrierung, ohne Downloads und ohne störende Werbung.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Können traditionelle Sportler und Athleten von diesem Test profitieren?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ja. Formel-1-Piloten, Kampfsportler (Boxen, Fechten), Sprinter und Rückschlagspieler (Tennis, Tischtennis) trainieren ihre visuelle Reaktionsschnelligkeit gezielt, um die neuromuskuläre Aktivierung und Auslösegeschwindigkeit schnell zuckender Muskelfasern zu schärfen.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Sollte ich meinen Blick zentral fokussieren oder auf das periphere Sehen achten?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ein leicht entspannter, zentraler Blick («weicher Fokus») ist optimal. Dadurch erfassen die lichtempfindlichen Stäbchenzellen des peripheren Sichtfelds Farb- und Signalwechsel im Testfeld blitzschnell, bevor der bewusste motorische Klickimpuls ausgelöst wird.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Wie oft sollte ich meine Reaktionszeit testen und trainieren?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Eine kurze tägliche Trainingseinheit von 5 bis 10 Minuten liefert einen verlässlichen Referenzwert für Ihre kognitive Wachheit, hilft bei der Aufwärmphase vor Wettkämpfen und dokumentiert langfristige Verbesserungen der neuromuskulären Latenz.',
+      },
+    },
   ],
 };
 
@@ -342,6 +375,7 @@ export default function GermanReactionTimeTestPage() {
       />
       <ReactionTimeTestWrapper copy={{ title: 'Reaktionstest' }} />
       <DrillGuide guide={reactionGuide} />
+      <DrillFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import ReactionSimulatorWrapper from '@/app/drills/reaction-speed/reaction-game/ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
@@ -245,6 +246,30 @@ const faqSchema = {
         text: 'Une session d\'échauffement de 5 à 10 minutes par jour avant vos parties compétitives suffit pour réveiller la coordination motrice sans fatiguer la main.',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'Quels types de jeux permettent de tester le temps de réaction ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Le temps de réaction s\'évalue à l\'aide de tests de clic visuel simple (Simple Reaction Time), de jeux d\'interception de cibles dynamiques en chute, de jeux de rythme intenses et d\'entraîneurs de visée pour FPS tactiques qui sollicitent le traitement perceptif.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Quels jeux améliorent le plus la coordination œil-main ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Les jeux de cibles en chute verticale, les jeux d\'action rythmique et les exercices de suivi visuel rapide développent puissamment la coordination œil-main en forçant un alignement spatial instantané entre le regard et le pointeur de la souris.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Ce jeu de réflexe est-il gratuit et sans inscription ?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Oui, le jeu de réaction SkillDrills est 100 % gratuit, s\'exécute directement dans votre navigateur web sans aucun téléchargement, sans inscription et sans publicité intrusive.',
+      },
+    },
   ],
 };
 
@@ -254,6 +279,7 @@ const reactionGameGuideFr = {
     'Un jeu de réflexe est un outil d\'entraînement interactif conçu pour évaluer et conditionner la rapidité de réponse neuromusculaire, la poursuite oculaire et la coordination œil-main face à des cibles mouvantes.',
     'À la différence des tests de clic basiques à signal unique, ce jeu multi-couloirs mobilise le temps de réaction avec choix régi par la Loi de Hick (Hick, 1952) : le cerveau doit repérer les cibles en chute libre, calculer leur accélération et déclencher le clic avant qu\'elles n\'atteignent le bas de l\'écran.',
     'Méthodologie de Mesure & Latence : Les chronométrages sont réalisés en local par l\'API haute résolution performance.now(). Un écran 60Hz standard impose jusqu\'à 16,7 ms de délai d\'affichage, alors qu\'un écran gaming 144Hz (6,9 ms) ou 240Hz (4,1 ms) réduit drastiquement la latence matérielle (Woods et al., 2015).',
+    'Méthodologie de mesure et latence matérielle : chaque événement est horodaté avec l\'horloge haute résolution performance.now() directement sur votre appareil, sans transmission vers des serveurs. Les minuteurs des navigateurs sont volontairement discrétisés par mesure de sécurité (~1 ms) et votre écran quantifie les stimuli selon son intervalle de rafraîchissement (16,7 ms à 60 Hz, 6,9 ms à 144 Hz et 4,1 ms à 240 Hz ; Woods et al., 2015). Le taux d\'interrogation de la souris (polling rate) ajoute environ 8 ms à 125 Hz contre 1 ms à 1000 Hz. Considérez les écarts de moins de 5 ms comme du bruit expérimental et comparez vos séries sur un matériel identique.',
   ],
   benchmarks: {
     title: 'Tableau de Rendement et Paliers de Score du Jeu de Réflexe (45 secondes)',
@@ -322,6 +348,7 @@ export default function FrenchReactionGamePage() {
 
       <ReactionSimulatorWrapper copy={{ title: 'Jeu de Réflexe en Ligne' }} />
       <DrillGuide guide={reactionGameGuideFr} />
+      <DrillFooter />
     </>
   );
 }

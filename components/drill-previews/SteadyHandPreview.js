@@ -8,10 +8,10 @@ import React, { useRef, useEffect } from 'react';
  * Autonomous HTML5 canvas simulation accurately replicating live SteadyHandClient:
  * - Dark tactical arena (#050508) with subtle cyan coordinate grid
  * - Tinted zone corridors:
- *     - Start Zone (left): Translucent emerald tint (rgba(0, 255, 136, 0.1)) with dashed border
+ *     - Start Zone (left): Translucent emerald tint (rgba(16, 185, 129, 0.1)) with dashed border
  *     - Goal Zone (right): Translucent electric cyan tint (rgba(59, 130, 246, 0.1)) with luminous border
  * - Glowing winding neon cyan track line (#06b6d4) with ambient shadow blur and corridor envelope
- * - Autonomous cursor (#00ff88) tracing smoothly along the track with realistic human micro-steering
+ * - Autonomous cursor (#10b981) tracing smoothly along the track with realistic human micro-steering
  * - Goal entry impact: emerald flash bloom, dual expanding shockwave rings, and kinetic spark bursts
  * - Dynamic regeneration of randomized path geometry on each completed lap
  * - Zero in-preview START/GOAL badges or fake pill text
@@ -77,7 +77,7 @@ export default function SteadyHandPreview() {
     };
 
     const spawnGoalBurst = (x, y) => {
-      const colors = ['#00ff88', '#10b981', '#38bdf8', '#ffffff'];
+      const colors = ['#10b981', '#34d399', '#38bdf8', '#ffffff'];
       for (let i = 0; i < 14; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 1.0 + Math.random() * 2.8;
@@ -287,10 +287,10 @@ export default function SteadyHandPreview() {
       }
 
       // 1. Start Zone (Left Column) - Emerald Translucent Fill
-      ctx.fillStyle = 'rgba(0, 255, 136, 0.08)';
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
       ctx.fillRect(0, 0, state.startZoneW, height);
 
-      ctx.strokeStyle = 'rgba(0, 255, 136, 0.25)';
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(state.startZoneW, 0);
@@ -302,7 +302,7 @@ export default function SteadyHandPreview() {
       ctx.fillStyle = `rgba(59, 130, 246, ${goalAlpha})`;
       ctx.fillRect(width - state.endZoneW, 0, state.endZoneW, height);
 
-      ctx.strokeStyle = state.goalFlash > 0 ? 'rgba(0, 255, 136, 0.6)' : 'rgba(59, 130, 246, 0.25)';
+      ctx.strokeStyle = state.goalFlash > 0 ? 'rgba(16, 185, 129, 0.6)' : 'rgba(59, 130, 246, 0.25)';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(width - state.endZoneW, 0);
@@ -340,12 +340,12 @@ export default function SteadyHandPreview() {
       ctx.shadowBlur = 0;
       ctx.restore();
 
-      // 5. Tracing Cursor (#00ff88)
+      // 5. Tracing Cursor (#10b981)
       const curX = state.cursor.x;
       const curY = state.cursor.y;
 
       ctx.save();
-      const chColor = '#00ff88';
+      const chColor = '#10b981';
       ctx.strokeStyle = chColor;
       ctx.fillStyle = chColor;
 
@@ -378,7 +378,7 @@ export default function SteadyHandPreview() {
       for (const sw of state.shockwaves) {
         ctx.save();
         ctx.globalAlpha = Math.max(0, sw.life);
-        ctx.strokeStyle = '#00ff88';
+        ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 1.8;
         ctx.beginPath();
         ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);

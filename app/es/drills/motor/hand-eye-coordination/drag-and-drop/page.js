@@ -1,6 +1,7 @@
 import DragAndDropClient from '@/app/drills/motor/hand-eye-coordination/drag-and-drop/DragAndDropClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -320,6 +321,26 @@ const guideProps = {
   },
 };
 
+const copyEs = {
+  title: "Test de Drag and Drop – Precisión con el Ratón",
+  subtitle: "Arrastre y Soltado Espacial de Blancos • Progresión de 15 Niveles",
+  startButtonText: "INICIAR DRILL",
+  playAgainText: "Jugar de nuevo",
+  shareText: "Compartir resultado",
+  exitText: "Salir",
+  accuracyLabel: "Precisión",
+  targetDropsLabel: "Entregas en Blanco",
+  maxComboLabel: "Combo Máximo",
+  peakLevelLabel: "Nivel Máximo",
+  rulesTitle: "Instrucciones del Drill y Sistema de Puntuación",
+  rulesItems: [
+    { num: "1", text: "Entrega en Blanco", highlight: "+100 PTS × Combo", result: "Arrastrar y soltar dentro del contenedor" },
+    { num: "2", text: "Combo Continuo", highlight: "Hasta 3.0× Multiplicador", result: "Encadenar entregas exitosas seguidas" },
+    { num: "3", text: "Progresión de Nivel", highlight: "+1 Nivel / 250 PTS", result: "Los contenedores se reducen y aceleran" },
+    { num: "4", text: "Fallo o Expiración", highlight: "Reinicio de combo", result: "Soltar fuera reinicia el multiplicador" }
+  ],
+};
+
 export default function DragAndDropPage() {
   return (
     <>
@@ -347,11 +368,16 @@ export default function DragAndDropPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DragAndDropClient copy={{ title: "Entrenador de Drag and Drop" }} />
+      <DragAndDropClient copy={copyEs} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/es/drills/motor/hand-eye-coordination/drag-and-drop" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/drag-and-drop"
+          locale="es"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

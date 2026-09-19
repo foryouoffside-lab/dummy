@@ -1,5 +1,6 @@
 import AntiZigzagClient from '@/app/drills/fps/anti-zigzag-movement-trainer/AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -244,10 +245,10 @@ export default function AntiZigzagKoPage() {
     stageCaption: "불규칙한 지그재그 스트레이프, 슬라이딩, 점프를 구사하는 회피 타겟에 조준선을 고정하세요.",
     rulesTitle: "훈련 규칙 및 점수 체계",
     rulesItems: [
-      { num: "1", text: "중앙 V자 교차 축에 조준을 두고,", highlight: "외곽 오버플릭을 억제", result: "에임 안정화" },
-      { num: "2", text: "타겟 이동 속도와", highlight: "조준선 속도를 정확히 동기화", result: "+100 PTS / 초" },
-      { num: "3", text: "1.0초 연속 추적 시", highlight: "콤보 수 1 증가", result: "점수 배수 적용" },
-      { num: "4", text: "타겟 수명이 끝나기 전에", highlight: "체력을 모두 소진시켜 파괴", result: "레벨 상승" }
+      { num: "1", text: "조준선 정렬", highlight: "+50점 (+0.4초/초)", result: "콤보 배율 적용" },
+      { num: "2", text: "타깃 파괴", highlight: "+25점 보너스", result: "체력 리셋 & 재생성" },
+      { num: "3", text: "레벨 상승", highlight: "+1 레벨 / 1400점", result: "가변 지그재그 가속" },
+      { num: "4", text: "타깃 이탈", highlight: "제한시간 만료", result: "콤보 초기화 (-0.6초)" }
     ],
     aboutTitle: "지그재그 무빙 및 슬라이딩 회피 추적 정보",
   };
@@ -255,9 +256,10 @@ export default function AntiZigzagKoPage() {
   const koGuide = {
     heading: "지그재그 회피 무빙 트래킹의 과학과 벤치마크 가이드",
     intro: [
-      "에이펙스 레전드, 콜 오브 듀티 워존, 오버워치 2와 같은 동적 기동 중심의 하이퍼 FPS에서는 적들이 선형으로 달리지 않고 대각선 지그재그 스텝, 슬라이딩 캔슬, 앉기 연타를 조합하여 조준을 교란합니다. 인간의 부드러운 안구 추종(Smooth Pursuit) 속도 한계는 대략 30°/s이며(Krauzlis, 2004), 이를 초과하는 급격한 벡터 반전은 심각한 망막 슬립을 유발하여 100~130ms의 교정 단속성 안구 운동(Catch-up Saccade)을 강제합니다(Rashbass, 1961).",
-      "초보 트래커들이 가장 자주 범하는 실수는 적의 지그재그 회피 끝점(Apex)을 억지로 플릭하여 쫓아가는 것입니다. V자 회피의 끝에서 적의 속도는 순간적으로 0이 된 후 즉시 반대편 중앙을 향해 가속합니다. 이를 무리하게 쫓아가면 손목 근육이 충돌하여 심각한 오버슈트가 발생합니다. 엘리트 에이머들은 중앙 'V자 교차 회랑'에 조준의 중심축을 두고, 적이 회랑을 관통할 때 매끄럽게 속도를 동기화시킵니다(Fitts, 1954; Accot & Zhai, 1997).",
-      "본 트레이너는 HTML5 Pointer Lock API를 통해 마우스 가속 없는 1:1 하드웨어 좌표 매핑과 performance.now() 고해상도 타이머를 제공합니다. 브라우저 보안 타이머 양자화(약 1ms)와 디스플레이 주사율(60Hz=16.7ms, 144Hz=6.9ms, 240Hz=4.1ms)로 인해 5ms 미만의 차이는 측정 오차로 간주되지만(Woods et al., 2015), 일관된 환경에서 자신의 동체 시력과 리액티브 트래킹 한계를 극복하는 최고의 기준점을 제공합니다."
+      "에이펙스 레전드, 콜 오브 듀티: 워존, 오버워치 2와 같은 고기동 하이퍼 FPS에서는 적들이 단순한 선형 주행을 하지 않고 불규칙한 대각선 지그재그 스텝, 슬라이딩 캔슬, 앉기 연타를 구사하여 조준선 고정을 깨뜨리고 시각-운동 비동기화(desynchronization)를 유발합니다. 선형 부드러운 안구 추종(Smooth Pursuit)이 연속적이고 예측 가능한 궤적에 의존하는 반면(Krauzlis, 2004), 지그재그 추적은 속도-정확성 상충 관계(Fitts, 1954; Accot & Zhai, 1997)가 지배하는 연속적 조향 과제를 운동 신경계에 강제합니다. FPS 게이머는 시각적 주의 집중력, 공간 분해능, 시간적 추적 대역폭이 뛰어나지만(Green & Bavelier, 2003), 표적이 급격한 사선 벡터 반전을 일으킬 때 망막 슬립(Rashbass, 1961)이 발생하여 1초 미만의 급격한 감속과 다축 손목 재정렬이 요구됩니다.",
+      "초보 트래커들이 회피 무빙을 상대할 때 저지르는 핵심 기계적 오류는 표적의 외곽 회전 정점(Apex) 뒤를 억지로 플릭하여 따라가려는 '오버플릭'입니다. 표적이 V자 패턴으로 지그재그 기동을 할 때, 방향 전환 정점에서 속도는 순간적으로 0으로 떨어진 뒤 반대편 중앙 회랑을 관통하며 급가속합니다. 외곽 끝점을 무리하게 쫓아가면 심각한 에임 오버슈트와 길항근의 근육 경련이 발생합니다. 최상위권 랭커들은 중앙의 'V자 교차 회랑 앵커링'을 구사하여 시각 초점을 중앙 축에 유지하고, 표적이 조준선을 가로지르는 순간에 맞춰 속도를 매끄럽게 동기화하는 미세 조정을 수행합니다.",
+      "Anti-Zigzag Aim Trainer(지그재그 무빙 트레이너)는 HTML5 Pointer Lock API를 기반으로 브라우저 가속 없는 순수 1:1 하드웨어 좌표 매핑, performance.now() 고해상도 크로노메트리, 마우스 스무딩 완전 배제 환경에서 구동됩니다. USB 폴링 지터를 억제하고(Woods et al., 2015), 점진적으로 주파수가 증가하는 지그재그 기동에 대해 지속 체류 시간(Dwell Time) 대미지 판정을 적용함으로써, 패닉 플릭을 억제하고 고난도 회피 교전을 제압하기 위한 필수 감각운동 억제 능력을 단련합니다.",
+      "측정 방법 및 하드웨어 지연 시간 안내: 모든 트래킹 이벤트는 브라우저의 고해상도 performance.now() 시계를 사용하여 사용자의 로컬 기기 내에서만 타임스탬프가 기록되며, 외부 서버로 점수가 전송되지 않습니다. 브라우저 타이머는 스펙터(Spectre) 완화 조치로 인해 약 1ms 단위로 양자화되며, 디스플레이는 주사율에 맞춰 시각 프레임을 양자화합니다(60Hz 기준 약 16.7ms, 144Hz 기준 약 6.9ms, 240Hz 기준 약 4.1ms, Woods et al., 2015). 마우스 폴링레이트는 125Hz에서 약 8ms, 1000Hz에서 약 1ms의 지연 편차를 추가합니다. 따라서 5ms 미만의 차이는 측정 노이즈로 간주되며, 타인의 장비와 단순 비교하기보다는 동일한 하드웨어 환경에서 본인의 지연 시간 단축 추이를 관찰하십시오."
     ],
     benchmarks: {
       title: "지그재그 방향 전환 반응 및 트래킹 지연 단계",
@@ -342,10 +344,11 @@ export default function AntiZigzagKoPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <AntiZigzagClient copy={copy} />
+      <DrillGuide guide={koGuide} />
       <div className="max-w-6xl mx-auto px-4 w-full">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/anti-zigzag-movement-trainer" locale="ko" />
       </div>
-      <DrillGuide guide={koGuide} />
+      <DrillFooter />
     </>
   );
 }

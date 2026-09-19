@@ -1,5 +1,6 @@
 import StrafeTrackingClient from './StrafeTrackingClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -294,7 +295,13 @@ export default function StrafeTrackingPage() {
   const copyEn = {
     h1Prefix: null,
     h1Keyword: "Strafe Tracking Aim Trainer",
-    h1Suffix: null
+    h1Suffix: null,
+    rulesItems: [
+      { num: "1", text: "Tracking Alignment", highlight: "+50 PTS (+0.4s/s)", result: "×Combo Mult" },
+      { num: "2", text: "Continuous Combo", highlight: "Up to 3.0×", result: "Max Multiplier" },
+      { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Strafe" },
+      { num: "4", text: "Off-Target Penalty", highlight: "1.0s Off-Target", result: "Resets Combo (-0.6s)" }
+    ]
   };
 
   return (
@@ -325,6 +332,7 @@ export default function StrafeTrackingPage() {
       />
       <StrafeTrackingClient copy={copyEn} />
       <DrillGuide guide={strafeTrackingGuide} />
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,7 @@ import CrossBodyMovementClient from '@/app/drills/physical/coordination/cross-bo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // PESQUISA DE PALAVRAS-CHAVE NATIVAS (SERP BRASIL / PT-BR)
@@ -322,7 +323,10 @@ const crossBodyGuide = {
     "Ao soar o cronômetro, posicione a mira sobre o nó ciano que desponta na borda do display.",
     "Deslize o cursor diagonalmente pelo centro da tela respeitando a margem luminosa do corredor.",
     "Conecte o nó magenta no canto oposto e preserve o multiplicador de 3.0x durante toda a rodada de 45 segundos."
-  ]
+  ],
+  audience: "Jogadores e atletas de eSports (CS2, Valorant, Apex Legends), esportistas de modalidades de precisão, pilotos e qualquer pessoa buscando aprimorar sua coordenação olho-mão e controle bilateral da linha média.",
+  faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
 };
 
 export default function CrossBodyMovementPagePt() {

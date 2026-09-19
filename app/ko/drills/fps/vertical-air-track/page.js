@@ -1,5 +1,6 @@
 import VerticalAirTrackClient from '@/app/drills/fps/vertical-air-track/VerticalAirTrackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -345,8 +346,10 @@ export default function VerticalAirTrackPageKo() {
           statPeakLevel: "최고 레벨",
           startTitle: "Vertical Air-Track",
           startSubtitle: "초정밀 RAW 마우스 입력 • 무한 난이도 진행",
-          pausedTitle: "게임 일시정지",
-          pausedSubtitle: "클릭하면 게임이 재개되며 마우스가 다시 잠깁니다",
+          startButtonText: "훈련 시작",
+          playAgainText: "다시 도전",
+          shareText: "결과 공유",
+          exitText: "나가기",
           stageCaption: "중력 가속도로 포물선을 그리며 낙하하는 공중 타겟을 추적하여 매끄러운 Y축 트래킹 정밀도를 훈련합니다.",
           rulesTitle: "드릴 조작법 & 점수 획득 규칙",
           aboutTitle: "수직 에임 연습(Vertical Air-Track)에 대하여",
@@ -379,13 +382,14 @@ export default function VerticalAirTrackPageKo() {
         }}
       />
       <DrillGuide guide={verticalAirTrackGuide} />
-      <div className="max-w-4xl mx-auto px-4 pb-12">
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills
           currentCategory="fps"
           currentHref="/drills/fps/vertical-air-track"
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

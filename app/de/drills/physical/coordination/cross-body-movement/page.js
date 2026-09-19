@@ -2,6 +2,7 @@ import CrossBodyMovementClient from '@/app/drills/physical/coordination/cross-bo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — Germany (DE / DACH)
@@ -323,7 +324,10 @@ const crossBodyGuide = {
     "Bewege den Cursor zu Rundenbeginn auf den cyanfarbenen Startknoten A am Rand.",
     "Ziehe die Diagonale flüssig durch den aufleuchtenden Korridor zum Zielknoten B.",
     "Triff Knoten B punktgenau und halte die fehlerfreie Serie für den 3,0x-Maximalcombo aufrecht."
-  ]
+  ],
+  audience: "Gamer und E-Sportler (CS2, Valorant, Apex), Athleten, Kampfsportler sowie alle, die ihre bilaterale Hand-Auge-Koordination und Mittellinien-Präzision gezielt steigern wollen.",
+  faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
 };
 
 export default function CrossBodyMovementPageDe() {

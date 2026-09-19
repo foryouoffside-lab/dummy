@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "ターゲット優先度 エイム練習 – 脅威度判定トレーナー | SkillDrills",
@@ -233,10 +234,11 @@ export default function TargetPrioritizationJaPage() {
     heading: "ターゲット優先度 エイム練習 実践マニュアル",
     subtitle: "乱戦時の脅威評価スピード、妨害刺激抑制、そして冷静な射撃抑制制御を科学的プロトコルで極限まで高める",
     intro: [
-      "ターゲット優先度（Target Prioritization）は、複数の敵やオブジェクトが入り乱れるFPSの集団戦において、どの脅威を最優先で撃破し、どの目標への射撃を抑制すべきかを瞬時に判断する認知的意思決定スキルです。VALORANTやCS2などのタクティカルFPSでは、視界に入った敵をただ撃つだけでは不十分であり、真の脅威を見極める冷静さが勝敗を分けます。",
-      "Anne TreismanとGarry Gelade（1980）の特徴統合理論、およびMichael I. Posner（1990）の注意ネットワーク理論が示す通り、人間の視覚システムは空間的位置の把握と特徴の選別を異なる神経回路で行います。さらにGordon D. Logan & Philip E. Cowan（1984）のレースモデルによれば、射撃行動の開始プロセスと停止プロセス（Go/No-Go）は脳内で互いに競合しています。",
-      "本ドリルでは、即座に排除すべき「高脅威（赤）」、時間経過で危険化する「中脅威（黄）」、そして絶対に撃ってはならない「味方（緑）」が混在する環境をシミュレート。F.C. Donders（1969）の選択反応時間論に基づき、視覚的判断と運動抑制の神経経路を徹底的に反復強化します。",
-      "計測精度について：本ドリルはブラウザの performance.now() 高分解能タイマーを用い、端末内で完結してミリ秒単位で処理されます。ディスプレイの表示更新周期（60Hz/144Hz/240Hz）による物理的表示差が生じるため、5ms未満の微小な誤差はハードウェア測定ノイズとして考慮してください。"
+      "ターゲット優先度（Target Prioritization）エイムトレーナーは、瞬時の脅威評価、視覚的妨害刺激の抑制、そしてエグゼクティブな運動抑制（射撃ストップ制御）を極限まで高める高度な知覚認知エイムドリルです。VALORANT、Counter-Strike 2、Rainbow Six Siege、Apex LegendsなどのタクティカルFPSでは、クラッチ状況の生存率は単純なフリックの物理速度だけでなくターゲット選別能力に依存します。どの敵を最優先で排除すべきかを瞬時に判断し、優先度の低い囮や味方プレイヤーへの誤射衝動を能動的に抑制できるかが勝敗を決定づけます。",
+      "運動抑制と意思決定制御の神経基盤は、Logan and Cowan（1984）のストップシグナルパラダイムによって確立されました。彼らの『競馬モデル（Horse-Race Model）』は、行動実行プロセス（Go）と行動抑制プロセス（Stop）が前頭葉—大脳基底核ネットワークにおいて互いに独立して速度を競い合っていることを実証しました。射撃抑制の訓練を欠くプレイヤーはプレッシャー下でパニック射撃に陥り、標的の敵味方識別が完了する前に反射的に人差し指を動かしてしまいます。",
+      "視覚的フィルタリングの生体力学的メカニズムは、Donald E. Broadbent（1958）およびAnne Treisman（1964）の選択的注意フィルター／減衰モデルによって定式化されました。複数の視覚刺激が網膜の処理リソースを巡って競合する際、脳はトップダウンの注意ゲーティング機構（Posner & Petersen, 1990）を作動させ、非脅威的な周辺運動を抑制しつつ、最も差し迫った脅威ベクトルへと中心窩の注意を集中させます。",
+      "本ドリルは、F.C. Donders（1868）のGo/No-Go弁別反応時間モデルとperformance.now()高精度デジタルクロノメトリ（Woods et al., 2015）を統合し、単なるマウス操作と競技プレッシャー下でのリアルタイムな戦術的意思決定速度との間のギャップを完璧に架橋します。",
+      "測定方法とハードウェア遅延について：すべての判定イベントはブラウザのperformance.now()高解像度クロックを用いて端末内でのみミリ秒単位で記録され、外部サーバーへのスコア送信は一切行われません。ブラウザタイマーはSpectre対策により約1ms単位に丸められており、ディスプレイは垂直走査周波数に応じて視覚フレームを量子化します（60Hzで約16.7ms、144Hzで6.9ms、240Hzで4.1ms、Woods et al., 2015）。マウスのポーリングレートは125Hzで約8ms、1000Hzで約1msの遅延差を生じさせます。5ms未満の差異は測定ノイズとして扱い、同一のハードウェア環境で継続的に自己記録を比較してください。"
     ],
     benchmarks: {
       title: "ターゲット優先度・脅威評価レイテンシ ベンチマーク基準",
@@ -324,6 +326,7 @@ export default function TargetPrioritizationJaPage() {
         copy={{
           h1Keyword: "ターゲット優先度 エイム練習",
           h1Suffix: " - 脅威度判定・射撃抑制エイムトレーナー",
+          subtitle: "複数の脅威評価、視覚的注意フィルタリング、射撃抑制（Go/No-Go）をリアルタイムフィードバックで鍛えます。",
           statScore: "スコア",
           statTime: "残り時間",
           statAccuracy: "命中率",
@@ -341,10 +344,10 @@ export default function TargetPrioritizationJaPage() {
           stageCaption: "最優先の赤ターゲットを即座に撃破し、次に黄ターゲットを排除。味方（緑）への誤射は厳禁です。",
           rulesTitle: "ドリル手順 & スコアリングシステム",
           rulesItems: [
-            { num: "1", text: "高脅威ターゲット", highlight: "赤 (+100点 / +0.4秒)", result: "最優先で即座に撃破必須" },
-            { num: "2", text: "中脅威ターゲット", highlight: "黄 (+50点 / +0.4秒)", result: "時間経過で赤（高脅威）へ昇格" },
-            { num: "3", text: "味方ユニット", highlight: "緑 (射撃厳禁)", result: "誤射・ミスでコンボリセット" },
-            { num: "4", text: "レベル進行", highlight: "1,400点ごとに+1レベル", result: "ターゲット密度と速度がシームレスに上昇" }
+            { num: "1", text: "高脅威ターゲット", highlight: "赤 (+100点 / +0.4秒)", result: "最優先で撃破" },
+            { num: "2", text: "中脅威ターゲット", highlight: "黄 (+50点 / +0.4秒)", result: "時間経過で赤へ昇格" },
+            { num: "3", text: "味方ユニット", highlight: "緑 (射撃禁止)", result: "誤射・ミスでコンボリセット" },
+            { num: "4", text: "レベル進行", highlight: "+1 / 1400点", result: "スポーン密度・速度の継続増加" }
           ],
           aboutTitle: "ターゲット優先度 エイム練習について",
           aboutHeading: "ターゲット優先度（Target Prioritization）とは？",
@@ -359,6 +362,7 @@ export default function TargetPrioritizationJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

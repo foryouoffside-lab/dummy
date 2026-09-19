@@ -416,7 +416,7 @@ export default function DropCatchClient({ copy = {} } = {}) {
 
             drillAudio.playHit();
             createExplosion(b.x, b.y, '#10b981');
-            const hitColor = eng.combo >= 10 ? '#38bdf8' : '#00ff88';
+            const hitColor = eng.combo >= 10 ? '#34d399' : '#10b981';
             eng.hitRings.push(createHitRing(b.x, b.y, b.r, hitColor));
           }
 
@@ -552,7 +552,7 @@ export default function DropCatchClient({ copy = {} } = {}) {
 
       if (gameState === 'playing' || gameState === 'start') {
         e.balls.forEach((b) => {
-          const targetColor = b.isFake ? '#ef4444' : (e.combo >= 10 ? '#38bdf8' : '#00ff88');
+          const targetColor = b.isFake ? '#ef4444' : (e.combo >= 10 ? '#34d399' : '#10b981');
           const age = performance.now() - b.spawnTime;
           const progress = Math.min(1, age / 1500);
 

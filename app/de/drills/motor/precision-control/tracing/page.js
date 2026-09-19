@@ -2,6 +2,7 @@ import FineMotorClient from '@/app/drills/motor/precision-control/tracing/Tracin
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -285,6 +286,29 @@ const guideProps = {
   },
 };
 
+const deCopy = {
+  title: "Maus-Tracing-Spiel",
+  subtitle: "Kontinuierliches Roh-Tracking • 45s Timer",
+  startButtonText: "Training Starten",
+  trainAgain: "Erneut Trainieren",
+  shareTitle: "Ergebnis Teilen",
+  exitTitle: "Beenden",
+  statFlowScore: "Flow-Punkte",
+  statTimeLeft: "Verbleibende Zeit",
+  statFlowIntegrity: "Flow-Stabilität",
+  statBestScore: "Bestergebnis",
+  maxStreakLabel: "Max. Streak-Frames",
+  peakFlowLabel: "Spitzen-Flow-Zustand",
+  bestScoreLabel: "Persönliche Bestleistung",
+  rulesTitle: "Trainingsanleitung & Bewertungssystem",
+  rulesItems: [
+    { num: "1", text: "Pfad Verfolgen", highlight: "Smaragdwelle", result: "+1 Punkt / Frame auf Pfad" },
+    { num: "2", text: "Geschwindigkeit", highlight: "Dynamische Welle", result: "2,2 → 3,8 px/f über 45s" },
+    { num: "3", text: "Flow-Bonus", highlight: "Super Flow", result: "4s Pfadtreue bringt +5 Punkte" },
+    { num: "4", text: "Präzises Tracking", highlight: "Desktop Exklusiv", result: "1:1 Rohe Mauseingabe" }
+  ],
+};
+
 export default function LocalizedMotorPage() {
   return (
     <>
@@ -312,11 +336,12 @@ export default function LocalizedMotorPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FineMotorClient copy={{ title: "Maus-Tracing-Spiel – Pfad-Verfolgung & Feinmotorik-Präzisionstest" }} />
+      <FineMotorClient copy={deCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/de/drills/motor/precision-control/tracing" />
+        <RelatedDrills currentCategory="motor" currentHref="/de/drills/motor/precision-control/tracing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

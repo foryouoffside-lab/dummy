@@ -8,7 +8,7 @@ import React, { useRef, useEffect } from 'react';
  * Autonomous HTML5 canvas simulation accurately replicating live PrecisionFlickShotClient:
  * - Dark tactical arena (#050508) with subtle white grid lines
  * - Exactly two tactical targets simultaneously on field:
- *     - 1 Active Target (emerald #00ff88) decaying with expanding pulse rings
+ *     - 1 Active Target (emerald #10b981) decaying with expanding pulse rings
  *     - 1 Standby Target (electric cyan #38bdf8)
  * - Multi-layer tactical target styling:
  *     1. Ghost outer ring
@@ -81,7 +81,7 @@ export default function PrecisionFlickShotPreview() {
 
     const spawnHitBurst = (x, y, isEmerald) => {
       const colors = isEmerald
-        ? ['#00ff88', '#22c55e', '#a7f3d0', '#ffffff']
+        ? ['#10b981', '#34d399', '#a7f3d0', '#ffffff']
         : ['#38bdf8', '#0284c7', '#bae6fd', '#ffffff'];
 
       for (let i = 0; i < 14; i++) {
@@ -301,11 +301,11 @@ export default function PrecisionFlickShotPreview() {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
       }
 
-      // 1. Render Tactical Targets (Active emerald #00ff88, Standby cyan #38bdf8)
+      // 1. Render Tactical Targets (Active emerald #10b981, Standby cyan #38bdf8)
       for (let i = 0; i < state.targets.length; i++) {
         const tgt = state.targets[i];
         const isActive = (i === state.activeIndex);
-        const color = isActive ? '#00ff88' : '#38bdf8';
+        const color = isActive ? '#10b981' : '#38bdf8';
         const progress = Math.max(0, Math.min(1, 1 - (tgt.radius / tgt.maxRadius)));
         const radius = tgt.radius;
 

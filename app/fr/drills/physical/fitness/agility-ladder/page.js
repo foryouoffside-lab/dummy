@@ -2,6 +2,7 @@ import MotorSequencingClient from '@/app/drills/physical/fitness/agility-ladder/
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // RECHERCHE DE MOTS-CLÉS NATIFS (SERP FRANCE / FR-FR)
@@ -322,7 +323,10 @@ const ladderGuide = {
     "Dès le départ de la descente, effectuez le snap initial vers le premier échelon à gauche.",
     "Validez les échelons 2, 3 et 4 dans un enchaînement rythmé sans interruption.",
     "Conservez le multiplicateur de 3.0x de bout en bout pour atteindre le statut Apex sur 45 secondes."
-  ]
+  ],
+  audience: "Sportifs (football, basketball, tennis, athlétisme) cherchant à perfectionner leur vitesse d'appuis et leur vivacité, ainsi que joueurs de FPS souhaitant optimiser leur rythme de counter-strafing.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('lashley1951', 'schmidt1975', 'fitts1954', 'woodworth1899', 'woods2015')
 };
 
 export default function AgilityLadderPageFr() {

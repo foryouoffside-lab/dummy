@@ -253,39 +253,69 @@ const copyFr = {
 const concentrationGridGuideFr = {
   heading: "Guide Complet de la Table de Schulte et Psychologie de l Attention Visuelle",
   intro: [
-    "La table de Schulte (Concentration Grid) compte parmi les dispositifs psychodiagnostiques et d entraînement cognitif les plus étudiés en neurosciences visuelles. Conçue à l origine par le psychiatre Walter Schulte, sa mission consiste à élargir le champ visuel fonctionnel (Functional Field of View) et à diminuer la latence de fixation oculaire durant la prospection ordonnée (Lu et al., 2022; Rayner, 1998).",
-    "À l inverse des épreuves de repérage statiques, ce module déploie des matrices progressives (de 3x3 jusqu à 8x8) sous une contrainte stricte de 45 secondes. Au fil de la résolution, la densité de distracteurs s accroît, confrontant le cerveau à un phénomène d encombrement perceptif (Crowding Effect) qui sollicite une intégration cognitive rigoureuse (Treisman & Gelade, 1980; Wolfe, 2007).",
-    "Application à la lecture rapide et au sport de haut niveau: Les recherches attestent que les lecteurs chevronnés ne fixent pas isolément chaque mot mais exploitent leur vision parafovéale pour anticiper les blocs textuels suivants, une faculté directement entraînée par ce protocole."
+    "La table de Schulte (Schulte Table) est un paradigme psychodiagnostique classique conçu en 1962 par le psychiatre allemand Walter Schulte pour mesurer l efficience de l exploration visuelle, la distribution de l attention sélective et la résistance à la fatigue mentale. Dans son format traditionnel, les chiffres de 1 à 25 sont dispersés aléatoirement sur une grille 5x5, le participant devant pointer chaque valeur dans l ordre croissant tout en fixant le centre géométrique de la matrice.",
+    "En psychologie du sport appliquée, cet exercice a évolué pour devenir la 'grille de concentration' (Harris & Harris, 1984), adoptée par les préparateurs en tennis, sport automobile et baseball pour développer la vitesse d exploration et la discipline mentale sous pression temporelle. Une étude en potentiels évoqués cognitifs (ERP) menée chez des enfants de 8 à 11 ans a révélé que la recherche séquentielle de chiffres active des composantes neuronales nettement plus exigeantes que le repérage isolé, un effet amplifié par l ajout de distracteurs chromatiques (Lu et al., 2022).",
+    "Le simulateur de SkillDrills hisse ce test historique au rang de tâche de performance continue (Continuous Performance Task). Plutôt qu une matrice statique isolée, la grille s élargit dynamiquement de 3x3 jusqu à 8x8 au fil des réussites, tout en introduisant des perturbations de rotation dès le niveau 5x5. Cette architecture sollicite l empan perceptif maximal et la coordination fovéale-parafovéale au sein d une fenêtre stricte de 45 secondes (Treisman & Gelade, 1980 ; Wolfe, 2007).",
+    "Méthodologie chronométrique : chaque action tactile ou clic est horodatée via l horloge haute résolution performance.now() du navigateur directement sur votre terminal. Les navigateurs intègrent une atténuation délibérée pour parer aux failles matérielles de type Spectre (résolution d environ 1 ms), et votre écran quantifie chaque affichage selon sa fréquence de rafraîchissement (environ 16,7 ms par image à 60 Hz, Woods et al., 2015). Évaluez votre progression sur un même matériel.",
+    "Transparence des données : SkillDrills ne collecte aucune donnée agrégée. Vos scores et configurations sont conservés exclusivement dans le localStorage de votre navigateur et ne sont jamais transmis à des serveurs distants.",
+    "Ce module est un jeu d entraînement cognitif et réflexe gratuit à visée pédagogique et sportive. Il ne s agit pas d un dispositif médical, d un outil de diagnostic ou de dépistage du TDAH, de la dyslexie ou d autres troubles neurodéveloppementaux."
   ],
   benchmarks: {
-    title: "Barèmes de Performance et Étendue du Champ Visuel Périphérique",
-    headers: ["Niveau de Performance", "Score (45s)", "Grille Maximale", "Interprétation Neurocognitive"],
+    title: "Barèmes de Performance de la Table de Schulte et Grille de Concentration (45s)",
+    headers: ["Niveau de Maîtrise", "Score (45s)", "Grille Maximale", "Latence de Recherche", "Interprétation Neurocognitive"],
     rows: [
-      ["Élite (Pilotes / Pros Esports)", "7.500+ pts", "7x7 ou plus", "Remarquable extension parafovéale. Latence saccadique minimale, détection simultanée de chiffres contigus sans fixation centrale obligatoire."],
-      ["Avancé (Lecteurs Rapides)", "5.500 – 7.499 pts", "6x6 – 7x7", "Haute discipline atencionale. Planification préalable des micro-saccades sans égarements oculaires."],
-      ["Compétent (Moyenne Entraînée)", "3.500 – 5.499 pts", "5x5 – 6x6", "Exploration ordonnée. Léger ralentissement sur les zones périphériques éloignées."],
-      ["Intermédiaire", "2.000 – 3.499 pts", "4x4 – 5x5", "Dépendance au balayage fovéal successif. Tendance à hésiter lors des transitions de lignes."],
-      ["Débutant", "< 2.000 pts", "3x3 – 4x4", "Recherche désordonnée avec régressions visuelles fréquentes face aux distracteurs proches."]
+      ["S+ (Élite)", "8.000+ PTS", "7x7+ (49+ cases)", "< 300 ms / chiffre", "Vitesse de balayage de classe mondiale, extension périphérique exceptionnelle et invariance rotationnelle immédiate."],
+      ["S (Maître)", "6.000 – 7.999 PTS", "6x6 (36 cases)", "300 – 450 ms / chiffre", "Efficacité d exploration supérieure ; pré-lecture parafovéale fluide et arrêts de fixation minimes."],
+      ["A (Avancé)", "4.500 – 5.999 PTS", "5x5 (25 cases)", "450 – 600 ms / chiffre", "Solide traitement du champ visuel ; anticipation séquentielle par paires régulière sur grilles moyennes."],
+      ["B (Compétent)", "3.000 – 4.499 PTS", "4x4 (16 cases)", "600 – 800 ms / chiffre", "Discipline de repérage au-dessus de la moyenne ; pauses occasionnelles de recentrage sur grands formats."],
+      ["C (Intermédiaire)", "1.800 – 2.999 PTS", "3x3 (9 cases)", "800 – 1.100 ms / chiffre", "Performance de base standard ; dépendance prédominante aux saccades fovéales successives."],
+      ["D (En développement)", "< 1.800 PTS", "3x3 (partiel)", "> 1.100 ms / chiffre", "Interférence par encombrement visuel (crowding) ; saccades nombreuses et discrimination ralentie."]
     ],
-    note: "Scores établis sur des sessions standardisées de 45 secondes. Les grilles nettoyées avec plus de 95% de précision reflètent un contrôle parfait de l attention soutenue."
+    note: "Ces paliers constituent un cadre de référence fondé sur la littérature cognitive (Lu et al., 2022 ; Treisman & Gelade, 1980 ; Rayner, 1998 ; Wolfe, 2007). Les scores varient selon la fréquence de l écran, le mode de pointage et la fatigue oculaire."
   },
-  instructions: [
-    "Fixez le centre du plateau et évitez de déplacer la tête durant l exercice.",
-    "Repérez les chiffres du 1 au maximum par vision périphérique sans fixer directement chaque case.",
-    "Sélectionnez les chiffres dans l ordre croissant le plus promptement possible.",
-    "Validez un maximum de grilles dans l intervalle de 45 secondes sans commettre de fautes."
+  techniques: {
+    title: "4 Techniques Scientifiques pour Maximiser la Vitesse d'Exploration",
+    items: [
+      {
+        name: "Ancrage Fovéal Central et Vision Parafovéale Élargie",
+        desc: "Ne suivez pas chaque chiffre avec des mouvements saccadés amples. Maintenez le regard posé au centre géométrique du plateau, laissant votre vision périphérique enregistrer les chiffres candidats (Lu et al., 2022).",
+        tips: "Évitez de tourner la tête ou de fixer les coins de l écran ; élargissez votre champ attentionnel."
+      },
+      {
+        name: "Chunking Séquentiel et Anticipation Double (Lookahead)",
+        desc: "Ne cherchez jamais un chiffre de manière isolée. Si vous apercevez '4' en cherchant '3', stockez ses coordonnées dans la mémoire de travail visuo-spatiale pour l enchaîner sans latence (Rayner, 1998).",
+        tips: "Conservez une carte mentale de 1 à 2 chiffres d avance pour lier vos clics en continu."
+      },
+      {
+        name: "Recherche Guidée et Intégration des Traits (Wolfe, 2007)",
+        desc: "Les attentes cognitives descendantes (Top-Down) orientent la saillance perceptive. Garder en mémoire la géométrie distinctive du prochain chiffre active les détecteurs neuronaux avant tout balayage au hasard.",
+        tips: "Visualisez mentalement la forme du chiffre suivant avant de scanner la grille."
+      },
+      {
+        name: "Invariance à la Rotation et Détection de Repères Structurels",
+        desc: "La rotation des chiffres perturbe la reconnaissance automatique de gabarit. Le cortex inférotemporal doit extraire des repères invariants (la boucle d un 6/9, la traverse d un 4).",
+        tips: "Identifiez les traits structurels clés plutôt que d essayer de redresser le chiffre mentalement."
+      }
+    ]
+  },
+  steps: [
+    "Posez votre regard au centre du plateau pour englober la matrice entière.",
+    "Repérez le chiffre '1' et touchez-le promptement pour lancer la chaîne séquentielle.",
+    "Anticipez : pendant la validation du chiffre actuel, scannez la périphérie pour les suivants.",
+    "Progressez dans les grilles : terminez rapidement les petits plateaux pour débloquer les matrices 5x5, 6x6 et 7x7.",
+    "Maintenez votre discipline visuelle face aux chiffres rotatifs durant les 45 secondes complètes."
   ],
-  tips: [
-    "Respirez posément pour maintenir un tonus musculaire oculaire détendu.",
-    "Ne balayez pas la grille comme une page de texte: englobez l ensemble du cadre d un regard global.",
-    "Privilégiez la précision à la précipitation pour éviter les pénalités d exactitude."
-  ],
-  sources: pickSources(
-    "Lu et al. (2022) - Saccadic Eye Movements and Peripheral Vision in Visual Search",
-    "Rayner (1998) - Eye Movements in Reading and Information Processing",
-    "Treisman & Gelade (1980) - A Feature-Integration Theory of Attention",
-    "Wolfe (2007) - Guided Search 4.0: Current Progress With a Variant of Feature Integration"
-  )
+  audience: "Lecteurs rapides, athlètes, pilotes, compétiteurs d esport (FPS/MOBA), étudiants et professionnels cherchant à élargir leur champ visuel périphérique et leur vitesse de traitement.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('lu2022', 'treisman1980', 'rayner1998', 'rayner2016', 'wolfe2007', 'woods2015'),
+  related: [
+    { href: "/fr/drills/cognitive/focus/distraction-fighter", label: "Test de Stroop en Ligne" },
+    { href: "/drills/cognitive/attention/concentration-stamina", label: "Test d Attention Soutenue" },
+    { href: "/drills/cognitive/attention/divided-attention", label: "Test d Attention Divisée" },
+    { href: "/drills/cognitive/processing-speed/rsvp-reader", label: "Test de Lecture Rapide RSVP" },
+    { href: "/drills/cognitive/processing-speed/symbol-matching", label: "Test de Substitution de Symboles" },
+    { href: "/drills/cognitive/processing-speed/reaction-time", label: "Test de Temps de Réaction" }
+  ]
 };
 
 export default function ConcentrationGridPageFr() {

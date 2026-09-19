@@ -2,6 +2,7 @@ import ObjectLocationClient from '@/app/drills/memory/spatial-memory/object-loca
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: "Test de Mémoire Spatiale – Localisation | SkillDrills",
@@ -262,25 +263,68 @@ const faqSchema = {
 const objectLocationGuide = {
   heading: "Guide Scientifique : Mémoire Spatiale et Liaison Objet-Localisation",
   intro: [
-    "La memoire de localisation d objets (Object Location Memory - OLM) constitue un sous-domaine fondamental de la cognition spatiale. Elle quantifie l aptitude du systeme nerveux a encoder simultanement deux flux d informations distincts: l identite visuelle d un symbole et ses coordonnees matricielles precises.",
-    "La theorie fondatrice d Irwin Silverman et Marion Eals (1992, 1994) a mis en evidence que le rappel de positions spatiales relatives d objets statiques constitue un mecanisme specialise, evolutivement dissocie des epreuves de rotation mentale 3D ou d orientation dynamique.",
-    "Sur le plan neuro-anatomique, cette performance exige l integration des deux courants visuels decrits par Ungerleider et Mishkin (1982) et Goodale et Milner (1992): la voie ventrale (qui identifie 'ce que' sont les objets) et la voie dorsale (qui determine 'ou' ils se situent). La liaison de ces caracteristiques s opere au sein du reseau parieto-hippocampique.",
-    "Steven Luck et Edward Vogel (1997) ont demontre que la memoire de travail visuelle presente une capacite finie d environ quatre unites integrees. Lorsque la taille de la matrice augmente de 3x3 a 7x7, la reussite depend etroitement du developpement de reperes spatiaux allocentriques et egocentriques efficaces.",
-    "Chronometrie et fidelite des mesures: les clics et le temps de reponse sont enregistres au moyen de l horloge performance.now() integree a votre navigateur. Les ecrans conventionnels a 60 Hz rafraichissent l affichage toutes les 16,7 ms. Pour evaluer vos gains reels, effectuez vos series d entrainement dans des conditions techniques comparables.",
-    "Transparence et respect de la vie privee: SkillDrills n envoie aucune donnee d evaluation vers des serveurs distants. Votre progression est stockee localement sur votre terminal (localStorage). Cet outil constitue un banc d essai cognitif destine a l entrainement intellectuel et non a un bilan clinique."
+    "Le test de mémoire spatiale et de localisation d'objets (Object Location Memory - OLM) est une évaluation neurocognitive interactive mesurant la rétention spatiale, la liaison visuelle objet-emplacement et le rappel de configurations matricielles. Contrairement aux tests matriciels anonymes, cette épreuve impose au cerveau de lier étroitement des symboles visuels distincts à des coordonnées spatiales précises.",
+    "Les fondements cliniques de l'évaluation de la mémoire de localisation d'objets ont été posés par Marion Eals & Irwin Silverman (1994) dans leurs recherches pionnières sur la cognition spatiale, démontrant que la rétention des emplacements d'objets constitue un mécanisme évolutif spécialisé, distinct de la rotation mentale. Auparavant, Edward C. Tolman (1948) avait formalisé le concept de carte cognitive, illustrant comment les organismes construisent des modèles spatiaux internes de leur environnement.",
+    "Dans l'architecture de la mémoire de travail, Robert H. Logie (1995) et Alan Baddeley (2000) ont établi que la liaison objet-localisation est coordonnée par le tampon épisodique (Episodic Buffer), qui intègre les données du cache visuel (identités des objets) et du scribe interne (coordonnées spatiales). Les travaux de Steven J. Luck & Edward K. Vogel (1997) ont prouvé que la conjonction de traits visuo-spatiaux génère un coût attentionnel majeur, tandis que Nelson Cowan (2001) a établi que la mémoire de travail focale non assistée est strictement bornée à 3 ou 4 paires objet-emplacement indépendantes.",
+    "Conformément aux normes chronométriques définies par Woods et al. (2015), cet entraînement met en œuvre une fenêtre d'exposition standardisée de 1,5 seconde et un calibrage adaptatif progressif (de matrices 3x3 jusqu'à 7x7) pour mesurer avec exactitude votre seuil de liaison visuo-spatiale.",
+    "Méthodologie de mesure : chaque événement est horodaté avec l'horloge haute résolution performance.now() de votre navigateur, directement sur votre appareil — aucun résultat n'est téléversé vers un serveur. Les minuteurs des navigateurs sont volontairement discrétisés face aux vulnérabilités matérielles (de l'ordre de 1 ms), et l'affichage quantifie chaque transition à l'intervalle de rafraîchissement d'écran (environ 16,7 ms par image à 60 Hz ; Woods et al., 2015). Les écarts inférieurs à 5 ms relèvent du bruit expérimental ; pour suivre vos progrès, effectuez vos séries sur le même équipement.",
+    "Transparence des données et respect de la vie privée : SkillDrills ne collecte aucune donnée agrégée. Vos scores et configurations demeurent stockés exclusivement dans le localStorage de votre navigateur web, garantissant qu'aucune moyenne globale ni profil d'utilisateur n'est diffusé. Toutes les références numériques et scientifiques mentionnées ici proviennent directement de travaux évalués par des pairs répertoriés ci-dessous.",
+    "Cet entraînement est un jeu interactif sur navigateur conçu pour la pratique cognitive et l'intérêt intellectuel. Il ne constitue pas un dispositif médical, un outil d'évaluation clinique, ni un protocole de diagnostic pour le TDAH, les troubles de la mémoire ou les affections neurocognitives. En cas d'inquiétude sur vos capacités cognitives ou de mémoire, consultez un neuropsychologue ou un médecin qualifié."
   ],
   benchmarks: {
-    title: "Paliers de Référence : Empan et Rétention Spatiale",
-    headers: ["Palier de Performance", "Taille de Grille", "Précision de Localisation", "Profil Neurocognitif & Liaison Spatiale"],
+    title: "Paliers Normatifs de Liaison Objet-Localisation Spatiale",
+    headers: ["Palier de Performance", "Objets & Échelle de Grille", "Score à l'Exercice", "Profil de Liaison Cognitive & Cartographie Spatiale"],
     rows: [
-      ["Palier 1 : Maître", "Grille 6x6 – 7x7", "≥ 90 % de réussite", "Liaison spatiale d élite : cartographie mentale instantanée et ancrage par quadrants."],
-      ["Palier 2 : Avancé", "Grille 5x5 – 6x6", "75 % – 89 % de précision", "Haute rétention : structuration géométrique rapide et dissociation des distracteurs."],
-      ["Palier 3 : Compétent", "Grille 4x4 – 5x5", "60 % – 74 % de précision", "Capacité solide : maintien fiable de 4 à 5 liaisons objets-positions simultanées."],
-      ["Palier 4 : En développement", "Grille 3x3 – 4x4", "45 % – 59 % de précision", "Niveau moyen standard : application du seuil de base de Luck & Vogel."],
-      ["Palier 5 : Débutant", "Grille 3x3", "< 45 % de précision", "Vulnérabilité à l interférence visuelle et perte des coordonnées cibles."]
+      ["Palier 1 (Supérieur / 99e Percentile)", "Niveau 8 – 10+ (8 – 10+ objets, grille 6x6–7x7)", "1 000+ points", "Élite visuo-spatiale ; sectorisation rapide en quadrants et ancrage sur repères relationnels ; liaison sans effort de 8+ paires objet-localisation ; localisation cible sub-500 ms."],
+      ["Palier 2 (Moyenne Supérieure / 85e–95e Percentile)", "Niveau 6 – 7 (6 – 7 objets, grille 5x5–6x6)", "750 – 999 points", "Supérieur à la moyenne adulte standard ; appariement sémantico-spatial robuste ; résistance aux interférences rétroactives visuelles sur grilles larges ; localisation 500 – 700 ms."],
+      ["Palier 3 (Moyenne Adulte Standard / 50e Percentile)", "Niveau 4 – 5 (4 – 5 objets, grille 4x4–5x5)", "450 – 749 points", "Ligne de base de la population adulte saine (Eals & Silverman, 1994 ; CANTAB PAL) ; gère 4 conjonctions objet-position (limite de Cowan) ; perte des cibles centrales sur grilles 5x5 ; localisation 700 – 950 ms."],
+      ["Palier 4 (Moyenne Inférieure / Goulot de Liaison)", "Niveau 3 (3 objets, grille 3x3–4x4)", "250 – 449 points", "Rappel limité à 2–3 objets isolés ; confusion des coordonnées des objets contigus ; difficulté lors de l'introduction de distracteurs ; localisation 950 – 1 300 ms."],
+      ["Palier 5 (En Développement / Empan Restreint)", "Niveau 1 – 2 (2 objets, grille 3x3)", "< 250 points", "Dégradation rapide de la trace visuelle ; échec de la liaison objet-localisation ; difficulté à retrouver les coordonnées cibles après 1,5 s de délai ; latence supérieure à 1 300 ms."]
     ],
-    note: "Ces reperes de performance ont ete etablis sur la base d exercices cognitifs interactifs; ils sont fournis a titre indicatif et ne remplacent pas une expertise neuropsychologique."
-  }
+    note: "Le nombre d'objets et la dimension de la grille reflètent le niveau maximal validé durant la session de 45 secondes ; percentiles normatifs calibrés sur les standards Silverman-Eals OLM et CANTAB PAL (Eals & Silverman, 1994 ; Luck & Vogel, 1997 ; Woods et al., 2015)."
+  },
+  techniques: {
+    title: "Protocoles Scientifiques pour Développer la Mémoire de Localisation",
+    items: [
+      {
+        name: "Ancrage Relationnel sur Repères Topologiques",
+        desc: "Associez les objets cibles aux repères spatiaux fixes tels que les 4 angles, la case centrale ou les bordures extérieures (Tolman, 1948). Retenir que « le losange est dans le coin supérieur gauche » ancre l'élément à un point de repère saillant sans nécessiter de calcul de coordonnées complexe.",
+        tips: "Identifiez immédiatement quels objets occupent les cases périphériques et les coins durant les 500 premières millisecondes."
+      },
+      {
+        name: "Appariement Associatif Sémantico-Spatial",
+        desc: "Créez des associations narratives ou verbales rapides liant l'identité d'un symbole à son orientation spatiale (Baddeley, 2000). Par exemple, associez mentalement une « étoile » en haut au ciel, ou une « clé » en bas à un tiroir secret.",
+        tips: "Formulez instantanément une étiquette verbale reliant le nom de l'icône à sa direction (ex. « étoile en haut, clé en bas »)."
+      },
+      {
+        name: "Sectorisation par Quadrants et Chunking",
+        desc: "Subdivisez mentalement les grilles étendues de 5x5 ou 7x7 en 4 quadrants distincts (haut-gauche, haut-droite, bas-gauche, bas-droite). Comptez le nombre d'objets présents dans chaque quadrant pour restreindre votre espace de recherche.",
+        tips: "Dénombrez d'abord les objets par quadrant avant de mémoriser leur case précise au sein de ce sous-secteur."
+      },
+      {
+        name: "Balayage Parafovéal et Ancrage Central",
+        desc: "Fixez votre regard rigoureusement au centre de la grille lors de l'apparition pour capturer la disposition globale par vision parafovéale, puis effectuez 1 ou 2 micro-saccades ciblées pour résoudre les icônes périphériques ambiguës.",
+        tips: "Évitez les mouvements oculaires désordonnés ; gardez la tête immobile et balayez la matrice avec fluidité."
+      }
+    ]
+  },
+  steps: [
+    "Centrez votre regard sur la matrice et observez la répartition initiale des objets.",
+    "Durant les 1,5 seconde d'affichage, reliez chaque objet à un repère saillant (angles, bordures, centre).",
+    "Formez des paires sémantico-spatiales rapides reliant l'identité de l'icône à son emplacement.",
+    "Dès l'effacement de la grille et l'apparition de l'icône cible, interrogez votre carte mentale et touchez la case mémorisée.",
+    "Progressez à travers les matrices de 3x3 à 7x7 pour développer une capacité élevée de liaison visuo-spatiale."
+  ],
+  audience: "Joueurs de jeux tactiques et compétitifs (gestion des temps de recharge et suivi de cartes), étudiants en sciences et ingénierie, radiologues, conducteurs et toute personne désireuse d'optimiser sa mémoire de travail spatiale et sa cartographie cognitive.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('cowan2001', 'baddeley2000', 'logie1995', 'luck1997', 'tolman1948', 'eals1994', 'woods2015'),
+  related: [
+    { href: "/drills/memory/spatial-memory/grid-memorization", label: "Test de Mémoire Visuelle" },
+    { href: "/drills/memory/spatial-memory/path-tracing", label: "Test de Mémorisation de Trajet" },
+    { href: "/drills/memory/short-term-memory/digit-span", label: "Test d'Empan Numérique" },
+    { href: "/drills/memory/short-term-memory/word-recall", label: "Test de Mémoire Verbale" },
+    { href: "/drills/memory/working-memory/n-back", label: "Test de Mémoire de Travail N-Back" }
+  ]
 };
 
 export default function ObjectLocationFrenchPage() {

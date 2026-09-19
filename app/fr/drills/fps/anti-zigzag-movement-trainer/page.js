@@ -1,5 +1,6 @@
 import AntiZigzagClient from '@/app/drills/fps/anti-zigzag-movement-trainer/AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -329,18 +330,19 @@ export default function AntiZigzagFrPage() {
           stageCaption: "Gardez votre réticule sur les cibles évasives aux trajectoires en zigzag imprévisibles. Concentrez-vous sur l'axe central !",
           rulesTitle: "Règles d'Entraînement & Système de Score",
           rulesItems: [
-            { num: "1", text: "Contact avec la Cible", highlight: "Dégâts Continus", result: "Maintient le temps de visée actif" },
-            { num: "2", text: "V-Crossover", highlight: "Centrage sur l'Axe", result: "Supprime le dépassement aux points d'inversion" },
-            { num: "3", text: "Montée de Niveau", highlight: "Tous les 1 400 PTS +1 Niveau", result: "Vitesse et fréquence de zigzag accrues" },
-            { num: "4", text: "Prise Relâchée", highlight: "Zéro Crispation", result: "Glisse continue plutôt que mouvements hachés" }
+            { num: "1", text: "Alignement de Visée", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+            { num: "2", text: "Destruction de Cible", highlight: "+25 PTS Bonus", result: "Reset HP & Respawn" },
+            { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau / 1400 PTS", result: "Zigzag Adaptatif" },
+            { num: "4", text: "Fuite de Cible", highlight: "Temps Écoulé", result: "Réinitialise Combo (-0.6s)" }
           ],
           aboutTitle: "À Propos du Tracking Anti-Zigzag"
         }}
       />
+      <DrillGuide guide={frGuide} />
       <div className="max-w-6xl mx-auto px-4 w-full">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/anti-zigzag-movement-trainer" locale="fr" />
       </div>
-      <DrillGuide guide={frGuide} />
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,7 @@ import DynamicGridEvasionClient from '@/app/drills/physical/coordination/dynamic
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — Japan (JP / JA)
@@ -324,7 +325,10 @@ const gridGuide = {
     "ウェーブ開始時、オレンジ色の枠線で点滅する危険マスを周辺視野で察知します。",
     "カウントダウン終了前に、点滅していない安全マスへ素早くフリック移動します。",
     "連続生存で最大3.0倍のコンボ倍率をキープし、45秒間の最高スコアを目指します。"
-  ]
+  ],
+  audience: "FPS・MOBAゲーマー（VALORANT、Apex、LoL、CS2）、球技・武道選手、および周辺視野・動体視力・空間回避反射を鍛えたいすべての方。",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('posner1980', 'treisman1980', 'woodworth1899', 'fitts1954', 'woods2015'),
 };
 
 export default function DynamicGridEvasionPageJa() {

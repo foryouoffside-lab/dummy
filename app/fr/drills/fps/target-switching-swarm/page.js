@@ -1,6 +1,7 @@
 import TargetSwitchingSwarmClient from '@/app/drills/fps/target-switching-swarm/TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -294,6 +295,7 @@ export default function TargetSwitchingSwarmFrPage() {
         copy={{
           h1Keyword: "Entraînement Target Switching FPS",
           h1Suffix: " – Changement de Cibles et Spray Transfer",
+          subtitle: "Entraînez les transitions rapides de cibles, les spray transfers et l'indexation visuelle sans pause de réajustement.",
           statScore: "Score",
           statTime: "Temps",
           statAccuracy: "Précision",
@@ -303,18 +305,15 @@ export default function TargetSwitchingSwarmFrPage() {
           statPeakLevel: "Niveau Max",
           startTitle: "Target Switching Swarm",
           startSubtitle: "Entrée Souris Brute (Raw Input) • Progression Continue",
-          getReady: "PRÉPAREZ-VOUS",
-          pausedTitle: "EN PAUSE",
-          pausedSubtitle: "Cliquez pour reprendre – le verrouillage du curseur sera réactivé.",
-          stageCaption: "Enchaînez les tirs rapidement entre les cibles avant la fin de leur compte à rebours. Évitez les tirs manqués pour maximiser le combo !",
+          stageCaption: "Enchaînez les tirs rapidement entre les cibles avant la fin de leur chronomètre. Évitez les tirs manqués pour maximiser le combo !",
           rulesTitle: "Règles d'Entraînement & Système de Score",
+          aboutTitle: "À Propos du Target Switching dans les FPS",
           rulesItems: [
-            { num: "1", text: "Destruction de Cible", highlight: "+100 PTS / +0,35s", result: "Prolonge le chrono" },
-            { num: "2", text: "Pénalité de Tir Manqué", highlight: "Reset de Combo (-0,6s)", result: "Réinitialise les multiplicateurs" },
-            { num: "3", text: "Progression de Niveau", highlight: "Tous les 1 400 PTS +1 Niveau", result: "Densité et vitesse accrues" },
-            { num: "4", text: "Transition Fluide", highlight: "Zéro hésitation post-kill", result: "Maximise les cibles par minute" }
-          ],
-          aboutTitle: "À Propos du Target Switching dans les FPS"
+            { num: "1", text: "Destruction de Cible", highlight: "Cibles Cyan (+100 PTS / +0,35s)", result: "+100 PTS / +0,35s" },
+            { num: "2", text: "Essaim Dynamique", highlight: "Réapparition Immédiate", result: "Essaim Continu" },
+            { num: "3", text: "Pénalité d'Échec", highlight: "Tir Manqué / Expiration", result: "Reset de Combo" },
+            { num: "4", text: "Progression de Niveau", highlight: "+1 Niveau / 2 100 PTS", result: "Plus Rapide & Petit" }
+          ]
         }}
       />
       <DrillGuide guide={targetSwitchingGuide} />
@@ -325,6 +324,7 @@ export default function TargetSwitchingSwarmFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

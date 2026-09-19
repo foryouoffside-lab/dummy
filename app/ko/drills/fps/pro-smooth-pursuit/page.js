@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "스무스 트래킹 에임 연습 – 활창 추적 안구 운동 | SkillDrills",
@@ -244,10 +245,10 @@ export default function ProSmoothPursuitKoPage() {
     stageCaption: "화면 위를 부드러운 곡선으로 진동 회주하는 타겟에 조준선을 계속 밀착시키세요.",
     rulesTitle: "훈련 규칙 및 점수 체계",
     rulesItems: [
-      { title: "연속 추적 보너스", text: "타겟 위에 조준선을 유지하면 1초당 점수가 가산되며, 콤보 배수가 최대 3.0배까지 누적됩니다." },
-      { title: "이탈 페널티", text: "타겟에서 조준선이 벗어나면 콤보가 즉시 리셋됩니다. 옵션 활성화 시 라운드 시간도 차감됩니다." },
-      { title: "리사주 곡선 궤적", text: "수직과 수평의 조화 진동이 결합된 연속 비선형 궤적으로 진정한 속도 동기화 능력을 훈련합니다." },
-      { title: "레벨 상승 체계", text: "1400점 획득 시마다 다음 레벨로 도약하며, 타겟의 이동 속도와 진폭 복잡도가 상승합니다." }
+      { num: "1", text: "목표 추종 유지", highlight: "+50 PTS (+0.4s/s)", result: "×콤보 배율" },
+      { num: "2", text: "연속 콤보 누적", highlight: "최대 3.0×", result: "최대 배율" },
+      { num: "3", text: "레벨 난이도 진행", highlight: "+1 레벨 / 1400 PTS", result: "적응형 궤적" },
+      { num: "4", text: "이탈 페널티", highlight: "1.0초 이탈", result: "콤보 초기화 (-0.6s)" }
     ],
     aboutTitle: "스무스 트래킹 및 활창 추적 안구 운동 정보",
   };
@@ -255,9 +256,11 @@ export default function ProSmoothPursuitKoPage() {
   const koGuide = {
     heading: "스무스 트래킹 훈련의 생체역학 가이드 및 성능 벤치마크",
     intro: [
-      "스무스 트래킹(Smooth Pursuit) 에임 트레이너는 리사주 곡선 형태의 비선형 조화 진동 궤적을 추종하여, 불필요한 손 떨림을 제거하고 안구의 활창 추적 기능과 전완근의 미세 조절력을 극대화하는 전문 FPS 드릴입니다. 에이펙스 레전드, 오버워치 2, 더 파이널스 등의 교전에서는 몇 초 동안 공중과 지상을 오가는 적에게 끊김 없이 탄환을 꽂아 넣는 지속 딜 능력이 필수적입니다.",
-      "안구의 활창 추적 운동은 Krauzlis(2004)의 연구에서 밝혀졌듯 중간상측두영역(MST), 전두안구영역(FEF), 시각운동피질(MT/V5)로 이루어진 신경망이 표적의 속도 벡터를 실시간 연산하여 눈을 움직입니다. Cyril Rashbass(1961)는 도약 안구 운동(Saccade)과 활창 안구 운동이 분리된 체계임을 규명했습니다. 손에 힘을 주고 플릭하듯 조준하려 하면 불필요한 단속 운동이 개입되어 화면이 떨리고 에임이 튀게 됩니다.",
-      "본 드릴은 중심와 시선 선행 이론(Land & McLeod, 2000), 주의집중 시각 확장(Green & Bavelier, 2003), 디지털 정밀 크로노메트리(Woods et al., 2015)를 결합하여 손목 긴장을 풀고 부드럽게 활주하는 최고 수준의 트래킹 감각을 완성시켜 줍니다."
+      "스무스 트래킹(Smooth Pursuit) 에임 트레이너는 리사주 곡선 형태의 비선형 조화 진동 궤적을 추종하여, 불필요한 손 떨림을 제거하고 안구의 활창 추적 기능과 전완근의 미세 조절력을 극대화하는 전문 FPS 감각운동 드릴입니다. 에이펙스 레전드, 오버워치 2, 더 파이널스 등의 긴 TTK(Time-to-Kill) 교전에서는 몇 초 동안 공중과 지상을 오가는 적에게 끊김 없이 탄환을 꽂아 넣는 지속 딜 능력(Damage Uptime)이 승패를 결정합니다.",
+      "안구의 활창 추적 운동은 Krauzlis(2004)의 연구에서 규명되었듯 중간상측두영역(MST), 전두안구영역(FEF), 시각운동피질(MT/V5)로 이루어진 피질 피드백 루프가 표적의 속도 벡터를 실시간 연산하여 안구 운동계를 지속적으로 구동합니다. 이 신경 회로는 수동적으로 반응하는 것이 아니라, 표적의 속도와 위상을 능동적으로 모델링하여 시선을 동기화합니다.",
+      "Cyril Rashbass(1961)의 고전적 정신물리학 실험에 따르면, 위치 오차에 반응하는 단속성 안구 운동(Saccade)과 망막 속도 오차(Retinal Slip)에 반응하는 활창 추적 운동은 신경학적으로 완전히 분리된 체계입니다. 마우스를 강하게 쥐거나 움직이는 표적을 향해 무리하게 미세 플릭을 시도하면 활창 추적 회로가 깨지면서 불필요한 교정 사카드가 유발되어 심각한 에임 떨림과 덜컹거림이 발생합니다.",
+      "본 드릴은 리사주 조화 곡선 궤적에 중심와 시선 선행 이론(Land & McLeod, 2000), 동적 주의집중 시각 확장(Green & Bavelier, 2003), 디지털 정밀 크로노메트리(Woods et al., 2015)를 결합하여 전완근 긴장을 풀고 비선형 곡선을 유영하듯 추적하는 궁극의 레이저 트래킹 에임을 완성시킵니다.",
+      "측정 기준 및 하드웨어 지연 시간: 모든 트래킹 이벤트는 브라우저 내장 performance.now() 고해상도 시계를 통해 로컬 기기에서만 정밀 측정되며 외부로 점수나 데이터가 전송되지 않습니다. 브라우저 타이머는 스펙터(Spectre) 완화 조치로 약 1ms 단위로 양자화되며, 모니터 디스플레이는 주사율에 맞춰 시각 프레임을 양자화합니다(60Hz=약 16.7ms, 144Hz=약 6.9ms, 240Hz=약 4.1ms, Woods et al., 2015). 마우스 폴링레이트는 125Hz에서 약 8ms, 1000Hz에서 약 1ms의 지연 편차를 추가합니다. 따라서 약 5ms 미만의 차이는 기술적 측정 노이즈로 간주되며, 타인의 장비와 단순 비교하기보다는 동일한 하드웨어 환경에서 본인의 지연 시간 및 트래킹 개선도를 추적하십시오."
     ],
     benchmarks: {
       title: "트래킹 유지율(Uptime) 및 성능 벤치마크 티어",
@@ -346,6 +349,7 @@ export default function ProSmoothPursuitKoPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/pro-smooth-pursuit" locale="ko" />
       </div>
       <DrillGuide guide={koGuide} />
+      <DrillFooter />
     </>
   );
 }

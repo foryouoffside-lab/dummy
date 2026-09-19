@@ -2,6 +2,7 @@ import FingerSequencingClient from '@/app/drills/motor/movement-speed/finger-seq
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -300,6 +301,31 @@ const guideProps = {
   },
 };
 
+const deCopy = {
+  title: "Sequenz-Aim-Trainer",
+  desc: "Sequenzielles Target Switching trainiert das präzise Treffen geordneter Ziele in festgelegter Reihenfolge statt des leichtest erreichbaren. Basierend auf den motorischen Sequenzprogrammen nach Lashley (1951) und Keele (1968) werden ballistische Übertragungsbahnen und Mikrokorrekturen geschult.",
+  score: "Punkte",
+  timeLeft: "Verbleibende Zeit",
+  accuracy: "Präzision",
+  bestScore: "Bestwert",
+  startButtonText: "Training Starten",
+  startSubtitle: "Feinmotorische Präzision & Sequenzielle Zielpfade • 1:1 Roheingabe",
+  getReady: "BEREITMACHEN",
+  rulesTitle: "Trainingsanleitung & Punktesystem",
+  rulesItems: [
+    { num: "1", text: "Geordnete Knoten-Treffer", highlight: "Smaragd-Sequenz", result: "+150 Punkte × Combo (+0,6s)" },
+    { num: "2", text: "Combo-Multiplikator", highlight: "Bis zu 3,0×", result: "Steigert Punkte exponentiell" },
+    { num: "3", text: "Level-Progression", highlight: "Kontinuierliche Skalierung", result: "Ziele schrumpfen dynamisch" },
+    { num: "4", text: "Fehlschuss / Timeout", highlight: "Combo-Reset", result: "Strafabzug von -0,8s" }
+  ],
+  chainsCleared: "Gelöste Ketten",
+  peakLevel: "Spitzen-Level",
+  maxCombo: "Max. Combo",
+  playAgain: "Erneut Trainieren",
+  shareTitle: "Ergebnis Teilen",
+  exitTitle: "Beenden"
+};
+
 export default function GermanFingerSequencingPage() {
   return (
     <>
@@ -327,11 +353,12 @@ export default function GermanFingerSequencingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient copy={{ title: 'Sequenz Aim Trainer' }} />
+      <FingerSequencingClient copy={deCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/finger-sequencing" />
+        <RelatedDrills currentCategory="motor" currentHref="/de/drills/motor/movement-speed/finger-sequencing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

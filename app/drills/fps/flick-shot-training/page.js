@@ -1,5 +1,6 @@
 import ProFlickClient from './ProFlickClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -215,7 +216,7 @@ export default function FlickShotPage() {
         "@type": "HowToStep",
         "position": 3,
         "name": "Execute Ballistic Flick and Click",
-        "text": "In a single explosive acceleration curve, snap your mouse onto the target center and click before the timer ring collapses."
+        "text": "In a single explosive acceleration curve, snap your mouse onto the target center and click before target expiration."
       },
       {
         "@type": "HowToStep",
@@ -320,10 +321,12 @@ export default function FlickShotPage() {
       <ProFlickClient
         copy={{
           h1Keyword: "Flick Shot Trainer",
-          h1Suffix: " - Snap Aim Practice"
+          h1Suffix: " - Snap Aim Practice",
+          subtitle: "Train your snap aim, ballistic muscle memory, and target acquisition with real-time feedback."
         }}
       />
       <DrillGuide guide={flickGuide} />
+      <DrillFooter />
     </>
   );
 }

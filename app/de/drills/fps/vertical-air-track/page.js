@@ -1,5 +1,6 @@
 import VerticalAirTrackClient from '@/app/drills/fps/vertical-air-track/VerticalAirTrackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -346,8 +347,10 @@ export default function VerticalAirTrackPageDe() {
           statPeakLevel: "Höchste Stufe",
           startTitle: "Vertical Air-Track",
           startSubtitle: "Hardware Raw Input • Dynamische Stufen-Progression",
-          pausedTitle: "Pausiert",
-          pausedSubtitle: "Klicken zum Fortfahren – Zeigersperre wird reaktiviert",
+          startButtonText: "Drill Starten",
+          playAgainText: "Nochmal Spielen",
+          shareText: "Ergebnis Teilen",
+          exitText: "Beenden",
           stageCaption: "Verfolge Ziele auf parabolischen Y-Achsen-Flugbahnen unter Gravitationseinfluss für maximale vertikale Präzision.",
           rulesTitle: "Drill-Anleitung & Punktesystem",
           aboutTitle: "Über den Vertical Air-Track Trainer",
@@ -380,13 +383,14 @@ export default function VerticalAirTrackPageDe() {
         }}
       />
       <DrillGuide guide={verticalAirTrackGuide} />
-      <div className="max-w-4xl mx-auto px-4 pb-12">
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills
           currentCategory="fps"
           currentHref="/drills/fps/vertical-air-track"
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

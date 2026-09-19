@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from '@/app/drills/reaction-speed/reaction-time-test/ReactionTimeTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -249,6 +250,38 @@ const faqSchema = {
         text: '네, 별도의 앱 설치나 로그인 없이 모바일 기기의 터치스크린에서도 완벽하게 작동하며, 가로 및 세로 모드를 모두 지원합니다.',
       },
     },
+    {
+      '@type': 'Question',
+      name: '이 반응속도 테스트는 완전 무료인가요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '네, SkillDrills의 모든 반응속도 및 인지 훈련 드릴은 회원가입, 앱 다운로드, 결제 요구, 화면을 가리는 팝업 광고 없이 브라우저에서 100% 완전 무료로 이용할 수 있습니다.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '전통 스포츠 선수나 운동선수에게도 도움이 되나요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '네. F1 드라이버, 복싱 및 격투기 선수, 단거리 육상 선수, 탁구·배드민턴 선수 등은 순간적인 시각 반응속도를 훈련하여 속근 섬유의 신경 동원 속도와 초기 반응 민첩성을 극대화합니다.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '화면 중앙을 집중해서 응시해야 하나요, 주변시를 활용해야 하나요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '눈에 과도하게 힘을 주어 한 점만 응시하기보다는, 시야를 넓게 두는 \'소프트 포커스(주변시 활용)\'가 유리합니다. 망막 주변부의 간상세포가 빛의 변화를 더욱 신속하게 감지하여 손가락 근육으로 즉각 신호를 전달합니다.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '반응속도 테스트와 훈련은 얼마나 자주 하는 것이 좋은가요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '하루 1회, 5~10분 정도의 짧은 세션을 추천합니다. 당일의 신경계 각성 상태와 컨디션을 객관적으로 점검하는 벤치마크가 되며, 랭크 게임 전 손 풀기 워밍업으로도 탁월합니다.',
+      },
+    },
   ],
 };
 
@@ -343,6 +376,7 @@ export default function KoreanReactionTimeTestPage() {
       />
       <ReactionTimeTestWrapper copy={{ title: '반응속도 테스트' }} />
       <DrillGuide guide={reactionGuide} />
+      <DrillFooter />
     </>
   );
 }

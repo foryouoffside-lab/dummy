@@ -2,6 +2,7 @@ import FineMotorClient from '@/app/drills/motor/precision-control/tracing/Tracin
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -311,6 +312,29 @@ const guideProps = {
   },
 };
 
+const esCopy = {
+  title: "Juego de Trazado con Ratón",
+  subtitle: "Seguimiento Continuo sin Filtros • Temporizador 45s",
+  startButtonText: "Comenzar Entrenamiento",
+  trainAgain: "Entrenar de Nuevo",
+  shareTitle: "Compartir Puntuación",
+  exitTitle: "Salir",
+  statFlowScore: "Puntos de Flujo",
+  statTimeLeft: "Tiempo Restante",
+  statFlowIntegrity: "Integridad de Flujo",
+  statBestScore: "Mejor Puntuación",
+  maxStreakLabel: "Racha Máxima de Frames",
+  peakFlowLabel: "Estado de Flujo Pico",
+  bestScoreLabel: "Récord Personal",
+  rulesTitle: "Instrucciones del Ejercicio y Sistema de Puntos",
+  rulesItems: [
+    { num: "1", text: "Trazar Trayectoria", highlight: "Onda Esmeralda", result: "+1 PT / frame dentro de ruta" },
+    { num: "2", text: "Velocidad Progresiva", highlight: "Onda Dinámica", result: "2.2 → 3.8 px/f en 45s" },
+    { num: "3", text: "Integridad de Flujo", highlight: "Súper Flujo", result: "4s seguidos otorgan +5 Bonus" },
+    { num: "4", text: "Control Estricto", highlight: "Exclusivo de Escritorio", result: "Entrada de ratón 1:1" }
+  ],
+};
+
 export default function SpanishTracingPage() {
   return (
     <>
@@ -338,11 +362,12 @@ export default function SpanishTracingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FineMotorClient copy={{ title: "Juego de Trazado con Ratón" }} />
+      <FineMotorClient copy={esCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/tracing" locale="es" />
       </div>
+      <DrillFooter />
     </>
   );
 }

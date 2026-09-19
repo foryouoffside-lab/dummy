@@ -1,5 +1,6 @@
 import ReactionSimulatorWrapper from '@/app/drills/reaction-speed/reaction-game/ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
@@ -245,6 +246,30 @@ const faqSchema = {
         text: 'Ein tägliches 5- bis 10-minütiges Warm-up vor Gaming-Sessions genügt, um das neuromuskuläre Zusammenspiel ohne Übermüdung der Handmuskeln zu schärfen.',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'Welche Arten von Spielen testen die Reaktionszeit?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Die Reaktionszeit wird durch einfache visuelle Farbumschlag-Klicktests (Simple Reaction Time), dynamische Fallziel-Interzeptionsspiele, temporeiche Rhythmusspiele sowie taktische FPS-Aim-Trainer erfasst, die unterschiedliche Stufen der sensorischen Reizverarbeitung fordern.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Welche Spiele verbessern die Hand-Auge-Koordination am effektivsten?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Spiele mit vertikal fallenden Zielen, Rhythmus-Action-Titel und dynamische Tracking-Übungen trainieren die Hand-Auge-Koordination besonders intensiv, da sie eine kontinuierliche räumliche Ausrichtung zwischen visueller Fixation und Mauszeigerposition erzwingen.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Ist dieses Reaktionsspiel kostenlos und ohne Anmeldung spielbar?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ja, das Reaktionsspiel auf SkillDrills ist zu 100 % kostenlos, läuft direkt und ohne Download im Webbrowser und erfordert weder eine Registrierung noch das Ansehen aufdringlicher Werbung.',
+      },
+    },
   ],
 };
 
@@ -254,6 +279,7 @@ const reactionGameGuideDe = {
     'Ein Reaktionsspiel ist ein interaktives Trainingstool zur Messung und Schulung von neuromuskulärer Reaktionsgeschwindigkeit, vertikalem Blicktracking und Hand-Auge-Koordination durch rasches Reagieren auf dynamische Stimuli.',
     'Im Gegensatz zu einfachen Rot-zu-Grün-Klicktests erfordert dieses Mehrspur-Reaktionsspiel echte Wahlreaktionszeit (Choice Reaction Time nach Hick, 1952): Das Gehirn muss fallende Ziele im Raum orten, ihre Beschleunigung berechnen und den Klick präzise ausführen, bevor sie den Bildschirm verlassen.',
     'Messgenauigkeit & Display-Latenz: Die Interzeptionszeit wird lokal im Browser über die hochauflösende performance.now() API mit Sub-Millisekunden-Präzision gemessen. Auf Standard-60Hz-Displays tritt eine Bildverzögerung von bis zu 16,7 ms auf, während 144Hz- (6,9 ms) und 240Hz-Gaming-Monitore (4,1 ms) den Hardware-Input-Lag drastisch reduzieren (Woods et al., 2015).',
+    'Messmethodik & Hardware-Faktoren: Jedes Ereignis wird mit der hochauflösenden Browser-Uhr performance.now() direkt auf Ihrem Endgerät zeitgestempelt – es werden keine Daten übertragen. Browser-Timer sind als Spectre-Schutzmaßnahme auf ca. 1 ms geglättet, und Ihr Bildschirm quantisiert Stimuli auf sein Bildwiederholintervall (ca. 16,7 ms bei 60 Hz, 6,9 ms bei 144 Hz und 4,1 ms bei 240 Hz; Woods et al., 2015). Die USB-Mausabfragerate fügt bei 125 Hz ca. 8 ms gegenüber ca. 1 ms bei 1000 Hz hinzu. Betrachten Sie Unterschiede unter 5 ms als Messrauschen und vergleichen Sie Ihre Serien stets auf identischer Hardware.',
   ],
   benchmarks: {
     title: 'Reaktionsspiel Leistungstabelle & Punkte-Einstufung (45-Sekunden-Lauf)',
@@ -322,6 +348,7 @@ export default function GermanReactionGamePage() {
 
       <ReactionSimulatorWrapper copy={{ title: 'Reaktionsspiel Online' }} />
       <DrillGuide guide={reactionGameGuideDe} />
+      <DrillFooter />
     </>
   );
 }

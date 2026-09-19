@@ -17,9 +17,7 @@ import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
@@ -66,10 +64,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Bulls-eye Hit", text: "Score +200 PTS × Combo (+0.6s) for hitting the inner 8px center ring." },
-  { title: "Standard Hit", text: "Score +100 PTS × Combo (+0.6s) for hitting outer target ring." },
-  { title: "Level Progression", text: "Level up every 1400 PTS. Targets shrink & decay faster dynamically." },
-  { title: "Miss / Timeout", text: "Missing shots or letting targets decay resets combo streak and deducts time when enabled." }
+  { num: "1", text: "Bullseye Core", highlight: "+200 PTS (+0.6s)", result: "×Combo Mult" },
+  { num: "2", text: "Standard Hit", highlight: "+100 PTS (+0.6s)", result: "Maintains Streak" },
+  { num: "3", text: "Level Up", highlight: "+1 / 1400 PTS", result: "Shrink & Faster Decay" },
+  { num: "4", text: "Miss / Timeout", highlight: "Penalty", result: "Resets Combo (-0.8s)" }
 ];
 
 const ABOUT_TEXT = `Precision Flick Shot Training is a high-speed motor drill engineered to refine mouse flick accuracy, target acquisition speed, and center-click timing.
@@ -142,14 +140,16 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
   }, []);
 
   const createExplosion = useCallback((x, y, color) => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.0 + Math.random() * 3.5;
       engine.current.particles.push({
         x, y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        life: 0.8,
+        life: 1.0,
+        maxLife: 1.0,
+        radius: 1.5 + Math.random() * 2.0,
         color
       });
     }
@@ -208,28 +208,16 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
   }, []);
 
   const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    gameActiveRef.current = false;
 
     setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
     setGameState('start');
-  }, []);
-
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
   }, []);
 
   // End Game Management
@@ -336,10 +324,37 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
   }, [spawnTarget]);
 
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, handleExitDrill]);
+
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      const locked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(locked);
+      if (!locked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      const isFs = !!document.fullscreenElement;
+      setIsFullscreen(isFs);
+      if (!isFs && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
-    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -355,70 +370,66 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (!containerRef.current || !containerRef.current.contains(e.target)) return;
 
-      if (gameState === 'playing') {
-        if (!pointerLocked && canvasRef.current) {
-          resumeDrill();
-        } else if (pointerLocked) {
-          const eRef = engine.current;
-          const ch = eRef.crosshair;
-          let hitIndex = -1;
-          let isBullseye = false;
+      if (gameState === 'playing' && pointerLocked) {
+        const eRef = engine.current;
+        const ch = eRef.crosshair;
+        let hitIndex = -1;
+        let isBullseye = false;
 
-          eRef.totalClicks++;
+        eRef.totalClicks++;
 
-          for (let i = 0; i < eRef.targets.length; i++) {
-            const tgt = eRef.targets[i];
-            const dist = Math.hypot(ch.x - tgt.x, ch.y - tgt.y);
-            if (dist <= tgt.radius + 6) {
-              hitIndex = i;
-              if (dist <= 8) isBullseye = true;
-              break;
-            }
+        for (let i = 0; i < eRef.targets.length; i++) {
+          const tgt = eRef.targets[i];
+          const dist = Math.hypot(ch.x - tgt.x, ch.y - tgt.y);
+          if (dist <= tgt.radius + 6) {
+            hitIndex = i;
+            if (dist <= 8) isBullseye = true;
+            break;
           }
+        }
 
-          if (hitIndex !== -1) {
-            const hitTgt = eRef.targets[hitIndex];
-            eRef.hits++;
-            if (isBullseye) eRef.bullseyes++;
-            eRef.combo++;
-            if (eRef.combo > eRef.bestCombo) eRef.bestCombo = eRef.combo;
+        if (hitIndex !== -1) {
+          const hitTgt = eRef.targets[hitIndex];
+          eRef.hits++;
+          if (isBullseye) eRef.bullseyes++;
+          eRef.combo++;
+          if (eRef.combo > eRef.bestCombo) eRef.bestCombo = eRef.combo;
 
-            const basePoints = isBullseye ? 200 : 100;
-            const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
-            eRef.score += Math.round(basePoints * getComboMultiplier(eRef.combo) * levelMult);
-            eRef.timeLeft += TIME_PER_HIT;
+          const basePoints = isBullseye ? 200 : 100;
+          const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
+          eRef.score += Math.round(basePoints * getComboMultiplier(eRef.combo) * levelMult);
+          eRef.timeLeft += TIME_PER_HIT;
 
-            const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
-            eRef.level = Math.max(eRef.level, rawLevel);
-            bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
+          const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
+          eRef.level = Math.max(eRef.level, rawLevel);
+          bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
-            drillAudio.playHit();
-            const hitColor = isBullseye ? '#eab308' : '#06b6d4';
-            createExplosion(hitTgt.x, hitTgt.y, hitColor);
-            eRef.hitRings.push(createHitRing(hitTgt.x, hitTgt.y, hitTgt.radius, hitColor));
-            createHitMarker(ch.x, ch.y);
-            setUiScore(eRef.score);
+          drillAudio.playHit();
+          const hitColor = eRef.combo >= 10 ? '#34d399' : (isBullseye ? '#fbbf24' : '#10b981');
+          createExplosion(hitTgt.x, hitTgt.y, hitColor);
+          eRef.hitRings.push(createHitRing(hitTgt.x, hitTgt.y, hitTgt.radius, hitColor));
+          createHitMarker(ch.x, ch.y);
+          setUiScore(eRef.score);
 
-            const cfg = getLevelConfig(eRef.level, eRef.combo);
-            const remainingIdx = 1 - hitIndex;
-            const remainingTgt = eRef.targets[remainingIdx];
+          const cfg = getLevelConfig(eRef.level, eRef.combo);
+          const remainingIdx = 1 - hitIndex;
+          const remainingTgt = eRef.targets[remainingIdx];
 
-            // Respawn the hit target cleanly without overlapping
-            eRef.targets[hitIndex] = spawnTarget(eRef.logicalWidth, eRef.logicalHeight, cfg, [remainingTgt]);
+          // Respawn the hit target cleanly without overlapping
+          eRef.targets[hitIndex] = spawnTarget(eRef.logicalWidth, eRef.logicalHeight, cfg, [remainingTgt]);
 
-            // If player hit the active shrinking target, switch active target to standby target!
-            if (hitIndex === eRef.activeIndex) {
-              eRef.activeIndex = remainingIdx;
-            }
-          } else {
-            eRef.misses++;
-            eRef.combo = 0;
-            eRef.screenShake = 6;
-            triggerFlash();
-            drillAudio.playPenalty();
-            createExplosion(ch.x, ch.y, '#ef4444');
-            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
+          // If player hit the active shrinking target, switch active target to standby target!
+          if (hitIndex === eRef.activeIndex) {
+            eRef.activeIndex = remainingIdx;
           }
+        } else {
+          eRef.misses++;
+          eRef.combo = 0;
+          eRef.screenShake = 6;
+          triggerFlash();
+          drillAudio.playPenalty();
+          createExplosion(ch.x, ch.y, '#ef4444');
+          if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
         }
       }
     };
@@ -429,7 +440,7 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, universalSens, triggerFlash, createExplosion, createHitMarker, spawnTarget, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash, createExplosion, createHitMarker, spawnTarget]);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -578,22 +589,20 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
         for (let i = 0; i < e.targets.length; i++) {
           const tgt = e.targets[i];
           const isActive = (i === e.activeIndex);
-          const progress = Math.max(0, Math.min(1, 1 - (tgt.radius / tgt.maxRadius)));
-          const targetColor = e.combo >= 10 ? '#38bdf8' : (isActive ? '#00ff88' : '#38bdf8');
-
-          drawPulseRing(ctx, tgt.x, tgt.y, tgt.radius, targetColor, progress);
+          const targetColor = e.combo >= 10 ? '#34d399' : '#10b981';
           drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, isActive);
         }
       }
 
       drawHitRings(ctx, e.hitRings, dt);
 
+      // Hit markers
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
         hm.life -= dt * 4.5;
         if (hm.life <= 0) { e.hitMarkers.splice(i, 1); continue; }
-        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#22d3ee';
+        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#ffffff';
         const s = 6 + (1 - hm.life) * 8;
         ctx.beginPath();
         ctx.moveTo(hm.x - s, hm.y - s); ctx.lineTo(hm.x + s, hm.y + s);
@@ -602,11 +611,33 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
       }
       ctx.globalAlpha = 1.0;
 
+      // Circular arc particles with delta-time alpha decay
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) {
+          e.particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius || 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Tactical Pro White Crosshair with drop shadow
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#06b6d4' : '#eab308';
-        ctx.strokeStyle = activeColor;
-        ctx.fillStyle = activeColor;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
 
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2); ctx.stroke();
@@ -621,6 +652,7 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -754,31 +786,13 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
-            </div>
-          )}
-
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
-              </div>
             </div>
           )}
 
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -786,9 +800,10 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Crosshair}
-              accent="cyan"
-              title="Precision Flick Shot"
-              subtitle="Target Decay & Bulls-Eye Micro-Flicks • Endless Level Progression"
+              accent="emerald"
+              title={copy?.title || "Precision Flick Shot"}
+              subtitle={copy?.subtitle || "Target Decay & Bulls-Eye Micro-Flicks • Endless Level Progression"}
+              buttonText={copy?.startButtonText || "START DRILL"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -802,15 +817,18 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
           {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
             <DrillResultCard
-              accent="cyan"
+              accent="emerald"
               grade={analytics.grade}
               score={uiScore}
               isNewBest={isNewBest}
+              playAgainText={copy?.playAgainText || "Play Again"}
+              shareText={copy?.shareText || "Share Score"}
+              exitText={copy?.exitText || "Exit"}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
-                { value: analytics.hits, label: "Target Hits" },
-                { value: analytics.bullseyes, label: "Bulls-eyes" },
-                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+                { value: analytics.accuracy, suffix: "%", label: copy?.accuracyLabel || "Accuracy" },
+                { value: analytics.hits, label: copy?.targetHitsLabel || "Target Hits" },
+                { value: analytics.bullseyes, label: copy?.bullseyesLabel || "Bulls-eyes" },
+                { value: `Lv. ${analytics.levelReached}`, label: copy?.peakLevelLabel || "Peak Level" },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareDrillLink}
@@ -824,68 +842,85 @@ export default function PrecisionFlickShotClient({ copy } = {}) {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {RULES_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
-                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Precision Flick Shot"
+              title={copy?.aboutTitle || "About Precision Flick Shot"}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <h3 className="text-base font-bold text-white">Ballistic Flick Accuracy &amp; Submovement Optimization</h3>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    Precision Flick Shot is a high-speed motor coordination drill engineered to test and refine rapid mouse flicks, target acquisition speed, and center-click timing under extreme temporal pressure.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    Target snapping is governed by the Stochastic Optimized Submovement Model (Meyer et al., 1988) and Woodworth&apos;s two-component hypothesis. Every flick begins with an open-loop ballistic motor impulse followed by a visual feedback deceleration phase. Training center-ring bulls-eyes forces the motor cortex to suppress endpoint distribution noise and minimize corrective secondary sub-movements.
-                  </p>
-                </div>
+              {copy?.aboutContent ? (
+                copy.aboutContent
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <h3 className="text-base font-bold text-white">Ballistic Flick Accuracy &amp; Submovement Optimization</h3>
+                    <p className="text-sm leading-relaxed text-gray-300">
+                      Precision Flick Shot is a high-speed motor coordination drill engineered to test and refine rapid mouse flicks, target acquisition speed, and center-click timing under extreme temporal pressure.
+                    </p>
+                    <p className="text-sm leading-relaxed text-gray-300">
+                      Target snapping is governed by the Stochastic Optimized Submovement Model (Meyer et al., 1988) and Woodworth&apos;s two-component hypothesis. Every flick begins with an open-loop ballistic motor impulse followed by a visual feedback deceleration phase. Training center-ring bulls-eyes forces the motor cortex to suppress endpoint distribution noise and minimize corrective secondary sub-movements.
+                    </p>
+                  </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Target className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Bulls-eye Center Accuracy</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><Target className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Bulls-eye Center Accuracy</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Hitting the inner 8-pixel core awards double points (+200 PTS), rewarding pinpoint foveal alignment and tight motor stopping power.</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Hitting the inner 8-pixel core awards double points (+200 PTS), rewarding pinpoint foveal alignment and tight motor stopping power.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Competitive Tactical Utility</h4>
+                    <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Competitive Tactical Utility</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">Directly trains opening duel reaction in CS2, Valorant, and Apex Legends where first-bullet headshot precision determines round outcomes.</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Directly trains opening duel reaction in CS2, Valorant, and Apex Legends where first-bullet headshot precision determines round outcomes.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Dynamic Decay Scaling</h4>
+                    <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                        <h4 className="text-xs font-bold text-white">Dynamic Decay Scaling</h4>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">As your score advances past 1,400-point level thresholds, target lifespans decay faster, requiring higher neuromuscular throughput.</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">As your score advances past 1,400-point level thresholds, target lifespans decay faster, requiring higher neuromuscular throughput.</p>
                   </div>
                 </div>
-              </div>
+              )}
             </DrillAccordion>
           </div>
         )}
       </main>
+    </div>
+  );
+}
 
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
+// === Subcomponents ===
+function RuleItem({ num, text, highlight = '', result }) {
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
+        </p>
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
+          {result}
+        </div>
+      </div>
     </div>
   );
 }

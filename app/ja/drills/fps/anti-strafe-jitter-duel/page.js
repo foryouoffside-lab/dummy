@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from '@/app/drills/fps/anti-strafe-jitter-duel/AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -331,10 +332,10 @@ export default function AntiStrafeJitterJaPage() {
           stageCaption: "急激に左右切り返し（レレレ撃ち）を繰り返す近距離ターゲットに照準を維持し続けてください。",
           rulesTitle: "ドリル手順 & スコアリングシステム",
           rulesItems: [
-            { num: "1", text: "照準追従ヒット", highlight: "+10点 / 0.25秒", result: "ターゲットに照準を重ね続ける" },
-            { num: "2", text: "継続トラッキング維持", highlight: "+0.4秒 / 秒", result: "ストリーク倍率を最大3.0倍まで上昇" },
-            { num: "3", text: "レベル進行", highlight: "1,400点ごとに+1レベル", result: "切り返し速度とジッター頻度が段階的上昇" },
-            { num: "4", text: "照準外れペナルティ", highlight: "失敗ペナルティ", result: "1.0秒間外れるとコンボリセット（設定有効時は-0.6秒）" }
+            { num: "1", text: "照準のアライメント", highlight: "+50 PTS (+0.4秒/秒)", result: "×コンボ倍率" },
+            { num: "2", text: "連続トラッキング", highlight: "最大 3.0×", result: "最大倍率" },
+            { num: "3", text: "レベル進行", highlight: "+1 レベル / 1400 PTS", result: "可変ジッター加速" },
+            { num: "4", text: "ロック外れペナルティ", highlight: "1.0秒 ロック外れ", result: "コンボリセット (-0.6秒)" }
           ],
           aboutTitle: "レレレ撃ち 練習について",
           aboutHeading: "リアクティブトラッキング（レレレ撃ち追従）とは？"
@@ -348,6 +349,7 @@ export default function AntiStrafeJitterJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

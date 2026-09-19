@@ -235,12 +235,22 @@ export default function RhythmAnomalyLocalePage() {
         <p dangerouslySetInnerHTML={{ __html: `La vía visual primaria se bifurca en dos subsistemas paralelos: la vía parvocelular (P) y la vía magnocelular (M). La vía magnocelular se compone de neuronas de gran calibre con axones gruesos y fuertemente mielinizados que proyectan a gran velocidad hacia la vía dorsal. Gracias a su latencia mínima, las neuronas M sobresalen en el procesamiento de frecuencias temporales elevadas y desfases luminosos de hasta 40–50 Hz (De Lange, 1958; Holcombe, 2009). Cuando una celda de la cuadrícula pulsa antes que sus vecinas, la diferencia de fase genera una señal de activación rápida en V1 que desencadena un pop-out visual automático (Kelly, 1961; Burr, 1980).` }} />
 
         <h3>Dos techos fisiológicos de la visión temporal: Muestreo rápido vs. Integración cortical</h3>
-        <p dangerouslySetInnerHTML={{ __html: `En un estudio canónico sobre cronometría visual, Holcombe (2009) comprobó que la percepción temporal humana está regida por dos umbrales independientes: un <strong>límite subcortical de muestreo rápido (~40–50 Hz)</strong> en la retina y V1 para resolver oscilaciones lumínicas, y un <strong>límite de integración cortical (~2–5 Hz)</strong>, sustancialmente más lento, para la identificación y enlace de características complejas. Este ejercicio fortalece el puente neurofuncional entre ambos sistemas, exigiendo una verificación atencional descendente casi instantánea tras la detección inicial por la vía magnocelular.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `En una investigación canónica sobre cronometría visual, Holcombe (2009) demostró que la percepción temporal humana está delimitada por dos techos fisiológicos claramente diferenciados:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Límite subcortical de muestreo rápido (~40–50 Hz):</strong> Las células ganglionares magnocelulares retinianas y las neuronas de V1 resuelven el contraste temporal y el parpadeo a tasas superiores a 40 Hz (De Lange, 1958; Kelly, 1961).
+          </li>
+          <li>
+            <strong>Límite cortical de enlace consciente (~2–5 Hz):</strong> La identificación semántica consciente y el ligamiento de características complejas exigen bucles de retroalimentación corticales recurrentes que operan a solo 2 a 5 ciclos por segundo (Holcombe, 2009).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `Rhythm Anomaly entrena deliberadamente la conexión funcional entre ambos sistemas: el usuario debe valerse de la sensibilidad magnocelular temprana para aislar el candidato anómalo y desplegar de inmediato una confirmación atencional descendente (top-down) antes de que concluya el ciclo de fase.` }} />
 
         <h3>Ventanas de Integración Temporal y Ruido de Entropía</h3>
         <p dangerouslySetInnerHTML={{ __html: `El sistema visual promedia la luz en intervalos de entre 30 y 100 milisegundos (Burr, 1980; Woods et al., 2015). Los eventos que ocurren dentro del mismo intervalo se fusionan perceptivamente. Los destellos estocásticos de entropía del drill inyectan ruido no periódico en esta ventana, obligando al cerebro a distinguir variaciones sinusoidales rítmicas de picos aislados de luminancia (Burr, 1980; Posner, 1980).` }} />
 
         <h3>Estándares de Rendimiento Temporal (Matriz Pulsante 45s)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `A partir de datos psicofísicos acumulados en series de 45 segundos sobre la cuadrícula de 36 celdas, el rendimiento de discriminación temporal se clasifica en cinco niveles de agudeza cronométrica:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

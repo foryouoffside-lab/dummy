@@ -1,5 +1,6 @@
 import VerticalAirTrackClient from '@/app/drills/fps/vertical-air-track/VerticalAirTrackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -345,8 +346,10 @@ export default function VerticalAirTrackPageJa() {
           statPeakLevel: "最高到達レベル",
           startTitle: "Vertical Air-Track",
           startSubtitle: "高精度RAWマウス入力 • エンドレス難易度進行",
-          pausedTitle: "ゲーム一時停止",
-          pausedSubtitle: "クリックで再開 — マウスカーソルが自動ロックされます",
+          startButtonText: "トレーニング開始",
+          playAgainText: "もう一度プレイ",
+          shareText: "スコアを共有",
+          exitText: "終了する",
           stageCaption: "重力加速度に従って放物線を描く空中ターゲットを追従し、滑らかな縦方向のトラッキング精度を養成。",
           rulesTitle: "ドリル操作方法 & スコア計算システム",
           aboutTitle: "垂直 エイム 練習（Vertical Air-Track）について",
@@ -379,13 +382,14 @@ export default function VerticalAirTrackPageJa() {
         }}
       />
       <DrillGuide guide={verticalAirTrackGuide} />
-      <div className="max-w-4xl mx-auto px-4 pb-12">
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills
           currentCategory="fps"
           currentHref="/drills/fps/vertical-air-track"
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

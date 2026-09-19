@@ -2,6 +2,7 @@ import SteadyHandClient from '@/app/drills/motor/precision-control/steady-hand/S
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -335,7 +336,13 @@ const frCopy = {
   shareTitle: 'Partager le Score',
   exitTitle: 'Quitter et Revenir',
   rulesTitle: 'Consignes et Modalités de Score',
-  rule1Text: 'Suivez la ligne cyan',
+  rulesItems: [
+    { num: '1', text: 'Suivez la ligne émeraude', highlight: 'lumineuse avec exactitude', result: 'L\'arrivée réinitialise le temps à 45s' },
+    { num: '2', text: 'Tour validé', highlight: 'Difficulté progressive', result: 'Couloirs plus étroits et virages serrés' },
+    { num: '3', text: 'Touche de paroi', highlight: 'Retour au départ', result: 'Tour invalidé et faute enregistrée' },
+    { num: '4', text: 'Maniement souris', highlight: 'Recommandé sur PC', result: 'Entrée brute 1:1 sans accélération' },
+  ],
+  rule1Text: 'Suivez la ligne émeraude',
   rule1Highlight: 'lumineuse avec exactitude',
   rule1Result: 'L\'arrivée réinitialise le temps à 45s',
   rule2Text: 'Tour validé',
@@ -402,6 +409,7 @@ export default function FrenchSteadyHandPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" locale="fr" />
       </div>
+      <DrillFooter />
     </>
   );
 }

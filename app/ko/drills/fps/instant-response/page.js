@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "FPS 반응속도 테스트 – 에임 반사신경·클릭 속도 | SkillDrills",
@@ -331,10 +332,10 @@ export default function InstantResponseKoPage() {
           stageCaption: "중앙 목표가 녹색으로 번쩍이는 즉시 클릭하세요. 어두운 페인트 자극을 걸러내는 격발 규율이 필요합니다.",
           rulesTitle: "훈련 규칙 & 점수 체계",
           rulesItems: [
-            { num: "1", text: "플래시 반응 명중", highlight: "+100점", result: "플래시 점등 즉시 신속하게 클릭" },
-            { num: "2", text: "스피드 보너스 체계", highlight: "최대 +150점", result: "150ms 미만 초고속 반응" },
-            { num: "3", text: "레벨 난이도 진행", highlight: "1,400점당 +1레벨", result: "플래시 노출 시간이 점진적으로 축소" },
-            { num: "4", text: "페인트 & 조기 격발", highlight: "실패 패널티", result: "콤보 초기화 (시간 패널티 설정 시 -0.8초)" }
+            { num: "1", text: "플래시 반응 명중", highlight: "+100 PTS (+0.6s)", result: "×콤보 배율" },
+            { num: "2", text: "스피드 보너스 체계", highlight: "150ms 미만 적중", result: "최대 +150 PTS" },
+            { num: "3", text: "레벨 난이도 진행", highlight: "+1 레벨 / 1400 PTS", result: "적응형 노출시간" },
+            { num: "4", text: "조기 격발 / 빗맞힘", highlight: "실패 페널티", result: "콤보 리셋 (-0.8s)" }
           ],
           aboutTitle: "FPS 반응속도 테스트 정보",
           aboutHeading: "FPS 반응속도 훈련이란 무엇인가요?"
@@ -348,6 +349,7 @@ export default function InstantResponseKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

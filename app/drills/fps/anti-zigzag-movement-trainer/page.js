@@ -1,5 +1,6 @@
 import AntiZigzagClient from './AntiZigzagClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -323,8 +324,18 @@ export default function AntiZigzagPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <AntiZigzagClient />
+      <AntiZigzagClient
+        copy={{
+          rulesItems: [
+            { num: "1", text: "Tracking Alignment", highlight: "+50 PTS (+0.4s/s)", result: "×Combo Mult" },
+            { num: "2", text: "Target Elimination", highlight: "+25 Bonus PTS", result: "Reset HP & Respawn" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Zigzag" },
+            { num: "4", text: "Target Escape", highlight: "Lifespan Expiry", result: "Resets Combo (-0.6s)" }
+          ]
+        }}
+      />
       <DrillGuide guide={antiZigzagGuide} />
+      <DrillFooter />
     </>
   );
 }

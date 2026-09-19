@@ -1,5 +1,6 @@
 import AntiStrafeJitterClient from '@/app/drills/fps/anti-strafe-jitter-duel/AntiStrafeJitterClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -302,10 +303,10 @@ export default function AntiStrafeJitterPtPage() {
     stageCaption: "Mantenha o retículo sobre o alvo em strafes rápidos e imprevisíveis. Relaxe a mão para inversões suaves!",
     rulesTitle: "Regras de Treino e Pontuação",
     rulesItems: [
-      { num: "1", text: "Contato com Alvo", highlight: "+10 PTS por tick", result: "Manutenção contínua da mira" },
-      { num: "2", text: "Inversão de Sentido", highlight: "Tracking Reativo", result: "Correção sensorial rápida" },
-      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível a cada 1.400 PTS", result: "Maior frequência e velocidade" },
-      { num: "4", text: "Estabilidade de Mira", highlight: "Sem Death Grip", result: "Deslizamento fluido e constante" }
+      { num: "1", text: "Alinhamento de Mira", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+      { num: "2", text: "Combo Contínuo", highlight: "Até 3.0×", result: "Multiplicador Máx" },
+      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Jitter Adaptativo" },
+      { num: "4", text: "Penalidade Fora do Alvo", highlight: "1.0s Fora do Alvo", result: "Reinicia Combo (-0.6s)" }
     ],
     aboutTitle: "Sobre o Tracking Reativo Anti-Strafe"
   };
@@ -345,6 +346,7 @@ export default function AntiStrafeJitterPtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,7 @@ import TargetPrioritizationClient from './TargetPrioritizationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import DrillFooter from '@/components/drill/DrillFooter';
 export const metadata = {
   title: "Target Prioritization Aim Trainer – Threat Aim | SkillDrills",
   description: "Free target prioritization aim trainer. Train threat evaluation, attention filtering and shot inhibition against mixed friendly and enemy targets.",
@@ -323,10 +324,37 @@ export default function TargetPrioritizationPage() {
       <TargetPrioritizationClient
         copy={{
           h1Keyword: "Target Prioritization Aim Trainer",
-          h1Suffix: " - Threat Assessment & Selection"
+          h1Suffix: " - Threat Assessment & Selection",
+          subtitle: "Train threat evaluation, cognitive filtering, and shot inhibition with real-time feedback.",
+          statScore: "Score",
+          statTime: "Time",
+          statAccuracy: "Accuracy",
+          statBestScore: "Best Score",
+          statThreatsCleared: "Threats Cleared",
+          statMaxCombo: "Max Combo",
+          statPeakLevel: "Peak Level",
+          startTitle: "Target Prioritization",
+          startSubtitle: "Threat Assessment & Cognitive Filtering • Endless Level Progression",
+          getReady: "GET READY",
+          toggleFlash: "Toggle Miss Flash",
+          toggleSound: "Toggle Sound",
+          pausedTitle: "Game Paused",
+          pausedSubtitle: "Click to resume — cursor lock will re-engage.",
+          stageCaption: "Eliminate highest-threat red targets first and intermediate yellow targets while holding fire on green friendlies.",
+          rulesTitle: "Drill Instructions & Scoring System",
+          rulesItems: [
+            { num: "1", text: "High Threat Target", highlight: "Red (+100 PTS / +0.4s)", result: "Must be eliminated first" },
+            { num: "2", text: "Medium Threat Target", highlight: "Yellow (+50 PTS / +0.4s)", result: "Escalates to Red after timer" },
+            { num: "3", text: "Friendly Unit", highlight: "Green (HOLD FIRE)", result: "Miss or friendly hit resets combo" },
+            { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Scaling" }
+          ],
+          aboutTitle: "About Target Prioritization",
+          aboutHeading: "What Is Target Prioritization?",
+          aboutText: "Target prioritization is choosing which threat to shoot while holding fire on everything else. Stopping an action you have already started is its own process, racing the one that launched it (Logan & Cowan, 1984) — which is why cancelling a shot is harder than taking one."
         }}
       />
       <DrillGuide guide={targetPrioritizationGuide} />
+      <DrillFooter />
     </>
   );
 }

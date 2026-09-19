@@ -1,6 +1,7 @@
 import TargetSwitchingSwarmClient from '@/app/drills/fps/target-switching-swarm/TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -334,6 +335,7 @@ export default function TargetSwitchingSwarmPageKo() {
         copy={{
           h1Keyword: "타겟 스위칭 에임",
           h1Suffix: " – 브라우저 무료 FPS 다중 타겟 전환 연습",
+          subtitle: "지체 없는 연속 플릭 전환과 스프레이 전환, 다중 타겟 시각적 인덱싱을 훈련하세요.",
           statScore: "점수",
           statTime: "남은 시간",
           statAccuracy: "적중률",
@@ -343,36 +345,14 @@ export default function TargetSwitchingSwarmPageKo() {
           statPeakLevel: "최고 레벨",
           startTitle: "Target Switching Swarm",
           startSubtitle: "초정밀 RAW 마우스 입력 • 무한 난이도 진행",
-          pausedTitle: "게임 일시정지",
-          pausedSubtitle: "클릭하면 게임이 재개되며 마우스가 다시 잠깁니다",
-          stageCaption: "타이머 링이 사라지기 전에 화면 곳곳에 생성되는 타겟을 빠른 플릭으로 연속 격추하세요.",
+          stageCaption: "타이머가 만료되기 전에 화면 곳곳에 생성되는 타겟을 빠른 플릭으로 연속 격추하세요.",
           rulesTitle: "드릴 조작법 & 점수 획득 규칙",
           aboutTitle: "타겟 스위칭(Target Switching)에 대하여",
           rulesItems: [
-            {
-              num: "1",
-              text: "타겟 즉시 격추",
-              highlight: "+100점 / +0.35초",
-              result: "타이머 링이 소진되기 전에 시안색 타겟 클릭"
-            },
-            {
-              num: "2",
-              text: "무지체 스위칭",
-              highlight: "킬 확인 딜레이 제거",
-              result: "격추 직후 망설임 없이 다음 인접 표적으로 즉시 전환"
-            },
-            {
-              num: "3",
-              text: "미스 및 타임아웃 페널티",
-              highlight: "콤보 초기화",
-              result: "클릭 빗나감 또는 시간 초과 시 콤보 배율 리셋"
-            },
-            {
-              num: "4",
-              text: "동적 스와름 진행",
-              highlight: "점진적 난이도 상승",
-              result: "점수가 누적될수록 타겟 생성 빈도 및 축소 속도 가속"
-            }
+            { num: "1", text: "타겟 즉시 격추", highlight: "시안색 타겟 (+100점 / +0.35초)", result: "+100점 / +0.35초" },
+            { num: "2", text: "동적 스와름 전환", highlight: "즉각 리스폰", result: "지속 스와름" },
+            { num: "3", text: "실패 페널티", highlight: "빗나감 / 타이머 초과", result: "콤보 초기화" },
+            { num: "4", text: "레벨 난이도 상승", highlight: "+1 레벨 / 2100점", result: "소형화 & 가속" }
           ]
         }}
       />
@@ -384,6 +364,7 @@ export default function TargetSwitchingSwarmPageKo() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

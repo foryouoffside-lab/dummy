@@ -2,6 +2,7 @@ import RapidTappingClient from '@/app/drills/motor/movement-speed/rapid-tapping/
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -333,6 +334,33 @@ const guideProps = {
   },
 };
 
+const jaCopy = {
+  title: "連打測定・CPSテスト",
+  desc: "1秒あたりのクリック数（CPS）を測定するオンライン連打テスト。標準的な1本指の連打は秒間約5〜7回（ハルステッド指タッピング基準、50〜55回/10秒）であり、ネット上で見られる10+ CPS以上の高記録はジッタークリックやバタフライクリックなどの特殊技術によるものです。",
+  score: "スコア",
+  timeLeft: "残り時間",
+  cpsRate: "現在CPS",
+  bestScore: "ハイスコア",
+  startButtonText: "訓練開始",
+  startSubtitle: "CPSクリック速度トレーナー • ハードウェア直接生入力",
+  getReady: "準備",
+  playAgain: "もう一度プレイ",
+  shareTitle: "スコアを共有",
+  exitTitle: "終了",
+  avgCps: "平均CPS",
+  totalClicks: "総クリック数",
+  maxDifficulty: "最高難易度",
+  peakCps: "ピークCPS",
+  newBest: "新記録",
+  rulesTitle: "訓練手順とスコアシステム",
+  rulesItems: [
+    { num: "1", text: "素早い標的打鍵", highlight: "エメラルド標的", result: "クリックで半径拡大＆縮小防止" },
+    { num: "2", text: "得点獲得基準", highlight: "10クリックごとに+1pt", result: "セッションスコアとして加算" },
+    { num: "3", text: "動的縮小加速", highlight: "スコア比例加速", result: "指の速度と筋持久力の限界に挑戦" },
+    { num: "4", text: "連打テクニック", highlight: "ジッター / バタフライ / 生打", result: "物理的な打鍵速度を最大化" }
+  ],
+};
+
 export default function JapaneseRapidTappingPage() {
   return (
     <>
@@ -360,11 +388,12 @@ export default function JapaneseRapidTappingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <RapidTappingClient />
+      <RapidTappingClient copy={jaCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/rapid-tapping" />
+        <RelatedDrills currentCategory="motor" currentHref="/ja/drills/motor/movement-speed/rapid-tapping" />
       </div>
+      <DrillFooter />
     </>
   );
 }

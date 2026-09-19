@@ -1,6 +1,7 @@
 import ReactionTimeTestWrapper from './ReactionTimeTestWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -371,6 +372,7 @@ export default function ReactionTimeTestPage() {
       />
       <ReactionTimeTestWrapper copy={{ title: 'Reaction Time Test' }} />
       <DrillGuide guide={reactionGuide} />
+      <DrillFooter />
     </>
   );
 }

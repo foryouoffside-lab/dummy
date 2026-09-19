@@ -2,6 +2,7 @@ import FineMotorClient from '@/app/drills/motor/precision-control/tracing/Tracin
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -311,6 +312,29 @@ const guideProps = {
   },
 };
 
+const frCopy = {
+  title: "Jeu de Tracé à la Souris",
+  subtitle: "Suivi Continu Entrée Brute • Chrono 45s",
+  startButtonText: "Démarrer l'Entraînement",
+  trainAgain: "Recommencer",
+  shareTitle: "Partager le Score",
+  exitTitle: "Quitter",
+  statFlowScore: "Score de Flux",
+  statTimeLeft: "Temps Restant",
+  statFlowIntegrity: "Intégrité du Flux",
+  statBestScore: "Meilleur Score",
+  maxStreakLabel: "Série Max d'Images",
+  peakFlowLabel: "Pic d'État de Flux",
+  bestScoreLabel: "Record Personnel",
+  rulesTitle: "Instructions de l'Exercice et Système de Points",
+  rulesItems: [
+    { num: "1", text: "Tracer la Trajectoire", highlight: "Onde Émeraude", result: "+1 PT / image sur la trajectoire" },
+    { num: "2", text: "Vitesse Progressive", highlight: "Onde Dynamique", result: "2,2 → 3,8 px/img sur 45s" },
+    { num: "3", text: "Intégrité du Flux", highlight: "Super Flux", result: "4s de verrouillage = +5 Bonus" },
+    { num: "4", text: "Suivi Précis", highlight: "Exclusif Bureau", result: "Entrée souris brute 1:1" }
+  ],
+};
+
 export default function FrenchTracingPage() {
   return (
     <>
@@ -338,11 +362,12 @@ export default function FrenchTracingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FineMotorClient copy={{ title: "Jeu de Tracé à la Souris" }} />
+      <FineMotorClient copy={frCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/tracing" locale="fr" />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,6 +1,8 @@
 import AimTrainerClient from '@/app/drills/motor/hand-eye-coordination/aim-trainer/AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
+import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -254,6 +256,38 @@ export default function AimTrainerKoreanPage() {
           title: '에임 연습 (Aim Trainer)',
           subtitle: '동적 타겟 에임・정밀 클릭 타이밍・무제한 레벨 스케일링',
           caption: '화면에 나타나 축소되는 타겟을 소멸하기 전 신속하고 정확하게 클릭하세요. 피츠의 법칙 기반 동적 정밀도 훈련.',
+          startButtonText: '훈련 시작',
+          playAgainText: '다시 도전',
+          shareText: '결과 공유',
+          exitText: '나가기',
+          rulesTitle: '드릴 조작법 & 점수 획득 규칙',
+          aboutTitle: '에임 연습(Aim Trainer Elite)에 대하여',
+          rulesItems: [
+            {
+              num: "1",
+              text: "타겟 명중",
+              highlight: "+100점 / +0.6초",
+              result: "동적 이동 타겟 신속 포착 및 격발"
+            },
+            {
+              num: "2",
+              text: "연속 콤보",
+              highlight: "최대 3.0배 배율",
+              result: "연속 클린 히트로 점수 배율 극대화"
+            },
+            {
+              num: "3",
+              text: "레벨 상승",
+              highlight: "1750점마다 레벨업",
+              result: "타겟 축소 및 이동 속도 가속화"
+            },
+            {
+              num: "4",
+              text: "미스 및 타임아웃",
+              highlight: "콤보 리셋",
+              result: "페널티 활성화 시 -0.8초 차감"
+            }
+          ]
         }}
       />
 
@@ -354,6 +388,9 @@ export default function AimTrainerKoreanPage() {
         </div>
 
         <h3>에임 능력을 비약적으로 끌어올리는 4가지 실천법</h3>
+        <p>
+          표적 획득 잠복기를 체계적으로 단축하고 미세 플릭 정확도를 최고조로 끌어올리기 위해, 훈련 중 다음 네 가지 근거 중심의 신경운동 프로토콜을 적용하십시오:
+        </p>
         <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
           <li>
             <strong>초기 탄도 임펄스 과감화 (Woodworth, 1899):</strong> 타겟까지의 거리 대부분을 주저함 없이 단숨에 도약하세요. 플릭 도중 멈칫거리지 않고 한 번의 호흡으로 목표점 부근까지 손을 밀어야 합니다.
@@ -433,6 +470,14 @@ export default function AimTrainerKoreanPage() {
           </div>
         </div>
       </DrillGuide>
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/aim-trainer"
+          locale="ko"
+        />
+      </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from '@/app/drills/reaction-speed/reaction-time-test/ReactionTimeTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -248,6 +249,38 @@ const faqSchema = {
         text: 'Sim! A ferramenta é 100% responsiva para telas touch em smartphones e tablets, operando em modo retrato ou paisagem sem downloads.',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'Este teste de tempo de reação é totalmente gratuito?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sim, todos os testes e ferramentas de treino cognitivo no SkillDrills são 100% gratuitos, sem necessidade de cadastro, sem download de aplicativos e sem anúncios intrusivos.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Atletas de esportes tradicionais podem utilizar este teste?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sim. Pilotos de automobilismo (como Fórmula 1), boxeadores, velocistas e atletas de esportes de raquete (tênis e tênis de mesa) utilizam testes de reação visual para aprimorar o recrutamento neuromuscular de fibras de contração rápida.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Devo focar a visão no centro ou utilizar a visão periférica?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Recomenda-se manter o olhar relaxado ("foco suave"). Isso permite que os bastonetes da retina periférica detectem o clarão ou a mudança visual instantaneamente, enviando o estímulo ao córtex motor com menor esforço de acomodação ocular.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Com que frequência devo testar e treinar minha velocidade de reação?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Uma sessão diária de 5 a 10 minutos é ideal. Ela funciona como um ótimo termômetro do seu nível de alerta e disposição do dia, além de servir de aquecimento antes de partidas ranqueadas.',
+      },
+    },
   ],
 };
 
@@ -342,6 +375,7 @@ export default function PortugueseReactionTimeTestPage() {
       />
       <ReactionTimeTestWrapper copy={{ title: 'Teste de Reflexo' }} />
       <DrillGuide guide={reactionGuide} />
+      <DrillFooter />
     </>
   );
 }

@@ -4,8 +4,7 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  AlertCircle, ArrowRight, LogOut, RefreshCw, Route, Share2,
-  TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
+  Route, Share2, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
@@ -13,15 +12,25 @@ import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
 import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
-import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
-import DrillFooter from '@/components/drill/DrillFooter';
+import { createHitRing, drawHitRings } from '@/lib/canvasFx';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import DrillResultCard from '@/components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
 
 const DRILL_DURATION = 45; // Fixed 45-second session
+
+// ============================================================
+// ACCORDION DATA
+// ============================================================
+const RULES_ITEMS = [
+  { num: "1", text: "Trace Corridor", highlight: "Lap Clear", result: "+45s Reset" },
+  { num: "2", text: "Reach Goal", highlight: "Endless Scaling", result: "Narrows Path" },
+  { num: "3", text: "Wall Collision", highlight: "Mistake", result: "Resets to Start" },
+  { num: "4", text: "Mouse Input", highlight: "Desktop", result: "1:1 Raw Tracking" }
+];
 
 // ============================================================
 // MAIN COMPONENT
@@ -75,7 +84,10 @@ export default function SteadyHandClient({ copy = null }) {
     laps: 0,
     mistakes: 0,
     maxStreak: 0,
-    screenShake: 0
+    screenShake: 0,
+    particles: [],
+    hitRings: [],
+    hitMarkers: []
   });
 
   // === Initialization & Local Storage ===
@@ -95,6 +107,44 @@ export default function SteadyHandClient({ copy = null }) {
     setTimeout(() => {
       setFlashes((prev) => prev.filter((f) => f.id !== id));
     }, 150);
+  }, []);
+
+  const createHitMarker = useCallback((x, y) => {
+    engine.current.hitMarkers.push({ x, y, life: 1.0 });
+  }, []);
+
+  const createGoalExplosion = useCallback((x, y, isHighCombo) => {
+    for (let i = 0; i < 14; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 4.0;
+      engine.current.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.9,
+        size: 2.0 + Math.random() * 2.0,
+        color: isHighCombo ? '#34d399' : '#10b981'
+      });
+    }
+    createHitRing(engine.current.hitRings, x, y, isHighCombo ? '#34d399' : '#10b981', 50);
+    createHitMarker(x, y);
+  }, [createHitMarker]);
+
+  const createDeviationExplosion = useCallback((x, y) => {
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.0 + Math.random() * 3.5;
+      engine.current.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.7,
+        size: 2.0,
+        color: '#ef4444'
+      });
+    }
   }, []);
 
   const getGradeForLaps = (laps, mistakes) => {
@@ -187,7 +237,10 @@ export default function SteadyHandClient({ copy = null }) {
       streak: 0,
       score: 0,
       timeLeft: DRILL_DURATION,
-      laps: 0, mistakes: 0, maxStreak: 0, screenShake: 0
+      laps: 0, mistakes: 0, maxStreak: 0, screenShake: 0,
+      particles: [],
+      hitRings: [],
+      hitMarkers: []
     };
 
     if (!canvasRef.current) return;
@@ -224,20 +277,14 @@ export default function SteadyHandClient({ copy = null }) {
   }, [startActualDrill]);
 
   const handleExitDrill = useCallback(() => {
-    markIntentionalExit();
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
     setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
     setGameState('start');
   }, []);
-
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
 
   const shareScore = useCallback(async () => {
     const url = copy?.shareUrl || 'https://skilldrills.online/drills/motor/precision-control/steady-hand';
@@ -296,10 +343,35 @@ export default function SteadyHandClient({ copy = null }) {
   }, [gameState, pointerLocked, endGame]);
 
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked || isTouchOnly);
+      if (gameState === 'playing' && !isLocked && !isTouchOnly) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      const isFs = Boolean(document.fullscreenElement);
+      setIsFullscreen(isFs);
+      if (!isFs && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('pointerlockchange', handlePointerLockChange);
-    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isTouchOnly, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -346,7 +418,9 @@ export default function SteadyHandClient({ copy = null }) {
         animationRef.current = requestAnimationFrame(loop);
         return;
       }
+      const deltaTimeMs = time - lastTime;
       lastTime = time;
+      const dt = Math.min(deltaTimeMs / 1000, 0.1);
       const e = engine.current;
 
       if (gameState === 'playing' && pointerLocked && e.path.length > 0) {
@@ -386,6 +460,8 @@ export default function SteadyHandClient({ copy = null }) {
             e.screenShake = 15;
             
             triggerRedFlash();
+            drillAudio.playPenalty();
+            createDeviationExplosion(ch.x, ch.y);
             
             setFlashBg('red');
             setTimeout(() => setFlashBg(null), 100);
@@ -404,6 +480,8 @@ export default function SteadyHandClient({ copy = null }) {
           e.path = generatePath(cvs.width, cvs.height, e.streak);
           
           setTimeLeft(e.timeLeft);
+          drillAudio.playHit();
+          createGoalExplosion(ch.x, ch.y, e.streak >= 10);
           
           setFlashBg('green');
           setTimeout(() => setFlashBg(null), 100);
@@ -426,19 +504,32 @@ export default function SteadyHandClient({ copy = null }) {
       ctx.fillStyle = '#050508';
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-      ctx.strokeStyle = 'rgba(6, 182, 212, 0.03)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
       ctx.lineWidth = 1; 
       for(let i = 0; i < cvs.width; i+= 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
       for(let j = 0; j < cvs.height; j+= 50) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
 
-      ctx.fillStyle = 'rgba(0, 255, 136, 0.1)';
+      // Start zone (0 to 100)
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
       ctx.fillRect(0, 0, 100, cvs.height);
-      ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-      ctx.fillRect(cvs.width - 100, 0, 100, cvs.height);
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(0, 0, 100, cvs.height);
 
+      // Goal zone (cvs.width - 100 to cvs.width)
+      const endZoneX = cvs.width - 100;
+      const isHighCombo = e.streak >= 10;
+      ctx.fillStyle = isHighCombo ? 'rgba(52, 211, 153, 0.12)' : 'rgba(16, 185, 129, 0.08)';
+      ctx.fillRect(endZoneX, 0, 100, cvs.height);
+      ctx.strokeStyle = isHighCombo ? 'rgba(52, 211, 153, 0.35)' : 'rgba(16, 185, 129, 0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(endZoneX, 0, 100, cvs.height);
+
+      // Tactical Emerald Path
       if (e.path.length > 0 && (gameState === 'playing' || gameState === 'start')) {
+        const pathColor = isHighCombo ? '#34d399' : '#10b981';
         ctx.beginPath();
-        ctx.strokeStyle = '#06b6d4';
+        ctx.strokeStyle = pathColor;
         ctx.lineWidth = 4;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
@@ -446,23 +537,82 @@ export default function SteadyHandClient({ copy = null }) {
         for (let i = 1; i < e.path.length; i++) {
           ctx.lineTo(e.path[i].x, e.path[i].y);
         }
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#06b6d4';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = pathColor;
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
 
+      // Render Particles
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size || 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Draw Hit Rings
+      drawHitRings(ctx, e.hitRings, dt);
+
+      // Draw Hit Markers
+      ctx.lineWidth = 2.0;
+      for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
+        const hm = e.hitMarkers[i];
+        hm.life -= dt * 4.5;
+        if (hm.life <= 0) { e.hitMarkers.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, hm.life);
+        ctx.strokeStyle = '#ffffff';
+        const s = 6 + (1 - hm.life) * 8;
+        ctx.beginPath();
+        ctx.moveTo(hm.x - s, hm.y - s); ctx.lineTo(hm.x + s, hm.y + s);
+        ctx.moveTo(hm.x + s, hm.y - s); ctx.lineTo(hm.x - s, hm.y + s);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Tactical Pro White Crosshair
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#00ff88' : '#f59e0b';
-        ctx.fillStyle = activeColor;
-        ctx.beginPath(); 
-        ctx.arc(ch.x, ch.y, 4, 0, Math.PI * 2); 
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+
+        // Outer reticle circle
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Reticle cross lines with center gap
+        ctx.lineWidth = 1.5;
+        const gap = 5;
+        ctx.beginPath();
+        ctx.moveTo(ch.x, ch.y - 14); ctx.lineTo(ch.x, ch.y - gap);
+        ctx.moveTo(ch.x, ch.y + 14); ctx.lineTo(ch.x, ch.y + gap);
+        ctx.moveTo(ch.x - 14, ch.y); ctx.lineTo(ch.x - gap, ch.y);
+        ctx.moveTo(ch.x + 14, ch.y); ctx.lineTo(ch.x + gap, ch.y);
+        ctx.stroke();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
-      animationRef.current = requestAnimationFrame(loop);
+      if (gameState !== 'gameOver') {
+        animationRef.current = requestAnimationFrame(loop);
+      }
     };
 
     animationRef.current = requestAnimationFrame(loop);
@@ -471,7 +621,7 @@ export default function SteadyHandClient({ copy = null }) {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, generatePath, resetCrosshairToStart, triggerRedFlash]);
+  }, [gameState, pointerLocked, generatePath, resetCrosshairToStart, triggerRedFlash, createGoalExplosion, createDeviationExplosion]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -575,23 +725,6 @@ export default function SteadyHandClient({ copy = null }) {
             </div>
           )}
 
-          {/* Paused Overlay */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                if (canvasRef.current) canvasRef.current.requestPointerLock(); 
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-cyan-500 mx-auto mb-4" />
-                <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-gray-300 font-medium">{copy?.pausedPrompt || "Click anywhere on the screen to lock cursor and resume."}</p>
-              </div>
-            </div>
-          )}
-
           {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
@@ -603,10 +736,10 @@ export default function SteadyHandClient({ copy = null }) {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Route}
-              accent="cyan"
-              title={copy?.startTitle || "Steady Hand Circuit"}
-              subtitle={copy?.startSubtitle || "Motor Precision & Line Tracking • 45s Timer"}
-              startButtonText={copy?.startBtn || "Start Drill"}
+              accent="emerald"
+              title={copy?.startTitle || copy?.title || "Steady Hand Circuit"}
+              subtitle={copy?.startSubtitle || copy?.subtitle || "Motor Precision & Line Tracking • 45s Timer"}
+              startButtonText={copy?.startBtn || copy?.startButtonText || "Start Drill"}
               isTouchOnlyDevice={false}
               onStart={startGame}
             />
@@ -617,80 +750,32 @@ export default function SteadyHandClient({ copy = null }) {
             <DrillCountdown value={countdownValue} subtitle={copy?.countdownSubtitle || "GET READY"} />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Standardized DrillResultCard */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    {copy?.newBest || "NEW BEST"}
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {analytics.laps}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">{copy?.statLaps || "Laps Cleared"}</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.laps}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.statLaps || "Laps Cleared"}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-red-400">{analytics.mistakes}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.errorsLabel || "Off-Path Errors"}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-amber-400">{analytics.maxStreak}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.maxStreakLabel || "Max Streak"}</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-cyan-400">{analytics.speedLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">{copy?.difficultyLabel || "Difficulty Level"}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={startGame}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> {copy?.trainAgain || "Train Again"}
-                  </button>
-                  <button
-                    onClick={shareScore}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title={copy?.shareTitle || "Share Score"}
-                  >
-                    <Share2 className="w-4 h-4 text-cyan-400" />
-                  </button>
-                  <button
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title={copy?.exitTitle || "Exit & Return"}
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={analytics.laps}
+              isNewBest={isNewBest}
+              playAgainText={copy?.trainAgain || copy?.playAgainText || "Train Again"}
+              shareText={copy?.shareTitle || copy?.shareText || "Share Score"}
+              exitText={copy?.exitTitle || copy?.exitText || "Exit"}
+              stats={[
+                { value: analytics.laps, label: copy?.statLaps || "Laps Cleared" },
+                { value: analytics.mistakes, label: copy?.errorsLabel || "Off-Path Errors" },
+                { value: `${analytics.maxStreak}x`, label: copy?.maxStreakLabel || "Max Streak" },
+                { value: `Lv. ${analytics.speedLevel}`, label: copy?.difficultyLabel || "Difficulty Level" },
+              ]}
+              onPlayAgain={startGame}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
               title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
@@ -698,10 +783,9 @@ export default function SteadyHandClient({ copy = null }) {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text={copy?.rule1Text || "Trace the exact"} highlight={copy?.rule1Highlight || "glowing cyan line"} result={copy?.rule1Result || "Goal Clear resets timer to 45s"} />
-                <RuleItem num="2" text={copy?.rule2Text || "Reaching Goal"} highlight={copy?.rule2Highlight || "Endless scaling"} result={copy?.rule2Result || "More segments & jagged"} />
-                <RuleItem num="3" text={copy?.rule3Text || "Off-Path Reset"} highlight={copy?.rule3Highlight || "Line Deviation"} result={copy?.rule3Result || "Resets position to start"} />
-                <RuleItem num="4" text={copy?.rule4Text || "Strict Tracking"} highlight={copy?.rule4Highlight || "Desktop Exclusive"} result={copy?.rule4Result || "1:1 Raw Mouse Input"} />
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
+                ))}
               </div>
             </DrillAccordion>
 
@@ -714,7 +798,7 @@ export default function SteadyHandClient({ copy = null }) {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Route className="w-4 h-4 text-cyan-400" /> {copy?.aboutHeading || "Continuous Path Precision & Hand Tremor Suppression"}
+                    <Route className="w-4 h-4 text-emerald-400" /> {copy?.aboutHeading || "Continuous Path Precision & Hand Tremor Suppression"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
                     {copy?.aboutP1 || (
@@ -730,24 +814,15 @@ export default function SteadyHandClient({ copy = null }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">{copy?.aboutCard1Title || "Target Audience"}</h4>
-                    </div>
+                    <h4 className="text-xs font-bold text-white mb-1.5">{copy?.aboutCard1Title || "Target Audience"}</h4>
                     <p className="text-xs text-gray-300 leading-relaxed">{copy?.aboutCard1Text || "Esports athletes, digital artists, graphic designers, surgeons, and individuals seeking to improve hand stability and reduce cursor jitter."}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">{copy?.aboutCard2Title || "Mechanical Benefits"}</h4>
-                    </div>
+                    <h4 className="text-xs font-bold text-white mb-1.5">{copy?.aboutCard2Title || "Mechanical Benefits"}</h4>
                     <p className="text-xs text-gray-300 leading-relaxed">{copy?.aboutCard2Text || "Fine motor coordination, continuous hand steadiness, smooth velocity regulation, and antagonist muscle stabilization."}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">{copy?.aboutCard3Title || "Dynamic Tightening"}</h4>
-                    </div>
+                    <h4 className="text-xs font-bold text-white mb-1.5">{copy?.aboutCard3Title || "Dynamic Tightening"}</h4>
                     <p className="text-xs text-gray-300 leading-relaxed">{copy?.aboutCard3Text || "Corridor width contracts dynamically while vertex angles become sharper, demanding rigorous micro-steering discipline."}</p>
                   </div>
                 </div>
@@ -756,52 +831,26 @@ export default function SteadyHandClient({ copy = null }) {
           </div>
         )}
 
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
 }
 
 // === Subcomponents ===
-
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black text-cyan-400"> {highlight}</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-cyan-400 whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function RelatedDrillCard({ title, desc, href }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-cyan-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-cyan-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-cyan-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

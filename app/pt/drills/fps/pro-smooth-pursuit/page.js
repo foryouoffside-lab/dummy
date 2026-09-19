@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Treino de Tracking Suave – Mira em Curva | SkillDrills",
@@ -249,10 +250,10 @@ export default function ProSmoothPursuitPage() {
     stageCaption: "Acompanhe continuamente o alvo em movimento oscilatório pelas curvas suaves da tela sem perder o contato visual.",
     rulesTitle: "Instruções do Treino e Sistema de Pontos",
     rulesItems: [
-      { num: "1", text: "Alinhar Mira no Alvo", highlight: "+10 pts/segundo", result: "Rastreamento contínuo sobre a esfera" },
-      { num: "2", text: "Multiplicador de Combo", highlight: "até 5x bônus", result: "Escala mantendo contato contínuo na trajetória" },
-      { num: "3", text: "Subida de Nível", highlight: "a cada 1.500 pontos", result: "Acelera as oscilações e reduz o alvo" },
-      { num: "4", text: "Perda de Contato", highlight: "Reseta Combo", result: "Sair do alvo interrompe o multiplicador imediatamente" }
+      { num: "1", text: "Rastreamento no Alvo", highlight: "+50 PTS (+0.4s/s)", result: "×Mult de Combo" },
+      { num: "2", text: "Sequência Contínua", highlight: "Até 3.0×", result: "Multiplicador Máx" },
+      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Curvas Adaptativas" },
+      { num: "4", text: "Perda de Contato", highlight: "1.0s Fora do Alvo", result: "Reset de Combo (-0.6s)" }
     ],
     aboutTitle: "Sobre o Treinador de Tracking Suave",
     aboutHeading: "O que é o Rastreamento Suave (Smooth Pursuit)?",
@@ -370,6 +371,7 @@ export default function ProSmoothPursuitPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

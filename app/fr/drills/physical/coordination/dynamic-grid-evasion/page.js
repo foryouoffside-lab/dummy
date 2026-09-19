@@ -2,6 +2,7 @@ import DynamicGridEvasionClient from '@/app/drills/physical/coordination/dynamic
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // RECHERCHE DE MOTS-CLÉS NATIFS (SERP FRANCE / FR-FR)
@@ -322,7 +323,10 @@ const gridGuide = {
     "Gardez les yeux détendus au centre afin de surveiller les signaux lumineux par vision périphérique.",
     "Glissez promptement le curseur vers la case sûre la plus proche avant l'explosion rouge.",
     "Maintenez le combo 3.0x sans interruption pour décrocher le rang Apex au bout des 45 secondes."
-  ]
+  ],
+  audience: "Joueurs d'esport (LoL, Valorant, CS2, Apex Legends), athlètes de sports de balle et de combat, et toute personne désireuse d'aiguiser sa vision périphérique et sa vitesse d'esquive réflexe.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('posner1980', 'treisman1980', 'woodworth1899', 'fitts1954', 'woods2015'),
 };
 
 export default function DynamicGridEvasionPageFr() {

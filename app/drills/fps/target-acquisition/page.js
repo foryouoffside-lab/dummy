@@ -1,5 +1,6 @@
 import TargetAcquisitionClient from './TargetAcquisitionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -319,10 +320,37 @@ export default function TargetAcquisitionPage() {
       <TargetAcquisitionClient
         copy={{
           h1Keyword: "Target Acquisition Aim Trainer",
-          h1Suffix: " - First Shot Precision"
+          h1Suffix: " - First Shot Precision",
+          subtitle: "Train visual target detection, threat discrimination, and first-shot flick accuracy with real-time feedback.",
+          statScore: "Score",
+          statTime: "Time",
+          statAccuracy: "Accuracy",
+          statBestScore: "Best Score",
+          statSetsCleared: "Sets Cleared",
+          statMaxCombo: "Max Combo",
+          statPeakLevel: "Peak Level",
+          startTitle: "Target Acquisition Pro",
+          startSubtitle: "Visual Discrimination Speed • Endless Level Progression",
+          getReady: "GET READY",
+          toggleFlash: "Toggle Miss Flash",
+          toggleSound: "Toggle Sound",
+          pausedTitle: "Game Paused",
+          pausedSubtitle: "Click to resume — cursor lock will re-engage.",
+          stageCaption: "Identify and click the brightest target in each cluster as quickly and accurately as possible.",
+          rulesTitle: "Drill Instructions & Scoring System",
+          rulesItems: [
+            { num: "1", text: "Target Hit", highlight: "+100 PTS (+0.4s)", result: "×Combo Mult" },
+            { num: "2", text: "Set Cleared", highlight: "+400 PTS × Level", result: "Cluster Spawn" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Scaling" },
+            { num: "4", text: "Wrong Target / Miss", highlight: "Penalty", result: "Resets Combo (-0.6s)" }
+          ],
+          aboutTitle: "About Target Acquisition Aim Trainer",
+          aboutHeading: "What Is Target Acquisition?",
+          aboutText: "Target acquisition is finding the right target and moving onto it. Basic visual features like colour and orientation are processed in parallel across the whole visual field before attention binds them into an object (Treisman & Gelade, 1980) — which is why a high-contrast target is found faster than a camouflaged one."
         }}
       />
       <DrillGuide guide={targetAcquisitionGuide} />
+      <DrillFooter />
     </>
   );
 }

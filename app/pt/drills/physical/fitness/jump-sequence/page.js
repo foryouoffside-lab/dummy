@@ -2,6 +2,7 @@ import JumpSequenceClient from '@/app/drills/physical/fitness/jump-sequence/Jump
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // PESQUISA DE PALAVRAS-CHAVE NATIVAS (SERP BRASIL / PT-BR)
@@ -322,7 +323,10 @@ const jumpGuide = {
     "Avalie a trajetória do alvo que entra em cena e carregue a impulsão na medida exata.",
     "Conduza a parábola suavemente durante o voo para colidir com o centro da esfera no ar.",
     "Conecte o pouso imediatamente com o salto seguinte para manter 3.0x de combo por 45 segundos."
-  ]
+  ],
+  audience: "Atletas (vôlei, basquete, futebol, atletismo) buscando aperfeiçoar o timing de salto e senso de trajetória, e jogadores de FPS que treinam a precisão de tiro aéreo e rastreamento em suspensão.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('komi2000', 'kawato1999', 'lee1976', 'woodworth1899', 'fitts1954', 'woods2015')
 };
 
 export default function JumpSequencePagePt() {

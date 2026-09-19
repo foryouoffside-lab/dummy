@@ -20,9 +20,7 @@ import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
@@ -82,10 +80,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION & DRILL DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Headshot Hit", highlight: "+100 PTS / +0.25s", result: "Top Priority Target Zone" },
-  { num: "2", text: "Chest / Limb Hit", highlight: "+40 / +20 PTS", result: "Maintains Combo Streak" },
-  { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Speed & Recoil Scale" },
-  { num: "4", text: "Magazine Discipline", highlight: "Failure Penalty", result: "<40% mag accuracy resets combo (-0.6s with Time Penalty enabled)" }
+  { num: "1", text: "Headshot Hit", highlight: "+100 PTS (+0.25s)", result: "×Combo Mult" },
+  { num: "2", text: "Chest / Limb Hit", highlight: "+40 / +20 PTS", result: "Maintains Streak" },
+  { num: "3", text: "Level Up", highlight: "+1 / 1400 PTS", result: "Adaptive Recoil" },
+  { num: "4", text: "Empty Mag / Miss", highlight: "Penalty", result: "Resets Combo (-0.6s)" }
 ];
 
 const ABOUT_INTRO = [
@@ -207,14 +205,14 @@ export default function RecoilControlClient({ copy = null }) {
     };
   }, []);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     if (reloadTimeoutRef.current) {
       clearTimeout(reloadTimeoutRef.current);
       reloadTimeoutRef.current = null;
     }
+    gameActiveRef.current = false;
     startingRef.current = false;
     isMouseDownRef.current = false;
 
@@ -225,25 +223,19 @@ export default function RecoilControlClient({ copy = null }) {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
-
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 5 + 1;
-      engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
+      const speed = Math.random() * 4 + 1.5;
+      engine.current.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        radius: Math.random() * 2.2 + 1.2,
+        color,
+      });
     }
   };
 
@@ -390,7 +382,7 @@ export default function RecoilControlClient({ copy = null }) {
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, []);
 
-  // Pointer lock change listener — release trigger when pointer lock is lost
+  // Pointer lock change listener — exit drill on pointer lock loss
   useEffect(() => {
     const handlePointerLockChange = () => {
       const locked = document.pointerLockElement === canvasRef.current;
@@ -399,11 +391,34 @@ export default function RecoilControlClient({ copy = null }) {
         isMouseDownRef.current = false;
         engine.current.shotCountInSpray = 0;
         engine.current.recoilOffset = { x: 0, y: 0 };
+        if (gameState === 'playing' || gameState === 'countdown') {
+          handleExitDrill();
+        }
       }
     };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+  }, [gameState, handleExitDrill]);
+
+  // Escape key & fullscreenchange exit handlers
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isFullscreen, handleExitDrill]);
 
   // Scoped Raw Input Mouse Move & Mouse Down/Up Event Handlers
   useEffect(() => {
@@ -421,15 +436,11 @@ export default function RecoilControlClient({ copy = null }) {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (!containerRef.current || !containerRef.current.contains(e.target)) return;
 
-      if (gameState === 'playing') {
-        if (!pointerLocked && canvasRef.current) {
-          resumeDrill();
-        } else if (pointerLocked) {
-          isMouseDownRef.current = true;
-          if (engine.current.ammo <= 0 && !engine.current.isReloading) {
-            drillAudio.playPenalty();
-            reloadMagazine();
-          }
+      if (gameState === 'playing' && pointerLocked) {
+        isMouseDownRef.current = true;
+        if (engine.current.ammo <= 0 && !engine.current.isReloading) {
+          drillAudio.playPenalty();
+          reloadMagazine();
         }
       }
     };
@@ -448,7 +459,7 @@ export default function RecoilControlClient({ copy = null }) {
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [gameState, pointerLocked, universalSens, resumeDrill, reloadMagazine]);
+  }, [gameState, pointerLocked, universalSens, reloadMagazine]);
 
   // Main Physics & Canvas Render Loop with Backdrop Caching and Capped DPR
   useEffect(() => {
@@ -470,7 +481,7 @@ export default function RecoilControlClient({ copy = null }) {
           backdropCacheRef.current = createBackdropCache(width, height, (bCtx, w, h) => {
             bCtx.fillStyle = '#050508';
             bCtx.fillRect(0, 0, w, h);
-            bCtx.strokeStyle = 'rgba(239, 68, 68, 0.04)';
+            bCtx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
             bCtx.lineWidth = 1;
             const cx = w / 2, cy = h / 2;
             bCtx.beginPath();
@@ -613,7 +624,8 @@ export default function RecoilControlClient({ copy = null }) {
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
               drillAudio.playHit();
-              const zoneColor = hitZone === 'head' ? '#ef4444' : '#f59e0b';
+              const isStreak = e.combo >= 10;
+              const zoneColor = hitZone === 'head' ? (isStreak ? '#34d399' : '#10b981') : (isStreak ? '#6ee7b7' : '#059669');
               const zoneRadius = hitZone === 'head' ? rHead : hitZone === 'chest' ? rChest : rLimb;
               createExplosion(bulletX, bulletY, zoneColor);
               e.hitRings.push(createHitRing(bulletX, bulletY, zoneRadius, zoneColor));
@@ -663,40 +675,50 @@ export default function RecoilControlClient({ copy = null }) {
         ctx.fillRect(0, 0, w, h);
       }
 
-      // Draw Target with zone boundaries
+      // Draw Target with zone boundaries (Emerald / Mint Tactical Palette)
       if (gameState === 'playing' || gameState === 'start') {
         const config = getLevelConfig(e.level, e.combo);
         const r = config.radius;
         const tx = e.target.x;
         const ty = e.target.y;
-
-        drawPulseRing(ctx, tx, ty, r * 1.5, '#ef4444', e.target.pulseSeed);
+        const isStreak = e.combo >= 10;
 
         // Limb Zone (Bottom)
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+        ctx.fillStyle = isStreak ? 'rgba(52, 211, 153, 0.22)' : 'rgba(16, 185, 129, 0.22)';
         ctx.beginPath(); ctx.arc(tx, ty + r * 0.75, r * 0.55, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
         ctx.lineWidth = 1.5; ctx.stroke();
 
         // Chest Zone (Middle)
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+        ctx.fillStyle = isStreak ? 'rgba(52, 211, 153, 0.42)' : 'rgba(16, 185, 129, 0.42)';
         ctx.beginPath(); ctx.arc(tx, ty, r * 0.7, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.8)';
         ctx.lineWidth = 1.5; ctx.stroke();
 
-        // Head Zone (Top - Brightest)
-        ctx.fillStyle = '#ef4444';
+        // Head Zone (Top - High-Priority Bullseye)
+        ctx.fillStyle = isStreak ? '#34d399' : '#10b981';
         ctx.beginPath(); ctx.arc(tx, ty - r * 0.75, r * 0.4, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2; ctx.stroke();
       }
 
-      // Render Particles
+      // Render Particles (14 circular arc particles with delta-time alpha decay)
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
-        p.x += p.vx; p.y += p.vy; p.life -= dt * 2.5;
-        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) {
+          e.particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius || 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
 
       drawHitRings(ctx, e.hitRings, dt);
@@ -716,29 +738,40 @@ export default function RecoilControlClient({ copy = null }) {
       }
       ctx.globalAlpha = 1.0;
 
-      // Draw Crosshair (incorporates recoil offset when firing)
+      // Draw Tactical Pro White Crosshair (#ffffff with rgba(0,0,0,0.9) drop shadow blur 3)
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
         const renderX = ch.x + (isMouseDownRef.current ? e.recoilOffset.x : 0);
         const renderY = ch.y + (isMouseDownRef.current ? e.recoilOffset.y : 0);
-        const activeColor = pointerLocked ? '#ef4444' : '#3b82f6';
-        
-        ctx.strokeStyle = activeColor;
-        ctx.fillStyle = activeColor;
-        
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(renderX, renderY, 16, 0, Math.PI * 2); ctx.stroke();
 
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+
+        // Outer reticle circle
         ctx.lineWidth = 1.5;
-        const gap = 6;
         ctx.beginPath();
-        ctx.moveTo(renderX, renderY - 16); ctx.lineTo(renderX, renderY - gap);
-        ctx.moveTo(renderX, renderY + 16); ctx.lineTo(renderX, renderY + gap);
-        ctx.moveTo(renderX - 16, renderY); ctx.lineTo(renderX - gap, renderY);
-        ctx.moveTo(renderX + 16, renderY); ctx.lineTo(renderX + gap, renderY);
+        ctx.arc(renderX, renderY, 15, 0, Math.PI * 2);
         ctx.stroke();
-        
-        ctx.beginPath(); ctx.arc(renderX, renderY, 2, 0, Math.PI * 2); ctx.fill();
+
+        // Cross lines
+        const chSize = 14;
+        const chGap = 5;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(renderX, renderY - chSize); ctx.lineTo(renderX, renderY - chGap);
+        ctx.moveTo(renderX, renderY + chSize); ctx.lineTo(renderX, renderY + chGap);
+        ctx.moveTo(renderX - chSize, renderY); ctx.lineTo(renderX - chGap, renderY);
+        ctx.moveTo(renderX + chSize, renderY); ctx.lineTo(renderX + chGap, renderY);
+        ctx.stroke();
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(renderX, renderY, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -873,7 +906,7 @@ export default function RecoilControlClient({ copy = null }) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Miss Flash"
               >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+                {flashEnabled ? <Zap className="w-4 h-4 text-emerald-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
@@ -887,31 +920,13 @@ export default function RecoilControlClient({ copy = null }) {
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
-            </div>
-          )}
-
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedPrompt || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
             </div>
           )}
 
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -919,7 +934,7 @@ export default function RecoilControlClient({ copy = null }) {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Crosshair}
-              accent="redOrange"
+              accent="emerald"
               title={copy?.startTitle || "Recoil Control Pro"}
               subtitle={copy?.startSubtitle || "Weapon Spray Patterns & Motor Compensation • Endless Level Progression"}
               startButtonText={copy?.startButtonText}
@@ -936,7 +951,7 @@ export default function RecoilControlClient({ copy = null }) {
           {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
             <DrillResultCard
-              accent="red"
+              accent="emerald"
               grade={analytics.grade}
               score={uiScore}
               isNewBest={isNewBest}
@@ -972,19 +987,9 @@ export default function RecoilControlClient({ copy = null }) {
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-                    <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{item.num}</div>
-                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-gray-100 font-sans">
-                        {item.text}<span className="font-black font-sans text-white"> {item.highlight}</span>
-                      </p>
-                      <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
-                        {item.result}
-                      </div>
-                    </div>
-                  </div>
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
             </DrillAccordion>
@@ -998,7 +1003,7 @@ export default function RecoilControlClient({ copy = null }) {
               <div className="space-y-8 font-sans">
                 <section>
                   <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-red-400" /> {copy?.whyMattersTitle || "Why Recoil Control Matters"}
+                    <Crosshair className="w-4 h-4 text-emerald-400" /> {copy?.whyMattersTitle || "Why Recoil Control Matters"}
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300 mb-3">
                     {copy?.whyMattersLead || "Recoil control is a learned open-loop motor program: the spray pattern is fixed, so you can run the counter-movement without waiting to see where the bullets land. Motor output gets more variable as a movement gets faster and more forceful (Schmidt et al., 1979), which is why a smooth pull-down repeats better than a hard one."}
@@ -1012,7 +1017,7 @@ export default function RecoilControlClient({ copy = null }) {
                   {(copy?.aboutCards || ABOUT_CARDS).map((card, i) => (
                     <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-blue-600'} flex items-center justify-center`}>
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg || 'bg-emerald-600'} flex items-center justify-center`}>
                           {card.icon ? <card.icon className="w-3.5 h-3.5 text-white" /> : <Crosshair className="w-3.5 h-3.5 text-white" />}
                         </div>
                         <h4 className="text-xs font-bold text-white">{card.title}</h4>
@@ -1025,7 +1030,7 @@ export default function RecoilControlClient({ copy = null }) {
                 {(copy?.aboutSections || ABOUT_SECTIONS).map((section, i) => (
                   <section key={i}>
                     <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                      {section.icon ? <section.icon className="w-4 h-4 text-red-400" /> : <Eye className="w-4 h-4 text-red-400" />} {section.title}
+                      {section.icon ? <section.icon className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4 text-emerald-400" />} {section.title}
                     </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
@@ -1036,10 +1041,26 @@ export default function RecoilControlClient({ copy = null }) {
             </DrillAccordion>
           </div>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
       </main>
+    </div>
+  );
+}
+
+// === Subcomponents ===
+function RuleItem({ num, text, highlight = '', result }) {
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
+        </p>
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
+          {result}
+        </div>
+      </div>
     </div>
   );
 }

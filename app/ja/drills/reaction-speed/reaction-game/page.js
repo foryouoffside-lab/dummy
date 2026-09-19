@@ -1,5 +1,6 @@
 import ReactionSimulatorWrapper from '@/app/drills/reaction-speed/reaction-game/ReactionSimulatorWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
@@ -245,6 +246,30 @@ const faqSchema = {
         text: 'プレイ前のウォーミングアップとして毎日5〜10分程度行うのが最適です。手に過度な負担をかけずに視覚と運動神経の連動性を維持できます。',
       },
     },
+    {
+      '@type': 'Question',
+      name: '反射神経や反応速度を測定するゲームにはどのような種類がありますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '画面の色変化に素早く反応する単純反応テスト、落下するターゲットを迎撃する動的反射ゲーム、テンポの速い音ゲー（リズムゲーム）、FPS向けのエイム練習ツールなどがあり、それぞれ求められる神経処理段階が異なります。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '手と目の協調性（Hand-Eye Coordination）を高めるにはどんなゲームが適していますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '垂直落下ターゲットの迎撃ゲームやリズムアクション、高速トラッキングエイム訓練が最適です。視覚の注視点とマウスカーソルの空間位置を瞬時に一致させる能力を集中的に鍛えることができます。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'この反射神経ゲームは完全無料で利用できますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'はい。SkillDrillsの反射神経ゲームは完全無料であり、会員登録やアプリのダウンロード、煩わしいポップアップ広告なしで、Webブラウザから直接ご利用いただけます。',
+      },
+    },
   ],
 };
 
@@ -254,6 +279,7 @@ const reactionGameGuideJa = {
     '反射神経ゲームは、動的な視覚刺激に対して大脳での認知と筋肉の運動出力を連動させ、反射速度、視覚追尾、手と目の協調性を測定・訓練するインタラクティブなトレーニングツールです。',
     '単一ボタンの単純クリック測定とは異なり、複数ラインから落下する球体を捕捉する本ゲームはヒックの法則（Hick, 1952）に基づく選択反応時間（Choice Reaction Time）を要求します。大脳は重力加速度による落下軌道を瞬時に予測し、滑動性眼球運動（Smooth Pursuit）と跳躍性眼球運動（Saccade）を組み合わせて正確な迎撃を行います（Carpenter, 1988）。',
     '高精度測定の仕組み：本ツールはブラウザの高精度 performance.now() APIを活用し、サーバーへの通信ラグなしで端末内の純粋な入力をミリ秒単位で記録します。標準の60Hzモニターでは最大16.7msのフレーム遅延がありますが、144Hz（6.9ms）や240Hz（4.1ms）のゲーミングモニターを使用することで遅延を最小化できます（Woods et al., 2015）。',
+    '測定精度とハードウェアの影響：すべてのイベントはブラウザの performance.now() 高精度クロックを用いて端末内で直接タイムスタンプ処理され、サーバーへのデータ送信は行われません。Spectre対策によりタイマー分解能は約1msに丸められており、ディスプレイのリフレッシュレートによっても刺激提示が量子化されます（60Hzで約16.7ms、144Hzで約6.9ms、240Hzで約4.1ms；Woods et al., 2015）。またマウスのポーリングレート（125Hzで約8ms、1000Hzで約1ms）も影響します。5ms未満の微小な差異は測定ノイズとして捉え、経時変化を比較する際は同一ハードウェア環境で測定してください。',
   ],
   benchmarks: {
     title: '反射神経ゲーム パフォーマンス基準＆スコア判定表 (45秒測定)',
@@ -322,6 +348,7 @@ export default function JapaneseReactionGamePage() {
 
       <ReactionSimulatorWrapper copy={{ title: '反射神経ゲーム' }} />
       <DrillGuide guide={reactionGameGuideJa} />
+      <DrillFooter />
     </>
   );
 }

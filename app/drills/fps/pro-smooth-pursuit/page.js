@@ -2,6 +2,7 @@ import ProSmoothPursuitClient from './ProSmoothPursuitClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import DrillFooter from '@/components/drill/DrillFooter';
 export const metadata = {
   title: "Smooth Pursuit Aim Trainer – Curve Tracking | SkillDrills",
   description: "Free smooth pursuit aim trainer. Train continuous target tracking and velocity matching against high-mobility targets in Apex and Overwatch 2.",
@@ -321,9 +322,21 @@ export default function ProSmoothPursuitPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      <ProSmoothPursuitClient />
+      <ProSmoothPursuitClient
+        copy={{
+          h1Keyword: "Smooth Pursuit Aim Trainer",
+          h1Suffix: " — Curve Tracking",
+          rulesItems: [
+            { num: "1", text: "Tracking Alignment", highlight: "+50 PTS (+0.4s/s)", result: "×Combo Mult" },
+            { num: "2", text: "Continuous Combo", highlight: "Up to 3.0×", result: "Max Multiplier" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Curves" },
+            { num: "4", text: "Off-Target Penalty", highlight: "1.0s Off-Target", result: "Resets Combo (-0.6s)" }
+          ]
+        }}
+      />
 
       <DrillGuide guide={proSmoothPursuitGuide} />
+      <DrillFooter />
     </>
   );
 }

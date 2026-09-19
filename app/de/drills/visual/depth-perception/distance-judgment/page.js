@@ -2,6 +2,7 @@ import DistanceJudgmentClient from '@/app/drills/visual/depth-perception/distanc
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distance-judgment (German: Räumliches Sehen)
@@ -228,9 +229,10 @@ const faqSchema = {
 const distanceGuideDe = {
   heading: 'Standards für räumliches Sehen & Tiefenwahrnehmung',
   intro: [
-    'Tiefenwahrnehmung ist die sensorische und neurologische Fähigkeit, den Raum dreidimensional zu erfassen und Entfernungen sowie Annäherungsgeschwindigkeiten exakt zu beurteilen. Im Motorsport, in der Luftfahrt, beim taktischen Fahren und im E-Sport entscheidet diese Fähigkeit über erfolgreichen Abfang oder Kollision.',
-    'Dieser Drill operationalisiert die Prinzipien des klassischen Howard-Dolman-Tests (Howard, 1919) und der ökologischen Optik (Lee, 1976; Regan & Beverley, 1978). Durch das Projizieren einer 3D-Kugel entlang eines visuellen Korridors trainiert der Drill die Extraktion von Expansionsgeschwindigkeit und Time-to-Contact (TTC).',
-    'Messmethodik: Zeitpunkte werden über performance.now() im Submillisekundenbereich erfasst. Der Fehler berechnet sich aus der relativen Abweichung zwischen Kugel- und Zielringdurchmesser.',
+    'Tiefenwahrnehmung (Stereosehen und räumliches Urteilsvermögen) ist die sensorische und neurologische Fähigkeit, den Raum dreidimensional zu erfassen und Entfernungen, räumliche Tiefenstaffelungen sowie Annäherungsgeschwindigkeiten von Objekten präzise zu beurteilen. Im Motorsport, in der Luftfahrt, beim Führen von Nutzfahrzeugen (Führerschein-Sehtest nach FeV) und im wettbewerbsorientierten E-Sport entscheidet diese Fähigkeit im Bruchteil einer Sekunde über erfolgreiches Abfangen oder folgenschwere Kollisionen.',
+    'Dieser Drill operationalisiert die geometrischen Grundlagen des klassischen Howard-Dolman-Stereoapparats (Howard, 1919) und der ökologischen Optik von David N. Lee (1976) sowie David Regan & Kenneth I. Beverley (1978). Durch das Projizieren einer dreidimensionalen Kugel entlang eines virtuellen Tunnels auf eine feste Referenzebene trainiert der Drill das visuelle System, optische Expansionsraten (Looming) und die geschätzte Kontaktzeit (Time-to-Contact, τ) unter stetig ansteigenden Geschwindigkeiten exakt zu berechnen.',
+    'Präzision & Messmethodik: Sämtliche Zeitstempel werden lokal über die hochauflösende performance.now()-Schnittstelle des Browsers mit Submillisekunden-Genauigkeit erfasst. Die Abweichung wird als relativer prozentualer Durchmesserfehler errechnet (|Tatsächlicher Durchmesser - Zieldurchmesser| / Zieldurchmesser). Physikalische Latenzen wie Monitor-Quantisierungszeiten (~16,7 ms bei 60 Hz, ~6,9 ms bei 144 Hz, ~4,1 ms bei 240 Hz) und USB-Abtastraten (125 Hz vs. 1000 Hz) bedingen messtechnische Toleranzen (Woods et al., 2015). Differenzen unter 5 ms stellen Messrauschen dar; vergleichen Sie Ergebnisse primär auf demselben Hardwaresetup.',
+    'Datenschutz & Transparenz: SkillDrills erfasst keinerlei personenbezogene Daten, diagnostische Sehprofile oder zentrale Telemetrie. Sämtliche Bestleistungen, Fehlerquoten und Levelstufen verbleiben ausschließlich im lokalen Speicher (LocalStorage) Ihres Webbrowsers.'
   ],
   benchmarks: {
     title: 'Referenztabelle für Tiefenwahrnehmung & Abfanggenauigkeit',
@@ -264,6 +266,14 @@ const distanceGuideDe = {
       },
     ],
   },
+  steps: [
+    'Klicken Sie auf "Test starten", um die 45-sekündige Sitzung zur Tiefenwahrnehmung zu beginnen.',
+    'Fixieren Sie den Blick stabil auf dem zyanfarbenen Zielring in der mittleren Tiefenebene.',
+    'Beobachten Sie die 3D-Kugel, die am fernen Ende des Tunnels erscheint und auf Sie zubeschleunigt.',
+    'Klicken Sie mit der Maus, tippen Sie auf den Bildschirm oder drücken Sie die Leertaste genau in dem Moment, in dem die Kugel den Zielring perfekt ausfüllt.',
+    'Verfolgen Sie Ihre Präzisionsauswertung (<5% Fehler: Perfekt / +150 PKT) und passen Sie sich den steigenden Geschwindigkeiten über 45 Sekunden an.'
+  ],
+  audience: 'Kraftfahrer und Berufskraftfahrer zur Vorbereitung auf den Sehtest für LKW- und Personenbeförderungs-Führerscheine, Sportler in Ballsportarten (Tennis, Baseball, Tischtennis), Piloten sowie Gamer, die ihre räumliche Einschätzung und ihr Abfang-Timing schulen möchten.',
   faqs: {
     title: 'Häufig gestellte Fragen zu räumlichem Sehen & Tiefentest',
     items: faqSchema.mainEntity.map((q) => ({
@@ -271,6 +281,15 @@ const distanceGuideDe = {
       a: q.acceptedAnswer.text,
     })),
   },
+  sources: pickSources('howard1919', 'lee1976', 'regan1978', 'julesz1971', 'woods2015'),
+  related: [
+    { href: "/drills/visual/tracking-accuracy/moving-target", label: "Bewegtes Ziel Abfangen" },
+    { href: "/drills/visual/reaction-speed/light-reaction", label: "Licht-Reaktionstest" },
+    { href: "/drills/visual/tracking-accuracy/multiple-targets", label: "Multi-Objekt-Tracking" },
+    { href: "/drills/visual/tracking-accuracy/pursuit-tracker", label: "Blickfolge-Tracker" },
+    { href: "/drills/visual/reaction-speed/go/no-go", label: "Go / No-Go Impulskontrolle" },
+    { href: "/drills/visual/visual-recognition/entropic-grid", label: "Entropisches Rastersuchen" }
+  ]
 };
 
 const copyDe = {

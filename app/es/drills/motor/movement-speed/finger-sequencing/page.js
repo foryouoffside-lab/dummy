@@ -2,6 +2,7 @@ import FingerSequencingClient from '@/app/drills/motor/movement-speed/finger-seq
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -300,6 +301,31 @@ const guideProps = {
   },
 };
 
+const esCopy = {
+  title: "Aim Trainer Secuencial",
+  desc: "El cambio secuencial de objetivos entrena el clic rápido en nodos ordenados numéricamente en lugar del blanco más cercano. Basado en los programas motores en serie de Lashley (1951) y Keele (1968), perfecciona la planificación de trayectorias balísticas y las microcorrecciones de puntería.",
+  score: "Puntos",
+  timeLeft: "Tiempo Restante",
+  accuracy: "Precisión",
+  bestScore: "Mejor Puntuación",
+  startButtonText: "Iniciar Entrenamiento",
+  startSubtitle: "Precisión Motora y Trayectorias Secuenciales • Entrada Directa 1:1",
+  getReady: "PREPÁRATE",
+  rulesTitle: "Instrucciones del Ejercicio y Sistema de Puntos",
+  rulesItems: [
+    { num: "1", text: "Impacto Secuencial de Nodos", highlight: "Secuencia Esmeralda", result: "+150 PTS × Combo (+0.6s)" },
+    { num: "2", text: "Multiplicador de Combo", highlight: "Hasta 3.0×", result: "Aumenta la puntuación exponencialmente" },
+    { num: "3", text: "Progresión de Nivel", highlight: "Escalado Continuo", result: "Los objetivos reducen su tamaño dinámicamente" },
+    { num: "4", text: "Fallo / Expiración", highlight: "Reinicio de Combo", result: "Penalización de -0.8s" }
+  ],
+  chainsCleared: "Cadenas Completadas",
+  peakLevel: "Nivel Máximo",
+  maxCombo: "Combo Máximo",
+  playAgain: "Entrenar de Nuevo",
+  shareTitle: "Compartir Puntuación",
+  exitTitle: "Salir"
+};
+
 export default function SpanishFingerSequencingPage() {
   return (
     <>
@@ -327,11 +353,12 @@ export default function SpanishFingerSequencingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient copy={{ title: 'Aim Trainer Secuencial' }} />
+      <FingerSequencingClient copy={esCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/finger-sequencing" />
+        <RelatedDrills currentCategory="motor" currentHref="/es/drills/motor/movement-speed/finger-sequencing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

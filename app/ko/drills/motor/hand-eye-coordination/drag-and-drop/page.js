@@ -1,6 +1,7 @@
 import DragAndDropClient from '@/app/drills/motor/hand-eye-coordination/drag-and-drop/DragAndDropClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -320,6 +321,26 @@ const guideProps = {
   },
 };
 
+const copyKo = {
+  title: "드래그 앤 드롭 연습・마우스 조작 트레이너",
+  subtitle: "공간 드래그 앤 드롭 타깃 정렬 • 15단계 레벨 스케일링",
+  startButtonText: "훈련 시작",
+  playAgainText: "다시 도전",
+  shareText: "결과 공유",
+  exitText: "나가기",
+  accuracyLabel: "정확도",
+  targetDropsLabel: "타깃 안착",
+  maxComboLabel: "최대 콤보",
+  peakLevelLabel: "최고 레벨",
+  rulesTitle: "드릴 조작법 & 점수 획득 규칙",
+  rulesItems: [
+    { num: "1", text: "타깃 안착", highlight: "+100점 × 콤보", result: "볼을 드래그해 컨테이너 내부 릴리즈" },
+    { num: "2", text: "연속 콤보", highlight: "최대 3.0배 배율", result: "연속 성공 시 보너스 획득" },
+    { num: "3", text: "레벨 난이도 상승", highlight: "250점마다 +1 레벨", result: "컨테이너 축소 및 이동 속도 가속" },
+    { num: "4", text: "빗맞힘 / 시간 초과", highlight: "콤보 초기화", result: "컨테이너 외부 릴리즈 시 배율 초기화" }
+  ],
+};
+
 export default function DragAndDropPage() {
   return (
     <>
@@ -347,11 +368,16 @@ export default function DragAndDropPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DragAndDropClient copy={{ title: "드래그 앤 드롭 마우스 트레이너" }} />
+      <DragAndDropClient copy={copyKo} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/ko/drills/motor/hand-eye-coordination/drag-and-drop" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/drag-and-drop"
+          locale="ko"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

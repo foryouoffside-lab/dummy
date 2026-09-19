@@ -1,5 +1,6 @@
 import MicroCorrectionClient from '@/app/drills/fps/micro-correction-precision/MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -229,10 +230,11 @@ export default function MicroCorrectionKoPage() {
     heading: "마이크로 플릭 연습 실전 가이드",
     subtitle: "초기 플릭 직후의 미세 조준 보정, 종단 마찰 감속 제동, 그리고 빗나가지 않는 헤드샷 정밀도를 완성하는 과학적 방법론",
     intro: [
-      "마이크로 플릭(Micro-Correction Aiming)은 빠른 첫 플릭이 적 머리에서 불과 수 픽셀 옆에 멈췄을 때, 찰나의 순간에 오차를 보정하여 정확히 헤드샷을 꽂아 넣는 FPS의 최후 승부처 기술입니다. 발로란트와 카운터스트라이크 2 같은 전술 슈팅 게임에서는 최초 플릭 속도 이상으로, 빗나간 조준을 얼마나 빠르고 침착하게 재정렬하느냐가 승패를 가릅니다.",
-      "Robert S. Woodworth(1899)와 David E. Meyer 등(1988)의 목표 지향 운동 이론에 따르면, 인간의 에임 운동은 거리를 단숨에 좁히는 '개루프 탄도 인파이어'와 타겟 근처에서의 '폐루프 시각 피드백 미세 보정'으로 명확히 구분됩니다. 나아가 Susana Martinez-Conde 등(2004)과 Martin Rolfs(2009)의 미세 도약 안구운동 연구는 뇌가 초점을 확정하기 직전의 감속 제어 메커니즘을 규명합니다.",
-      "Paul M. Fitts(1954)의 운동 법칙에 따르면 극소형 타겟을 타격하는 작업은 난이도 지수(ID)가 기하급수적으로 치솟습니다. 본 드릴은 앵커 타겟과 마이크로 타겟의 연속 타격을 통해 관성을 급제동하는 패드 브레이킹과 손끝 관절의 정밀 독립 제어를 빈틈없이 단련합니다.",
-      "측정 정확도 안내: 본 드릴은 브라우저의 performance.now() 고해상도 타이머를 활용하여 기기 내부에서 밀리초 단위로 정확히 실행됩니다. 디스플레이 주사율(60Hz/144Hz/240Hz)에 따른 프레임 지연이 발생하므로 5ms 미만의 미세 편차는 하드웨어 측정 노이즈로 간주하시기 바랍니다."
+      "마이크로 플릭(Micro-Correction Aim Trainer)은 시각적 표적 획득에서 발생하는 2차 미세 조정 단계를 단련하고 표준화하기 위해 설계된 실증적 감각운동 훈련 드릴입니다. 발로란트(Valorant), 카운터스트라이크 2(CS2), 레인보우 식스 시즈와 같은 최고 수준의 전술 슈팅 게임에서는 불과 5~25픽셀(1도 미만)에 불과한 미세한 조준선 수정 속도가 라운드의 승패를 완전히 가릅니다.",
+      "목표 지향적 고속 운동을 지배하는 이론적 기틀은 Robert S. Woodworth(1899)의 기념비적인 2원 모델에서 확립되었습니다. 즉, 사지를 시각 자극 방향으로 강하게 가속하는 초기 개루프(Open-loop) 탄도 임펄스와, 지속적인 감각 피드백에 의해 안내되는 후속 폐루프(Closed-loop) 제어 단계입니다. 이러한 속도-정확도 상충 관계는 Paul M. Fitts(1954)의 피츠 법칙(Fitts's Law)으로 수학적 공식화되었으며, 운동 시간은 표적 거리와 표적 폭의 비율에 따라 로그 함수적으로 증가합니다(ID = log2(2D / W)).",
+      "이후 David E. Meyer 등(1988)의 확률적 최적화 하위운동 모델(Stochastic Optimized Submovement Model)은 인간의 운동 제어 체계가 과도한 관성 오버슈트를 방지하기 위해 1차 주운동을 표적 경계의 직전이나 근방에 안착시킨 후, 연속되는 신속한 교정 하위운동(Submovements)을 통해 좌표 오차를 즉각 해소하도록 프로그래밍되어 있음을 증명했습니다.",
+      "시야가 목표에 완전히 고정되는 종단 주시 단계에서, 인간의 안구운동계는 미세 도약(Microsaccades; 1도 미만의 무의식적 미세 안구 도약)을 생성하여 망막의 신경 표상을 갱신하고 중심와를 고주파수 시각 표적 정중앙에 정렬합니다(Rolfs, 2009; Martinez-Conde et al., 2004). 본 훈련은 로우 포인터 락(Raw Pointer Lock) 하드웨어 입력과 performance.now() 디지털 정밀 시계(Woods et al., 2015)를 결합하여 에임 감속 시의 미세 진동과 오버플릭 밀림을 억제하고 정밀한 헤드샷 능력을 체화하도록 돕습니다.",
+      "측정 기준 및 하드웨어 지연 투명성: 모든 조준 및 타격 이벤트는 브라우저 내부의 performance.now() 고해상도 시계를 통해 사용자 기기 내에서 즉각 타임스탬프 처리되며 외부로 점수가 전송되지 않습니다. 다만 브라우저의 Spectre 보안 완화 조치로 타이머가 약 1ms 단위로 양자화되며, 모니터 주사율에 따른 화면 갱신 주기(60Hz 약 16.7ms, 144Hz 6.9ms, 240Hz 4.1ms; Woods et al., 2015)와 마우스 폴링레이트(125Hz 8ms 대 1000Hz 1ms)가 물리적 변수로 작용합니다. 따라서 5ms 미만의 미세 차이는 측정 노이즈로 간주하고, 서로 다른 장비 간 단순 비교보다는 동일한 장비 환경에서 본인의 기록 변화를 추적하는 지표로 활용하시기 바랍니다."
     ],
     benchmarks: {
       title: "마이크로 보정 레이턴시 & 정밀도 벤치마크 기준",
@@ -331,6 +333,7 @@ export default function MicroCorrectionKoPage() {
         copy={{
           h1Keyword: "마이크로 플릭 연습",
           h1Suffix: " - 에임 미세조정 & 헤드샷 정밀도 트레이너",
+          subtitle: "초기 플릭 후 목표 중심의 미세 오차를 즉각 보정하고 손끝 감속 제어 및 헤드샷 정밀도를 훈련합니다.",
           statScore: "점수",
           statTime: "남은 시간",
           statAccuracy: "정확도",
@@ -343,15 +346,13 @@ export default function MicroCorrectionKoPage() {
           getReady: "준비",
           toggleFlash: "미스 플래시 켜기/끄기",
           toggleSound: "효과음 켜기/끄기",
-          pausedTitle: "일시 정지됨",
-          pausedSubtitle: "클릭하여 계속하기 — 마우스 커서 락이 다시 활성화됩니다.",
           stageCaption: "앵커 타겟을 클릭한 후 즉시 조준선을 미세 조정하여 작은 마이크로 타겟을 정밀 타격하세요.",
           rulesTitle: "훈련 규칙 및 점수 산정 방식",
           rulesItems: [
-            { num: "1", text: "앵커 타겟 명중", highlight: "+10점 (+0.2초)", result: "인접 마이크로 타겟 잠금 해제" },
-            { num: "2", text: "마이크로 타겟 명중", highlight: "최대 +585점 (+0.2초)", result: "정밀도 및 콤보 배율 비례 점수 획득" },
-            { num: "3", text: "레벨 상승", highlight: "매 1,400점마다 +1 레벨", result: "타겟 크기 지속 축소 및 고난도화" },
-            { num: "4", text: "미스 / 시간 초과", highlight: "페널티", result: "콤보 즉시 초기화" }
+            { num: "1", text: "앵커 타겟 명중", highlight: "+10점 (+0.2초)", result: "마이크로 해제" },
+            { num: "2", text: "마이크로 명중", highlight: "최대 +585점", result: "정밀도 × 콤보" },
+            { num: "3", text: "레벨 상승", highlight: "+1 레벨 / 1,400점", result: "가변 축소 난이도" },
+            { num: "4", text: "미스 / 초과", highlight: "페널티", result: "콤보 리셋 (-0.6초)" }
           ],
           aboutTitle: "마이크로 플릭 에임 트레이너 소개",
           aboutHeading: "마이크로 플릭(에임 미세조정)이란?",
@@ -367,6 +368,7 @@ export default function MicroCorrectionKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import AngleHoldClient from '@/app/drills/fps/angle-hold-trainer/AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -299,10 +300,10 @@ export default function FrenchAngleHoldPage() {
     h1Suffix: " — Tenue de Ligne FPS",
     subtitle: "Entraînement à la Tenue d'Angle et Défense contre le Peeker's Advantage",
     rulesItems: [
-      { num: "1", text: "Cible Touchée", highlight: "+100 PTS (+0,6s)", result: "× Combo × Multiplicateur de Niveau" },
-      { num: "2", text: "Multiplicateur de Combo", highlight: "Jusqu'à 3,0x points", result: "Les séries plus longues provoquent des décalages plus agressifs" },
-      { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau tous les 1400 PTS", result: "Fenêtre temporelle raccourcie et cibles plus vives" },
-      { num: "4", text: "Tir Raté / Tir Anticipé", highlight: "Pénalité d'Erreur", result: "Réinitialisation du combo (avec pénalité : -0,8s)" }
+      { num: "1", text: "Tir Réussi", highlight: "+100 PTS (+0,6s)", result: "×Combo Mult" },
+      { num: "2", text: "Apparitions d'Angle", highlight: "Coins de Mur", result: "Fenêtre Réduite" },
+      { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau / 1400 PTS", result: "Échelle Adaptative" },
+      { num: "4", text: "Tir Raté / Précipité", highlight: "Pénalité", result: "Reset Combo (-0,8s)" }
     ],
     aboutCards: [
       { iconBg: "bg-blue-600", title: "Recommandé pour", text: "Les défenseurs de site sur Valorant, les anchors sur CS2, les joueurs de R6 Siege et quiconque veut tenir une ligne avec rigueur." },
@@ -366,6 +367,7 @@ export default function FrenchAngleHoldPage() {
       </div>
 
       <DrillGuide guide={angleHoldGuideFr} />
+      <DrillFooter />
     </>
   );
 }

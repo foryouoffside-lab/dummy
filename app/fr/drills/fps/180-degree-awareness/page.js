@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Entraînement Demi-Tour 180° – Visée FPS | SkillDrills",
@@ -290,21 +291,20 @@ export default function AwarenessDrillFrPage() {
   const copyFr = {
     h1Keyword: "Entraînement Demi-Tour 180°",
     h1Suffix: " — Visée et Réflexes FPS",
+    subtitle: "Entraînez la détection périphérique, les flicks grand angle et le freinage terminal lors de demi-tours à 180°.",
     statScore: "Score",
     statTime: "Temps",
     statAccuracy: "Précision",
     statBestScore: "Meilleur Score",
     startTitle: "Entraînement Demi-Tour 180°",
     startSubtitle: "Entrée Brute de Souris • Niveaux Infinis",
-    getReady: "PRÊT",
-    pausedTitle: "Jeu en Pause",
-    pausedSubtitle: "Cliquez pour reprendre — le verrouillage du curseur sera réactivé",
-    stageCaption: "Repérez les cibles sur les bords par vision périphérique et effectuez des demi-tours à 180°.",
+    stageCaption: "Repérez les cibles sur les bords par vision périphérique et effectuez des demi-tours à 180° avant la fin du chronomètre.",
     rulesTitle: "Règles d'Entraînement et Système de Points",
     rulesItems: [
-      { title: "Cible Touchée (+100 pts)", text: "Les tirs consécutifs augmentent le multiplicateur de combo jusqu'à 3.0x." },
-      { title: "Bords 180° et Série", text: "Les cibles apparaissent aux extrémités, rétrécissent et exigent des réactions plus vives." },
-      { title: "Tir Manqué / Temps Écoulé", text: "Tout tir raté réinitialise le combo. Avec pénalité, vous perdez 0.8s au chronomètre." }
+      { num: "1", text: "Cible Périphérique", highlight: "Grand Angle (+100 PTS / +0,6s)", result: "×Mult de Combo" },
+      { num: "2", text: "Apparitions à 180°", highlight: "Vision Périphérique Extrême", result: "Plus Rapide & Petit" },
+      { num: "3", text: "Progression de Niveau", highlight: "+1 Niveau / 1 750 PTS", result: "Échelle Adaptative" },
+      { num: "4", text: "Tir Manqué / Expiration", highlight: "Pénalité d'Échec", result: "Reset Combo (-0,8s)" }
     ],
     aboutTitle: "À Propos de l'Entraînement Demi-Tour 180°",
     aboutHeading: "Pourquoi entraîner les demi-tours à 180 degrés ?",
@@ -350,6 +350,7 @@ export default function AwarenessDrillFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

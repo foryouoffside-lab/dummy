@@ -1,5 +1,6 @@
 import AngleHoldClient from './AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -298,7 +299,13 @@ export default function AngleHoldPage() {
     h1Prefix: null,
     h1Keyword: "Crosshair Placement & Angle Hold Trainer",
     h1Suffix: null,
-    subtitle: "Angle Hold Aim Practice & Peeker’s Advantage Defense"
+    subtitle: "Master crosshair placement, corner pre-aim discipline, and peeker's advantage defense.",
+    rulesItems: [
+      { num: "1", text: "Successful Peek Hit", highlight: "+100 PTS (+0.6s)", result: "×Combo Mult" },
+      { num: "2", text: "Peeking Spawns", highlight: "Corner Outcrops", result: "Faster & Shorter" },
+      { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Scaling" },
+      { num: "4", text: "Miss / Pre-fire", highlight: "Failure Penalty", result: "Resets Combo (-0.8s)" }
+    ]
   };
 
   return (
@@ -331,6 +338,7 @@ export default function AngleHoldPage() {
       <AngleHoldClient copy={copyEn} />
 
       <DrillGuide guide={angleHoldGuide} />
+      <DrillFooter />
     </>
   );
 }

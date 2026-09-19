@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 // ============================================================
 // GERMAN SEARCH KEYWORD RESEARCH & INTENT CLUSTERING (DACH)
@@ -223,10 +224,11 @@ export default function TargetAcquisitionDePage() {
     heading: "Zielerfassung FPS Training – Wissenschaftlicher Leitfaden",
     subtitle: "Visuelle Erkennungsgeschwindigkeit, Kontrastdiskriminierung und fehlerfreie Erstschuss-Präzision für CS2 und Valorant",
     intro: [
-      "Zielerfassung (Target Acquisition) ist die übergeordnete Fähigkeit, in einem optisch komplexen virtuellen Raum innerhalb von Millisekunden den Gegner zu lokalisieren, ihn von Umgebungsstrukturen zu unterscheiden und die Waffe mit dem ersten Schuss punktgenau auf die Hitbox zu bringen. Nach der Merkmals-Integrations-Theorie von Anne Treisman und Garry Gelade (1980) werden grundlegende optische Reize wie Helligkeit, Farbe und Kantenorientierung im menschlichen Sehsystem zunächst vorattentiv und parallel über das gesamte Sehfeld verarbeitet.",
-      "Das Guided Search Modell von Jeremy M. Wolfe (1994, 2007) beschreibt, wie das Gehirn sensorische Auffälligkeit (Bottom-Up-Signale) mit taktischer Vorerwartung (Top-Down-Fokus) verknüpft. Werden Zielkontraste trainiert, lernt der visuelle Kortex, irrelevante Hintergrunddetails auszublenden. Dadurch wird die Latenz zwischen dem ersten visuellen Reizkontakt und dem Beginn der motorischen Zielbewegung drastisch minimiert.",
-      "Die anschließende Zeigerbewegung folgt den biomechanischen Gesetzmäßigkeiten von Fitts' Gesetz (Fitts, 1954) und der stochastischen Submovement-Theorie von David E. Meyer et al. (1988): Nach einem initialen schnellen Flick bringt eine feinmotorische Endphasen-Bremsung das Fadenkreuz auf den Kopf des Ziels. In Shootern mit minimaler Time-to-Kill entscheidet dieser Erstkontakt unmittelbar über das Duell.",
-      "Messpräzision & Hardware-Transparenz: Alle Erfassungs- und Klicklatenzen werden über performance.now() im Mikrosekundenbereich gemessen (Woods et al., 2015). Bei 144-Hz- und 240-Hz-Monitoren sinkt das framebedingte Anzeigefenster auf 6,9 ms bzw. 4,1 ms. Kleinste Latenzabweichungen unter 5 ms spiegeln Hardware-Aktualisierungszyklen wider."
+      "Der Zielerfassungs-Trainer (Target Acquisition Aim Trainer) ist ein hochspezialisiertes perzeptiv-kognitives Test- und Trainingsprogramm zur Maximierung der visuellen Reaktionsgeschwindigkeit, Kontrastdiskriminierung und Erstschuss-Präzision. In taktischen Wettkampf-Shootern wie Valorant, Counter-Strike 2 und Rainbow Six Siege entscheidet sich das Duell in den ersten 300 Millisekunden des Sichtkontakts: Derjenige, der die gegnerische Silhouette als Erster identifiziert, fokussiert und den Kopfschuss setzt, gewinnt den Raumvorteil.",
+      "Die theoretische Grundlage der visuellen Objekterkennung und Zielsuche formulierten Anne Treisman und Garry Gelade (1980) in ihrer Merkmals-Integrations-Theorie (Feature-Integration Theory). Treisman wies nach, dass elementare optische Merkmale wie Leuchtdichtekontrast, Farbunterschiede (Pop-Out) und Kantenorientierung zunächst vorattentiv und vollkommen parallel über das gesamte Sehfeld extrahiert werden. Erst wenn die fokussierte räumliche Aufmerksamkeit auf eine präzise Koordinate gerichtet wird, verschmelzen diese Einzeleigenschaften zu einer identifizierbaren Bedrohung.",
+      "In Erweiterung der parallelen Informationsverarbeitung beschreibt Jeremy M. Wolfes (1994, 2007) Guided-Search-Modell, wie kognitive Erwartungshaltungen (Top-Down) und sensorische Salienz-Karten (Bottom-Up) interagieren, um die visuelle Aufmerksamkeit zu priorisieren. Durch gezieltes Training der Kontrastdiskriminierung lernt der primäre visuelle Kortex, irrelevante visuelle Störsignale und Hintergrundelemente schlagartig zu verwerfen, wodurch die Latenz zwischen Zielerscheinen und motorischem Bewegungsantritt signifikant sinkt.",
+      "Unter Einbeziehung von Paul M. Fitts’ (1954) motorischem Index of Difficulty, David E. Meyer et al.s (1988) Stochastic Optimized Submovement Model und digitaler Präzisionschronometrie (Woods et al., 2015) trainiert dieser Drill Spieler darin, kognitive Zögerlichkeit zu eliminieren, messerscharfe primäre Flicks auszuführen und eine unerschütterliche Erstschuss-Präzision unter Matchdruck zu verankern.",
+      "Messpräzision & Hardware-Latenz: Jedes Erfassungs- und Trefferereignis wird clientseitig über die hochauflösende Systemuhr performance.now() mit Mikrosekundenauflösung erfasst – es erfolgt kein Upload von Daten. Zwei physikalische Rahmenbedingungen sind zu beachten: Browser-Timer werden zum Schutz vor Spectre-Angriffen auf rund 1 ms gerundet, und der Monitor quantisiert Bildreize auf sein Bildwiederholintervall (~16,7 ms bei 60 Hz, 6,9 ms bei 144 Hz und 4,1 ms bei 240 Hz; Woods et al., 2015). Die USB-Abtastrate der Maus addiert etwa 8 ms bei 125 Hz gegenüber 1 ms bei 1000 Hz. Zeitunterschiede unter 5 ms stellen messtechnisches Rauschen dar; vergleiche daher deine Messreihen auf identischer Hardware."
     ],
     benchmarks: {
       title: "Zielerfassungs-Latenz & Erstschuss-Benchmarks (Millisekunden & Trefferquote)",
@@ -286,6 +288,7 @@ export default function TargetAcquisitionDePage() {
   const copyDe = {
     h1Keyword: "Zielerfassung FPS Training",
     h1Suffix: " – First Shot Precision",
+    subtitle: "Trainiere visuelle Zielerkennung, Kontrast-Diskrimination und Erstschuss-Präzision mit Echtzeit-Feedback.",
     statScore: "Punkte",
     statTime: "Zeit",
     statAccuracy: "Präzision",
@@ -303,10 +306,10 @@ export default function TargetAcquisitionDePage() {
     stageCaption: "Finde und klicke in jedem Ziel-Cluster das hellste Ziel (höchste Deckkraft) mit maximaler Geschwindigkeit und Präzision.",
     rulesTitle: "Trainingsregeln & Punktesystem",
     rulesItems: [
-      { title: "Richtiges Ziel treffen (+100 Pkt / +0,4s)", text: "Klicke immer das hellste Ziel zuerst an. Skaliert mit Combo- und Level-Bonus." },
-      { title: "Set-Clear-Bonus (+400 Pkt × Level)", text: "Das fehlerfreie Abräumen einer Zielgruppe erzeugt sofort das nächste Cluster." },
-      { title: "Levelaufstieg (alle 1.400 Pkt)", text: "Dichtere Gruppen, kleinere Zielradien und feinere Kontrastunterschiede." },
-      { title: "Fehlklick / Fehlschuss", text: "Falsches Ziel oder Miss setzt die Combo auf 0 zurück (mit Strafzeit -0,6s)." }
+      { num: "1", text: "Zieltreffer", highlight: "+100 PKT (+0,4s)", result: "×Combo-Multiplikator" },
+      { num: "2", text: "Set geräumt", highlight: "+400 PKT × Level", result: "Neues Cluster" },
+      { num: "3", text: "Levelaufstieg", highlight: "+1 / 1400 PKT", result: "Dynamische Dichte & Tempo" },
+      { num: "4", text: "Fehlklick / Miss", highlight: "Strafe", result: "Combo-Reset (-0,6s)" }
     ],
     aboutTitle: "Über das Zielerfassungs-Training",
     aboutHeading: "Was bedeutet Zielerfassung (Target Acquisition) im Shooter?",
@@ -361,6 +364,7 @@ export default function TargetAcquisitionDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

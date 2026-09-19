@@ -1,5 +1,6 @@
 import MicroCorrectionClient from '@/app/drills/fps/micro-correction-precision/MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -222,10 +223,11 @@ export default function MicroCorrectionDePage() {
     heading: "Mikrokorrektur Aiming – Wissenschaftlicher Trainingsleitfaden",
     subtitle: "Meistere Bremskontrolle, Endphasen-Verzögerung und Fingerkuppen-Feinjustierung für maximale Headshot-Präzision in taktischen Shootern",
     intro: [
-      "Mikrokorrektur Aiming (Micro-Adjustment) ist die entscheidende biomechanische Schnittstelle im modernen Wettkampf-Shooter. Wenn in Counter-Strike 2 oder Valorant ein 30-Grad-Flick nur 10 bis 15 Pixel neben der Schläfe des Gegners stoppt, gewinnt derjenige das Duell, der diese minimale Distanz innerhalb von 120 bis 160 Millisekunden ohne Überschwingen schließt. Der erste ballistische Impuls bringt das Fadenkreuz in die Nahzone – erst die nachfolgende Mikrokorrektur erzielt den tödlichen Kopfschuss.",
-      "Die wissenschaftliche Grundlage dieses Bewegungsmusters legten Robert S. Woodworth (1899) und später David E. Meyer et al. (1988) mit dem Zwei-Komponenten-Modell zielgerichteter Bewegungen. Jeder Zielvorgang spaltet sich in eine schnelle, ungeführte ballistische Anfangsbewegung (Open-Loop) und eine darauffolgende visuell rückgekoppelte Feinkorrekturphase (Closed-Loop). Ergänzend belegen Susana Martinez-Conde et al. (2004) sowie Martin Rolfs (2009), dass das menschliche Sehsystem winzige Mikrosakkaden nutzt, um die foveale Mitte scharfzustellen – ein Prozess, der eine millimetergenaue Zielbestätigung vor der Klickauslösung erfordert.",
-      "Nach Paul M. Fitts (1954) steigt der Schwierigkeitsgrad einer Zielaufgabe (Index of Difficulty) logarithmisch an, je kleiner das Trefferziel im Verhältnis zur Bewegungsdistanz wird. Bei extrem kleinen Kopfhitboxen auf Distanz stößt das Arm- und Handgelenk an seine mechanischen Grenzen. Dieser Trainer schult die Entkopplung von Arm-Schwung und Fingerkuppen-Bremsung (Woods et al., 2015), um die Trägheit des Mauskörpers über Mauspad-Friktion schlagartig zu neutralisieren.",
-      "Messpräzision & Hardware-Transparenz: Dieses Training nutzt performance.now() mit Mikrosekundenauflösung zur exakten Zeitmessung zwischen Anker-Klick und Mikroziel-Treffer. Beachte, dass dein Monitor bei 60 Hz alle 16,6 ms ein neues Bild darstellt, während ein 240-Hz-Display diesen Intervall auf 4,1 ms senkt. Gemessene Abweichungen unter 5 ms spiegeln daher die physikalischen Aktualisierungszyklen deines Monitors wider."
+      "Mikrokorrektur Aiming (Micro-Adjustment) ist die entscheidende biomechanische Schnittstelle im modernen Wettkampf-Shooter. In taktischen High-Stakes-Shootern wie Valorant, Counter-Strike 2 und Rainbow Six Siege werden Duelle regelmäßig durch minimale Korrekturen von nur 5 bis 25 Pixeln unterhalb eines Winkelgrades entschieden. Der erste ballistische Impuls bringt das Fadenkreuz in die Nahzone des Gegners – erst die nachfolgende Mikrokorrektur erzielt den finalen Kopfschuss.",
+      "Das theoretische Fundament zielgerichteter Schnellbewegungen legte Robert S. Woodworth (1899) mit seinem klassischen Zwei-Komponenten-Modell: Ein primärer, offener ballistischer Impuls (Open-Loop) beschleunigt die Hand in Richtung des visuellen Reizes, gefolgt von einer geschlossenen Kontrollphase (Closed-Loop) unter ständiger sensorischer Rückkopplung. Diese Geschwindigkeits-Genauigkeits-Abwägung wurde von Paul M. Fitts (1954) im Fitts’schen Gesetz mathematisch quantifiziert: Die Bewegungszeit skaliert logarithmisch mit der Zieldistanz und umgekehrt proportional zur Zielbreite (ID = log2(2D / W)).",
+      "Spätere neurowissenschaftliche Modellierungen von David E. Meyer et al. (1988) etablierten das Stochastic Optimized Submovement Model. Dieses belegt, dass die menschliche Motorik primäre Bewegungen strategisch so plant, dass sie kurz vor oder am Rand des Zielbereichs landen, um verbleibende Koordinatendifferenzen durch blitzschnelle Korrektur-Subbewegungen ohne kinetisches Überschwingen (Overshoot) aufzulösen.",
+      "In der hochauflösenden Endphase der fovealen Fixation nutzt das okulomotorische System Mikrosakkaden – unwillkürliche, hochfrequente Foveaverschiebungen von unter 1 Grad –, um retinale Signale aufzufrischen und das Sehzentrum auf mikroskopischen Trefferflächen zu zentrieren (Rolfs, 2009; Martinez-Conde et al., 2004). Dieser Trainer koppelt Raw-Pointer-Lock-Hardwareeingaben mit digitaler Hochpräzisions-Chronometrie via performance.now() (Woods et al., 2015), um Endphasen-Oszillationen und Overflick-Drift zu eliminieren.",
+      "Messpräzision & Hardware-Latenz: Jedes Ereignis wird clientseitig mit der hochauflösenden Systemuhr performance.now() erfasst – es findet kein Upload von Daten statt. Zwei physikalische Grenzwerte sind zu beachten: Browser-Timer werden zum Schutz vor Spectre-Angriffen auf rund 1 ms gerundet, und der Monitor quantisiert Bildreize auf sein Bildwiederholintervall (~16,7 ms bei 60 Hz, 6,9 ms bei 144 Hz und 4,1 ms bei 240 Hz; Woods et al., 2015). Die USB-Abtastrate (Polling Rate) addiert etwa 8 ms bei 125 Hz gegenüber 1 ms bei 1000 Hz. Zeitunterschiede unter 5 ms stellen messtechnisches Rauschen dar; vergleiche daher deine Messreihen auf identischer Hardware."
     ],
     benchmarks: {
       title: "Mikrokorrektur-Latenz & Präzisions-Benchmarks (Millisekunden & Trefferquote)",
@@ -285,6 +287,7 @@ export default function MicroCorrectionDePage() {
   const copyDe = {
     h1Keyword: "Mikrokorrektur Aiming",
     h1Suffix: " – FPS Headshot Trainer",
+    subtitle: "Trainiere Endphasen-Bremskontrolle und unmittelbare Micro-Adjustments für tödliche Headshot-Präzision.",
     statScore: "Punkte",
     statTime: "Zeit",
     statAccuracy: "Präzision",
@@ -297,15 +300,13 @@ export default function MicroCorrectionDePage() {
     getReady: "BEREITMACHEN",
     toggleFlash: "Fehlschuss-Aufleuchten umschalten",
     toggleSound: "Soundeffekte umschalten",
-    pausedTitle: "Spiel Pausiert",
-    pausedSubtitle: "Klicke in das Spielfeld, um die Mauszeiger-Sperre zu reaktivieren.",
     stageCaption: "Klicke das Ankerziel an und korrigiere dein Fadenkreuz sofort mit feiner Fingerbewegung auf das Mikroziel.",
     rulesTitle: "Trainingsregeln & Punktesystem",
     rulesItems: [
-      { num: "1", text: "Ankerziel treffen", highlight: "+10 Pkt (+0,2s)", result: "Schaltet benachbartes Mikroziel frei" },
-      { num: "2", text: "Mikroziel treffen", highlight: "bis +585 Pkt (+0,2s)", result: "Punkte skalieren mit Präzision & Combo" },
-      { num: "3", text: "Levelaufstieg", highlight: "alle 1.400 Punkte", result: "Zielgrößen schrumpfen kontinuierlich" },
-      { num: "4", text: "Fehlschuss / Timeout", highlight: "Strafe", result: "Combo-Multiplikator wird sofort zurückgesetzt" }
+      { num: "1", text: "Ankerziel treffen", highlight: "+10 Pkt (+0,2s)", result: "Mikroziel aktiv" },
+      { num: "2", text: "Mikroziel treffen", highlight: "bis +585 Pkt", result: "Präzision × Combo" },
+      { num: "3", text: "Levelaufstieg", highlight: "+1 Level / 1.400 Pkt", result: "Adaptive Skalierung" },
+      { num: "4", text: "Fehlschuss / Timeout", highlight: "Strafe", result: "Combo-Reset (-0,6s)" }
     ],
     aboutTitle: "Über das Mikrokorrektur-Training",
     aboutHeading: "Was ist Mikrokorrektur-Aiming?",
@@ -360,6 +361,7 @@ export default function MicroCorrectionDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

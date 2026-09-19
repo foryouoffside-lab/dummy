@@ -2,6 +2,7 @@ import SteadyHandClient from '@/app/drills/motor/precision-control/steady-hand/S
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -336,8 +337,14 @@ const deCopy = {
   shareTitle: 'Ergebnis teilen',
   exitTitle: 'Beenden & Zurück',
   rulesTitle: 'Spielregeln & Steuerung',
+  rulesItems: [
+    { num: '1', text: 'Folge dem leuchtenden', highlight: 'Smaragd-Parcours exakt', result: 'Ziel setzt Timer auf 45s' },
+    { num: '2', text: 'Rundenerfolg', highlight: 'Endlose Steigerung', result: 'Engere Pfade & schärfere Kurven' },
+    { num: '3', text: 'Wandberührung', highlight: 'Sofortiger Reset', result: 'Startposition & Fehlerzählung' },
+    { num: '4', text: 'Echte Mausführung', highlight: 'Desktop empfohlen', result: '1:1 Rohdatenübertragung' },
+  ],
   rule1Text: 'Folge dem leuchtenden',
-  rule1Highlight: 'blauen Parcours exakt',
+  rule1Highlight: 'Smaragd-Parcours exakt',
   rule1Result: 'Ziel setzt Timer auf 45s',
   rule2Text: 'Rundenerfolg',
   rule2Highlight: 'Endlose Steigerung',
@@ -403,6 +410,7 @@ export default function GermanSteadyHandPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" locale="de" />
       </div>
+      <DrillFooter />
     </>
   );
 }

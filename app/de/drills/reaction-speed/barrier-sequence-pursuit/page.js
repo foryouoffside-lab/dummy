@@ -1,6 +1,7 @@
 import BarrierSequencePursuitClient from '@/app/drills/reaction-speed/barrier-sequence-pursuit/BarrierSequencePursuitWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -311,6 +312,7 @@ export default function GermanBarrierSequencePursuitPage() {
           currentHref="https://skilldrills.online/de/drills/reaction-speed/barrier-sequence-pursuit"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

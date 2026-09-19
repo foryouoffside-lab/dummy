@@ -1,5 +1,6 @@
-import FlowStateClient from '@/app/drills/fps/flow-state/FlowInductionClient';
+import FlowStateClient from '@/app/drills/fps/flow-state/FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -244,10 +245,10 @@ export default function FlowStateKoPage() {
     stageCaption: "연속적으로 부드럽게 유영하는 베지에 곡선 타겟에 조준선을 유지하며 에임 리듬을 타세요.",
     rulesTitle: "훈련 규칙 및 점수 체계",
     rulesItems: [
-      { num: "1", text: "추적 정렬 유지", highlight: "+10 PTS / 0.25초", result: "녹색 조준선을 타겟 중심에 고정" },
-      { num: "2", text: "동적 난이도 상승", highlight: "유기적 베지에 곡선", result: "레벨 상승에 따라 반경 축소 및 속도 증가" },
-      { num: "3", text: "시간 경제성", highlight: "+0.4초 / 초", result: "추적 유지 중 라운드 시간 회복" },
-      { num: "4", text: "집중 이탈 페널티", highlight: "콤보 리셋", result: "1.0초 이탈 시 콤보 초기화 (옵션 시 -0.6초)" }
+      { num: "1", text: "추적 정렬 유지", highlight: "+10 PTS (+0.4초/초)", result: "조준선을 타겟에 정렬 유지" },
+      { num: "2", text: "플로우 배수", highlight: "최대 3.0× 배수", result: "연속 집중 체인 지속" },
+      { num: "3", text: "레벨 상승", highlight: "+1 레벨 / 1400 PTS", result: "적응형 베지에 궤적 가속" },
+      { num: "4", text: "집중 이탈 페널티", highlight: "1.0초 이탈", result: "콤보 초기화 (-0.6초)" }
     ],
     aboutTitle: "플로우 상태(몰입) 에임 훈련 정보",
   };
@@ -257,7 +258,8 @@ export default function FlowStateKoPage() {
     intro: [
       "플로우 상태 트레이너는 인지 심리학과 운동 신경과학의 연구를 집약하여, 심리적 몰입(Zone), 지속 주의력 지구력, 그리고 정밀한 활창 추종 제어력을 체계적으로 배양하는 FPS 전문 훈련 도구입니다. 미하이 칙센트미하이(1975, 1990)의 몰입 이론이 입증하듯, 당면 과제의 도전도와 개인의 기량이 정밀하게 맞물릴 때 자기 검열과 잡념이 사라지며 완벽한 몰입에 도달합니다.",
       "Dietrich(2004)의 일시적 전두엽 기능 저하 가설(Transient Hypofrontality)은 이 상태의 신경학적 기전을 설명합니다. 배외측 전전두엽 피질(DLPFC)의 과도한 자의식 통제가 잦아들면서, 기저핵과 소뇌가 고도로 숙련된 에임 모션을 완벽히 자동 실행하게 됩니다. 이는 승부처의 극심한 압박 속에서도 망설임 없는 번개 같은 미세 교정을 가능케 합니다.",
-      "본 시스템은 performance.now() 고해상도 하드웨어 크로노메트리(Woods et al., 2015)와 부드러운 유기적 베지에 곡선 궤적(Krauzlis, 2004; Posner & Petersen, 1990)을 결합하여, 설치 없이 브라우저에서 바로 최고의 집중력 지구력을 완성시켜 줍니다."
+      "본 시스템은 performance.now() 고해상도 하드웨어 크로노메트리(Woods et al., 2015)와 부드러운 유기적 베지에 곡선 궤적(Krauzlis, 2004; Posner & Petersen, 1990)을 결합하여, 설치 없이 브라우저에서 바로 최고의 집중력 지구력을 완성시켜 줍니다.",
+      "측정 정밀도 및 하드웨어 환경 안내: 본 훈련의 모든 상호작용은 브라우저의 performance.now() 고해상도 타이머를 통해 사용자 기기 로컬에서만 측정되며 외부 서버로 전송되지 않습니다. 브라우저 타이머는 스펙터(Spectre) 보안 완화 조치로 인해 약 1ms 단위로 양자화되며, 모니터 주사율(60Hz 약 16.7ms, 144Hz 약 6.9ms, 240Hz 약 4.1ms, Woods et al., 2015) 및 마우스 폴링레이트(125Hz 약 8ms vs 1000Hz 약 1ms)에 따른 물리적 지연 편차가 존재합니다. 5ms 미만의 차이는 측정 노이즈로 해석해야 하며, 타인과의 단순 비교보다는 동일 하드웨어 환경에서의 개인 훈련 추이를 추적하는 지표로 활용하세요."
     ],
     benchmarks: {
       title: "인지 몰입 단계 및 주의 지속력 벤치마크 티어",
@@ -346,6 +348,7 @@ export default function FlowStateKoPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/flow-state" locale="ko" />
       </div>
       <DrillGuide guide={koGuide} />
+      <DrillFooter />
     </>
   );
 }

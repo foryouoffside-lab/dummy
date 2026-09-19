@@ -1,5 +1,6 @@
 import AngleHoldClient from '@/app/drills/fps/angle-hold-trainer/AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -309,10 +310,10 @@ export default function KoreanAngleHoldPage() {
     overviewTitle: "대기 에임과 크로스헤어 플레이스먼트의 원리",
     overviewLead: "대기 에임이란 적이 출현할 위치에 미리 조준선을 대기시켜 두고, 적이 겹쳐지는 순간 사격하는 방어 기술입니다. 인간의 단순 시각 반응 시간은 약 200~250ms이지만, 적의 행동을 구별하는 인지 판단이 개입되면 선택지 수에 따라 반응 시간이 지수적으로 증가합니다(Donders, 1868; Hick, 1952).",
     rulesItems: [
-      { num: "1", text: "표적 명중", highlight: "+100 PTS (+0.6초)", result: "× 콤보 × 레벨 배율" },
-      { num: "2", text: "콤보 시스템", highlight: "최대 3.0배 점수", result: "연속 적중 시 더욱 빠르고 가혹한 피킹 발생" },
-      { num: "3", text: "레벨 진행", highlight: "+1 레벨 / 1400 PTS", result: "노출 시간 단축 및 적응형 표적 축소" },
-      { num: "4", text: "놓침・오발・조기 격발", highlight: "실패 페널티", result: "콤보 리셋 (시간 페널티 활성 시 -0.8초)" }
+      { num: "1", text: "피킹 적중", highlight: "+100 PTS (+0.6초)", result: "×콤보 배율" },
+      { num: "2", text: "피킹 출현", highlight: "모퉁이 기습", result: "노출시간 단축" },
+      { num: "3", text: "레벨 진행", highlight: "+1 레벨 / 1400 PTS", result: "적응형 난이도" },
+      { num: "4", text: "놓침 / 조기격발", highlight: "실패 페널티", result: "콤보 리셋 (-0.8s)" }
     ],
     aboutCards: [
       { iconBg: "bg-blue-600", title: "추천 대상 플레이어", text: "발로란트에서 사이트를 홀딩하는 앵커, 카스2에서 초크포인트를 수비하는 디펜더, 정밀한 프리 에임 반응을 극한으로 끌어올리고 싶은 게이머." },
@@ -376,6 +377,7 @@ export default function KoreanAngleHoldPage() {
       </div>
 
       <DrillGuide guide={angleHoldGuideKo} />
+      <DrillFooter />
     </>
   );
 }

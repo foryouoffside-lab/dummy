@@ -15,7 +15,7 @@ import { getFpsScoreGrade, getComboMultiplier } from '../../../../lib/scoringEng
 import { getDifficultyProgress, getStartLevel, ramp } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { drawTacticalTarget, createHitRing, drawHitRings } from '@/lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
@@ -34,6 +34,13 @@ const TIME_PER_HIT = 0.6; // +0.6s per valid hit
 const TIME_PENALTY = 0.8; // -0.8s on miss / target timeout (opt-in gated)
 const STORAGE_KEY = 'skilldrills_barrier_sequence_pursuit_v3';
 const TARGET_FILL_COLOR = '#ef4444';
+
+const RULES_ITEMS = [
+  { num: '1', text: 'Peeking Target Hit', highlight: '+100 PTS (+0.6s)', result: '×Combo Mult' },
+  { num: '2', text: 'Streak & Heat', highlight: 'Up to 3.0×', result: 'Faster Peeks' },
+  { num: '3', text: 'Level Progression', highlight: '+1 Level / 1750 PTS', result: 'Adaptive Scaling' },
+  { num: '4', text: 'Miss / Timeout', highlight: 'Penalty', result: 'Resets Combo (-0.8s)' },
+];
 
 const RELATED_DRILLS = [
   { id: "fps-tracking-trainer", name: "FPS Tracking Trainer", cat: "Reaction Speed", desc: "Condition tracking accuracy against dynamic moving targets.", href: "/drills/reaction-speed/fps-tracking-trainer" },
@@ -76,7 +83,6 @@ const getLevelConfig = (level: number, combo = 0) => {
 
 type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
 type Barrier = { x: number; y: number; w: number; h: number };
-type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 
 export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?: string } } = {}) {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
@@ -120,6 +126,7 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const bestLevelRunRef = useRef(1);
   const lastTimeRef = useRef(DRILL_DURATION);
+  const mousePosRef = useRef({ x: -100, y: -100, active: false });
 
   const engine = useRef({
     score: 0,
@@ -133,7 +140,7 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
     timeLeft: DRILL_DURATION,
     screenShake: 0,
     particles: [] as Particle[],
-    rings: [] as RingBurst[],
+    hitRings: [] as ReturnType<typeof createHitRing>[],
     barriers: [] as Barrier[],
     target: {
       active: false,
@@ -208,6 +215,26 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
   });
+
+  // Direct Escape and Fullscreen Exit Lifecycle
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown' || isFullscreen)) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isFullscreen, handleExitDrill]);
 
   // Complete Drill Session cleanly
   const endGame = useCallback(() => {
@@ -324,7 +351,7 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
       timeLeft: DRILL_DURATION,
       screenShake: 0,
       particles: [],
-      rings: [],
+      hitRings: [],
       barriers: [],
       target: {
         active: false,
@@ -401,11 +428,11 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
         setUiCombo(e.combo);
         drillAudio.playHit();
 
-        // Particles explosion (colored to match the target's own rendered body)
-        const hitColor = TARGET_FILL_COLOR;
-        for (let i = 0; i < 10; i++) {
+        // Particles explosion with combo color shift
+        const hitColor = e.combo >= 10 ? '#34d399' : (e.combo >= 5 ? '#f59e0b' : TARGET_FILL_COLOR);
+        for (let i = 0; i < 14; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const spd = 2 + Math.random() * 4;
+          const spd = 2 + Math.random() * 5;
           e.particles.push({
             x: e.target.x,
             y: e.target.y,
@@ -416,16 +443,8 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
           });
         }
 
-        // Ring Burst Effect
-        e.rings.push({
-          x: e.target.x,
-          y: e.target.y,
-          startR: e.target.radius * 0.4,
-          maxR: e.target.radius * 2.6,
-          life: 0.28,
-          maxLife: 0.28,
-          color: hitColor
-        });
+        // Ring Burst Effect (via canvasFx)
+        e.hitRings.push(createHitRing(e.target.x, e.target.y, e.target.radius, hitColor));
 
         e.target.active = false;
         const delay = config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin);
@@ -571,62 +590,9 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
         t.y = t.baseY + (t.peekY - t.baseY) * ease;
       }
 
-      // Draw active target
+      // Draw active target cleanly with standard tactical styling
       if (e.target.active) {
-        const t = e.target;
-        const r = t.radius;
-        const remaining = Math.max(0, 1 - (now - t.spawnTime) / t.ttl);
-        ctx.save();
-
-        // Depleting countdown ring
-        ctx.globalAlpha = 0.5;
-        ctx.strokeStyle = remaining < 0.3 ? '#ef4444' : '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r + 8, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
-        ctx.stroke();
-
-        // Ghost outer ring
-        ctx.globalAlpha = 0.2;
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r + 5, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Tactical outer ring
-        ctx.globalAlpha = 0.55;
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Filled red body with subtle glow
-        ctx.globalAlpha = 0.88;
-        ctx.shadowColor = TARGET_FILL_COLOR;
-        ctx.shadowBlur = 14;
-        ctx.fillStyle = TARGET_FILL_COLOR;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Highlight sheen
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(t.x - r * 0.2, t.y - r * 0.2, r * 0.28, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bright white center core
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, Math.max(2.5, r * 0.18), 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
+        drawTacticalTarget(ctx, e.target.x, e.target.y, e.target.radius, TARGET_FILL_COLOR);
       }
 
       // Draw Tactical Cover Barriers (Drawn AFTER target so targets peek from behind)
@@ -652,22 +618,8 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
         ctx.restore();
       }
 
-      // Ring Bursts Draw
-      for (let i = e.rings.length - 1; i >= 0; i--) {
-        const ring = e.rings[i];
-        ring.life -= dt;
-        if (ring.life <= 0) { e.rings.splice(i, 1); continue; }
-        const progress = 1 - ring.life / ring.maxLife;
-        const currentR = ring.startR + (ring.maxR - ring.startR) * progress;
-        ctx.save();
-        ctx.globalAlpha = (ring.life / ring.maxLife) * 0.75;
-        ctx.strokeStyle = ring.color;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(ring.x, ring.y, currentR, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
+      // Draw Hit Rings (from canvasFx)
+      drawHitRings(ctx, e.hitRings, dt);
 
       // Particles Update & Draw
       for (let i = e.particles.length - 1; i >= 0; i--) {
@@ -679,13 +631,41 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
           e.particles.splice(i, 1);
           continue;
         }
+        ctx.save();
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       }
       ctx.globalAlpha = 1.0;
+
+      // Tactical Pro White Crosshair
+      if (gameState === 'playing' && mousePosRef.current.active && !isMobile) {
+        const mx = mousePosRef.current.x;
+        const my = mousePosRef.current.y;
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+
+        // Center dot
+        ctx.beginPath();
+        ctx.arc(mx, my, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crosshair lines: gap 4px, length 10px (radius 14px)
+        ctx.beginPath();
+        ctx.moveTo(mx, my - 14); ctx.lineTo(mx, my - 4);
+        ctx.moveTo(mx, my + 4); ctx.lineTo(mx, my + 14);
+        ctx.moveTo(mx - 14, my); ctx.lineTo(mx - 4, my);
+        ctx.moveTo(mx + 4, my); ctx.lineTo(mx + 14, my);
+        ctx.stroke();
+        ctx.restore();
+      }
 
       ctx.restore();
       animationRef.current = requestAnimationFrame(draw);
@@ -697,7 +677,7 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       ro.disconnect();
     };
-  }, [gameState, endGame, spawnTarget, triggerFlash]);
+  }, [gameState, endGame, spawnTarget, triggerFlash, isMobile]);
 
   // Share Score Card helper
   const sharePage = useCallback(async () => {
@@ -835,8 +815,23 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
           {/* CANVAS */}
           <canvas 
             ref={canvasRef} 
-            onPointerDown={(e) => handleCanvasInteraction(e.clientX, e.clientY)}
-            className="block absolute top-0 left-0 w-full h-full z-10 cursor-crosshair touch-none" 
+            onPointerDown={(e) => {
+              if (canvasRef.current) {
+                const r = canvasRef.current.getBoundingClientRect();
+                mousePosRef.current = { x: e.clientX - r.left, y: e.clientY - r.top, active: true };
+              }
+              handleCanvasInteraction(e.clientX, e.clientY);
+            }}
+            onPointerMove={(e) => {
+              if (canvasRef.current) {
+                const r = canvasRef.current.getBoundingClientRect();
+                mousePosRef.current = { x: e.clientX - r.left, y: e.clientY - r.top, active: true };
+              }
+            }}
+            onPointerLeave={() => {
+              mousePosRef.current.active = false;
+            }}
+            className={`block absolute top-0 left-0 w-full h-full z-10 touch-none ${gameState === 'playing' ? 'cursor-none' : 'cursor-crosshair'}`} 
           />
 
           {/* START CARD */}
@@ -887,15 +882,9 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Hit Peeking Targets" highlight="+100 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
-                <RuleItem num="2" text="Combo & Heat System" highlight="Up to 3.0x Multiplier" result="Higher streaks speed up peek frequency" />
-                <RuleItem num="3" text="Level Progression" highlight="Continuous Scaling" result="Targets shrink and exposure windows shorten" />
-                <RuleItem 
-                  num="4" 
-                  text="Miss & Timeout Rules" 
-                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
-                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
-                />
+                {RULES_ITEMS.map((r) => (
+                  <RuleItem key={r.num} {...r} />
+                ))}
               </div>
             </DrillAccordion>
 
@@ -973,9 +962,6 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
           </section>
         )}
 
-        {/* SITE FOOTER */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
@@ -984,13 +970,15 @@ export default function BarrierSequencePursuitClient({ copy }: { copy?: { title?
 // === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans min-w-0">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-lg flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
+        <p className="text-xs sm:text-sm font-medium text-gray-100 font-sans truncate min-w-0">
           {text}{highlight && <span className="font-black text-white"> ({highlight})</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-black px-2.5 py-1 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide flex-shrink-0">
           {result}
         </div>
       </div>

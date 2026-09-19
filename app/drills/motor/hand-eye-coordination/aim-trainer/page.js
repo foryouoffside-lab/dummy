@@ -1,6 +1,7 @@
 import AimTrainerClient from './AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -247,6 +248,12 @@ const howToSchema = {
 const copyEn = {
   h1Keyword: "Aim Trainer Online",
   h1Suffix: " - Aim Trainer Elite Online",
+  rulesItems: [
+    { num: "1", text: "Target Hit", highlight: "+100 PTS / +0.6s", result: "Acquire & Click Moving Targets" },
+    { num: "2", text: "Continuous Combo", highlight: "Up to 3.0× Points", result: "Chain Consecutive Hits" },
+    { num: "3", text: "Level Progression", highlight: "+1 Level / 1750 PTS", result: "Targets Shrink & Accelerate" },
+    { num: "4", text: "Miss & Timeout", highlight: "Combo Reset", result: "Penalty Deducts -0.8s" }
+  ],
 };
 export default function AimTrainerPage() {
   const sources = pickSources('fitts1954', 'mackenzie1992', 'elliott2010', 'woodworth1899', 'woods2015');
@@ -444,6 +451,7 @@ export default function AimTrainerPage() {
           </div>
         </div>
       </DrillGuide>
+      <DrillFooter />
     </>
   );
 }

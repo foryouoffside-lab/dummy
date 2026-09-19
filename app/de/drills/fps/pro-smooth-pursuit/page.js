@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Smooth Pursuit Aim Trainer – Kurven-Tracking | SkillDrills",
@@ -310,10 +311,10 @@ export default function GermanProSmoothPursuitPage() {
     stageCaption: "Führe dein Fadenkreuz kontinuierlich und ohne Ruckeln auf dem oszillierenden Ziel entlang flüssiger Kurvenbahnen.",
     rulesTitle: "Trainingsanleitung & Punktesystem",
     rulesItems: [
-      { title: "Ziel-Tracking", text: "+10 PTS (+0,4s/s) für kontinuierliche Verweildauer im Zielradius." },
-      { title: "Combo-Multiplikator", text: "Bis zu 3,0x Punkte bei ununterbrochenem Strahl-Tracking." },
-      { title: "Level-Progression", text: "Alle 1400 PTS steigt das Level; Zielgeschwindigkeit und Kurvendynamik ziehen an." },
-      { title: "Zielverlust-Strafe", text: "Längeres Abdriften setzt die Combo zurück (bei Strafzeit: -0,6s nach 1,0s Zielverlust)." }
+      { num: "1", text: "Ziel-Tracking", highlight: "+50 PTS (+0.4s/s)", result: "×Combo-Multiplikator" },
+      { num: "2", text: "Kontinuierliche Combo", highlight: "Bis zu 3.0×", result: "Max. Multiplikator" },
+      { num: "3", text: "Levelaufstieg", highlight: "+1 Level / 1400 PTS", result: "Adaptive Kurven" },
+      { num: "4", text: "Zielverlust-Strafe", highlight: "1.0s Zielverlust", result: "Combo-Reset (-0.6s)" }
     ],
     aboutTitle: "Über den Smooth Pursuit Aim Trainer"
   };
@@ -349,6 +350,7 @@ export default function GermanProSmoothPursuitPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/pro-smooth-pursuit" locale="de" />
       </div>
       <DrillGuide guide={proSmoothPursuitGuide} />
+      <DrillFooter />
     </>
   );
 }

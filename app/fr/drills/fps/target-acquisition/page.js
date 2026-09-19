@@ -1,6 +1,7 @@
 import TargetAcquisitionClient from '@/app/drills/fps/target-acquisition/TargetAcquisitionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -293,6 +294,7 @@ export default function TargetAcquisitionFrPage() {
   const copyFr = {
     h1Keyword: "Acquisition de Cibles FPS",
     h1Suffix: " – Premier Tir",
+    subtitle: "Entraînez la détection visuelle des cibles, la discrimination des menaces et la précision du premier tir avec analyse en temps réel.",
     statScore: "Score",
     statTime: "Temps",
     statAccuracy: "Précision",
@@ -310,18 +312,10 @@ export default function TargetAcquisitionFrPage() {
     stageCaption: "Repérez et cliquez sur la cible la plus brillante (plus forte opacité) de chaque grappe le plus vite et le plus précisément possible.",
     rulesTitle: "Consignes de l'Exercice et Barème",
     rulesItems: [
-      {
-        title: "Tir Réussi (+100 PTS / +0,4s)",
-        text: "Tirez d'abord sur la cible la plus brillante. Les multiplicateurs de combo et bonus de palier s'additionnent."
-      },
-      {
-        title: "Tir Manqué ou Ordre Erroné (-50 PTS / -1,0s)",
-        text: "Cliquer sur une cible secondaire avant la principale réinitialise votre combo et déduit du temps au chronomètre."
-      },
-      {
-        title: "Série Complète Neutralisée (+400 PTS)",
-        text: "Éliminer l'ensemble des cibles dans le bon ordre octroie un important bonus et lance une configuration plus ardue."
-      }
+      { num: "1", text: "Cible Touchée", highlight: "+100 PTS (+0,4s)", result: "×Multiplicateur Combo" },
+      { num: "2", text: "Série Neutralisée", highlight: "+400 PTS × Niveau", result: "Nouvelle Grappe" },
+      { num: "3", text: "Niveau Supérieur", highlight: "+1 / 1400 PTS", result: "Progression Dynamique Continue" },
+      { num: "4", text: "Tir Erroné / Manqué", highlight: "Pénalité", result: "Réinitialise Combo (-0,6s)" }
     ],
     aboutTitle: "À Propos de l'Acquisition de Cibles",
     aboutHeading: "Qu'est-ce que l'Acquisition de Cibles ?",
@@ -363,6 +357,7 @@ export default function TargetAcquisitionFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

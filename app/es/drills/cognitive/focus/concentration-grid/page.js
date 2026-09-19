@@ -234,21 +234,25 @@ const faqSchema = {
 const concentrationGridGuideEs = {
   heading: "Guía Completa de la Tabla de Schulte y Psicología de la Atención Visual",
   intro: [
-    "La Tabla de Schulte (Concentration Grid) es uno de los instrumentos psicodiagnósticos y de acondicionamiento cognitivo más estudiados en neurociencia visual. Diseñada originalmente por el psiquiatra Walter Schulte, su propósito es ensanchar el campo visual funcional (Functional Field of View) y reducir la latencia de fijación ocular durante la exploración secuencial (Lu et al., 2022; Rayner, 1998).",
-    "A diferencia de las pruebas de búsqueda estáticas, este simulador implementa matrices en expansión continua (desde 3x3 hasta 8x8) bajo un límite estricto de 45 segundos. A medida que el usuario encuentra cada número, la densidad estimular aumenta, sometiendo al sistema atencional a un fenómeno de apiñamiento visual progresivo (Crowding Effect) que exige una estricta integración de características perceptuales (Treisman & Gelade, 1980; Wolfe, 2007).",
-    "Evidencia en lectura rápida y deportes de alta velocidad: Las investigaciones demuestran que los lectores eficientes no fijan cada palabra de manera individual, sino que utilizan el campo parafoveal para procesar hasta 14-15 caracteres a la derecha de la fijación (Rayner, 2016). En el ámbito deportivo, pilotos y atletas de élite recurren a estas cuadrículas para reducir los tiempos de reacción sacádica y sostener la agudeza atencional bajo situaciones de estrés competitivo (Woods et al., 2015)."
+    "La Tabla de Schulte (Concentration Grid) es uno de los instrumentos psicodiagnósticos y de acondicionamiento cognitivo más consolidados en la neurociencia visual. Diseñada originalmente por el psiquiatra alemán Walter Schulte (1962) para evaluar la eficiencia de la búsqueda visual y la fatiga mental, su paradigma tradicional exige localizar los números del 1 al 25 en orden estrictamente ascendente sobre una matriz de 5x5 manteniendo la fijación en el centro.",
+    "En la psicología del deporte aplicada, este ejercicio evolucionó hacia la denominada 'cuadrícula de concentración' (Harris & Harris, 1984), empleada por preparadores de élite en tenis, automovilismo y béisbol para entrenar la velocidad de barrido ocular y la disciplina atencional bajo presión temporal. Un estudio de potenciales relacionados con eventos (ERP) en niños de 8 a 11 años reveló que la búsqueda secuencial activa componentes neuronales sensiblemente más lentos que la localización simple, acentuándose la latencia ante estímulos dicromáticos (Lu et al., 2022).",
+    "El simulador de SkillDrills eleva este protocolo histórico a una tarea de rendimiento continuo (Continuous Performance Task). En lugar de una matriz aislada, la cuadrícula se expande dinámicamente desde 3x3 hasta 8x8 a medida que se completan las fases, introduciendo perturbaciones de rotación a partir del nivel 5x5 para desafiar la amplitud perceptual y la coordinación foveal-parafoveal en una sesión fija de 45 segundos (Treisman & Gelade, 1980; Wolfe, 2007).",
+    "Metodología de cronometría: cada evento de pulsación se registra con el reloj de alta resolución performance.now() del navegador en su propio dispositivo. Los navegadores web aplican una atenuación deliberada por motivos de seguridad (mitigación de Spectre a ~1 ms) y la pantalla cuantiza las actualizaciones a su tasa de refresco: aproximadamente 16,7 ms por fotograma a 60 Hz (Woods et al., 2015). Se recomienda evaluar progresos en el mismo dispositivo.",
+    "Transparencia de datos: SkillDrills no recopila datos agregados de los usuarios. Sus mejores registros y configuraciones permanecen almacenados exclusivamente en el localStorage local de su navegador, sin transmisión a servidores remotos.",
+    "Este ejercicio es una herramienta interactiva de entrenamiento de reflejos y agilidad cognitiva con fines formativos. No constituye un instrumento diagnóstico médico ni una terapia para el TDAH, dislexia u otras condiciones clínicas. Ante dudas sobre su atención o visión, consulte con un profesional sanitario cualificado."
   ],
   benchmarks: {
-    title: "Baremos de Rendimiento y Rango de Visión Periférica",
-    headers: ["Nivel de Rendimiento", "Puntuación (45s)", "Cuadrícula Máxima", "Interpretación Neurocognitiva"],
+    title: "Baremos de Rendimiento de la Tabla de Schulte y Cuadrícula de Concentración (45s)",
+    headers: ["Nivel de Rendimiento", "Puntuación (45s)", "Cuadrícula Máxima", "Latencia de Búsqueda", "Interpretación Neurocognitiva"],
     rows: [
-      ["Élite (Pilotos / Esports Pro)", "7.500+ pts", "7x7 o superior", "Excelente amplitud de visión parafoveal. Mínima latencia sacádica, localización simultánea de dígitos adyacentes sin fijación central obligatoria."],
-      ["Avanzado (Lectores Rápidos)", "5.500 – 7.499 pts", "6x6 – 7x7", "Gran disciplina atencional. Capacidad constante de pre-planificación de movimientos oculares (Lookahead Saccades) sin saltos erráticos."],
-      ["Competente (Promedio Entrenado)", "3.500 – 5.499 pts", "5x5 – 6x6", "Búsqueda visual organizada. Ligera desaceleración ante dígitos rotados o en las esquinas más alejadas de la cuadrícula."],
-      ["Intermedio", "2.000 – 3.499 pts", "4x4 – 5x5", "Dependencia de movimientos oculares fóvea a fóvea. Tendencia a perder el ritmo al pasar de una fila a otra."],
-      ["Principiante", "< 2.000 pts", "3x3 – 4x4", "Búsqueda desordenada con frecuentes regresiones oculares. Dificultad para inhibir distractores numéricos cercanos."]
+      ["S+ (Élite)", "8.000+ PTS", "7x7+ (49+ casillas)", "< 300 ms / objetivo", "Velocidad de escaneo visual de clase mundial, amplitud periférica sobresaliente e instantánea invarianza rotacional."],
+      ["S (Maestría)", "6.000 – 7.999 PTS", "6x6 (36 casillas)", "300 – 450 ms / objetivo", "Eficiencia superior de búsqueda visual; pre-visualización parafoveal fluida y mínimas pausas de fijación."],
+      ["A (Avanzado)", "4.500 – 5.999 PTS", "5x5 (25 casillas)", "450 – 600 ms / objetivo", "Sólido procesamiento del campo visual; chunking secuencial por pares constante en matrices de densidad media."],
+      ["B (Competente)", "3.000 – 4.499 PTS", "4x4 (16 casillas)", "600 – 800 ms / objetivo", "Disciplina de búsqueda por encima del promedio; pausas ocasionales de re-fijación central en cuadrículas mayores."],
+      ["C (Intermedio)", "1.800 – 2.999 PTS", "3x3 (9 casillas)", "800 – 1.100 ms / objetivo", "Rendimiento basal estándar; dependencia predominante de movimientos sacádicos foveales sucesivos."],
+      ["D (En desarrollo)", "< 1.800 PTS", "3x3 (parcial)", "> 1.100 ms / objetivo", "Interferencia por apiñamiento visual (crowding); alto conteo sacádico y discriminación numérica vacilante."]
     ],
-    note: "Puntuaciones basadas en sesiones fijas de 45 segundos sin tiempo añadido. Las cuadrículas limpiadas con precisión superior al 95% reflejan un control óptimo de la atención sostenida."
+    note: "Estos baremos se fundamentan en investigaciones experimentales sobre exploración visual y atención selectiva (Lu et al., 2022; Treisman & Gelade, 1980; Rayner, 1998; Wolfe, 2007). Las puntuaciones individuales varían según la tasa de refresco del monitor, el tipo de puntero y la fatiga ocular."
   },
   techniques: {
     title: "Protocolos y Estrategias Científicas de Optimización",

@@ -325,16 +325,7 @@ export default function NBackPageKo() {
 
       <NBackClient copy={nBackClientCopyKo} />
 
-      <DrillGuide
-        lead={guideKo.lead}
-        metrics={guideKo.metrics}
-        benchmarks={guideKo.benchmarks}
-        science={guideKo.science}
-        protocols={guideKo.protocols}
-        sources={guideKo.sources}
-        faqs={guideKo.faqs}
-        related={guideKo.related}
-      />
+      <DrillGuide {...guideKo} />
 
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="memory" currentHref="/drills/memory/working-memory/n-back" locale="ko" />

@@ -1,6 +1,7 @@
 import RecoilControlClient from '@/app/drills/fps/recoil-control/RecoilControlClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -338,7 +339,7 @@ export default function RecoilControlPageJa() {
       { num: "1", text: "ヘッドショット命中", highlight: "+100 PTS / +0.25秒", result: "最優先ターゲットゾーン" },
       { num: "2", text: "胴体・四肢ヒット", highlight: "+40 / +20 PTS", result: "コンボ継続" },
       { num: "3", text: "レベル進行", highlight: "+1レベル / 1400 PTS", result: "標的速度 & 反動倍率上昇" },
-      { num: "4", text: "マガジン規律", highlight: "失敗ペナルティ", result: "マガジン命中率40%未満でコンボリセット（ペナルティ有効時 -0.6秒）" }
+      { num: "4", text: "マガジン規律", highlight: "命中率40%未満ペナルティ", result: "コンボ喪失 (-0.6秒)" }
     ],
     aboutTitle: "リコイル練習トレーナーについて",
     whyMattersTitle: "なぜリコイル制御（反動補正）が重要なのか",
@@ -407,6 +408,7 @@ export default function RecoilControlPageJa() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/recoil-control" locale="ja" />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -1,6 +1,8 @@
 import AimTrainerClient from '@/app/drills/motor/hand-eye-coordination/aim-trainer/AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
+import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -251,6 +253,38 @@ export default function AimTrainerPortuguesePage() {
           title: 'Treino de Mira Online (Aim Trainer)',
           subtitle: 'Alvos Móveis Dinâmicos & Precisão de Clique • Progressão Contínua de Nível',
           caption: 'Mire e acerte os alvos em movimento o mais rápido e preciso possível antes que desapareçam. Baseado na Lei de Fitts.',
+          startButtonText: 'INICIAR TREINO',
+          playAgainText: 'Jogar Novamente',
+          shareText: 'Compartilhar Pontuação',
+          exitText: 'Sair',
+          rulesTitle: 'Instruções & Sistema de Pontuação',
+          aboutTitle: 'Sobre o Aim Trainer Elite',
+          rulesItems: [
+            {
+              num: "1",
+              text: "Acerto no Alvo",
+              highlight: "+100 PTS / +0,6s",
+              result: "Detecte e clique nos alvos móveis"
+            },
+            {
+              num: "2",
+              text: "Combo Contínuo",
+              highlight: "Até 3,0× Multiplicador",
+              result: "Encadeie acertos limpos sem errar"
+            },
+            {
+              num: "3",
+              text: "Progressão de Nível",
+              highlight: "+1 Nível / 1750 PTS",
+              result: "Alvos encolhem e aceleram"
+            },
+            {
+              num: "4",
+              text: "Erro e Expiração",
+              highlight: "Reset de Combo",
+              result: "Penalidade deduz -0,8s"
+            }
+          ]
         }}
       />
 
@@ -351,6 +385,9 @@ export default function AimTrainerPortuguesePage() {
         </div>
 
         <h3>4 Princípios Práticos para Desenvolver Mira Precisa</h3>
+        <p>
+          Para comprimir sistematicamente a latência de aquisição de alvos e maximizar a precisão em micro-flicks, aplique estes quatro protocolos neuromotores baseados em evidências durante seu treino:
+        </p>
         <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
           <li>
             <strong>Flick Inicial Firme (Woodworth, 1899):</strong> Cubra a maior parte da distância até o alvo com um movimento contínuo e rápido, sem pausas ou hesitações no trajeto.
@@ -430,6 +467,14 @@ export default function AimTrainerPortuguesePage() {
           </div>
         </div>
       </DrillGuide>
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/aim-trainer"
+          locale="pt"
+        />
+      </div>
+      <DrillFooter />
     </>
   );
 }

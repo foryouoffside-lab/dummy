@@ -1,5 +1,6 @@
 import RecoilControlClient from './RecoilControlClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -297,7 +298,13 @@ export default function RecoilControlPage() {
   const copyEn = {
     h1Prefix: null,
     h1Keyword: "Recoil Control Trainer",
-    h1Suffix: null
+    h1Suffix: null,
+    rulesItems: [
+      { num: "1", text: "Headshot Precision", highlight: "+100 PTS / +0.25s", result: "Top Priority Target Zone" },
+      { num: "2", text: "Chest & Limb Hits", highlight: "+40 / +20 PTS", result: "Maintains Combo Streak" },
+      { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Speed & Recoil Scale" },
+      { num: "4", text: "Magazine Discipline", highlight: "<40% Mag Penalty", result: "Resets Combo (-0.6s)" }
+    ]
   };
 
   return (
@@ -331,6 +338,8 @@ export default function RecoilControlPage() {
       <RecoilControlClient copy={copyEn} />
 
       <DrillGuide guide={recoilControlGuide} />
+
+      <DrillFooter />
     </>
   );
 }

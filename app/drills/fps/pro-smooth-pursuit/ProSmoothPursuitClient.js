@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
+  Activity, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
   Timer, Volume2, VolumeX,
   Share2, LogOut,
@@ -20,9 +20,7 @@ import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
@@ -67,13 +65,31 @@ const getLevelConfig = (level, combo = 0) => {
 };
 
 // ============================================================
-// ACCORDION DATA
+// ACCORDION DATA & RULE ITEM
 // ============================================================
+function RuleItem({ num, text, highlight = '', result }) {
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
+        </p>
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
+          {result}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const RULES_ITEMS = [
-  { title: "Tracking Alignment", text: "Score +50 PTS × Combo × Level (+0.4s/s) while locked on the Lissajous curve target." },
-  { title: "Continuous Combo", text: "Chain continuous tracking uptime to build combo multiplier up to 3.0x max." },
-  { title: "Off-Target Penalty", text: "Falling off target for 1.0s resets active combo multiplier chain and deducts time when enabled." },
-  { title: "Level Progression", text: "Level up every 1400 PTS scored. Target speed accelerates & curves sharpen dynamically." }
+  { num: "1", text: "Tracking Alignment", highlight: "+50 PTS (+0.4s/s)", result: "×Combo Mult" },
+  { num: "2", text: "Continuous Combo", highlight: "Up to 3.0×", result: "Max Multiplier" },
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Curves" },
+  { num: "4", text: "Off-Target Penalty", highlight: "1.0s Off-Target", result: "Resets Combo (-0.6s)" }
 ];
 
 
@@ -135,9 +151,25 @@ export default function ProSmoothPursuitClient({ copy = null }) {
     combo: 0, bestCombo: 0,
     onTargetTimer: 0, continuousTrackTime: 0, msOffTarget: 0, offTargetTotalTime: 0,
     totalFrames: 0, framesOnTarget: 0,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 0, logicalHeight: 0
   });
+
+  const createExplosion = useCallback((x, y, color) => {
+    const pCount = 14;
+    for (let i = 0; i < pCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 4.5;
+      engine.current.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        color
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const saved = getSavedData();
@@ -244,7 +276,7 @@ export default function ProSmoothPursuitClient({ copy = null }) {
       level: startLevel, score: 0, timeLeft: DRILL_DURATION,
       combo: 0, bestCombo: 0, onTargetTimer: 0, continuousTrackTime: 0,
       msOffTarget: 0, offTargetTotalTime: 0, totalFrames: 0, framesOnTarget: 0,
-      particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
     setIsFullscreen(true);
@@ -266,35 +298,79 @@ export default function ProSmoothPursuitClient({ copy = null }) {
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, []);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
 
-    setIsFullscreen(false);
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
     if (document.pointerLockElement) {
-      document.exitPointerLock();
+      try { document.exitPointerLock(); } catch (e) {}
     }
+    if (document.fullscreenElement) {
+      try { document.exitFullscreen(); } catch (e) {}
+    }
+
+    setIsFullscreen(false);
+    setPointerLocked(false);
     setGameState('start');
-  }, []);
+    setScore(0);
+    setTimeLeft(DRILL_DURATION);
+    setAccuracy(100);
+    setCombo(0);
 
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
+    const w = engine.current.logicalWidth || 800;
+    const h = engine.current.logicalHeight || 450;
+    engine.current = {
+      t: 0,
+      crosshair: { x: w / 2, y: h / 2, initialized: false },
+      level: 1, score: 0, timeLeft: DRILL_DURATION,
+      combo: 0, bestCombo: 0, onTargetTimer: 0, continuousTrackTime: 0,
+      msOffTarget: 0, offTargetTotalTime: 0, totalFrames: 0, framesOnTarget: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
+      logicalWidth: w, logicalHeight: h
+    };
   }, []);
 
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (gameState === 'playing' || gameState === 'countdown' || gameState === 'gameOver') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleExitDrill();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [gameState, handleExitDrill]);
+
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked);
+      if (!isLocked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+  }, [gameState, handleExitDrill]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = !!document.fullscreenElement;
+      setIsFullscreen(isFull);
+      if (!isFull && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -412,6 +488,9 @@ export default function ProSmoothPursuitClient({ copy = null }) {
             setLevel(Math.floor(e.level));
 
             drillAudio.playHit();
+            const hitColor = e.combo >= 10 ? '#34d399' : '#10b981';
+            createExplosion(targetX, targetY, hitColor);
+            e.hitRings.push(createHitRing(targetX, targetY, cfg.radius, hitColor));
             createHitMarker(e.crosshair.x, e.crosshair.y);
           }
 
@@ -436,6 +515,7 @@ export default function ProSmoothPursuitClient({ copy = null }) {
               e.screenShake = 6;
               triggerFlash();
               drillAudio.playPenalty();
+              createExplosion(targetX, targetY, '#ef4444');
             }
             if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.msOffTarget = 0;
@@ -475,18 +555,35 @@ export default function ProSmoothPursuitClient({ copy = null }) {
         const dist = Math.hypot(e.crosshair.x - targetX, e.crosshair.y - targetY);
         const isLocked = dist <= cfg.radius;
 
-        const targetColor = isLocked ? '#00ff88' : '#ef4444';
+        const targetColor = isLocked ? (e.combo >= 10 ? '#34d399' : '#10b981') : '#ef4444';
 
-        drawPulseRing(ctx, targetX, targetY, cfg.radius, targetColor, (time % 1000) / 1000);
         drawTacticalTarget(ctx, targetX, targetY, cfg.radius, targetColor, true);
       }
+
+      // Render particles
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Render hit rings
+      drawHitRings(ctx, e.hitRings, dt);
 
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
         hm.life -= dt * 4.5;
         if (hm.life <= 0) { e.hitMarkers.splice(i, 1); continue; }
-        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#00ff88';
+        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#ffffff';
         const s = 5 + (1 - hm.life) * 6;
         ctx.beginPath();
         ctx.moveTo(hm.x - s, hm.y - s); ctx.lineTo(hm.x + s, hm.y + s);
@@ -497,7 +594,10 @@ export default function ProSmoothPursuitClient({ copy = null }) {
 
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
+        const activeColor = '#ffffff';
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 
@@ -505,7 +605,7 @@ export default function ProSmoothPursuitClient({ copy = null }) {
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2); ctx.stroke();
 
         ctx.lineWidth = 1.5;
-        const gap = 5;
+        const gap = 4;
         ctx.beginPath();
         ctx.moveTo(ch.x, ch.y - 14); ctx.lineTo(ch.x, ch.y - gap);
         ctx.moveTo(ch.x, ch.y + 14); ctx.lineTo(ch.x, ch.y + gap);
@@ -514,6 +614,7 @@ export default function ProSmoothPursuitClient({ copy = null }) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -650,26 +751,8 @@ export default function ProSmoothPursuitClient({ copy = null }) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -726,12 +809,9 @@ export default function ProSmoothPursuitClient({ copy = null }) {
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
-                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
-                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
-                  </div>
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
             </DrillAccordion>
@@ -764,9 +844,6 @@ export default function ProSmoothPursuitClient({ copy = null }) {
 
 
       </main>
-
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

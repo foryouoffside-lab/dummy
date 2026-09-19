@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 // ============================================================
 // GERMAN SEARCH KEYWORD RESEARCH & INTENT CLUSTERING (DACH)
@@ -298,10 +299,10 @@ export default function InstantResponseDePage() {
     stageCaption: "Klicke im exakten Moment des grünen Aufleuchtens. Halte strikte Disziplin gegen verfrühte Täuschungsreize.",
     rulesTitle: "Trainingsregeln & Punktesystem",
     rulesItems: [
-      { num: "1", text: "Reflex-Treffer", highlight: "+100 Pkt", result: "Sofortiger Klick bei grünem Farbumschlag" },
-      { num: "2", text: "Geschwindigkeits-Bonus", highlight: "bis zu +150 Pkt", result: "Extrapunkte für Reaktionen unter 150 ms" },
-      { num: "3", text: "Levelaufstieg", highlight: "alle 1.400 Punkte", result: "Kürzere Aufleuchtzeiten fordern schnellere Reflexe" },
-      { num: "4", text: "Fehlklick / Frühstart", highlight: "Strafe", result: "Combo-Reset (bei Strafzeit-Option -0,8s)" }
+      { num: "1", text: "Reflex-Treffer", highlight: "+100 PTS (+0.6s)", result: "×Combo-Multiplikator" },
+      { num: "2", text: "Geschwindigkeits-Bonus", highlight: "Treffer <150ms", result: "Bis zu +150 PTS" },
+      { num: "3", text: "Levelaufstieg", highlight: "+1 Level / 1400 PTS", result: "Adaptive Zeitfenster" },
+      { num: "4", text: "Fehlklick / Frühstart", highlight: "Fehlerstrafe", result: "Combo-Reset (-0.8s)" }
     ],
     aboutTitle: "Über das FPS-Reaktionszeit-Training",
     aboutHeading: "Was ist das FPS-Reaktionszeit-Training?",
@@ -358,6 +359,7 @@ export default function InstantResponseDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

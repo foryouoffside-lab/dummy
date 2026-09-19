@@ -2,6 +2,7 @@ import FineMotorClient from '@/app/drills/motor/precision-control/tracing/Tracin
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -285,6 +286,29 @@ const guideProps = {
   },
 };
 
+const jaCopy = {
+  title: "マウストレースゲーム",
+  subtitle: "生入力による連続軌跡トラッキング • 45秒タイマー",
+  startButtonText: "訓練開始",
+  trainAgain: "もう一度プレイ",
+  shareTitle: "スコアを共有",
+  exitTitle: "終了",
+  statFlowScore: "フロースコア",
+  statTimeLeft: "残り時間",
+  statFlowIntegrity: "フロー安定度",
+  statBestScore: "ハイスコア",
+  maxStreakLabel: "最大継続フレーム",
+  peakFlowLabel: "最高フロー状態",
+  bestScoreLabel: "自己最高記録",
+  rulesTitle: "訓練手順とスコアシステム",
+  rulesItems: [
+    { num: "1", text: "軌跡追従", highlight: "エメラルド波形", result: "経路維持で1フレームあたり+1pt" },
+    { num: "2", text: "速度上昇", highlight: "漸進的加速", result: "45秒で2.2 → 3.8 px/fに加速" },
+    { num: "3", text: "フローボーナス", highlight: "スーパーフロー", result: "4秒連続維持で+5ptボーナス" },
+    { num: "4", text: "精密制御", highlight: "デスクトップ専用", result: "1:1 生マウス入力対応" }
+  ],
+};
+
 export default function LocalizedMotorPage() {
   return (
     <>
@@ -312,11 +336,12 @@ export default function LocalizedMotorPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FineMotorClient copy={{ title: "マウストレースゲーム・精密軌跡追従テスト – スムーストラッキング診断" }} />
+      <FineMotorClient copy={jaCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/ja/drills/motor/precision-control/tracing" />
+        <RelatedDrills currentCategory="motor" currentHref="/ja/drills/motor/precision-control/tracing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

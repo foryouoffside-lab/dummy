@@ -2,6 +2,7 @@ import MotorSequencingClient from '@/app/drills/physical/fitness/agility-ladder/
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // PESQUISA DE PALAVRAS-CHAVE NATIVAS (SERP BRASIL / PT-BR)
@@ -322,7 +323,10 @@ const ladderGuide = {
     "Ao iniciar a descida, execute o snap inicial em direção ao primeiro degrau à esquerda.",
     "Conecte os degraus 2, 3 e 4 em um único movimento rítmico contínuo sem hesitar.",
     "Preserve o multiplicador de 3.0x ininterruptamente para atingir o nível Apex durante os 45 segundos."
-  ]
+  ],
+  audience: "Atletas de futebol, basquete, tênis e atletismo buscando aprimorar a velocidade de passadas e coordenação de pés, além de gamers de eSports treinando ritmo de counter-strafing.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('lashley1951', 'schmidt1975', 'fitts1954', 'woodworth1899', 'woods2015')
 };
 
 export default function AgilityLadderPagePt() {

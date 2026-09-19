@@ -41,12 +41,7 @@ export const metadata = {
 };
 
 export default function DistractionFighterPageES() {
-  const sources = pickSources(
-    "Stroop (1935) - Studies of Interference in Serial Verbal Reactions",
-    "MacLeod (1991) - Half a Century of Research on the Stroop Effect",
-    "Logan & Cowan (1984) - On the Ability to Inhibit Thought and Action: A Theory of an Act of Control",
-    "Posner & Petersen (1990) - The Attention System of the Human Brain"
-  );
+  const sources = pickSources('stroop1935', 'macleod1991', 'logan1984', 'posner1990', 'woods2015');
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -206,7 +201,9 @@ export default function DistractionFighterPageES() {
     intro: [
       "El efecto Stroop, descrito originalmente por J. Ridley Stroop en 1935, constituye uno de los hallazgos más sólidos de la psicología cognitiva. Al enfrentarse a palabras donde el texto contradice la tinta (por ejemplo, 'AMARILLO' en letras rojas), los tiempos de respuesta se demoran y la probabilidad de error se multiplica.",
       "La explicación reside en la velocidad disimétrica de procesamiento cerebral: leer es una conducta casi refleja y automática (MacLeod, 1991). Según el modelo de carrera de Logan & Cowan (1984), el impulso de lectura gana la competición interna a menos que las áreas frontales ejerzan una inhibición deliberada.",
-      "La neurociencia confirma que la corteza cingulada anterior y la corteza prefrontal modulan esta resolución de interferencias. El entrenamiento sistemático incrementa la tolerancia a la distracción y afina el autocontrol bajo apremio de tiempo."
+      "La neurociencia confirma que la corteza cingulada anterior y la corteza prefrontal modulan esta resolución de interferencias. El entrenamiento sistemático incrementa la tolerancia a la distracción y afina el autocontrol bajo apremio de tiempo.",
+      "Metodología de cronometría: cada pulsación se registra con el reloj de alta precisión performance.now() del navegador en su propio dispositivo. Los temporizadores del navegador aplican una atenuación de seguridad frente a vulnerabilidades como Spectre (alrededor de 1 ms), mientras que la pantalla cuantiza los cambios según su frecuencia de actualización: aproximadamente 16,7 ms por fotograma a 60 Hz, 6,9 ms a 144 Hz y 4,1 ms a 240 Hz (Woods et al., 2015). Se recomienda valorar tendencias personales en un mismo dispositivo en lugar de comparar cifras aisladas entre hardware dispar.",
+      "Transparencia de datos y aviso educativo: SkillDrills no recopila datos agregados ni almacena información en servidores remotos. Sus métricas y configuraciones se conservan exclusivamente en el almacenamiento local (localStorage) de su navegador. Este ejercicio es una herramienta interactiva de entrenamiento cognitivo para fines educativos y recreativos; no constituye un dispositivo médico, prueba de diagnóstico ni tratamiento para el TDAH u otras condiciones clínicas."
     ],
     benchmarks: {
       title: "Baremos de Rendimiento en el Test de Stroop (Sesión de 45 Segundos)",
@@ -220,17 +217,39 @@ export default function DistractionFighterPageES() {
       ],
       note: "Baremos obtenidos en sesiones de 45 segundos con diversidad de colores progresiva y tiempos de respuesta exigentes (Stroop, 1935; Woods et al., 2015)."
     },
-    instructions: [
-      "Observe la palabra y elija el botón correspondiente al color de la tinta.",
-      "Ignore la palabra escrita: procese únicamente el color visible.",
-      "Conserve un ritmo ágil para multiplicar la puntuación acumulada.",
-      "Priorice la exactitud para no perder multiplicadores de acierto."
+    techniques: {
+      title: "4 Estrategias para Superar la Interferencia de Stroop",
+      items: [
+        {
+          name: "Enfoque periférico en los bordes de las letras",
+          desc: "No lea la palabra como una unidad semántica; fije la mirada en la esquina o remate de una sola letra para evitar la activación automática del área del lenguaje.",
+          tips: "Perciba la letra como una forma geométrica abstracta y no como texto."
+        },
+        {
+          name: "Supresión estricta de la voz interior",
+          desc: "Pronunciar mentalmente el nombre del color genera interferencia fonológica en el lóbulo temporal. Conecte de forma directa la percepción visual con el botón motor.",
+          tips: "Mantenga la lengua relajada y respire con tranquilidad sin susurrar los colores."
+        },
+        {
+          name: "Cadencia de respuesta rítmica y controlada",
+          desc: "Hacer clics apresurados multiplica los errores por impulsividad y rompe el multiplicador. Un ritmo estable y pausado protege la racha y optimiza el tiempo de reacción neto.",
+          tips: "Priorice la precisión absoluta sobre la velocidad ciega."
+        },
+        {
+          name: "Micro-sesiones de resistencia a la distracción",
+          desc: "El control inhibitorio frontal gasta glucosa rápidamente. Sesiones diarias de 3 a 5 minutos producen las mayores adaptaciones neuroplásticas en la corteza prefrontal.",
+          tips: "Realice este ejercicio como activación mental previa a tareas de estudio o trabajo intensivo."
+        }
+      ]
+    },
+    steps: [
+      "Observe el término presentado en pantalla sin leerlo mentalmente.",
+      "Inhiba el significado del texto y aísle la longitud de onda cromática de la tinta.",
+      "Seleccione el botón inferior correspondiente al color real del pigmento.",
+      "Encadene aciertos consecutivos para elevar el combo y activar niveles de alta velocidad."
     ],
-    tips: [
-      "Fije la atención en la silueta o terminación de una letra y no en el término entero.",
-      "No verbalice mentalmente los nombres de los colores para no entorpecer el procesamiento.",
-      "Mantenga una respiración calmada para sostener la concentración durante las fases rápidas."
-    ],
+    audience: "Estudiantes, opositores, profesionales en oficinas abiertas, deportistas y jugadores de esports que requieran blindar su atención selectiva y suprimir distracciones automáticas.",
+    faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
     sources
   };
 

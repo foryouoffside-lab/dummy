@@ -1,5 +1,6 @@
 import InstantResponseClient from './InstantResponseClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 export const metadata = {
@@ -326,10 +327,18 @@ export default function InstantResponsePage() {
       <InstantResponseClient
         copy={{
           h1Keyword: "FPS Reaction Time Test",
-          h1Suffix: " — Gaming Reflex Trainer"
+          h1Suffix: " — Gaming Reflex Trainer",
+          subtitle: "Master raw visual stimulus response speed, click latency, and trigger discipline.",
+          rulesItems: [
+            { num: "1", text: "Flash Reaction Hit", highlight: "+100 PTS (+0.6s)", result: "×Combo Mult" },
+            { num: "2", text: "Speed Bonus", highlight: "Sub-150ms Hit", result: "Up to +150 PTS" },
+            { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Windows" },
+            { num: "4", text: "Miss / Pre-fire", highlight: "Failure Penalty", result: "Resets Combo (-0.8s)" }
+          ]
         }}
       />
       <DrillGuide guide={instantResponseGuide} />
+      <DrillFooter />
     </>
   );
 }

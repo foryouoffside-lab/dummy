@@ -1,6 +1,7 @@
 import MarketDoorsPursuitClient from '@/app/drills/reaction-speed/market-doors-pursuit/MarketDoorsPursuitWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -311,6 +312,7 @@ export default function FrenchMarketDoorsPursuitPage() {
           currentHref="https://skilldrills.online/fr/drills/reaction-speed/market-doors-pursuit"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

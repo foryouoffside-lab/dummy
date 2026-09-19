@@ -1,5 +1,6 @@
 import VerticalAirTrackClient from '@/app/drills/fps/vertical-air-track/VerticalAirTrackClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -220,10 +221,11 @@ export default function VerticalAirTrackEsPage() {
   const verticalAirTrackGuide = {
     heading: "Guía de Puntería Vertical FPS & Seguimiento Parabólico Aéreo",
     intro: [
-      "El Vertical Aim Trainer (Vertical Air-Track) es un entrenamiento biomecánico enfocado en aislar la precisión en el eje Y, la anticipación de arcos gravitatorios y la intercepción de rivales suspendidos en el aire. En shooters frenéticos como Apex Legends, Overwatch 2, Halo Infinite y Destiny 2, los jugadores recurren a ganchos, plataformas de salto, ascensores y caídas para sortear la colocación horizontal habitual de la retícula.",
-      "La neurofisiología del seguimiento vertical difiere sustancialmente del horizontal. Richard J. Krauzlis (2004) demostró que el smooth pursuit vertical recluta estructuras específicas del vermis cerebeloso y del tronco encefálico, con mayor susceptibilidad a vibraciones motrices por la asimetría biomecánica del brazo. Cyril Rashbass (1961) comprobó que el movimiento suave responde al error de velocidad retiniana (retinal slip) y no a saltos estáticos de posición, exigiendo igualar la cadencia de desplazamiento en todo momento.",
-      "Seguir blancos en el aire demanda interiorizar la aceleración de la gravedad (g = 9,81 m/s²). Tal como expusieron Peter R. Cavanagh et al. (1984) y Michael F. Land & Peter McLeod (2000), el cerebro prevé la ralentización en la cúspide del salto y el incremento veloz de caída. Quienes no anticipan esta parábola suelen quedarse rezagados al rastrear caídas libres.",
-      "Medición de rendimiento: cada fotograma se registra con el reloj de alta resolución performance.now() del navegador en tu propio equipo. Parámetros de hardware: los navegadores redondean los temporizadores (~1 ms) por mitigación de Spectre y los monitores muestran cuadros a frecuencias fijas (16,7 ms a 60 Hz, 6,9 ms a 144 Hz, 4,1 ms a 240 Hz; Woods et al., 2015). Diferencias menores a 5 ms entran dentro de la tolerancia de hardware."
+      "El Entrenador de Puntería Vertical (Vertical Aim Trainer / Vertical Air-Track) es un ejercicio avanzado de control neuromotor diseñado para aislar y perfeccionar la precisión en el eje Y, la anticipación de arcos gravitatorios y la intercepción de objetivos aéreos. En shooters dinámicos modernos como Apex Legends, Overwatch 2, Halo Infinite y Destiny 2, los adversarios explotan constantemente la verticalidad mediante plataformas de salto (jump pads), ganchos de agarre, elevadores de gravedad y caídas desde alturas para romper la colocación horizontal convencional de la retícula.",
+      "La neurobiología del seguimiento visual de persecución vertical difiere sustancialmente del plano horizontal. Richard J. Krauzlis (2004) demostró que el seguimiento suave (smooth pursuit) vertical activa vías neuronales específicas en el vermis cerebeloso y el tronco encefálico, mostrando una mayor vulnerabilidad al temblor motor debido a la asimetría biomecánica del sistema musculoesquelético del brazo. Cyril Rashbass (1961) probó que el smooth pursuit está impulsado por el error de velocidad retiniana (retinal slip) y no por un simple error de posición estática, exigiendo una igualación continua de la velocidad visual.",
+      "Seguir y abatir entidades suspendidas en el aire exige internalizar la física de la aceleración gravitatoria (g = 9,81 m/s²). Tal como establecieron Peter R. Cavanagh et al. (1984) y Michael F. Land & Peter McLeod (2000), el sistema visomotor humano anticipa la deceleración de la trayectoria parabólica en la cúspide (ápice) del salto y su subsiguiente aceleración durante el descenso. Los jugadores que no anticipan esta curvatura cinemática sufren un desfase constante, quedando rezagados al rastrear caídas libres.",
+      "Al eliminar el apoyo en movimientos horizontales y aislar la trayectoria pura en el eje vertical mediante cronometría digital de alta precisión con performance.now() (Woods et al., 2015), este entrenamiento cierra la brecha entre la memoria muscular bidimensional y el dominio del combate tridimensional en 360 grados.",
+      "Cómo se mide el rendimiento: cada evento e interacción se registra directamente con el reloj de alta resolución performance.now() del navegador, ejecutándose de forma estrictamente local en tu dispositivo — ninguna puntuación se envía al exterior. Dos variables físicas no pueden controlarse: los temporizadores web sufren una atenuación deliberada para mitigar vulnerabilidades Spectre (típicamente a 1 ms) y los monitores cuantizan la señal al intervalo de su tasa de refresco — unos 16,7 ms por cuadro a 60 Hz, 6,9 ms a 144 Hz y 4,1 ms a 240 Hz (Woods et al., 2015). El polling rate del ratón añade unos 8 ms a 125 Hz frente a 1 ms a 1000 Hz. Por ello, las variaciones menores a 5 ms constituyen ruido de medición y conviene comparar series de rendimiento en el mismo equipo."
     ],
     benchmarks: {
       title: "Tablas de Rendimiento: Rastreo Vertical y Tiempo de Contacto Aéreo",
@@ -303,8 +305,10 @@ export default function VerticalAirTrackEsPage() {
           statPeakLevel: "Nivel Máximo",
           startTitle: "Vertical Air-Track",
           startSubtitle: "Entrada Raw de Hardware • Progresión Dinámica de Niveles",
-          pausedTitle: "Pausado",
-          pausedSubtitle: "Haz clic para continuar – el bloqueo del ratón se reactivará",
+          startButtonText: "Iniciar Ejercicio",
+          playAgainText: "Jugar de Nuevo",
+          shareText: "Compartir Puntuación",
+          exitText: "Salir",
           stageCaption: "Rastrea blancos en trayectorias parabólicas en el eje Y con gravedad para afinar tu precisión vertical.",
           rulesTitle: "Instrucciones del Ejercicio y Sistema de Puntos",
           aboutTitle: "Sobre el Entrenador Vertical Air-Track",
@@ -330,20 +334,21 @@ export default function VerticalAirTrackEsPage() {
             {
               num: "4",
               text: "Progresión de Nivel",
-              highlight: "Cada 1.500 PTS +1 Nivel",
+              highlight: "Cada 1.400 PTS +1 Nivel",
               result: "La velocidad vertical y la gravedad aumentan progresivamente"
             }
           ]
         }}
       />
       <DrillGuide guide={verticalAirTrackGuide} />
-      <div className="max-w-4xl mx-auto px-4 pb-12">
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills
           currentCategory="fps"
           currentHref="/drills/fps/vertical-air-track"
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-canvas text-ink-1 font-sans antialiased selection:bg-blue-500/20 selection:text-blue-400;
   }
@@ -120,8 +125,8 @@
 /* ── Instant Response Preview (.ir-prev) ───────────────────────────────
    Authentic representation of InstantResponseClient (play_1.png / play_4.png):
    Pure pitch-black canvas (#050508) + subtle green concentric radar rings,
-   vibrant emerald tactical sphere (#00ff88) with glowing tactical rings, white
-   core, and sheen; high-vis green aim reticle (#00ff88) that hovers alertly,
+   vibrant emerald tactical sphere (#10b981) with glowing tactical rings, white
+   core, and sheen; high-vis green aim reticle (#10b981) that hovers alertly,
    snaps to center on the target, triggers a bright white impact flash with hitmarker
    and emerald hit sparks (createExplosion), and loops seamlessly.
    100% GPU compositor keyframes, zero main-thread overhead. */
@@ -133,7 +138,7 @@
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(ellipse 65% 55% at 50% 50%, rgba(0, 255, 136, 0.12), transparent 75%),
+    radial-gradient(ellipse 65% 55% at 50% 50%, rgba(16, 185, 129, 0.12), transparent 75%),
     #050508;
   overflow: hidden;
 }
@@ -145,7 +150,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 1px solid rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.08);
   pointer-events: none;
 }
 .ir-prev-radar-1 { width: 70px; height: 70px; }
@@ -302,7 +307,7 @@
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  border: 2px solid #00ff88;
+  border: 2px solid #10b981;
   opacity: 0;
   pointer-events: none;
   animation: ir-prev-hit-ring-anim 2.2s ease-out infinite;
@@ -377,8 +382,8 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #00ff88;
-  box-shadow: 0 0 3px #00ff88;
+  background: #10b981;
+  box-shadow: 0 0 3px #10b981;
   pointer-events: none;
   animation: ir-prev-spark-anim 2.2s ease-out infinite;
   opacity: 0;
@@ -426,13 +431,13 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1.5px solid #00ff88;
+  border: 1.5px solid #10b981;
   box-shadow: none;
 }
 
 .ir-prev-reticle-tick {
   position: absolute;
-  background: #00ff88;
+  background: #10b981;
   box-shadow: none;
 }
 .ir-prev-tick-n { top: 0; left: 50%; width: 1.5px; height: 10px; transform: translateX(-50%); }
@@ -448,7 +453,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #00ff88;
+  background: #10b981;
   box-shadow: none;
 }
 
@@ -561,10 +566,10 @@
 }
 
 .aw180-hit-ring {
-  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #10b981; opacity: 0; pointer-events: none;
 }
 .aw180-tgt-left .aw180-hit-ring { animation: aw180-hit-ring-left 3.2s ease-out infinite; }
-.aw180-tgt-right .aw180-hit-ring { animation: aw180-hit-ring-right 3.2s ease-out infinite; border-color: #5eead4; }
+.aw180-tgt-right .aw180-hit-ring { animation: aw180-hit-ring-right 3.2s ease-out infinite; border-color: #34d399; }
 @keyframes aw180-hit-ring-left {
   0%, 23% { transform: scale(0.8); opacity: 0; }
   24% { transform: scale(1.1); opacity: 1; }
@@ -629,7 +634,7 @@
 /* ── 2. Flow State Trainer (.fs-prev) ──────────────────────────────────── */
 .fs-prev {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 255, 136, 0.12), transparent 75%), #050508;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 185, 129, 0.12), transparent 75%), #050508;
   overflow: hidden;
 }
 .fs-prev-field { position: relative; width: 100%; height: 100%; }
@@ -648,14 +653,14 @@
 }
 
 .fs-prev-target { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.fs-prev-ghost-ring { position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(0, 255, 136, 0.3); }
-.fs-prev-tactical-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(0, 255, 136, 0.75); }
+.fs-prev-ghost-ring { position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(16, 185, 129, 0.3); }
+.fs-prev-tactical-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.75); }
 .fs-prev-orb { position: absolute; inset: 4px; border-radius: 50%; background: #10b981; box-shadow: 0 0 3px rgba(16, 185, 129, 0.3); }
 .fs-prev-sheen { position: absolute; top: 18%; left: 22%; width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.55); }
 .fs-prev-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 
 .fs-prev-pulse {
-  position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid #00ff88;
+  position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid #10b981;
   animation: fs-pulse-wave 1.4s ease-out infinite;
 }
 @keyframes fs-pulse-wave {
@@ -666,15 +671,15 @@
 .fs-prev-reticle {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 28px; height: 28px; z-index: 10;
 }
-.fs-prev-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #00ff88; box-shadow: none; }
-.fs-prev-reticle-tick { position: absolute; background: #00ff88; box-shadow: none; }
+.fs-prev-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #10b981; box-shadow: none; }
+.fs-prev-reticle-tick { position: absolute; background: #10b981; box-shadow: none; }
 .fs-tick-n { top: 0; left: 50%; width: 1.5px; height: 9px; transform: translateX(-50%); }
 .fs-tick-s { bottom: 0; left: 50%; width: 1.5px; height: 9px; transform: translateX(-50%); }
 .fs-tick-w { left: 0; top: 50%; height: 1.5px; width: 9px; transform: translateY(-50%); }
 .fs-tick-e { right: 0; top: 50%; height: 1.5px; width: 9px; transform: translateY(-50%); }
-.fs-prev-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #00ff88; }
+.fs-prev-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #10b981; }
 
-.fs-prev-spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #00ff88; opacity: 0; }
+.fs-prev-spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #10b981; opacity: 0; }
 .fs-spark-1 { left: 20%; top: 20%; animation: fs-spark-anim 1.2s ease-out infinite; }
 .fs-spark-2 { right: 20%; bottom: 20%; animation: fs-spark-anim 1.2s 0.6s ease-out infinite; }
 @keyframes fs-spark-anim {
@@ -718,7 +723,7 @@
 }
 
 .ta-hit-ring {
-  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #10b981; opacity: 0; pointer-events: none;
 }
 .ta-tgt-2 .ta-hit-ring { animation: ta-hit-ring-2 3.0s ease-out infinite; }
 @keyframes ta-hit-ring-2 {
@@ -765,7 +770,7 @@
 /* ── 4. Anti-Zigzag Aim Trainer (.az-prev) ──────────────────────────────── */
 .az-prev {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 255, 136, 0.12), transparent 75%), #050508;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 185, 129, 0.12), transparent 75%), #050508;
   overflow: hidden;
 }
 .az-prev-field { position: relative; width: 100%; height: 100%; }
@@ -788,24 +793,24 @@
   width: 36px; height: 4px; background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
 }
 .az-hp-bar {
-  width: 75%; height: 100%; background: #22c55e; border-radius: 2px;
+  width: 75%; height: 100%; background: #10b981; border-radius: 2px;
   animation: az-hp-drain 3.2s linear infinite;
 }
 @keyframes az-hp-drain {
-  0% { width: 95%; background: #22c55e; }
+  0% { width: 95%; background: #10b981; }
   50% { width: 55%; background: #eab308; }
   90%, 100% { width: 25%; background: #ef4444; }
 }
 
 .az-target { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.az-ghost-ring { position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(0, 255, 136, 0.3); }
-.az-tactical-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(0, 255, 136, 0.75); }
+.az-ghost-ring { position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(16, 185, 129, 0.3); }
+.az-tactical-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.75); }
 .az-orb { position: absolute; inset: 4px; border-radius: 50%; background: #10b981; box-shadow: 0 0 3px rgba(16, 185, 129, 0.3); }
 .az-sheen { position: absolute; top: 18%; left: 22%; width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.55); }
 .az-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 
 .az-pulse {
-  position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid #00ff88;
+  position: absolute; inset: -3px; border-radius: 50%; border: 1.5px solid #10b981;
   animation: az-pulse-anim 1.5s ease-out infinite;
 }
 @keyframes az-pulse-anim {
@@ -859,7 +864,7 @@
 }
 
 .fs-flick-hit-ring {
-  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0;
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #10b981; opacity: 0;
 }
 .fs-flick-tgt-1 .fs-flick-hit-ring { animation: fs-flick-hit-ring-1 2.8s ease-out infinite; }
 .fs-flick-tgt-2 .fs-flick-hit-ring { animation: fs-flick-hit-ring-2 2.8s ease-out infinite; }
@@ -937,9 +942,9 @@
 .mc-tactical-cyan { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(6, 182, 212, 0.8); }
 .mc-orb-cyan { position: absolute; inset: 4px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 4px rgba(6, 182, 212, 0.85); }
 
-.mc-ghost-green { position: absolute; inset: -3px; border-radius: 50%; border: 1px solid rgba(0, 255, 136, 0.3); }
-.mc-tactical-green { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(0, 255, 136, 0.85); }
-.mc-orb-green { position: absolute; inset: 3px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 3px rgba(0, 255, 136, 0.85); }
+.mc-ghost-green { position: absolute; inset: -3px; border-radius: 50%; border: 1px solid rgba(16, 185, 129, 0.3); }
+.mc-tactical-green { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(16, 185, 129, 0.85); }
+.mc-orb-green { position: absolute; inset: 3px; border-radius: 50%; background: #10b981; box-shadow: 0 0 3px rgba(16, 185, 129, 0.85); }
 
 .mc-sheen { position: absolute; top: 18%; left: 22%; width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); }
 .mc-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 5px; height: 5px; border-radius: 50%; background: #fff; }
@@ -952,7 +957,7 @@
   animation: mc-hit-ring-anchor 2.4s ease-out infinite;
 }
 .mc-micro .mc-hit-ring {
-  border: 2px solid #00ff88;
+  border: 2px solid #10b981;
   animation: mc-hit-ring-micro 2.4s ease-out infinite;
 }
 @keyframes mc-hit-ring-anchor {
@@ -1011,7 +1016,7 @@
 /* ── 7. Smooth Pursuit Aim Trainer (.psp-prev) ─────────────────────────── */
 .psp-prev {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 255, 136, 0.12), transparent 75%), #050508;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 185, 129, 0.12), transparent 75%), #050508;
   overflow: hidden;
 }
 .psp-prev-field { position: relative; width: 100%; height: 100%; }
@@ -1030,8 +1035,8 @@
 }
 
 .psp-target { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.psp-ghost-ring { position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(0, 255, 136, 0.3); }
-.psp-tactical-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(0, 255, 136, 0.8); }
+.psp-ghost-ring { position: absolute; inset: -4px; border-radius: 50%; border: 1px solid rgba(16, 185, 129, 0.3); }
+.psp-tactical-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.8); }
 .psp-orb { position: absolute; inset: 4px; border-radius: 50%; background: #10b981; box-shadow: 0 0 3px rgba(16, 185, 129, 0.3); }
 .psp-sheen { position: absolute; top: 18%; left: 22%; width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.55); }
 .psp-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; border-radius: 50%; background: #fff; }
@@ -1039,13 +1044,13 @@
 .psp-reticle {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 28px; height: 28px; z-index: 10;
 }
-.psp-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #00ff88; box-shadow: none; }
-.psp-reticle-tick { position: absolute; background: #00ff88; box-shadow: none; }
+.psp-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #10b981; box-shadow: none; }
+.psp-reticle-tick { position: absolute; background: #10b981; box-shadow: none; }
 .psp-tick-n { top: 0; left: 50%; width: 1.5px; height: 9px; transform: translateX(-50%); }
 .psp-tick-s { bottom: 0; left: 50%; width: 1.5px; height: 9px; transform: translateX(-50%); }
 .psp-tick-w { left: 0; top: 50%; height: 1.5px; width: 9px; transform: translateY(-50%); }
 .psp-tick-e { right: 0; top: 50%; height: 1.5px; width: 9px; transform: translateY(-50%); }
-.psp-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #00ff88; }
+.psp-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #10b981; }
 
 
 /* ── 8. Recoil Control Trainer (.rc-prev) ───────────────────────────────── */
@@ -1130,7 +1135,7 @@
 /* ── 9. Strafe Tracking Aim Trainer (.st-prev) ──────────────────────────── */
 .st-prev {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 255, 136, 0.12), transparent 75%), #050508;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 185, 129, 0.12), transparent 75%), #050508;
   overflow: hidden;
 }
 .st-prev-field { position: relative; width: 100%; height: 100%; }
@@ -1149,21 +1154,21 @@
 
 .st-capsule {
   position: relative; width: 100%; height: 100%; border-radius: 17px;
-  border: 2px solid #00ff88; background: rgba(0, 255, 136, 0.22);
-  box-shadow: 0 0 4px rgba(0, 255, 136, 0.6); display: flex; align-items: center; justify-content: center;
+  border: 2px solid #10b981; background: rgba(16, 185, 129, 0.22);
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.6); display: flex; align-items: center; justify-content: center;
 }
 .st-capsule-core { width: 10px; height: 10px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px #fff; }
 
 .st-reticle {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 32px; height: 32px; z-index: 10;
 }
-.st-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #22c55e; box-shadow: none; }
-.st-reticle-tick { position: absolute; background: #22c55e; box-shadow: none; }
+.st-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #10b981; box-shadow: none; }
+.st-reticle-tick { position: absolute; background: #10b981; box-shadow: none; }
 .st-tick-n { top: 0; left: 50%; width: 1.5px; height: 10px; transform: translateX(-50%); }
 .st-tick-s { bottom: 0; left: 50%; width: 1.5px; height: 10px; transform: translateX(-50%); }
 .st-tick-w { left: 0; top: 50%; height: 1.5px; width: 10px; transform: translateY(-50%); }
 .st-tick-e { right: 0; top: 50%; height: 1.5px; width: 10px; transform: translateY(-50%); }
-.st-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #22c55e; }
+.st-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #10b981; }
 
 
 /* ── 10. Target Prioritization Aim Trainer (.tp-prev) ───────────────────── */
@@ -1322,7 +1327,7 @@
 /* ── 12. Angle Hold Trainer (.ah-prev) ──────────────────────────────────── */
 .ah-prev {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 255, 136, 0.12), transparent 75%), #050508;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 185, 129, 0.12), transparent 75%), #050508;
   overflow: hidden;
 }
 .ah-prev-field { position: relative; width: 100%; height: 100%; }
@@ -1337,7 +1342,7 @@
 }
 .ah-wall-edge {
   position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
-  background: rgba(0, 255, 136, 0.25);
+  background: rgba(16, 185, 129, 0.25);
 }
 
 /* Peeking Target Emerging from Corner */
@@ -1353,12 +1358,12 @@
 }
 
 .ah-target { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.ah-tactical { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(0, 255, 136, 0.85); }
+.ah-tactical { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.85); }
 .ah-orb { position: absolute; inset: 4px; border-radius: 50%; background: #10b981; box-shadow: 0 0 3px rgba(16, 185, 129, 0.3); }
 .ah-core { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 
 .ah-hit-ring {
-  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #10b981; opacity: 0; pointer-events: none;
   animation: ah-hit-ring-anim 2.6s ease-out infinite;
 }
 @keyframes ah-hit-ring-anim {
@@ -1385,13 +1390,13 @@
   position: absolute; left: 45%; top: 50%; width: 28px; height: 28px; margin-left: -14px; margin-top: -14px;
   pointer-events: none; z-index: 10;
 }
-.ah-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #00ff88; box-shadow: none; }
-.ah-reticle-tick { position: absolute; background: #00ff88; box-shadow: none; }
+.ah-reticle-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #10b981; box-shadow: none; }
+.ah-reticle-tick { position: absolute; background: #10b981; box-shadow: none; }
 .ah-tick-n { top: 0; left: 50%; width: 1.5px; height: 9px; transform: translateX(-50%); }
 .ah-tick-s { bottom: 0; left: 50%; width: 1.5px; height: 9px; transform: translateX(-50%); }
 .ah-tick-w { left: 0; top: 50%; height: 1.5px; width: 9px; transform: translateY(-50%); }
 .ah-tick-e { right: 0; top: 50%; height: 1.5px; width: 9px; transform: translateY(-50%); }
-.ah-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #00ff88; }
+.ah-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #10b981; }
 
 
 /* ── 13. Anti-Strafe Jitter Trainer (.asj-prev) ─────────────────────────── */
@@ -1478,7 +1483,7 @@
 .vat-reticle-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; border-radius: 50%; background: #ef4444; }
 
 .vat-hit-ring {
-  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #00ff88; opacity: 0; pointer-events: none;
+  position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #10b981; opacity: 0; pointer-events: none;
   animation: vat-hit-ring 3.0s ease-out infinite;
 }
 @keyframes vat-hit-ring {

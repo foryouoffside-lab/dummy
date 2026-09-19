@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 // ============================================================
 // GERMAN SEARCH KEYWORD RESEARCH & INTENT CLUSTERING (DACH)
@@ -286,21 +287,20 @@ export default function AwarenessDrillDePage() {
   const copyDe = {
     h1Keyword: "180 Grad Aiming",
     h1Suffix: " – FPS Snap Turn Trainer",
+    subtitle: "Trainiere periphere Reizverarbeitung, großwinklige Flicks und die Endphasen-Bremskraft bei 180°-Drehungen.",
     statScore: "Punkte",
     statTime: "Zeit",
     statAccuracy: "Präzision",
     statBestScore: "Highscore",
     startTitle: "180° Awareness Pro",
     startSubtitle: "Hardware-Rohdaten • Endlose Levelprogression & Raumwahrnehmung",
-    getReady: "BEREITMACHEN",
-    pausedTitle: "Spiel Pausiert",
-    pausedSubtitle: "Klicke in das Spielfeld, um die Mauszeiger-Sperre zu reaktivieren",
-    stageCaption: "Erfasse Ziele an den Bildschirmrändern über dein peripheres Sehen und führe präzise 180-Grad-Drehungen aus.",
+    stageCaption: "Erfasse Ziele an den Bildschirmrändern über dein peripheres Sehen und führe präzise 180-Grad-Flicks aus, bevor der Timer abläuft.",
     rulesTitle: "Trainingsregeln & Punktesystem",
     rulesItems: [
-      { title: "Zieltreffer (+100 Pkt)", text: "Trefferserien erhöhen den Combo-Multiplikator auf bis zu 3,0x." },
-      { title: "180° Randzonen & Level-Steigerung", text: "Ziele erscheinen an den äußeren Rändern, schrumpfen und verlangen schnellere Reaktionszeiten." },
-      { title: "Fehlschuss / Timeout", text: "Fehlklicks oder verpasste Ziele setzen die Combo zurück. Mit Strafzeit-Option verlierst du 0,8s." }
+      { num: "1", text: "Rand-Zieltreffer", highlight: "Großwinkel-Ziel (+100 PKT / +0,6s)", result: "×Combo-Mult" },
+      { num: "2", text: "180° Randzonen", highlight: "Extrem periphär", result: "Schneller & Kleiner" },
+      { num: "3", text: "Level-Progression", highlight: "+1 Level / 1.750 PKT", result: "Adaptive Skalierung" },
+      { num: "4", text: "Fehlschuss / Timeout", highlight: "Fehlerstrafe", result: "Combo-Reset (-0,8s)" }
     ],
     aboutTitle: "Über das 180-Grad-Aim-Training",
     aboutHeading: "Was ist 180-Grad-Awareness-Training?",
@@ -357,6 +357,7 @@ export default function AwarenessDrillDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

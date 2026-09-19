@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from '@/app/drills/reaction-speed/reaction-time-test/ReactionTimeTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -215,6 +216,54 @@ const faqSchema = {
         "@type": "Answer",
         "text": "Oui, le module prend en charge les événements tactiles PointerEvents avec une détection immédiate au contact de l'écran. Toutefois, les dalles tactiles des appareils mobiles introduisent généralement 10 à 30 ms de latence de numériseur supplémentaire comparé à une souris filaire 1000 Hz."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "La caféine améliore-t-elle réellement la vitesse de réaction ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui. La consommation modérée de caféine bloque les récepteurs centraux de l'adénosine, stimulant l'éveil cortical et réduisant temporairement le temps de réaction moteur de 10 à 20 ms (Smith, 2002)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "En quoi ce test se distingue-t-il d'un outil comme Human Benchmark ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alors qu'un test classique se limite souvent à un simple clic binaire rouge/vert, notre outil évalue la chronométrie mentale et l'estimation d'intervalle, sanctionnant l'anticipation impulsive et offrant un barème comparatif multi-paliers adapté aux exigences compétitives modernes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ce test de temps de réaction en ligne est-il totalement gratuit ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui, l'ensemble des modules d'évaluation et d'entraînement sur SkillDrills est accessible 100 % gratuitement, sans inscription, sans téléchargement d'application et sans publicités invasives."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Les athlètes de disciplines traditionnelles peuvent-ils tirer profit de ce test ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolument. Les pilotes de sports mécaniques (Formule 1, moto), les boxeurs, les escrimeurs et les joueurs de sports de raquette (tennis de table, badminton) utilisent ces protocoles visuels pour affûter le recrutement des unités motrices rapides et la vigilance réflexe."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Faut-il fixer le centre de l'écran ou privilégier la vision périphérique ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Il est conseillé d'adopter une fixation attentionnelle détendue (« regard adouci »). Cela permet aux cellules en bâtonnets de la rétine périphérique, très sensibles aux variations lumineuses, de détecter l'éclair instantanément avant que le cortex moteur ne déclenche la frappe."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "À quelle fréquence est-il recommandé de mesurer et d'entraîner ses réflexes ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Une courte session quotidienne de 5 à 10 minutes suffit pour établir une ligne de base neuro-fonctionnelle fiable, servir d'échauffement avant des parties compétitives et mesurer l'évolution de la vitesse de réaction au fil des semaines."
+      }
     }
   ]
 };
@@ -301,7 +350,7 @@ const reactionGuide = {
   ],
   audience: "Joueurs d'esport sur Counter-Strike 2, Valorant, Apex Legends et League of Legends, athlètes de sports de combat et de vitesse, conducteurs et toute personne désireuse d'évaluer et de perfectionner sa vivacité neuromotrice.",
   faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
-  sources: pickSources('kosinski2008', 'woods2015', 'shelton2010', 'der2006')
+  sources: pickSources('kosinski2008', 'woods2015', 'jain2015', 'shelton2010', 'dye2009', 'der2006', 'smith2002'),
 };
 
 export default function LocalizedReactionTimeTestPageFr() {
@@ -339,6 +388,7 @@ export default function LocalizedReactionTimeTestPageFr() {
       />
       <DrillGuide {...reactionGuide} />
       <RelatedDrills currentCategory="reaction-speed" currentHref="/drills/reaction-speed/reaction-time-test" />
+      <DrillFooter />
     </>
   );
 }

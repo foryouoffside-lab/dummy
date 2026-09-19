@@ -501,14 +501,14 @@ export default function GhostLinkClient({ copy } = {}) {
 
         if (phaseRef.current === "IDENTIFY") {
           if (showResultsRef.current) {
-            color = b.isTarget ? "#00ff88" : (isBoxDarkMode ? "#1f1f2e" : "#e2e8f0");
+            color = b.isTarget ? "#10b981" : (isBoxDarkMode ? "#1f1f2e" : "#e2e8f0");
             glow = b.isTarget;
           } else {
             color = isSelected ? "#f97316" : (isBoxDarkMode ? "#334155" : "#cbd5e1");
             glow = isSelected;
           }
         } else if (phaseRef.current === "MEMORIZE") {
-          color = b.isTarget ? "#00ff88" : (isBoxDarkMode ? "#1f1f2e" : "#e2e8f0");
+          color = b.isTarget ? "#10b981" : (isBoxDarkMode ? "#1f1f2e" : "#e2e8f0");
           glow = b.isTarget;
         } else {
           // TRACKING PHASE — deliberately uniform: the task is remembering which

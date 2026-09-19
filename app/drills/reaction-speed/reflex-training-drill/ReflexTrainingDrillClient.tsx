@@ -15,12 +15,12 @@ import { getFpsScoreGrade, getComboMultiplier } from '../../../../lib/scoringEng
 import { getDifficultyProgress, getStartLevel, ramp } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
+import { drawTacticalTarget, createHitRing, drawHitRings } from '@/lib/canvasFx';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
@@ -79,6 +79,33 @@ type BurstTarget = { id: number; x: number; y: number; radius: number; spawnTime
 type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
 type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 
+const RULES_ITEMS = [
+  {
+    num: '1',
+    text: 'Clear Burst Targets',
+    highlight: '+100 PTS',
+    result: '× Combo × Level bonus (+0.6s clock per hit)',
+  },
+  {
+    num: '2',
+    text: 'Combo & Heat System',
+    highlight: 'Up to 3.0x Multiplier',
+    result: 'Higher streaks spawn more concurrent targets',
+  },
+  {
+    num: '3',
+    text: 'Level Progression',
+    highlight: 'Continuous Scaling',
+    result: 'Spawn windows tighten and targets shrink',
+  },
+  {
+    num: '4',
+    text: 'Miss & Timeout Rules',
+    highlight: 'Combo Reset',
+    result: 'Zero penalties by default; opt-in time deduction',
+  },
+];
+
 interface ReflexTrainingDrillClientProps {
   copy?: {
     title?: string;
@@ -130,6 +157,7 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const bestLevelRunRef = useRef(1);
   const lastTimeRef = useRef(DRILL_DURATION);
+  const mousePosRef = useRef<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false });
 
   const engine = useRef({
     score: 0,
@@ -143,7 +171,7 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
     timeLeft: DRILL_DURATION,
     screenShake: 0,
     particles: [] as Particle[],
-    rings: [] as RingBurst[],
+    hitRings: [] as ReturnType<typeof createHitRing>[],
     targets: [] as BurstTarget[],
     nextId: 1,
     nextSpawnTime: 0
@@ -206,6 +234,26 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
   });
+
+  // Direct Escape and Fullscreen Exit Lifecycle
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown' || isFullscreen)) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, isFullscreen, handleExitDrill]);
 
   // Complete Drill Session cleanly
   const endGame = useCallback(() => {
@@ -304,6 +352,7 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
     setIsNewBest(false);
+    mousePosRef.current = { x: 0, y: 0, active: false };
 
     engine.current = {
       score: 0,
@@ -317,7 +366,7 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
       timeLeft: DRILL_DURATION,
       screenShake: 0,
       particles: [],
-      rings: [],
+      hitRings: [],
       targets: [],
       nextId: 1,
       nextSpawnTime: 0
@@ -396,31 +445,23 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
       setUiCombo(e.combo);
       drillAudio.playHit();
 
-      // Particles explosion (colored to match the target's own rendered body)
-      const hitColor = TARGET_FILL_COLOR;
-      for (let i = 0; i < 10; i++) {
+      // Particles explosion (14 particles with combo color shift)
+      const particleColor = e.combo >= 10 ? '#34d399' : e.combo >= 5 ? '#f59e0b' : TARGET_FILL_COLOR;
+      for (let i = 0; i < 14; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const spd = 2 + Math.random() * 4;
+        const spd = 2 + Math.random() * 5;
         e.particles.push({
           x: hitTarget.x,
           y: hitTarget.y,
           vx: Math.cos(angle) * spd,
           vy: Math.sin(angle) * spd,
-          color: hitColor,
+          color: particleColor,
           life: 1.0
         });
       }
 
-      // Ring Burst Effect
-      e.rings.push({
-        x: hitTarget.x,
-        y: hitTarget.y,
-        startR: hitTarget.radius * 0.4,
-        maxR: hitTarget.radius * 2.6,
-        life: 0.28,
-        maxLife: 0.28,
-        color: hitColor
-      });
+      // Canonical dual expanding hit rings (R2)
+      e.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, particleColor));
 
       e.targets.splice(hitIndex, 1);
       return;
@@ -544,79 +585,13 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
         }
       }
 
-      // Draw every live burst target (Tactical Red Target Sphere matching reference design)
+      // Draw every live burst target using canonical drawTacticalTarget (R1)
       for (const t of e.targets) {
-        const r = t.radius;
-        const remaining = Math.max(0, 1 - (now - t.spawnTime) / t.ttl);
-        ctx.save();
-
-        // Depleting countdown arc
-        ctx.globalAlpha = 0.5;
-        ctx.strokeStyle = remaining < 0.3 ? '#ef4444' : '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r + 8, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
-        ctx.stroke();
-
-        // Ghost outer ring
-        ctx.globalAlpha = 0.2;
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r + 5, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Tactical outer ring
-        ctx.globalAlpha = 0.55;
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Filled red body with subtle glow
-        ctx.globalAlpha = 0.88;
-        ctx.shadowColor = TARGET_FILL_COLOR;
-        ctx.shadowBlur = 14;
-        ctx.fillStyle = TARGET_FILL_COLOR;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Highlight sheen
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(t.x - r * 0.2, t.y - r * 0.2, r * 0.28, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bright white center core
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, Math.max(2.5, r * 0.18), 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
+        drawTacticalTarget(ctx, t.x, t.y, t.radius, TARGET_FILL_COLOR);
       }
 
-      // Ring Bursts Draw
-      for (let i = e.rings.length - 1; i >= 0; i--) {
-        const ring = e.rings[i];
-        ring.life -= dt;
-        if (ring.life <= 0) { e.rings.splice(i, 1); continue; }
-        const progress = 1 - ring.life / ring.maxLife;
-        const currentR = ring.startR + (ring.maxR - ring.startR) * progress;
-        ctx.save();
-        ctx.globalAlpha = (ring.life / ring.maxLife) * 0.75;
-        ctx.strokeStyle = ring.color;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(ring.x, ring.y, currentR, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
+      // Draw canonical hit rings (R2)
+      drawHitRings(ctx, e.hitRings, dt);
 
       // Particles Update & Draw
       for (let i = e.particles.length - 1; i >= 0; i--) {
@@ -635,6 +610,49 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
         ctx.fill();
       }
       ctx.globalAlpha = 1.0;
+
+      // Tactical Pro White Crosshair (R5)
+      if (mousePosRef.current && mousePosRef.current.active) {
+        const mx = mousePosRef.current.x;
+        const my = mousePosRef.current.y;
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+
+        // Top
+        ctx.beginPath();
+        ctx.moveTo(mx, my - 4);
+        ctx.lineTo(mx, my - 14);
+        ctx.stroke();
+
+        // Bottom
+        ctx.beginPath();
+        ctx.moveTo(mx, my + 4);
+        ctx.lineTo(mx, my + 14);
+        ctx.stroke();
+
+        // Left
+        ctx.beginPath();
+        ctx.moveTo(mx - 4, my);
+        ctx.lineTo(mx - 14, my);
+        ctx.stroke();
+
+        // Right
+        ctx.beginPath();
+        ctx.moveTo(mx + 4, my);
+        ctx.lineTo(mx + 14, my);
+        ctx.stroke();
+
+        // Center dot
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(mx, my, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
 
       ctx.restore();
       animationRef.current = requestAnimationFrame(draw);
@@ -784,8 +802,23 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
           {/* CANVAS */}
           <canvas 
             ref={canvasRef} 
-            onPointerDown={(e) => handleCanvasInteraction(e.clientX, e.clientY)}
-            className="block absolute top-0 left-0 w-full h-full z-10 cursor-crosshair touch-none" 
+            onPointerDown={(e) => {
+              if (canvasRef.current) {
+                const r = canvasRef.current.getBoundingClientRect();
+                mousePosRef.current = { x: e.clientX - r.left, y: e.clientY - r.top, active: true };
+              }
+              handleCanvasInteraction(e.clientX, e.clientY);
+            }}
+            onPointerMove={(e) => {
+              if (canvasRef.current) {
+                const r = canvasRef.current.getBoundingClientRect();
+                mousePosRef.current = { x: e.clientX - r.left, y: e.clientY - r.top, active: true };
+              }
+            }}
+            onPointerLeave={() => {
+              mousePosRef.current.active = false;
+            }}
+            className={`block absolute top-0 left-0 w-full h-full z-10 touch-none ${gameState === 'playing' ? 'cursor-none' : 'cursor-crosshair'}`} 
           />
 
           {/* START CARD */}
@@ -835,31 +868,10 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem
-                  num="1"
-                  text={t('reflexTrainingDrill.rule1Text', 'Clear Burst Targets')}
-                  highlight={t('reflexTrainingDrill.rule1Highlight', '+100 PTS')}
-                  result={t('reflexTrainingDrill.rule1Result', '× Combo × Level bonus (+0.6s clock per hit)')}
-                />
-                <RuleItem
-                  num="2"
-                  text={t('reflexTrainingDrill.rule2Text', 'Combo & Heat System')}
-                  highlight={t('reflexTrainingDrill.rule2Highlight', 'Up to 3.0x Multiplier')}
-                  result={t('reflexTrainingDrill.rule2Result', 'Higher streaks spawn more concurrent targets')}
-                />
-                <RuleItem
-                  num="3"
-                  text={t('reflexTrainingDrill.rule3Text', 'Level Progression')}
-                  highlight={t('reflexTrainingDrill.rule3Highlight', 'Continuous Scaling')}
-                  result={t('reflexTrainingDrill.rule3Result', 'Spawn windows tighten and targets shrink')}
-                />
-                <RuleItem 
-                  num="4" 
-                  text={t('reflexTrainingDrill.rule4Text', 'Miss & Timeout Rules')} 
-                  highlight={penaltyEnabled ? t('reflexTrainingDrill.rule4HighlightPenalty', '-0.8s Penalty') : t('reflexTrainingDrill.rule4HighlightZero', 'Zero Penalties (Default)')} 
-                  result={penaltyEnabled ? t('reflexTrainingDrill.rule4ResultPenalty', 'Deducts 0.8s & resets combo') : t('reflexTrainingDrill.rule4ResultZero', 'Resets combo. Time penalty is opt-in via settings')} 
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-sans">
+                {RULES_ITEMS.map((r) => (
+                  <RuleItem key={r.num} {...r} />
+                ))}
               </div>
             </DrillAccordion>
 
@@ -937,9 +949,6 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
           </section>
         )}
 
-        {/* SITE FOOTER */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
     </div>
   );
@@ -948,13 +957,15 @@ export default function ReflexTrainingDrillClient({ copy }: ReflexTrainingDrillC
 // === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black text-white"> ({highlight})</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans min-w-0">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-lg flex-shrink-0 font-mono">
+        {num}
+      </div>
+      <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
+        <p className="text-xs sm:text-sm font-medium text-gray-100 font-sans truncate min-w-0">
+          {text}{highlight && <span className="font-black text-white font-mono"> ({highlight})</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-black px-2.5 py-1 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide flex-shrink-0 font-mono">
           {result}
         </div>
       </div>

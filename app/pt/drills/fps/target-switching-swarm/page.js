@@ -1,6 +1,7 @@
 import TargetSwitchingSwarmClient from '@/app/drills/fps/target-switching-swarm/TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -294,6 +295,7 @@ export default function TargetSwitchingSwarmPtPage() {
         copy={{
           h1Keyword: "Treino de Target Switching FPS",
           h1Suffix: " – Troca Rápida de Alvos e Spray Transfer",
+          subtitle: "Treine transições rápidas entre alvos, spray transfers e indexação visual sem pausa de ajuste.",
           statScore: "Pontos",
           statTime: "Tempo",
           statAccuracy: "Precisão",
@@ -303,18 +305,15 @@ export default function TargetSwitchingSwarmPtPage() {
           statPeakLevel: "Nível Máximo",
           startTitle: "Target Switching Swarm",
           startSubtitle: "Entrada Raw de Hardware • Progressão Contínua",
-          getReady: "PREPARAR",
-          pausedTitle: "PAUSADO",
-          pausedSubtitle: "Clique para retomar – o bloqueio do cursor será reativado.",
-          stageCaption: "Mude rapidamente de alvo e elimine os alvos em enxame antes que seus anéis expirem. Evite tiros perdidos para maximizar combos!",
+          stageCaption: "Mude rapidamente de alvo e elimine os alvos em enxame antes que o temporizador expire. Evite tiros perdidos para maximizar combos!",
           rulesTitle: "Regras de Treino e Sistema de Pontuação",
+          aboutTitle: "Sobre Target Switching em Jogos de Tiro (FPS)",
           rulesItems: [
-            { num: "1", text: "Destruição de Alvo", highlight: "+100 PTS / +0,35s", result: "Estende o tempo da rodada" },
-            { num: "2", text: "Penalidade por Erro", highlight: "Reset de Combo (-0,6s)", result: "Zera o multiplicador" },
-            { num: "3", text: "Progressão de Nível", highlight: "A cada 1.400 PTS +1 Nível", result: "Aumenta densidade e velocidade" },
-            { num: "4", text: "Foco em Transição", highlight: "Sem hesitação pós-eliminação", result: "Maximiza alvos por minuto" }
-          ],
-          aboutTitle: "Sobre Target Switching em Jogos de Tiro (FPS)"
+            { num: "1", text: "Destruição de Alvo", highlight: "Alvos Ciano (+100 PTS / +0,35s)", result: "+100 PTS / +0,35s" },
+            { num: "2", text: "Enxame Dinâmico", highlight: "Respawn Imediato", result: "Enxame Contínuo" },
+            { num: "3", text: "Penalidade por Erro", highlight: "Tiro Errado / Tempo Esgotado", result: "Reset de Combo" },
+            { num: "4", text: "Progressão de Nível", highlight: "+1 Nivel / 2.100 PTS", result: "Mais Rápido & Menor" }
+          ]
         }}
       />
       <DrillGuide guide={targetSwitchingGuide} />
@@ -325,6 +324,7 @@ export default function TargetSwitchingSwarmPtPage() {
           locale="pt"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

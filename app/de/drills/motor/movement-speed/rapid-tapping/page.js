@@ -2,6 +2,7 @@ import RapidTappingClient from '@/app/drills/motor/movement-speed/rapid-tapping/
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -322,6 +323,33 @@ const guideProps = {
   },
 };
 
+const deCopy = {
+  title: "CPS Test",
+  desc: "Ein CPS-Test misst, wie viele Klicks pro Sekunde Sie mit der Maustaste ausführen können. Normales Einzelfinger-Klicken erreicht typischerweise 5–7 Klicks pro Sekunde (Halstead Finger-Tapping-Norm: 50–55 Taps/10s). Höhere Werte basieren auf speziellen Techniken wie Jitter- oder Butterfly-Clicking.",
+  score: "Punkte",
+  timeLeft: "Verbleibende Zeit",
+  cpsRate: "Aktuelle CPS",
+  bestScore: "Bestergebnis",
+  startButtonText: "Training Starten",
+  startSubtitle: "CPS-Klickgeschwindigkeitstrainer • 1:1 Rohe Mauseingabe",
+  getReady: "BEREIT MACHEN",
+  playAgain: "Erneut Trainieren",
+  shareTitle: "Ergebnis Teilen",
+  exitTitle: "Beenden",
+  avgCps: "Durchschnittliche CPS",
+  totalClicks: "Gesamtklicks",
+  maxDifficulty: "Max. Schwierigkeit",
+  peakCps: "Spitzen-CPS",
+  newBest: "NEUER REKORD",
+  rulesTitle: "Trainingsanleitung & Bewertungssystem",
+  rulesItems: [
+    { num: "1", text: "Schnelles Zielklicken", highlight: "Smaragdziel", result: "Klick vergrößert Radius & verhindert Schrumpfen" },
+    { num: "2", text: "Punkte-Schwelle", highlight: "+1 Punkt pro 10 Klicks", result: "Erhöht die Gesamtsitzungspunktzahl" },
+    { num: "3", text: "Dynamisches Schrumpfen", highlight: "Beschleunigt mit Punkten", result: "Fordert maximale Fingergeschwindigkeit" },
+    { num: "4", text: "Klicktechniken", highlight: "Jitter / Butterfly / Roh", result: "Maximiert die reine Klickrate" }
+  ],
+};
+
 export default function GermanRapidTappingPage() {
   return (
     <>
@@ -349,11 +377,12 @@ export default function GermanRapidTappingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <RapidTappingClient />
+      <RapidTappingClient copy={deCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/rapid-tapping" />
+        <RelatedDrills currentCategory="motor" currentHref="/de/drills/motor/movement-speed/rapid-tapping" />
       </div>
+      <DrillFooter />
     </>
   );
 }

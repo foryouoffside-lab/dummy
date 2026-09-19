@@ -2,6 +2,7 @@ import DynamicGridEvasionClient from '@/app/drills/physical/coordination/dynamic
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // INVESTIGACIÓN DE PALABRAS CLAVE NATIVAS (SERP ESPAÑA / LATAM)
@@ -322,7 +323,10 @@ const gridGuide = {
     "Mantén una mirada relajada al centro para captar las señales de aviso con la visión periférica.",
     "Mueve el ratón con decisión hacia la celda segura más cercana antes de la detonación roja.",
     "Preserva el combo 3.0x ininterrumpidamente durante los 45 segundos para coronar el rango Apex."
-  ]
+  ],
+  audience: "Jugadores y atletas de eSports (LoL, Valorant, CS2, Apex Legends), deportistas de pelota y combate, y cualquier persona que busque mejorar su visión periférica y velocidad de evasión táctica.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('posner1980', 'treisman1980', 'woodworth1899', 'fitts1954', 'woods2015'),
 };
 
 export default function DynamicGridEvasionPageEs() {

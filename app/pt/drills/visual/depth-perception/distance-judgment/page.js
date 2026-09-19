@@ -2,6 +2,7 @@ import DistanceJudgmentClient from '@/app/drills/visual/depth-perception/distanc
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distance-judgment (Portuguese: Percepção de Profundidade)
@@ -227,9 +228,10 @@ const faqSchema = {
 const distanceGuidePt = {
   heading: 'Padrões de Percepção de Profundidade e Noção Espacial',
   intro: [
-    'A percepção de profundidade é a capacidade de enxergar o mundo tridimensionalmente e julgar com exatidão distâncias, volumes e trajetórias de objetos em movimento. No esporte, na aviação e no trânsito, o cálculo correto de distância evita colisões graves.',
-    'Este exercício baseia-se no aparelho clássico de Howard-Dolman (1919) e na teoria da expansão óptica de David Lee (1976; Regan & Beverley, 1978). O teste treina o córtex visual para extrair a taxa de crescimento da imagem e calcular a Time-to-Contact (TTC).',
-    'Metodologia: O tempo é registrado com precisão de milissegundos via performance.now(). O desvio corresponde à diferença relativa entre os diâmetros.',
+    'A percepção de profundidade (visão estereoscópica e cálculo espacial) é a faculdade visual e neurológica que capacita o organismo a interpretar o ambiente em três dimensões e julgar com exatidão milimétrica a distância, o volume e a trajetória de alvos dinâmicos. Em esportes de alta velocidade (tênis, beisebol, automobilismo), na aviação, em exames psicotécnicos de direção (CNH profissional) e nos eSports táticos, estimar distâncias em frações de segundo define a linha divisória entre uma interceptação perfeita e uma colisão catastrófica.',
+    'Este exercício recria digitalmente os fundamentos geométricos do clássico aparelho estereoscópico de Howard-Dolman (Howard, 1919) e as pesquisas seminais de óptica ecológica formuladas por David N. Lee (1976) e David Regan & Kenneth I. Beverley (1978). Projetando uma esfera 3D ao longo de um túnel virtual em direção a um plano de referência estático, o treino condiciona o córtex visual a processar a taxa de expansão retiniana (looming) e calcular o tempo até o contato (Time-to-Contact, τ) sob velocidades de aproximação crescentes.',
+    'Metrologia & Precisão de Amostragem: Todos os desvios de interceptação são capturados localmente por meio da API de hardware performance.now() em resolução sub-milissegundo. O erro é computado como o desvio percentual relativo (|Diâmetro Real - Diámetro Alvo| / Diâmetro Alvo). Fatores de latência de exibição (~16,7 ms a 60 Hz, ~6,9 ms a 144 Hz, ~4,1 ms a 240 Hz) e taxas de polling do mouse (125 Hz vs 1000 Hz) introduzem dispersões físicas padrão (Woods et al., 2015). Variações abaixo de 5 ms constituem ruído instrumental normal; realize comparações no mesmo hardware.',
+    'Transparência e Privacidade de Dados: O SkillDrills não coleta informações pessoais, relatórios diagnósticos de visão nem telemetria centralizada em servidores remotos. Todas as pontuações alcançadas, níveis superados e taxas de precisão permanecem gravadas estritamente no armazenamento local (LocalStorage) do seu navegador.'
   ],
   benchmarks: {
     title: 'Tabela de Desempenho em Julgamento de Profundidade',
@@ -238,7 +240,7 @@ const distanceGuidePt = {
       ['Tier 1: Mestre Estereoscópico Apex', 'Abaixo de 5,0% de erro', '1500+ pts | Nível 7+', 'Sensibilidade excepcional a expansão óptica; timing perfeito.'],
       ['Tier 2: Alta Acuidade de Profundidade', '5,0% – 9,9% de erro', '1100 – 1499 pts | Nível 5–6', 'Forte antecipação espacial; boa adaptação a altas velocidades.'],
       ['Tier 3: Noção de Distância Padrão', '10,0% – 15,9% de erro', '750 – 1099 pts | Nível 3–4', 'Média saudável; pequenos atrasos sob velocidades extremas.'],
-      ['Tier 4: Sensibilidade Moderada', '16,0% – 25,0% de erro', '450 – 749 pts | Nível 2', 'Tendência a disparar precocemente antes do encaixe plano.'],
+      ['Tier 4: Sensibilidade Moderada', '16,0% – 25,0% de erro', '450 – 749 pts | Nivel 2', 'Tendência a disparar precocemente antes do encaixe plano.'],
       ['Tier 5: Em Desenvolvimento', 'Acima de 25,0% de erro', 'Abaixo de 450 pts | Nível 1', 'Erro temporal expressivo; necessidade de treino regular.'],
     ],
   },
@@ -263,6 +265,14 @@ const distanceGuidePt = {
       },
     ],
   },
+  steps: [
+    'Clique em "Iniciar Teste" para dar início à sessão de 45 segundos de cálculo de profundidade.',
+    'Mantenha o olhar fixado estavelmente sobre o anel ciano de referência localizado no plano médio.',
+    'Acompanhe a aproximação da esfera 3D que surge no fundo do túnel e acelera em sua direção.',
+    'Clique com o mouse, toque na tela ou aperte a barra de espaço no milissegundo exato em que a esfera preencher a circunferência do anel alvo.',
+    'Analise o feedback de precisão (<5% de erro: Perfeito / +150 PTS) e adapte seu reflexo às velocidades crescentes ao longo de 45 segundos.'
+  ],
+  audience: 'Motoristas e candidatos a habilitação profissional (CNH C, D, E e exames de frotistas), operadores de máquinas e empilhadeiras, atletas de esportes com bola e raquete (tênis, vôlei, beisebol), pilotos e jogadores de eSports que buscam calibrar noção espacial e timing de interceptação.',
   faqs: {
     title: 'Perguntas Frequentes sobre Percepção de Profundidade e Distância',
     items: faqSchema.mainEntity.map((q) => ({
@@ -270,6 +280,15 @@ const distanceGuidePt = {
       a: q.acceptedAnswer.text,
     })),
   },
+  sources: pickSources('howard1919', 'lee1976', 'regan1978', 'julesz1971', 'woods2015'),
+  related: [
+    { href: "/drills/visual/tracking-accuracy/moving-target", label: "Interceptação de Alvo Móvel" },
+    { href: "/drills/visual/reaction-speed/light-reaction", label: "Teste de Reação à Luz" },
+    { href: "/drills/visual/tracking-accuracy/multiple-targets", label: "Rastreamento de Múltiplos Objetos" },
+    { href: "/drills/visual/tracking-accuracy/pursuit-tracker", label: "Rastreador de Perseguição Ocular" },
+    { href: "/drills/visual/reaction-speed/go/no-go", label: "Controle de Impulso Go / No-Go" },
+    { href: "/drills/visual/visual-recognition/entropic-grid", label: "Varredura em Grade Entrópica" }
+  ]
 };
 
 const copyPt = {

@@ -21,9 +21,7 @@ import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, createHitRing, drawHitRings, drawTacticalTarget } from '../../../../lib/canvasFx';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
@@ -70,10 +68,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Tracking Alignment", highlight: "+10 PTS / 0.25s", result: "Keep Green Crosshair Locked On Target" },
-  { num: "2", text: "Dynamic Escalation", highlight: "Continuous Bezier Curve", result: "Adaptive radius & speed as your level climbs" },
-  { num: "3", text: "Time Economy", highlight: "+0.4s / sec", result: "Maintains clock while tracking" },
-  { num: "4", text: "Focus Break Rule", highlight: "Failure Penalty", result: "1.0s off-target resets combo (-0.6s with Time Penalty enabled)" }
+  { num: "1", text: "Tracking Alignment", highlight: "+10 PTS (+0.4s/s)", result: "Keep Locked on Target" },
+  { num: "2", text: "Flow Multiplier", highlight: "Up to 3.0× Points", result: "Continuous Focus Chain" },
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Bezier Speed" },
+  { num: "4", text: "Focus Break Rule", highlight: "1.0s Off-Target", result: "Resets Combo (-0.6s)" }
 ];
 
 const ABOUT_INTRO = [
@@ -163,7 +161,7 @@ export default function FlowStateClient({ copy = null }) {
     combo: 0, bestCombo: 0,
     focusTimer: 0, continuousTrackTime: 0, focusBreaks: 0, msOffTarget: 0,
     totalFrames: 0, framesOnTarget: 0, wasTracking: false,
-    particles: [], hitMarkers: [], screenShake: 0,
+    particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
     logicalWidth: 0, logicalHeight: 0
   });
 
@@ -194,6 +192,22 @@ export default function FlowStateClient({ copy = null }) {
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
+  }, []);
+
+  const createExplosion = useCallback((x, y, color) => {
+    for (let i = 0; i < 14; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 4.5;
+      engine.current.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        maxLife: 1.0,
+        color
+      });
+    }
   }, []);
 
   const createHitMarker = useCallback((x, y) => {
@@ -305,7 +319,7 @@ export default function FlowStateClient({ copy = null }) {
       combo: 0, bestCombo: 0,
       focusTimer: 0, continuousTrackTime: 0, focusBreaks: 0, msOffTarget: 0,
       totalFrames: 0, framesOnTarget: 0, wasTracking: false,
-      particles: [], hitMarkers: [], screenShake: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
       logicalWidth: w, logicalHeight: h
     };
 
@@ -344,7 +358,6 @@ export default function FlowStateClient({ copy = null }) {
   }, [spawnNewBezierSegment]);
 
   const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
@@ -356,25 +369,43 @@ export default function FlowStateClient({ copy = null }) {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (gameState === 'playing' || gameState === 'countdown' || gameState === 'gameOver') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleExitDrill();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked);
+      if (!isLocked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
     return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+  }, [gameState, handleExitDrill]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = !!document.fullscreenElement;
+      setIsFullscreen(isFull);
+      if (!isFull && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -489,6 +520,9 @@ export default function FlowStateClient({ copy = null }) {
             if (e.combo > e.bestCombo) e.bestCombo = e.combo;
             setCombo(e.combo);
             e.continuousTrackTime = 0;
+            if (e.combo % 5 === 0) {
+              e.hitRings.push(createHitRing(tObj.x, tObj.y, tObj.r * 1.5, e.combo >= 10 ? '#34d399' : '#10b981'));
+            }
           }
 
           if (e.focusTimer >= 0.25) {
@@ -522,6 +556,8 @@ export default function FlowStateClient({ copy = null }) {
             e.screenShake = 6;
             triggerFlash();
             drillAudio.playPenalty();
+            createExplosion(tObj.x, tObj.y, '#ef4444');
+            e.hitRings.push(createHitRing(tObj.x, tObj.y, tObj.r, '#ef4444'));
             e.wasTracking = false;
           }
         }
@@ -554,11 +590,30 @@ export default function FlowStateClient({ copy = null }) {
       if (gameState === 'playing' || gameState === 'start') {
         const tObj = e.target;
         const isTracking = Math.hypot(e.crosshair.x - tObj.x, e.crosshair.y - tObj.y) <= tObj.r;
-        const targetColor = isTracking ? '#00ff88' : '#22c55e';
+        const targetColor = gameState === 'playing'
+          ? (isTracking ? (e.combo >= 10 ? '#34d399' : '#10b981') : '#ef4444')
+          : '#10b981';
 
-        drawPulseRing(ctx, tObj.x, tObj.y, tObj.r, targetColor, (time / 1000) % 1);
         drawTacticalTarget(ctx, tObj.x, tObj.y, tObj.r, targetColor, false);
       }
+
+      // Render particles
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Render hit rings
+      drawHitRings(ctx, e.hitRings, dt);
 
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
@@ -575,8 +630,11 @@ export default function FlowStateClient({ copy = null }) {
       ctx.globalAlpha = 1.0;
 
       const ch = e.crosshair;
-      if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
+      if (ch.initialized && (gameState === 'playing' || gameState === 'start' || gameState === 'countdown')) {
+        const activeColor = '#ffffff';
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 
@@ -593,6 +651,7 @@ export default function FlowStateClient({ copy = null }) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -607,7 +666,7 @@ export default function FlowStateClient({ copy = null }) {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, spawnNewBezierSegment, endGame, triggerFlash, createHitMarker]);
+  }, [gameState, pointerLocked, spawnNewBezierSegment, endGame, triggerFlash, createHitMarker, createExplosion]);
 
   const shareDrillLink = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/fps/flow-state';
@@ -732,26 +791,8 @@ export default function FlowStateClient({ copy = null }) {
             <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
-          {/* Pause Overlay */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Focus Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -860,9 +901,6 @@ export default function FlowStateClient({ copy = null }) {
 
 
       </main>
-
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
@@ -872,11 +910,11 @@ function RuleItem({ num, text, highlight = '', result }) {
   return (
     <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
       <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
+      <div className="flex-1 flex flex-row items-center justify-between gap-2 min-w-0">
+        <p className="text-sm font-medium text-gray-100 font-sans truncate">
           {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide flex-shrink-0">
           {result}
         </div>
       </div>

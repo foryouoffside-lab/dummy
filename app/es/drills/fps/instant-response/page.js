@@ -2,6 +2,8 @@ import InstantResponseClient from '@/app/drills/fps/instant-response/InstantResp
 import DrillGuide from '@/components/drill/DrillGuide';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import { pickSources } from '@/lib/drillSources';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Tiempo de Reacción FPS – Reflejos de Tiro | SkillDrills",
@@ -238,14 +240,13 @@ export default function InstantResponseEsPage() {
     startSubtitle: "Latencia visual y velocidad de clic • Progresión dinámica",
     getReady: "Prepararse",
     pausedTitle: "Pausado",
-    pausedSubtitle: "Haz clic para reanudar (se reactivará el bloqueo de puntero)",
     stageCaption: "Haz clic en cuanto la diana central cambie a color verde. Evita disparos anticipados en fintas.",
     rulesTitle: "Reglas de Entrenamiento y Puntuación",
     rulesItems: [
-      { num: "1", text: "Acierto en Flash", highlight: "+100 PTS", result: "Clic inmediato tras el encendido verde" },
-      { num: "2", text: "Bonus de Rapidez", highlight: "Hasta +150 PTS", result: "Reacciones ultrarrápidas bajo 160 ms" },
-      { num: "3", text: "Subida de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "La ventana de reacción se acorta progresivamente" },
-      { num: "4", text: "Disparo Previo", highlight: "Falta / Reinicio", result: "Reinicia el combo si pulsas antes del flash" }
+      { num: "1", text: "Acierto en Flash", highlight: "+100 PTS (+0.6s)", result: "×Multiplicador Combo" },
+      { num: "2", text: "Bonus de Rapidez", highlight: "Tiro Sub-150ms", result: "Hasta +150 PTS" },
+      { num: "3", text: "Subida de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Ventanas Adaptativas" },
+      { num: "4", text: "Fallo / Pre-disparo", highlight: "Penalización", result: "Reinicio Combo (-0.8s)" }
     ],
     aboutTitle: "Acerca del Test de Tiempo de Reacción FPS",
     aboutHeading: "¿Cómo funciona la medición de reflejos en shooters?"
@@ -312,7 +313,24 @@ export default function InstantResponseEsPage() {
           desc: "En torneos de alto nivel, evitar un disparo precipitado en una finta es crucial. Los circuitos frontales entrenados detienen el clic antes de cometer el fallo."
         }
       ]
-    }
+    },
+    steps: [
+      "Configura tu sensibilidad habitual en los ajustes de sesión para un mapeo de entrada uniforme.",
+      "Haz clic en 'Iniciar Entrenamiento' para activar la pantalla completa y el Pointer Lock del navegador.",
+      "Fija la atención visual en la retícula central con el dedo índice en tensión ligera sobre el botón del ratón.",
+      "Haz clic al instante al detectar el cambio de color, controlando el impulso de disparo antes de tiempo.",
+      "Analiza tu tiempo medio de reacción, la desviación típica y tus rachas de combo en cada nivel."
+    ],
+    audience: "Jugadores competitivos de FPS y shooters tácticos (Valorant, CS2, Rainbow Six Siege, Apex Legends, Overwatch 2), jugadores de eSports y deportistas que entrenan su velocidad de reacción visual.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    sources: pickSources('woods2015', 'posner1990', 'donders1969', 'hick1952'),
+    related: [
+      { href: "/es/drills/fps/angle-hold-trainer", label: "Colocación de Mira y Retención de Ángulos" },
+      { href: "/es/drills/fps/flick-shot-training", label: "Entrenamiento de Flick Shot" },
+      { href: "/es/drills/fps/180-degree-awareness", label: "Conciencia Espacial 180°" },
+      { href: "/es/drills/reaction-speed/reaction-time-test", label: "Test de Tiempo de Reacción" },
+      { href: "/es/drills/reaction-speed/reflex-training-drill", label: "Entrenamiento de Reflejos" }
+    ]
   };
 
   return (
@@ -350,6 +368,7 @@ export default function InstantResponseEsPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

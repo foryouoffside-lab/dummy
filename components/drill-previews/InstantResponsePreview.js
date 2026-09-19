@@ -3,8 +3,8 @@
 // Instant Response — authentic animated card preview.
 // Recreates the EXACT in-game visuals and gameplay from InstantResponseClient.js:
 // 1. Pitch black tactical canvas (#050508) with subtle green concentric radar rings
-// 2. High-vis neon green player aim reticle (#00ff88 circle, 4 crosshair ticks, center dot)
-// 3. Central tactical target: idle state -> luminous emerald flash (#00ff88)
+// 2. High-vis emerald player aim reticle (#10b981 circle, 4 crosshair ticks, center dot)
+// 3. Central tactical target: idle state -> luminous emerald flash (#10b981)
 // 4. Pro snap: reticle snaps to center, hitmarker flashes white, particle sparks burst outwards.
 
 export default function InstantResponsePreview() {

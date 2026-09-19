@@ -2,6 +2,7 @@ import FingerSequencingClient from '@/app/drills/motor/movement-speed/finger-seq
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -300,6 +301,31 @@ const guideProps = {
   },
 };
 
+const ptCopy = {
+  title: "Treino de Mira Sequencial",
+  desc: "A alternância sequencial de alvos treina o clique rápido e preciso em nós ordenados numericamente em vez de mirar no alvo mais acessível. Com base nos programas motores seriais de Lashley (1951) e Keele (1968), aperfeiçoa o planejamento de trajetórias balísticas e microcorreções de mira.",
+  score: "Pontos",
+  timeLeft: "Tempo Restante",
+  accuracy: "Precisão",
+  bestScore: "Melhor Pontuação",
+  startButtonText: "Iniciar Treino",
+  startSubtitle: "Precisão Motora e Trajetórias Sequenciais • Entrada Direta 1:1",
+  getReady: "PREPARE-SE",
+  rulesTitle: "Instruções do Treino e Sistema de Pontuação",
+  rulesItems: [
+    { num: "1", text: "Acerto Sequencial de Nós", highlight: "Sequência Esmeralda", result: "+150 PTS × Combo (+0.6s)" },
+    { num: "2", text: "Multiplicador de Combo", highlight: "Até 3.0×", result: "Aumenta a pontuação exponencialmente" },
+    { num: "3", text: "Progressão de Nível", highlight: "Escala Contínua", result: "Alvos encolhem dinamicamente" },
+    { num: "4", text: "Erro / Expiração", highlight: "Reinício do Combo", result: "Penalidade de -0.8s" }
+  ],
+  chainsCleared: "Sequências Concluídas",
+  peakLevel: "Nível Máximo",
+  maxCombo: "Combo Máximo",
+  playAgain: "Treinar Novamente",
+  shareTitle: "Compartilhar Pontuação",
+  exitTitle: "Sair"
+};
+
 export default function PortugueseFingerSequencingPage() {
   return (
     <>
@@ -327,11 +353,12 @@ export default function PortugueseFingerSequencingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient copy={{ title: 'Treino de Mira Sequencial' }} />
+      <FingerSequencingClient copy={ptCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/finger-sequencing" />
+        <RelatedDrills currentCategory="motor" currentHref="/pt/drills/motor/movement-speed/finger-sequencing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

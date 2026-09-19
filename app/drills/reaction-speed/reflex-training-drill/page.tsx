@@ -1,6 +1,7 @@
 import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -334,6 +335,7 @@ export default function ReflexTrainingDrillPage() {
       />
       <ReflexTrainingDrillWrapper copy={{ title: 'Reflex Training Drill' }} />
       <DrillGuide guide={reflexDrillGuide} />
+      <DrillFooter />
     </>
   );
 }

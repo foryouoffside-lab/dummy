@@ -1,6 +1,7 @@
 import DragAndDropClient from './DragAndDropClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -321,6 +322,26 @@ const guideProps = {
   },
 };
 
+const copyEn = {
+  title: "Drag & Drop Mouse Trainer",
+  subtitle: "Spatial Drag & Drop Target Alignment • 15 Levels",
+  startButtonText: "START DRILL",
+  playAgainText: "Play Again",
+  shareText: "Share Score",
+  exitText: "Exit",
+  accuracyLabel: "Accuracy",
+  targetDropsLabel: "Target Drops",
+  maxComboLabel: "Max Combo",
+  peakLevelLabel: "Peak Level",
+  rulesTitle: "Drill Instructions & Scoring System",
+  rulesItems: [
+    { num: "1", text: "Target Drop", highlight: "+100 PTS × Combo", result: "Clean Drag & Release in Container" },
+    { num: "2", text: "Continuous Combo", highlight: "Up to 3.0× Multiplier", result: "Chain Consecutive Drops" },
+    { num: "3", text: "Level Progression", highlight: "+1 Level / 250 PTS", result: "Containers Shrink & Accelerate" },
+    { num: "4", text: "Miss & Timeout", highlight: "Combo Reset", result: "Off-Target Drops Reset Multiplier" }
+  ],
+};
+
 export default function DragAndDropPage() {
   return (
     <>
@@ -348,8 +369,9 @@ export default function DragAndDropPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DragAndDropClient copy={{ title: "Drag and Drop Mouse Trainer" }} />
+      <DragAndDropClient copy={copyEn} />
       <DrillGuide {...guideProps} />
+      <DrillFooter />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import FPSTrackingTrainerClient from '@/app/drills/reaction-speed/fps-tracking-trainer/FPSTrackingTrainerWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -311,6 +312,7 @@ export default function JapaneseFPSTrackingTrainerPage() {
           currentHref="https://skilldrills.online/ja/drills/reaction-speed/fps-tracking-trainer"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

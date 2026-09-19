@@ -1,6 +1,7 @@
 import TargetAcquisitionClient from '@/app/drills/fps/target-acquisition/TargetAcquisitionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -293,6 +294,7 @@ export default function TargetAcquisitionEsPage() {
   const copyEs = {
     h1Keyword: "Adquisición de Objetivos FPS",
     h1Suffix: " – Primer Disparo",
+    subtitle: "Entrena detección visual de objetivos, discriminación de amenazas y precisión de primer disparo con métricas en tiempo real.",
     statScore: "Puntuación",
     statTime: "Tiempo",
     statAccuracy: "Precisión",
@@ -310,18 +312,10 @@ export default function TargetAcquisitionEsPage() {
     stageCaption: "Localiza y haz clic en el blanco más brillante (mayor opacidad) de cada grupo con la mayor rapidez y precisión posible.",
     rulesTitle: "Instrucciones del Ejercicio y Puntuación",
     rulesItems: [
-      {
-        title: "Disparo Acertado (+100 PTS / +0,4s)",
-        text: "Dispara primero al objetivo de mayor brillo. Los multiplicadores de combo y las bonificaciones de nivel se acumulan."
-      },
-      {
-        title: "Disparo Incorrecto u Orden Erróneo (-50 PTS / -1,0s)",
-        text: "Hacer clic en un blanco secundario antes que en el principal reinicia el combo y resta tiempo del cronómetro."
-      },
-      {
-        title: "Serie Completa Eliminada (+400 PTS)",
-        text: "Despejar todos los blancos en la secuencia correcta otorga una bonificación notable y presenta una ronda más compleja."
-      }
+      { num: "1", text: "Impacto en Diana", highlight: "+100 PTS (+0,4s)", result: "×Multiplicador Combo" },
+      { num: "2", text: "Serie Despejada", highlight: "+400 PTS × Nivel", result: "Nuevo Grupo" },
+      { num: "3", text: "Subida de Nivel", highlight: "+1 / 1400 PTS", result: "Escalado Dinámico Continuo" },
+      { num: "4", text: "Blanco Erróneo / Fallo", highlight: "Penalización", result: "Reinicio Combo (-0,6s)" }
     ],
     aboutTitle: "Acerca del Entrenamiento de Adquisición",
     aboutHeading: "¿Qué es la Adquisición de Objetivos?",
@@ -363,6 +357,7 @@ export default function TargetAcquisitionEsPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

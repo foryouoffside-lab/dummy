@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
     title: "180度 振り向き 練習 – 振り向きエイム・周辺視野 | SkillDrills",
@@ -318,21 +319,20 @@ export default function AwarenessDrillJaPage() {
         copy={{
           h1Keyword: "180度 振り向き 練習",
           h1Suffix: " - 振り向きエイム・周辺視野トレーナー",
+          subtitle: "周辺視野による高速敵探知、大角度フリック移行、180度振り向きの終末制動力を訓練。",
           statScore: "スコア",
           statTime: "残り時間",
           statAccuracy: "命中率",
           statBestScore: "自己ベスト",
           startTitle: "180度 振り向き 練習",
           startSubtitle: "ハードウェア生入力 • エンドレス難易度進行",
-          getReady: "準備完了",
-          pausedTitle: "一時停止中",
-          pausedSubtitle: "クリックして再開 — カーソルロックが再適用されます",
-          stageCaption: "画面両端に出現するターゲットを周辺視野で捉え、瞬時に大振りフリックで撃ち抜いてください。",
+          stageCaption: "画面端に出現するターゲットを周辺視野で捉え、タイマーが切れる前に180度フリックで破壊してください。",
           rulesTitle: "ドリル手順 & スコアリングシステム",
           rulesItems: [
-            { title: "ターゲット命中 (+100点)", text: "命中を継続してコンボ倍率を最大3.0倍まで上昇。" },
-            { title: "180°端出現 & ストリーク加速", text: "画面左右両端に出現し、ストリークが伸びるほどサイズ縮小＆滞空短縮。" },
-            { title: "ミス / タイムアウト", text: "ミスまたは時間切れでコンボリセット。設定でペナルティ有効時は-0.8秒。" }
+            { num: "1", text: "端ターゲット撃破", highlight: "大角度標的 (+100点 / +0.6秒)", result: "×コンボ倍率" },
+            { num: "2", text: "180°周辺視野出現", highlight: "極限周辺視野", result: "小型化 & 高速化" },
+            { num: "3", text: "難易度レベル上昇", highlight: "+1 レベル / 1750点", result: "適応スケーリング" },
+            { num: "4", text: "ミス / タイムアウト", highlight: "失敗ペナルティ", result: "コンボリセット (-0.8秒)" }
           ],
           aboutTitle: "180度 振り向き 練習について",
           aboutHeading: "180度振り向きエイム練習とは？",
@@ -349,6 +349,7 @@ export default function AwarenessDrillJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

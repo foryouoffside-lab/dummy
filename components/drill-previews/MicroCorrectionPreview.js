@@ -3,7 +3,7 @@
 // Micro-Correction Aim Trainer — authentic animated card preview.
 // Recreates the EXACT in-game visuals and mechanics from MicroCorrectionClient.js:
 // 1. Primary Cyan (#06b6d4) anchor target
-// 2. Once anchor is struck, a tight Micro Target in Emerald (#00ff88) immediately spawns adjacent
+// 2. Once anchor is struck, a tight Micro Target in Emerald (#10b981) immediately spawns adjacent
 // 3. Player crosshair hits anchor, micro-adjusts rapidly across tight distance, hits micro target.
 
 export default function MicroCorrectionPreview() {

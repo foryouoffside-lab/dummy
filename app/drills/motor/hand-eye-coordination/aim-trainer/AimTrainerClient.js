@@ -18,9 +18,7 @@ import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../../components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget, createHitRing, drawHitRings } from '../../../../../lib/canvasFx';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
@@ -77,7 +75,7 @@ const spawnTarget = (w, h, config) => {
     radius: config.radius,
     age: 0,
     ttl: config.maxLife,
-    color: '#22c55e'
+    color: '#10b981'
   };
 };
 
@@ -85,10 +83,10 @@ const spawnTarget = (w, h, config) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Target Hit", text: "Acquire and click active moving targets before they disappear. Score +100 PTS × Combo (+0.6s) per hit." },
-  { title: "Continuous Combo", text: "Chain successful target hits to build combo multiplier up to 3.0x max." },
-  { title: "Level Progression", text: "Level up every 1750 PTS. Targets shrink, accelerate, and expire faster." },
-  { title: "Miss / Timeout", text: "Missing shots or letting targets expire resets combo streak and deducts 0.8s when penalty is enabled." }
+  { num: "1", text: "Target Hit", highlight: "+100 PTS (+0.6s)", result: "×Combo Mult" },
+  { num: "2", text: "Continuous Combo", highlight: "Up to 3.0× PTS", result: "Maintains Flow" },
+  { num: "3", text: "Level Up", highlight: "+1 / 1750 PTS", result: "Shrink & Accelerate" },
+  { num: "4", text: "Miss / Timeout", highlight: "Penalty", result: "Resets Combo (-0.8s)" }
 ];
 
 
@@ -151,14 +149,16 @@ export default function AimTrainerClient({ copy = {} } = {}) {
   }, []);
 
   const createExplosion = useCallback((x, y, color) => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.0 + Math.random() * 3.5;
       engine.current.particles.push({
         x, y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        life: 0.8,
+        life: 1.0,
+        maxLife: 1.0,
+        radius: 1.5 + Math.random() * 2.0,
         color
       });
     }
@@ -193,28 +193,16 @@ export default function AimTrainerClient({ copy = {} } = {}) {
   }, []);
 
   const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    gameActiveRef.current = false;
 
     setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
     setGameState('start');
-  }, []);
-
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
   }, []);
 
   // End Game Management
@@ -321,10 +309,37 @@ export default function AimTrainerClient({ copy = {} } = {}) {
   }, []);
 
   useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, handleExitDrill]);
+
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      const locked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(locked);
+      if (!locked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    const handleFullscreenChange = () => {
+      const isFs = !!document.fullscreenElement;
+      setIsFullscreen(isFs);
+      if (!isFs && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
-    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState, handleExitDrill]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -340,57 +355,53 @@ export default function AimTrainerClient({ copy = {} } = {}) {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (!containerRef.current || !containerRef.current.contains(e.target)) return;
 
-      if (gameState === 'playing') {
-        if (!pointerLocked && canvasRef.current) {
-          resumeDrill();
-        } else if (pointerLocked) {
-          const eRef = engine.current;
-          const ch = eRef.crosshair;
-          let hitIndex = -1;
+      if (gameState === 'playing' && pointerLocked) {
+        const eRef = engine.current;
+        const ch = eRef.crosshair;
+        let hitIndex = -1;
 
-          eRef.totalClicks++;
+        eRef.totalClicks++;
 
-          for (let i = 0; i < eRef.targets.length; i++) {
-            const tgt = eRef.targets[i];
-            const dist = Math.hypot(ch.x - tgt.x, ch.y - tgt.y);
-            if (dist <= tgt.radius + 8) {
-              hitIndex = i;
-              break;
-            }
+        for (let i = 0; i < eRef.targets.length; i++) {
+          const tgt = eRef.targets[i];
+          const dist = Math.hypot(ch.x - tgt.x, ch.y - tgt.y);
+          if (dist <= tgt.radius + 8) {
+            hitIndex = i;
+            break;
           }
+        }
 
-          if (hitIndex !== -1) {
-            const hitTgt = eRef.targets[hitIndex];
-            eRef.hits++;
-            eRef.combo++;
-            if (eRef.combo > eRef.bestCombo) eRef.bestCombo = eRef.combo;
+        if (hitIndex !== -1) {
+          const hitTgt = eRef.targets[hitIndex];
+          eRef.hits++;
+          eRef.combo++;
+          if (eRef.combo > eRef.bestCombo) eRef.bestCombo = eRef.combo;
 
-            const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
-            eRef.score += Math.round(100 * getComboMultiplier(eRef.combo) * levelMult);
-            eRef.timeLeft += TIME_PER_HIT;
+          const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
+          eRef.score += Math.round(100 * getComboMultiplier(eRef.combo) * levelMult);
+          eRef.timeLeft += TIME_PER_HIT;
 
-            const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
-            eRef.level = Math.max(eRef.level, rawLevel);
-            bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
+          const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
+          eRef.level = Math.max(eRef.level, rawLevel);
+          bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
-            drillAudio.playHit();
-            const hitColor = eRef.combo >= 10 ? '#38bdf8' : '#00ff88';
-            createExplosion(hitTgt.x, hitTgt.y, hitColor);
-            eRef.hitRings.push(createHitRing(hitTgt.x, hitTgt.y, hitTgt.radius, hitColor));
-            createHitMarker(ch.x, ch.y);
-            setUiScore(eRef.score);
+          drillAudio.playHit();
+          const hitColor = eRef.combo >= 10 ? '#34d399' : '#10b981';
+          createExplosion(hitTgt.x, hitTgt.y, hitColor);
+          eRef.hitRings.push(createHitRing(hitTgt.x, hitTgt.y, hitTgt.radius, hitColor));
+          createHitMarker(ch.x, ch.y);
+          setUiScore(eRef.score);
 
-            const cfg = getLevelConfig(eRef.level, eRef.combo);
-            eRef.targets[hitIndex] = spawnTarget(eRef.logicalWidth, eRef.logicalHeight, cfg);
-          } else {
-            eRef.misses++;
-            eRef.combo = 0;
-            eRef.screenShake = 6;
-            triggerFlash();
-            drillAudio.playPenalty();
-            createExplosion(ch.x, ch.y, '#ef4444');
-            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
-          }
+          const cfg = getLevelConfig(eRef.level, eRef.combo);
+          eRef.targets[hitIndex] = spawnTarget(eRef.logicalWidth, eRef.logicalHeight, cfg);
+        } else {
+          eRef.misses++;
+          eRef.combo = 0;
+          eRef.screenShake = 6;
+          triggerFlash();
+          drillAudio.playPenalty();
+          createExplosion(ch.x, ch.y, '#ef4444');
+          if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
         }
       }
     };
@@ -401,7 +412,7 @@ export default function AimTrainerClient({ copy = {} } = {}) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, universalSens, triggerFlash, createExplosion, createHitMarker, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash, createExplosion, createHitMarker]);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -525,16 +536,14 @@ export default function AimTrainerClient({ copy = {} } = {}) {
 
       if (gameState === 'playing' || gameState === 'start') {
         for (const tgt of e.targets) {
-          const progress = Math.min(1, tgt.age / tgt.ttl);
-          const targetColor = e.combo >= 10 ? '#38bdf8' : '#00ff88';
-
-          drawPulseRing(ctx, tgt.x, tgt.y, tgt.radius, targetColor, progress);
+          const targetColor = e.combo >= 10 ? '#34d399' : '#10b981';
           drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, false);
         }
       }
 
       drawHitRings(ctx, e.hitRings, dt);
 
+      // Hit markers
       ctx.lineWidth = 2.0;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -549,11 +558,33 @@ export default function AimTrainerClient({ copy = {} } = {}) {
       }
       ctx.globalAlpha = 1.0;
 
+      // Circular arc particles with delta-time alpha decay
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) {
+          e.particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius || 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Tactical Pro White Crosshair with drop shadow
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#22c55e' : '#eab308';
-        ctx.strokeStyle = activeColor;
-        ctx.fillStyle = activeColor;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
 
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2); ctx.stroke();
@@ -568,6 +599,7 @@ export default function AimTrainerClient({ copy = {} } = {}) {
         ctx.stroke();
 
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -710,26 +742,8 @@ export default function AimTrainerClient({ copy = {} } = {}) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{t('aimTrainer.gamePaused', 'Game Paused')}</h2>
-                <p className="text-xs text-gray-300 font-medium">{t('aimTrainer.clickToResume', 'Click to resume — cursor lock will re-engage.')}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -740,6 +754,7 @@ export default function AimTrainerClient({ copy = {} } = {}) {
               accent="emerald"
               title={copy?.title || t('aimTrainer.title', 'Aim Trainer Elite')}
               subtitle={copy?.subtitle || t('aimTrainer.subtitle', 'Dynamic Moving Targets & Precision Click Timing • Endless Level Progression')}
+              buttonText={copy?.startButtonText || "START DRILL"}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -757,11 +772,14 @@ export default function AimTrainerClient({ copy = {} } = {}) {
               grade={analytics.grade}
               score={uiScore}
               isNewBest={isNewBest}
+              playAgainText={copy?.playAgainText || "Play Again"}
+              shareText={copy?.shareText || "Share Score"}
+              exitText={copy?.exitText || "Exit"}
               stats={[
-                { value: analytics.accuracy, suffix: "%", label: t('aimTrainer.accuracy', 'Accuracy') },
-                { value: analytics.hits, label: t('aimTrainer.targetHits', 'Target Hits') },
-                { value: `${analytics.bestCombo}x`, label: t('aimTrainer.maxCombo', 'Max Combo') },
-                { value: `Lv. ${analytics.levelReached}`, label: t('aimTrainer.peakLevel', 'Peak Level') },
+                { value: analytics.accuracy, suffix: "%", label: copy?.accuracyLabel || t('aimTrainer.accuracy', 'Accuracy') },
+                { value: analytics.hits, label: copy?.targetHitsLabel || t('aimTrainer.targetHits', 'Target Hits') },
+                { value: `${analytics.bestCombo}x`, label: copy?.maxComboLabel || t('aimTrainer.maxCombo', 'Max Combo') },
+                { value: `Lv. ${analytics.levelReached}`, label: copy?.peakLevelLabel || t('aimTrainer.peakLevel', 'Peak Level') },
               ]}
               onPlayAgain={enterDrill}
               onShare={shareScore}
@@ -782,28 +800,20 @@ export default function AimTrainerClient({ copy = {} } = {}) {
           <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title={t('aimTrainer.rulesTitle', 'Drill Instructions & Scoring System')}
+              title={copy?.rulesTitle || t('aimTrainer.rulesTitle', 'Drill Instructions & Scoring System')}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                  { title: t('aimTrainer.rule1Title', 'Target Hit'), text: t('aimTrainer.rule1Text', 'Acquire and click active moving targets before they disappear. Score +100 PTS × Combo (+0.6s) per hit.') },
-                  { title: t('aimTrainer.rule2Title', 'Continuous Combo'), text: t('aimTrainer.rule2Text', 'Chain successful target hits to build combo multiplier up to 3.0x max.') },
-                  { title: t('aimTrainer.rule3Title', 'Level Progression'), text: t('aimTrainer.rule3Text', 'Level up every 1750 PTS. Targets shrink, accelerate, and expire faster.') },
-                  { title: t('aimTrainer.rule4Title', 'Miss / Timeout'), text: t('aimTrainer.rule4Text', 'Missing shots or letting targets expire resets combo streak and deducts 0.8s when penalty is enabled.') },
-                ].map((item, i) => (
-                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
-                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
                 ))}
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title={t('aimTrainer.aboutTitle', 'About Aim Trainer Elite')}
+              title={copy?.aboutTitle || t('aimTrainer.aboutTitle', 'About Aim Trainer Elite')}
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -851,9 +861,25 @@ export default function AimTrainerClient({ copy = {} } = {}) {
           </div>
         )}
       </main>
+    </div>
+  );
+}
 
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
+// === Subcomponents ===
+function RuleItem({ num, text, highlight = '', result }) {
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
+        </p>
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
+          {result}
+        </div>
+      </div>
     </div>
   );
 }

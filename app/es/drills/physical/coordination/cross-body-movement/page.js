@@ -2,6 +2,7 @@ import CrossBodyMovementClient from '@/app/drills/physical/coordination/cross-bo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // INVESTIGACIÓN DE PALABRAS CLAVE NATIVAS (SERP ESPAÑA / LATAM)
@@ -322,7 +323,10 @@ const crossBodyGuide = {
     "Al activarse la prueba, sitúa el cursor sobre el nodo cian visible en el perímetro del lienzo.",
     "Desliza el ratón de forma recta y continua a través del centro hacia el nodo magenta opuesto.",
     "Alcanza el nodo objetivo y prolonga el multiplicador de 3.0x a lo largo de toda la sesión de 45 segundos."
-  ]
+  ],
+  audience: "Jugadores y atletas de eSports (CS2, Valorant, Apex Legends), deportistas de disciplinas de precisión, pilotos y cualquier persona que busque optimizar su coordinación óculo-manual y control bilateral de la línea media.",
+  faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
 };
 
 export default function CrossBodyMovementPageEs() {

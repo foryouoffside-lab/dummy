@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Tracking Fluide FPS – Visée en Poursuite | SkillDrills",
@@ -249,10 +250,10 @@ export default function ProSmoothPursuitPage() {
     stageCaption: "Suivez en continu la cible oscillante le long des courbes sans perdre le contact visuel.",
     rulesTitle: "Consignes d'Entraînement et Barème",
     rulesItems: [
-      { num: "1", text: "Maintenir le Réticule sur la Cible", highlight: "+10 pts/seconde", result: "Suivi continu de la sphère mobile" },
-      { num: "2", text: "Multiplicateur de Combo", highlight: "jusqu'à 5x bonus", result: "Augmente avec la durée de contact ininterrompue" },
-      { num: "3", text: "Montée de Niveau", highlight: "tous les 1 500 points", result: "Accélère la trajectoire et réduit la cible" },
-      { num: "4", text: "Perte de Contact", highlight: "Réinitialise Combo", result: "Quitter la sphère remet le multiplicateur à zéro" }
+      { num: "1", text: "Maintien sur Cible", highlight: "+50 PTS (+0.4s/s)", result: "×Multiplicateur Combo" },
+      { num: "2", text: "Série Ininterrompue", highlight: "Jusqu'à 3.0×", result: "Multiplicateur Max" },
+      { num: "3", text: "Progression Niveau", highlight: "+1 Niveau / 1400 PTS", result: "Courbes Adaptatives" },
+      { num: "4", text: "Perte de Contact", highlight: "1.0s Hors Cible", result: "Reset Combo (-0.6s)" }
     ],
     aboutTitle: "À Propos de l'Entraîneur de Tracking Fluide",
     aboutHeading: "Qu'est-ce que la Poursuite Visuelle Fluide (Smooth Pursuit) ?",
@@ -370,6 +371,7 @@ export default function ProSmoothPursuitPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

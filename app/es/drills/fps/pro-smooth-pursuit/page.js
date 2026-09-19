@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Tracking Suave de Puntería – Curvas FPS | SkillDrills",
@@ -249,10 +250,10 @@ export default function ProSmoothPursuitPage() {
     stageCaption: "Sigue continuamente el objetivo en movimiento oscilatorio por las curvas de la pantalla sin perder contacto visual.",
     rulesTitle: "Instrucciones de Entrenamiento y Puntuación",
     rulesItems: [
-      { num: "1", text: "Mantener Retícula en Objetivo", highlight: "+10 pts/segundo", result: "Seguimiento continuo de la esfera" },
-      { num: "2", text: "Multiplicador de Combo", highlight: "hasta 5x bonus", result: "Aumenta al conservar el contacto ininterrumpido" },
-      { num: "3", text: "Subida de Nivel", highlight: "cada 1.500 puntos", result: "Incrementa velocidad y reduce tamaño de diana" },
-      { num: "4", text: "Pérdida de Contacto", highlight: "Reinicia Combo", result: "Salir de la diana restablece el combo al instante" }
+      { num: "1", text: "Seguimiento en Objetivo", highlight: "+50 PTS (+0.4s/s)", result: "×Multiplicador Combo" },
+      { num: "2", text: "Racha Continua", highlight: "Hasta 3.0×", result: "Multiplicador Máx" },
+      { num: "3", text: "Subida de Nivel", highlight: "+1 Nivel / 1400 PTS", result: "Curvas Adaptativas" },
+      { num: "4", text: "Pérdida de Contacto", highlight: "1.0s Fuera de Diana", result: "Reinicio Combo (-0.6s)" }
     ],
     aboutTitle: "Sobre el Entrenador de Tracking Suave",
     aboutHeading: "¿Qué es el Seguimiento Suave (Smooth Pursuit)?",
@@ -370,6 +371,7 @@ export default function ProSmoothPursuitPage() {
           locale="es"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

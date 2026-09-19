@@ -1,5 +1,6 @@
 import MicroCorrectionClient from '@/app/drills/fps/micro-correction-precision/MicroCorrectionClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -229,10 +230,11 @@ export default function MicroCorrectionJaPage() {
     heading: "マイクロフリック 練習 実践マニュアル",
     subtitle: "一次フリック直後の微小な位置ズレ修正、終末摩擦減速、そしてヘッドショット精度を科学的プロトコルで極める",
     intro: [
-      "マイクロフリック（Micro-Correction Aiming）は、初速のフリックが標的のわずか数ピクセル横に着弾した際、瞬時にその誤差を修正して頭部を撃ち抜くFPSの最重要リカバリースキルです。VALORANTやCS2などのタクティカルFPSでは、初弾のフリック精度以上に、ズレた照準をミリ秒単位で微調整する速度が勝敗を決定します。",
-      "Robert S. Woodworth（1899）およびDavid E. Meyerら（1988）が提唱した目標指向運動の二段階モデルによれば、人間の腕運動は「距離を稼ぐ開ループ弾道インパルス」と「目標近傍での閉ループ視覚微調整」に明確に分かれます。さらにSusana Martinez-Condeら（2004）やMartin Rolfs（2009）の微小眼球運動（マイクロサッカード）研究が示すように、視覚情報が中心窩で確定する直前の神経フィードバックが不可欠です。",
-      "Paul M. Fitts（1954）の運動難易度法則に照らすと、極小サイズのターゲットを狙う作業は難易度指数（ID）が跳ね上がります。本ドリルはアンカーとマイクロターゲットの二連続撃破を通じて、慣性を急停止させる終末減速ブレーキと指先関節の精密な独立制御を徹底的に鍛え上げます。",
-      "計測精度について：本ドリルはブラウザの performance.now() 高分解能タイマーを用い、端末内で完結してミリ秒単位で処理されます。ディスプレイの表示更新周期（60Hz/144Hz/240Hz）による物理的表示差が生じるため、5ms未満の微小な誤差はハードウェア測定ノイズとして考慮してください。"
+      "マイクロフリック（Micro-Correction Aiming）は、視覚標的捕捉における二次微調整フェーズを単離・測定し、精密に習熟するための生体力学的トレーニングドリルです。VALORANTやCounter-Strike 2、Rainbow Six Siegeといった競技タクティカルFPSのハイレベルな撃ち合いでは、わずか5〜25ピクセル（1度未満）の微小な照準修正の速度と精度が勝敗を直結して決定づけます。",
+      "急速な目標指向運動を支配する理論的枠組みは、Robert S. Woodworth（1899）が提唱した二段階モデルに端を発します。目標へ向けて四肢を急加速させる初期の開ループ弾道インパルス（Open-loop ballistic impulse）と、連続的な感覚フィードバックによって精密誘導される終末閉ループ制御フェーズ（Closed-loop control）の組み合わせです。この速度と精度のトレードオフはPaul M. Fitts（1954）のフィッツの法則によって数学的に定式化され、移動時間は目標距離と標的幅の比率に応じて対数関数的に増大します（ID = log2(2D / W)）。",
+      "その後、David E. Meyerら（1988）が提唱した確率的最適化サブムーブメントモデル（Stochastic Optimized Submovement Model）により、人間の運動制御系は過度な慣性オーバーシュートを防ぐため、一次動作を標的境界のわずかに手前または近傍に着地させ、その直後に極めて迅速な二次微修正動作（Submovement）を繰り出して座標誤差を解消するよう運動計画を構築することが実証されました。",
+      "終末固視フェーズにおいて、人間の眼球運動系はマイクロサッカード（振幅1度未満の不随意微小跳躍運動）を展開し、網膜の神経受容を更新して中心窩を高周波の視覚標的に正確に位置合わせします（Rolfs, 2009; Martinez-Conde et al., 2004）。本ドリルはポインターロックによる生のマウス入力と performance.now() によるデジタル時間測定（Woods et al., 2015）を同期させ、終末の照準振動や行き過ぎ（オーバーフリック）を完全に排除してロボットのような精密ヘッドショットを実現します。",
+      "測定精度とハードウェア遅延について：すべての判定イベントはブラウザの performance.now() 高分解能クロックを用いてデバイス内でリアルタイムにタイムスタンプが記録され、外部へスコアが送信されることはありません。ブラウザ仕様としてSpectre対策のためタイマー分解能が約1msに丸められている点、およびディスプレイのリフレッシュレート（60Hzで約16.7ms、144Hzで約6.9ms、240Hzで約4.1ms; Woods et al., 2015）による物理的表示量子化が存在します。さらにマウスのポーリングレート（125Hzで約8ms、1000Hzで1ms）も加わるため、5ms未満の微小な差異は測定ノイズとして扱い、他者の環境ではなく同一ハードウェア環境での自己記録比較を行ってください。"
     ],
     benchmarks: {
       title: "マイクロ補正レイテンシ & 微調整精度 ベンチマーク基準",
@@ -331,6 +333,7 @@ export default function MicroCorrectionJaPage() {
         copy={{
           h1Keyword: "マイクロフリック 練習",
           h1Suffix: " - エイム微調整・ヘッドショット精度トレーナー",
+          subtitle: "初弾フリック後の微小なエイムズレを即時修正し、指先の終末減速とヘッドショット精度を強化します。",
           statScore: "スコア",
           statTime: "残り時間",
           statAccuracy: "命中率",
@@ -343,15 +346,13 @@ export default function MicroCorrectionJaPage() {
           getReady: "準備完了",
           toggleFlash: "ミスフラッシュ切替",
           toggleSound: "効果音切替",
-          pausedTitle: "一時停止中",
-          pausedSubtitle: "クリックして再開 — カーソルロックが再適用されます",
           stageCaption: "アンカーターゲットをクリック後、瞬時に微小ターゲットへ照準を微調整して射撃してください。",
           rulesTitle: "ドリル手順 & スコアリングシステム",
           rulesItems: [
-            { num: "1", text: "アンカーターゲット命中", highlight: "+10点 (+0.2秒)", result: "次のマイクロターゲットをアンロック" },
-            { num: "2", text: "マイクロターゲット命中", highlight: "最大+585点 (+0.2秒)", result: "微調整精度とコンボ倍率でボーナス加算" },
-            { num: "3", text: "レベル進行", highlight: "1,400点ごとに+1レベル", result: "ターゲットサイズが段階的に縮小" },
-            { num: "4", text: "ミス / タイムアウト", highlight: "ペナルティ", result: "コンボがリセットされます" }
+            { num: "1", text: "アンカー命中", highlight: "+10点 (+0.2秒)", result: "マイクロ解除" },
+            { num: "2", text: "マイクロ命中", highlight: "最大+585点", result: "微調整 × コンボ" },
+            { num: "3", text: "レベル進行", highlight: "+1Lv / 1,400点", result: "連続縮小適応" },
+            { num: "4", text: "ミス / 制限時間", highlight: "ペナルティ", result: "コンボリセット (-0.6秒)" }
           ],
           aboutTitle: "マイクロフリック 練習について",
           aboutHeading: "マイクロフリック（微調整エイム）とは？",
@@ -367,6 +368,7 @@ export default function MicroCorrectionJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

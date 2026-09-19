@@ -1,6 +1,8 @@
 import RapidTappingClient from './RapidTappingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -324,6 +326,33 @@ const guideProps = {
   },
 };
 
+const copyEn = {
+  title: "CPS Test",
+  desc: "A CPS test counts how many times you can click a mouse button in one second. Sustained one-finger clicking runs to roughly 5–7 clicks per second, because the standard finger tapping test puts a healthy adult's dominant index finger near 50–55 taps per 10 seconds (Halstead, 1947) — the much higher numbers quoted online come from jitter and butterfly techniques, which do not use one finger press per click.",
+  score: "Score",
+  timeLeft: "Time Left",
+  cpsRate: "CPS Rate",
+  bestScore: "Best Score",
+  startButtonText: "Start Drill",
+  startSubtitle: "CPS Click Speed Trainer • Hardware Raw Input",
+  getReady: "GET READY",
+  playAgain: "Play Again",
+  shareTitle: "Share Score",
+  exitTitle: "Exit & Return",
+  avgCps: "Average CPS",
+  totalClicks: "Total Clicks",
+  maxDifficulty: "Max Difficulty",
+  peakCps: "Peak CPS",
+  newBest: "NEW BEST",
+  rulesTitle: "Drill Instructions & Scoring System",
+  rulesItems: [
+    { num: "1", text: "Rapid Target Tapping", highlight: "Tactical Emerald Target", result: "Expands target radius & prevents decay" },
+    { num: "2", text: "Scoring Threshold", highlight: "+1 Point per 10 Clicks", result: "Builds final session score" },
+    { num: "3", text: "Dynamic Shrink Rate", highlight: "Accelerates with Score", result: "Pushes finger speed & endurance limits" },
+    { num: "4", text: "Tapping Techniques", highlight: "Jitter / Butterfly / Raw", result: "Maximize raw clicking speed" }
+  ],
+};
+
 export default function RapidTappingPage() {
   return (
     <>
@@ -351,8 +380,12 @@ export default function RapidTappingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <RapidTappingClient />
+      <RapidTappingClient copy={copyEn} />
       <DrillGuide {...guideProps} />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/rapid-tapping" />
+      </div>
+      <DrillFooter />
     </>
   );
 }

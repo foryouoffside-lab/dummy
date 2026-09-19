@@ -1,5 +1,6 @@
 import AngleHoldClient from '@/app/drills/fps/angle-hold-trainer/AngleHoldClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
@@ -299,10 +300,10 @@ export default function PortugueseAngleHoldPage() {
     h1Suffix: " — Treino de Ângulos",
     subtitle: "Treino de Marcação de Pixel e Defesa contra Peeker's Advantage",
     rulesItems: [
-      { num: "1", text: "Acerto de Alvo", highlight: "+100 PTS (+0,6s)", result: "× Combo × Multiplicador de Nível" },
-      { num: "2", text: "Multiplicador de Combo", highlight: "Até 3,0x pontos", result: "Sequências maiores geram peeks mais agressivos" },
-      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível a cada 1400 PTS", result: "Janela de tempo menor e alvos mais rápidos" },
-      { num: "4", text: "Tiro Errado / Pre-Fire", highlight: "Penalidade por Erro", result: "Reset de combo (com penalidade: -0,8s)" }
+      { num: "1", text: "Acerto no Peek", highlight: "+100 PTS (+0,6s)", result: "×Multiplicador" },
+      { num: "2", text: "Surgimento em Cantos", highlight: "Aparicão Rápida", result: "Menor Janela" },
+      { num: "3", text: "Progressão de Nível", highlight: "+1 Nível / 1400 PTS", result: "Escala Adaptativa" },
+      { num: "4", text: "Erro / Pre-Fire", highlight: "Penalidade", result: "Reset Combo (-0,8s)" }
     ],
     aboutCards: [
       { iconBg: "bg-blue-600", title: "Recomendado para", text: "Defensores de bombsite em Valorant, âncoras de CS2, operadores de R6 Siege e quem deseja cravar mira com disciplina." },
@@ -366,6 +367,7 @@ export default function PortugueseAngleHoldPage() {
       </div>
 
       <DrillGuide guide={angleHoldGuidePt} />
+      <DrillFooter />
     </>
   );
 }

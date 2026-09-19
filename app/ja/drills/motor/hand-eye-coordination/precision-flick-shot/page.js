@@ -1,6 +1,7 @@
 import PrecisionFlickShotClient from '@/app/drills/motor/hand-eye-coordination/precision-flick-shot/PrecisionFlickShotClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -326,6 +327,26 @@ const guideProps = {
   },
 };
 
+const copyJa = {
+  title: "フリックエイム練習・マウス精度テスト",
+  subtitle: "ターゲット減衰 & ブルズアイ・マイクロフリック • 無制限レベル進行",
+  startButtonText: "訓練開始",
+  playAgainText: "もう一度挑戦",
+  shareText: "スコアを共有",
+  exitText: "終了",
+  accuracyLabel: "命中率",
+  targetHitsLabel: "ターゲット撃破",
+  bullseyesLabel: "ブルズアイ",
+  peakLevelLabel: "到達レベル",
+  rulesTitle: "操作方法・スコア獲得ルール",
+  rulesItems: [
+    { num: "1", text: "ブルズアイ命中", highlight: "+200点 / +0.6秒", result: "中心核へのピンポイント着弾" },
+    { num: "2", text: "通常ターゲット撃破", highlight: "+100点 / +0.6秒", result: "周辺視野の瞬時捕捉とクリック" },
+    { num: "3", text: "レベル難易度進行", highlight: "1400点毎に+1レベル", result: "ターゲット縮小と生存時間短縮" },
+    { num: "4", text: "ミス・時間切れ", highlight: "コンボリセット", result: "ペナルティ有効時 -0.8秒" }
+  ],
+};
+
 export default function PrecisionFlickShotPage() {
   return (
     <>
@@ -353,11 +374,16 @@ export default function PrecisionFlickShotPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <PrecisionFlickShotClient copy={{ title: "フリックエイム練習" }} />
+      <PrecisionFlickShotClient copy={copyJa} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/ja/drills/motor/hand-eye-coordination/precision-flick-shot" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/precision-flick-shot"
+          locale="ja"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -19,13 +19,32 @@ import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '../../../../lib/canvasFx';
-import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
-import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+
+// ============================================================
+// SINGLE-LINE INSTRUCTION RULE ITEM
+// ============================================================
+function RuleItem({ num, text, highlight = '', result }) {
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
+        </p>
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
+          {result}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ============================================================
 // TUNING CONSTANTS
@@ -66,13 +85,13 @@ const getLevelConfig = (level, combo = 0) => {
 };
 
 // ============================================================
-// ACCORDION DATA
+// DEFAULT ONE-POINTED SCORING RULES
 // ============================================================
-const RULES_ITEMS = [
-  { title: "Correct Target Hit (+100 PTS / +0.4s)", text: "Click the brightest target first. Multiplied by combo & level bonus." },
-  { title: "Set Cleared Bonus (+400 PTS × Level)", text: "Clearing all targets in a set spawns the next target cluster." },
-  { title: "Level Progression (Every 1400 PTS)", text: "Continuous target density, size, and fine opacity delta scaling." },
-  { title: "Wrong Click / Miss Penalty", text: "Wrong target or miss resets combo to 0 (-0.6s with Time Penalty enabled)." }
+const DEFAULT_RULES_ITEMS = [
+  { num: "1", text: "Target Hit", highlight: "+100 PTS (+0.4s)", result: "×Combo Mult" },
+  { num: "2", text: "Set Cleared", highlight: "+400 PTS × Level", result: "Cluster Spawn" },
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Scaling" },
+  { num: "4", text: "Wrong Target / Miss", highlight: "Penalty", result: "Resets Combo (-0.6s)" }
 ];
 
 export default function TargetAcquisitionClient({ copy = null }) {
@@ -154,32 +173,80 @@ export default function TargetAcquisitionClient({ copy = null }) {
     };
   }, []);
 
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    gameActiveRef.current = false;
+
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    if (document.pointerLockElement) {
+      try { document.exitPointerLock(); } catch (e) {}
+    }
+    if (document.fullscreenElement) {
+      try { document.exitFullscreen(); } catch (e) {}
+    }
 
     setIsFullscreen(false);
-    if (document.pointerLockElement) {
-      document.exitPointerLock();
-    }
+    setPointerLocked(false);
     setGameState('start');
+    setUiScore(0);
+    setUiTimeLeft(DRILL_DURATION);
+
+    const w = engine.current?.logicalWidth || 800;
+    const h = engine.current?.logicalHeight || 450;
+    engine.current = {
+      crosshair: { x: w / 2, y: h / 2, initialized: false },
+      targets: [],
+      score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
+      successfulHits: 0, missedClicks: 0, sequenceErrors: 0, setsCleared: 0,
+      totalClicks: 0, correctHits: 0, maxCombo: 0,
+      particles: [], hitMarkers: [], hitRings: [], screenShake: 0,
+      logicalWidth: w, logicalHeight: h
+    };
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
+  // ESC key listener (capture phase)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (gameState === 'playing' || gameState === 'countdown' || gameState === 'gameOver') {
+          e.preventDefault();
+          e.stopPropagation();
+          handleExitDrill();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [gameState, handleExitDrill]);
 
-  const resumeDrill = useCallback(async () => {
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
+  // Pointer lock release listener
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      const isLocked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(isLocked);
+      if (!isLocked && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
+  }, [gameState, handleExitDrill]);
+
+  // Fullscreen exit listener
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [isFullscreen, gameState, handleExitDrill]);
 
   const spawnTargetSet = useCallback((width, height, currentLevel, currentCombo = 0) => {
     const e = engine.current;
@@ -220,10 +287,17 @@ export default function TargetAcquisitionClient({ copy = null }) {
   }, []);
 
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 5 + 1;
-      engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
+      const speed = Math.random() * 5 + 1.5;
+      engine.current.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        color
+      });
     }
   };
 
@@ -343,13 +417,6 @@ export default function TargetAcquisitionClient({ copy = null }) {
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
   }, [spawnTargetSet]);
 
-  // Pointer lock change listener
-  useEffect(() => {
-    const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
-    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
-  }, []);
-
   // Scoped Raw Input Mouse Move & Mouse Down Event Handlers
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -368,7 +435,7 @@ export default function TargetAcquisitionClient({ copy = null }) {
 
       if (gameState === 'playing') {
         if (!pointerLocked && canvasRef.current) {
-          resumeDrill();
+          handleExitDrill();
         } else if (pointerLocked) {
           const eRef = engine.current;
           eRef.totalClicks++;
@@ -423,8 +490,9 @@ export default function TargetAcquisitionClient({ copy = null }) {
                 drillAudio.playHit();
               }
 
-              createExplosion(hitTarget.x, hitTarget.y, '#00ff88');
-              eRef.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, '#00ff88'));
+              const hitColor = eRef.combo >= 10 ? '#34d399' : '#10b981';
+              createExplosion(hitTarget.x, hitTarget.y, hitColor);
+              eRef.hitRings.push(createHitRing(hitTarget.x, hitTarget.y, hitTarget.radius, hitColor));
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -458,7 +526,7 @@ export default function TargetAcquisitionClient({ copy = null }) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, universalSens, triggerFlash, resumeDrill, spawnTargetSet]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash, spawnTargetSet]);
 
   // Main Physics & Canvas Render Loop with Backdrop Caching and Capped DPR
   useEffect(() => {
@@ -480,7 +548,7 @@ export default function TargetAcquisitionClient({ copy = null }) {
           backdropCacheRef.current = createBackdropCache(width, height, (bCtx, w, h) => {
             bCtx.fillStyle = '#050508';
             bCtx.fillRect(0, 0, w, h);
-            bCtx.strokeStyle = 'rgba(0, 255, 136, 0.04)';
+            bCtx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
             bCtx.lineWidth = 1;
             const cx = w / 2, cy = h / 2;
             bCtx.beginPath();
@@ -559,7 +627,7 @@ export default function TargetAcquisitionClient({ copy = null }) {
 
           drawPulseRing(
             ctx, t.x, t.y, t.radius,
-            `rgba(0, 255, 136, ${t.val})`,
+            `rgba(16, 185, 129, ${t.val})`,
             ((time / 1600) + t.seed) % 1
           );
 
@@ -567,8 +635,8 @@ export default function TargetAcquisitionClient({ copy = null }) {
             t.x - t.radius * 0.35, t.y - t.radius * 0.35, t.radius * 0.1,
             t.x, t.y, t.radius
           );
-          g.addColorStop(0,    `rgba(178, 255, 224, ${t.val})`);
-          g.addColorStop(0.55, `rgba(0, 255, 136,  ${t.val})`);
+          g.addColorStop(0,    `rgba(167, 243, 208, ${t.val})`);
+          g.addColorStop(0.55, `rgba(16, 185, 129,  ${t.val})`);
           g.addColorStop(1,    `rgba(6, 95,  70,   ${t.val})`);
           ctx.fillStyle = g;
           ctx.beginPath();
@@ -585,13 +653,18 @@ export default function TargetAcquisitionClient({ copy = null }) {
         });
       }
 
-      // Render Particles
+      // Render Particles (Smooth Circles)
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
         p.x += p.vx; p.y += p.vy; p.life -= dt * 2.5;
         if (p.life <= 0) { e.particles.splice(i, 1); continue; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
       }
+      ctx.globalAlpha = 1.0;
 
       drawHitRings(ctx, e.hitRings, dt);
 
@@ -610,26 +683,29 @@ export default function TargetAcquisitionClient({ copy = null }) {
       }
       ctx.globalAlpha = 1.0;
 
-      // Draw Crosshair
+      // Draw Crosshair (Tactical Pro White)
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
+        const activeColor = '#ffffff';
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
-        
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(ch.x, ch.y, 16, 0, Math.PI * 2); ctx.stroke();
 
-        ctx.lineWidth = 1.5;
-        const gap = 6;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(ch.x, ch.y, 14, 0, Math.PI * 2); ctx.stroke();
+
+        const gap = 4;
         ctx.beginPath();
-        ctx.moveTo(ch.x, ch.y - 16); ctx.lineTo(ch.x, ch.y - gap);
-        ctx.moveTo(ch.x, ch.y + 16); ctx.lineTo(ch.x, ch.y + gap);
-        ctx.moveTo(ch.x - 16, ch.y); ctx.lineTo(ch.x - gap, ch.y);
-        ctx.moveTo(ch.x + 16, ch.y); ctx.lineTo(ch.x + gap, ch.y);
+        ctx.moveTo(ch.x, ch.y - 14); ctx.lineTo(ch.x, ch.y - gap);
+        ctx.moveTo(ch.x, ch.y + 14); ctx.lineTo(ch.x, ch.y + gap);
+        ctx.moveTo(ch.x - 14, ch.y); ctx.lineTo(ch.x - gap, ch.y);
+        ctx.moveTo(ch.x + 14, ch.y); ctx.lineTo(ch.x + gap, ch.y);
         ctx.stroke();
-        
+
         ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
@@ -684,6 +760,11 @@ export default function TargetAcquisitionClient({ copy = null }) {
               <span data-seo-kw="1">{copy?.h1Keyword || "Target Acquisition Aim Trainer"}</span>
               {copy?.h1Suffix || ""}
             </h1>
+            {copy?.subtitle && (
+              <p className="text-sm text-slate-400 font-medium leading-relaxed">
+                {copy.subtitle}
+              </p>
+            )}
           </div>
         )}
 
@@ -768,26 +849,8 @@ export default function TargetAcquisitionClient({ copy = null }) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
-          {gameState === 'playing' && !pointerLocked && (
-            <div 
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">{copy?.pausedTitle || "Game Paused"}</h2>
-                <p className="text-xs text-gray-300 font-medium">{copy?.pausedSubtitle || "Click to resume — cursor lock will re-engage."}</p>
-              </div>
-            </div>
-          )}
-
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
@@ -844,12 +907,15 @@ export default function TargetAcquisitionClient({ copy = null }) {
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(copy?.rulesItems || RULES_ITEMS).map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-4">
-                    <h3 className="text-xs font-bold text-gray-200 mb-1">{item.title}</h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+                {(copy?.rulesItems || DEFAULT_RULES_ITEMS).map((item, i) => (
+                  <RuleItem
+                    key={i}
+                    num={item.num || String(i + 1)}
+                    text={item.text}
+                    highlight={item.highlight}
+                    result={item.result}
+                  />
                 ))}
               </div>
             </DrillAccordion>
@@ -874,9 +940,6 @@ export default function TargetAcquisitionClient({ copy = null }) {
           </div>
         )}
       </main>
-
-      {/* ── FOOTER ── */}
-      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

@@ -233,12 +233,22 @@ export default function RhythmAnomalyLocalePage() {
         <p dangerouslySetInnerHTML={{ __html: `인간의 시각 신경로는 크게 소세포 경로(P-Pathway)와 대세포 경로(M-Pathway)로 나뉩니다. 소세포 경로는 정밀한 색상과 형태를 담당하는 반면, 대세포 경로는 굵고 유수화된 신경 섬유를 통해 자극을 뇌의 등쪽 시각 경로(Dorsal Stream)로 광속 전달합니다. 최소화된 전도 지연 덕분에 M 경로는 40~50Hz에 달하는 고주파 깜빡임과 위상 변화를 감지하는 데 최적화되어 있습니다 (De Lange, 1958; Holcombe, 2009). 36개 셀 격자에서 단 하나의 셀이 다른 주기로 점멸할 때 발생하는 미세한 위상차는 일차 시각 피질(V1)에서 자동적이고 전주의적인 '팝아웃(Pop-out)' 현상을 촉발합니다 (Kelly, 1961; Burr, 1980).` }} />
 
         <h3>시간 시각의 두 가지 한계: 빠른 하위 샘플링 vs 느린 대뇌 결합</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Holcombe(2009)의 연구에 따르면, 인간의 시간적 시각 정보 처리는 두 가지 서로 다른 생리학적 한계를 가집니다. 첫째는 망막 및 V1 대세포 뉴런이 깜빡임을 분리하는 <strong>하위 피질 시간 한계(~40–50 Hz)</strong>이고, 둘째는 대상의 정체를 파악하고 의식적으로 결합하는 <strong>상위 피질 결합 한계(~2–5 Hz)</strong>입니다. 리듬 아노말리 훈련은 이 두 시스템 사이의 연결을 강화합니다. 관찰자는 초고속 대세포 깜빡임 감각을 통해 후보 셀을 감지한 뒤, 다음 펄스 주기가 끝나기 전에 하향식 주의 검증을 번개처럼 완료해야 합니다.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `시각적 시간 정보 처리에 관한 기념비적인 메타 분석에서, Holcombe(2009)은 인간의 시간 지각이 두 가지 독립된 생리학적 한계에 의해 지배된다는 사실을 입증했습니다:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>피질하 저수준 샘플링 한계(~40–50 Hz):</strong> 망막 대세포 신경절 세포와 초기 V1 뉴런은 40Hz를 초과하는 고속 명멸 및 국소 휘도 대비를 전주의적으로 해상할 수 있습니다 (De Lange, 1958; Kelly, 1961).
+          </li>
+          <li>
+            <strong>대뇌 피질 고수준 결합 한계(~2–5 Hz):</strong> 자극의 정체를 의식적으로 식별하고 다중 특징을 하나의 통합된 객체로 인지하는 데는 초당 2~5주기로 작동하는 느린 피질 되먹임 루프가 필요합니다 (Holcombe, 2009).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `리듬 아노말리(Rhythm Anomaly) 훈련은 이 두 시스템을 잇는 신경학적 교량을 정밀하게 단련합니다. 훈련자는 조기 대세포 명멸 감수성을 통해 이상 펄스 후보를 전주의적으로 포착한 후, 펄스 주기가 끝나기 전에 하향식 주의 검증을 전광석화처럼 완수해야 합니다.` }} />
 
         <h3>시간 적분 창(Temporal Integration Window)과 엔트로피 노이즈</h3>
         <p dangerouslySetInnerHTML={{ __html: `인간의 시각계는 약 30~100밀리초의 짧은 시간 창 동안 유입되는 빛을 하나로 통합합니다 (Burr, 1980; Woods et al., 2015). 이 적분 창 내에서 발생하는 자극들은 단일 시각 사건으로 융합됩니다. 본 훈련에서 무작위로 발생하는 '엔트로피 섬광'은 시각 적분 창에 일시적 잡음을 주입하여, 단순한 순간 광량 변화에 의존하는 것을 방지하고 뇌가 진정한 정현파 주기성을 판별하도록 훈련합니다 (Burr, 1980; Posner, 1980).` }} />
 
         <h3>시각 시간 분해능 등급 기준 (45초 맥동 격자)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `36개 맥동 셀 격자에서 45초 동안 진행되는 표준화된 테스트 데이터를 기반으로, 개인의 시간 주파수 판별력은 5단계의 인지 등급으로 분류됩니다:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

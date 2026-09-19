@@ -2,6 +2,7 @@ import MotorSequencingClient from '@/app/drills/physical/fitness/agility-ladder/
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // INVESTIGACIÓN DE PALABRAS CLAVE NATIVAS (SERP ESPAÑA / LATAM)
@@ -322,7 +323,10 @@ const ladderGuide = {
     "Al iniciarse el descenso, ejecuta el primer movimiento decidido hacia el peldaño izquierdo.",
     "Conecta los peldaños 2, 3 y 4 en una secuencia rítmica continua sin interrupción.",
     "Sostén el multiplicador de 3.0x de forma ininterrumpida para coronar el rango Apex en los 45 segundos."
-  ]
+  ],
+  audience: "Deportistas de fútbol, baloncesto, tenis y atletismo que buscan perfeccionar su juego de pies y velocidad de apoyos, así como jugadores de eSports para optimizar el ritmo de counter-strafing.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('lashley1951', 'schmidt1975', 'fitts1954', 'woodworth1899', 'woods2015')
 };
 
 export default function AgilityLadderPageEs() {

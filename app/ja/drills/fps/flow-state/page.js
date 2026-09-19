@@ -1,5 +1,6 @@
-import FlowStateClient from '@/app/drills/fps/flow-state/FlowInductionClient';
+import FlowStateClient from '@/app/drills/fps/flow-state/FlowStateClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
@@ -244,10 +245,10 @@ export default function FlowStateJaPage() {
     stageCaption: "連続して出現・移動するベジェ曲線ターゲットに照準を合わせ続け、エイムのリズムを維持します。",
     rulesTitle: "トレーニングルール & スコアリング",
     rulesItems: [
-      { num: "1", text: "追従アライメント", highlight: "+10 PTS / 0.25秒", result: "緑色クロスヘアをターゲットに維持" },
-      { num: "2", text: "動的難易度上昇", highlight: "滑らかなベジェ曲線", result: "レベル上昇に伴い半径縮小＆加速" },
-      { num: "3", text: "時間ボーナス", highlight: "+0.4秒 / 秒", result: "追従中は制限時間が延長" },
-      { num: "4", text: "集中途切れペナルティ", highlight: "コンボリセット", result: "1.0秒外れるとコンボ喪失（ペナルティ有効時-0.6秒）" }
+      { num: "1", text: "追従アライメント", highlight: "+10 PTS (+0.4秒/秒)", result: "クロスヘアをターゲットに維持" },
+      { num: "2", text: "フロー倍率", highlight: "最大3.0×倍率", result: "連続集中チェーンを維持" },
+      { num: "3", text: "レベル進行", highlight: "+1 レベル / 1400 PTS", result: "適応型ベジェ軌道が加速" },
+      { num: "4", text: "集中途切れペナルティ", highlight: "1.0秒ロスト", result: "コンボ初期化 (-0.6秒)" }
     ],
     aboutTitle: "フロー状態トレーニング・ゾーン誘導について",
   };
@@ -257,7 +258,8 @@ export default function FlowStateJaPage() {
     intro: [
       "フロー状態トレーナーは、認知心理学と運動神経科学の知見を融合し、心理的フロー（ゾーン）、持続的注意持久力、および高精度な滑走追従能力を体系的に鍛え上げる専門ドリルです。ミハイ・チクセントミハイ（1975, 1990）の研究が示す通り、課題の難易度と自身の能力が完璧に均衡したとき、自己への疑念や雑念が消え去り、極限の没入状態が生まれます。",
       "Dietrich（2004）の一時的前頭葉低下仮説（Transient Hypofrontality）が説明するように、背外側前頭前野の過剰な自己監視が静まることで、大脳基底核と小脳が洗練されたエイム運動を完全に自動化します。FPSの撃ち合いにおいて、この状態は判断の躊躇をなくし、光のような超速マイクロ修正を可能にします。",
-      "本ツールは高精度ハードウェアクロノメトリ（performance.now()）と滑らかなベジェ曲線生成（Krauzlis, 2004; Posner & Petersen, 1990）を搭載し、インストール不要でブラウザから即座に最高峰のメンタル持久力を養成できます。"
+      "本ツールは高精度ハードウェアクロノメトリ（performance.now()）と滑らかなベジェ曲線生成（Krauzlis, 2004; Posner & Petersen, 1990）を搭載し、インストール不要でブラウザから即座に最高峰のメンタル持久力を養成できます。",
+      "測定精度およびハードウェア環境について: 本ドリルはブラウザの performance.now() API（ミリ秒未満の分解能）を用いてすべてのイベントをローカルで計測します。計測値は外部サーバーへ送信されず、お使いの端末内でのみ処理されます。ブラウザのタイマーはSpectre対策のため約1msに粗視化されており、ディスプレイのリフレッシュレート（60Hzで約16.7ms、144Hzで約6.9ms、240Hzで約4.1ms、Woods et al., 2015）やマウスのポーリングレート（125Hzで約8ms、1000Hzで約1ms）による量子化誤差が生じます。5ms未満の微細な差はハードウェアの測定ノイズとして扱い、他者のスコアとの単純比較ではなく、同一環境での自己記録推移の指標としてご活用ください。"
     ],
     benchmarks: {
       title: "フロー誘導段階と集中力持続ティア",
@@ -346,6 +348,7 @@ export default function FlowStateJaPage() {
         <RelatedDrills currentCategory="fps" currentHref="/drills/fps/flow-state" locale="ja" />
       </div>
       <DrillGuide guide={jaGuide} />
+      <DrillFooter />
     </>
   );
 }

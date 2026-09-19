@@ -2,6 +2,7 @@ import CrossBodyMovementClient from '@/app/drills/physical/coordination/cross-bo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // RECHERCHE DE MOTS-CLÉS NATIFS (SERP FRANCE / FR-FR)
@@ -322,7 +323,10 @@ const crossBodyGuide = {
     "Dès le signal de départ, placez le réticule sur le nœud cyan en périphérie de l'écran.",
     "Balayez l'écran en ligne droite oblique sans mordre les bordures du couloir lumineux.",
     "Atteignez le nœud magenta opposé et préservez le combo 3.0x durant l'intégralité des 45 secondes."
-  ]
+  ],
+  audience: "Joueurs d'esport (CS2, Valorant, Apex Legends), athlètes de sports de précision et de combat, et toute personne souhaitant développer sa coordination œil-main et son contrôle moteur bilatéral.",
+  faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
 };
 
 export default function CrossBodyMovementPageFr() {

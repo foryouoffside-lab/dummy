@@ -1,6 +1,8 @@
 import FingerSequencingClient from './FingerSequencingClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -320,6 +322,31 @@ const guideProps = {
   },
 };
 
+const copyEn = {
+  title: "Sequence Aim Trainer",
+  desc: "Sequential target switching means clicking a set of targets in a required order rather than whichever one is easiest to reach. An ordered sequence like that runs as a single pre-planned motor program instead of one fresh decision per target (Lashley, 1951; Keele, 1968), so the time is spent in the transitions between targets, not in the clicks. Each transition is itself a Fitts's Law movement, timed by the log of the gap between two targets divided by their width (Fitts, 1954).",
+  score: "Score",
+  timeLeft: "Time Left",
+  accuracy: "Accuracy",
+  bestScore: "Best Score",
+  startButtonText: "Start Training",
+  startSubtitle: "Motor Precision & Sequential Pathing • Continuous Scaling",
+  getReady: "GET READY",
+  rulesTitle: "Drill Instructions & Scoring System",
+  rulesItems: [
+    { num: "1", text: "Ordered Node Hits", highlight: "Emerald Sequence", result: "+150 PTS × Combo (+0.6s)" },
+    { num: "2", text: "Combo Multiplier", highlight: "Up to 3.0×", result: "Boosts point earnings exponentially" },
+    { num: "3", text: "Level Progression", highlight: "Continuous Scaling", result: "Target sizes shrink continuously" },
+    { num: "4", text: "Miss / Timeout", highlight: "Resets Combo", result: "Penalty deducts -0.8s" }
+  ],
+  chainsCleared: "Chains Cleared",
+  peakLevel: "Peak Level",
+  maxCombo: "Max Combo",
+  playAgain: "Play Again",
+  shareTitle: "Share Score",
+  exitTitle: "Exit"
+};
+
 export default function FingerSequencingPage() {
   return (
     <>
@@ -347,8 +374,12 @@ export default function FingerSequencingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient copy={{ title: 'Sequence Aim Trainer' }} />
+      <FingerSequencingClient copy={copyEn} />
       <DrillGuide {...guideProps} />
+      <div className="max-w-6xl mx-auto px-4 pb-12">
+        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/finger-sequencing" />
+      </div>
+      <DrillFooter />
     </>
   );
 }

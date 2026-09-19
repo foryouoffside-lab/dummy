@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "FPS 反応速度 テスト – クリック反射神経測定 | SkillDrills",
@@ -331,10 +332,10 @@ export default function InstantResponseJaPage() {
           stageCaption: "中央ターゲットが緑色にフラッシュした瞬間にクリックしてください。フェイントを見極める自制心が求められます。",
           rulesTitle: "ドリル手順 & スコアリングシステム",
           rulesItems: [
-            { num: "1", text: "フラッシュ反応命中", highlight: "+100点", result: "フラッシュ点灯直後に素早くクリック" },
-            { num: "2", text: "スピードボーナス", highlight: "最大+150点", result: "150ms未満の超高速反応" },
-            { num: "3", text: "レベル難易度進行", highlight: "1,400点ごとに+1レベル", result: "フラッシュ露出時間が段階的に短縮" },
-            { num: "4", text: "フェイント & 早期射撃", highlight: "ペナルティ", result: "コンボがリセットされます（設定有効時は-0.8秒）" }
+            { num: "1", text: "フラッシュ反応命中", highlight: "+100 PTS (+0.6s)", result: "×コンボ倍率" },
+            { num: "2", text: "スピードボーナス", highlight: "150ms未満ヒット", result: "最大 +150 PTS" },
+            { num: "3", text: "レベル難易度進行", highlight: "+1 レベル / 1400 PTS", result: "適応型露出時間" },
+            { num: "4", text: "早期射撃 / ミス", highlight: "失敗ペナルティ", result: "コンボリセット (-0.8s)" }
           ],
           aboutTitle: "FPS 反応速度 テストについて",
           aboutHeading: "FPS反応速度トレーニングとは？"
@@ -348,6 +349,7 @@ export default function InstantResponseJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

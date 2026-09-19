@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "타겟 획득 에임 연습 – 초탄 정확도 트레이너 | SkillDrills",
@@ -229,10 +230,11 @@ export default function TargetAcquisitionKoPage() {
     title: "타겟 획득 에임 트레이너 실전 가이드",
     subtitle: "시각적 식별 속도, 특징 대비 판별력, 그리고 빗나가지 않는 초탄 헤드샷 정확도를 완성하는 과학적 방법론",
     intro: [
-      "타겟 획득(Target Acquisition)은 시야에 들어오는 복잡한 게임 환경 속에서 적의 위치를 가장 빠르게 포착하고, 단숨에 조준선을 이동시켜 초탄을 적중시키는 FPS의 핵심 기본기입니다. Anne Treisman과 Garry Gelade(1980)의 특징 통합 이론에 따르면 밝기, 색상, 실루엣과 같은 기본 특징들은 의식적인 탐색 없이도 시야 전체에서 병렬적으로 우선 처리됩니다.",
-      "또한 Jeremy M. Wolfe(1994, 2007)의 안내 탐색(Guided Search) 모델은 하향식 인지 기대와 상향식 감각 두드러짐이 결합하여 주의의 우선순위를 결정한다고 설명합니다. 본 드릴에서 명도 차이 식별을 반복 훈련하면 시각 피질이 불필요한 배경 잡음을 즉시 걸러내어, 적 출현부터 사격 개시까지의 잠재 지연 시간을 비약적으로 단축시킵니다.",
-      "Paul M. Fitts(1954)의 운동 법칙, David E. Meyer 등(1988)의 확률 최적화 하위운동 이론, 그리고 고정밀 디지털 시간 측정(Woods et al., 2015)을 바탕으로 설계되어, 실전 교전 압박 속에서도 한 치의 망설임 없는 초탄 사격을 구현합니다.",
-      "측정 정확도 안내: 본 드릴은 브라우저의 performance.now() 고해상도 타이머를 활용하여 전적으로 사용자 기기 내부에서 동작합니다. 디스플레이의 주사율(60Hz 기준 약 16.7ms, 144Hz 기준 약 6.9ms, 240Hz 기준 약 4.1ms)에 따른 지연이 발생하므로, 5ms 미만의 미세한 편차는 하드웨어 측정 노이즈로 간주하고 동일 환경에서의 기록 변화를 분석하시기 바랍니다."
+      "타겟 획득 에임 트레이너(Target Acquisition Aim Trainer)는 찰나의 순간에 발생하는 시각적 탐지, 특징 대비 식별, 그리고 치명적인 초탄 적중 능력을 체계적으로 개발하기 위해 엔지니어링된 지각-인지 운동 훈련 드릴입니다. 발로란트, 카운터스트라이크 2, 레인보우 식스 시즈와 같은 전술 슈팅 게임에서는 시야가 열리는 최초 300밀리초 안에 교전의 성패가 갈립니다. 상대방의 결정적인 실루엣을 가장 먼저 탐색, 식별하고 조준선을 정렬하는 플레이어가 라운드를 지배합니다.",
+      "시각 탐색 및 객체 식별의 이론적 토대는 Anne Treisman과 Garry Gelade(1980)의 '특징 통합 이론(Feature-Integration Theory)'에서 수립되었습니다. 트레이스먼은 휘도 대비, 색상 팝아웃, 모서리 방향성과 같은 저차원 시각 특징들이 시야 전체에 걸쳐 전주의적(Preattentive)으로 병렬 추출됨을 입증했습니다. 오직 초점화된 공간 주의가 특정 좌표로 유도될 때에만 이러한 개별 특징들이 하나의 인지 가능한 적의 위협으로 결합됩니다.",
+      "병렬 시각 정보 처리를 확장한 Jeremy M. Wolfe(1994, 2007)의 '안내 탐색(Guided Search)' 모델은 하향식(Top-down) 인지 기대와 상향식(Bottom-up) 감각 현저성 지도가 상호작용하여 주의의 우선순위를 부여하는 기전을 규명합니다. 시각 대비 식별을 집중 훈련하면 시각 피질이 낮은 대비의 배경 잡음과 방해 요소를 즉시 기각하도록 적응하여, 표적 출현과 운동 개시 사이의 인지 지연 시간을 획기적으로 줄여줍니다.",
+      "Paul M. Fitts(1954)의 운동 난이도 법칙, David E. Meyer 등(1988)의 확률적 최적화 하위운동 모델, 그리고 고정밀 디지털 시간 측정(Woods et al., 2015)을 유기적으로 융합한 본 드릴은 인지적 망설임을 제거하고 신속한 1차 탄도 플릭을 구사하여 실전 매치의 압박 속에서도 초탄 명중력을 확고히 정착시킵니다.",
+      "측정 기준 및 하드웨어 지연 투명성: 모든 타겟 식별 및 격발 이벤트는 브라우저 내부의 performance.now() 고해상도 시계를 통해 사용자 기기 내에서 즉각 타임스탬프 처리되며 외부로 점수가 전송되지 않습니다. 다만 브라우저의 Spectre 보안 완화 조치로 타이머가 약 1ms 단위로 양자화되며, 모니터 주사율에 따른 화면 갱신 주기(60Hz 약 16.7ms, 144Hz 6.9ms, 240Hz 4.1ms; Woods et al., 2015)와 마우스 폴링레이트(125Hz 8ms 대 1000Hz 1ms)가 물리적 변수로 작용합니다. 따라서 5ms 미만의 미세 차이는 측정 노이즈로 간주하고, 서로 다른 장비 간 단순 비교보다는 동일한 장비 환경에서 본인의 기록 변화를 추적하는 지표로 활용하시기 바랍니다."
     ],
     benchmarks: {
       title: "타겟 획득 및 식별 레이턴시 벤치마크 기준",
@@ -318,6 +320,7 @@ export default function TargetAcquisitionKoPage() {
         copy={{
           h1Keyword: "타겟 획득 에임 연습",
           h1Suffix: " - 초탄 정확도 & 적 포착 트레이너",
+          subtitle: "실시간 피드백으로 타겟 시각 탐지, 위협 변별, 초탄 플릭 정확도를 훈련하세요.",
           statScore: "점수",
           statTime: "남은 시간",
           statAccuracy: "정확도",
@@ -335,10 +338,10 @@ export default function TargetAcquisitionKoPage() {
           stageCaption: "각 타겟 클러스터에서 가장 밝은(불투명도가 높은) 목표를 가장 빠르고 정확하게 찾아 클릭하세요.",
           rulesTitle: "훈련 규칙 및 점수 산정 방식",
           rulesItems: [
-            { title: "정확한 타겟 타격 (+100점 / +0.4초)", text: "가장 밝은 타겟을 먼저 클릭하세요. 콤보 배율과 레벨 보너스가 적용됩니다." },
-            { title: "세트 클리어 보너스 (+400점 × 레벨)", text: "한 세트의 모든 타겟을 순서대로 격추하면 다음 클러스터가 즉시 생성됩니다." },
-            { title: "레벨 상승 (매 1,400점마다)", text: "타겟 밀도 증가, 크기 축소, 더욱 미세한 명도 차이로 난이도가 단계적으로 심화됩니다." },
-            { title: "오클릭 / 미스 페널티", text: "잘못된 타겟 클릭이나 빗나간 사격 시 콤보가 즉시 0으로 초기화됩니다." }
+            { num: "1", text: "타겟 명중", highlight: "+100점 (+0.4초)", result: "콤보 배수 적용" },
+            { num: "2", text: "세트 클리어", highlight: "+400점 × 레벨", result: "클러스터 즉시 생성" },
+            { num: "3", text: "레벨 상승", highlight: "+1 / 1400점", result: "적응형 난이도 진행" },
+            { num: "4", text: "오클릭 / 미스", highlight: "페널티", result: "콤보 초기화 (-0.6초)" }
           ],
           aboutTitle: "타겟 획득 에임 트레이너 소개",
           aboutHeading: "타겟 획득(Target Acquisition)이란?",
@@ -353,6 +356,7 @@ export default function TargetAcquisitionKoPage() {
           locale="ko"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

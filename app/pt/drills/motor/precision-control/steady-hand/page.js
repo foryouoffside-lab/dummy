@@ -2,6 +2,7 @@ import SteadyHandClient from '@/app/drills/motor/precision-control/steady-hand/S
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -335,7 +336,13 @@ const ptCopy = {
   shareTitle: 'Compartilhar Pontuação',
   exitTitle: 'Sair e Voltar',
   rulesTitle: 'Instruções e Regras de Pontuação',
-  rule1Text: 'Siga a linha azul',
+  rulesItems: [
+    { num: '1', text: 'Siga a linha esmeralda', highlight: 'fluorescente com exatidão', result: 'Chegar ao fim reseta o tempo para 45s' },
+    { num: '2', text: 'Volta completa', highlight: 'Dificuldade progressiva', result: 'Pista mais estreita e curvas fechadas' },
+    { num: '3', text: 'Toque na borda', highlight: 'Retorno ao início', result: 'Penalidade de volta e erro somado' },
+    { num: '4', text: 'Controle de mouse', highlight: 'Recomendado para desktop', result: 'Entrada 1:1 sem aceleração' },
+  ],
+  rule1Text: 'Siga a linha esmeralda',
   rule1Highlight: 'fluorescente com exatidão',
   rule1Result: 'Chegar ao fim reseta o tempo para 45s',
   rule2Text: 'Volta completa',
@@ -353,7 +360,7 @@ const ptCopy = {
   aboutP2: 'Segundo a Lei de Direção de Accot & Zhai (1997), a dificuldade cresce exponencialmente com a redução da largura. De 50 px a 12 px, o teste exige feedback visual contínuo (Woodworth, 1899) e firmeza muscular absoluta.',
   aboutCard1Title: 'Público-alvo',
   aboutCard1Text: 'Gamers de FPS/MOBA, ilustradores digitais, cirurgiões e quem deseja eliminar a instabilidade e tremor do ponteiro.',
-  aboutCard2Title: 'Benefícios Motores',
+  aboutCard2Title: 'Beneficios Motores',
   aboutCard2Text: 'Coordenação motora fina, firmeza de mão, controle de velocidade em curvas e prevenção de fadiga muscular.',
   aboutCard3Title: 'Estreitamento Dinâmico',
   aboutCard3Text: 'A pista encolhe a cada volta e os ângulos ficam mais agudos, demandando controle milimétrico do mouse.',
@@ -402,6 +409,7 @@ export default function PortugueseSteadyHandPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" locale="pt" />
       </div>
+      <DrillFooter />
     </>
   );
 }

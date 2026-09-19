@@ -1,6 +1,7 @@
 import FPSTrackingTrainerClient from '@/app/drills/reaction-speed/fps-tracking-trainer/FPSTrackingTrainerWrapperLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -210,11 +211,14 @@ const guideProps = {
   title: 'Entraîneur de Tracking FPS — Précision de Suivi et Contrôle Continu',
   subtitle:
     'Développez la poursuite oculaire lisse, la stabilité face aux strafes et la fluidité de tir face à des cibles véloces.',
-  scientificIntro: `Le suivi de cible (tracking) dans les jeux de tir à la première personne mobilise l'interaction entre le système oculomoteur de poursuite lisse (smooth pursuit) et le contrôle proprioceptif du membre supérieur (Rashbass, 1961 ; Krauzlis, 2004). Contrairement aux tirs balistiques ponctuels (flicks), le suivi continu impose d'annuler en temps réel l'erreur de vitesse rétinienne.
-
-Lorsque la cible traverse l'espace visuel, le cortex et l'aire temporale médiane supérieure (MST) décodent son vecteur cinétique afin de guider les ordres cérébelleux vers les muscles du bras. L'apparition de saccades parasites ou de tremblements traduit une co-contraction involontaire des muscles agonistes et antagonistes, forçant le système visuel à effectuer des micro-recalages saccadiques inefficaces.
-
-Ce drill isole la cinétique de la poursuite fluide, permettant au joueur d'atténuer la rigidité musculaire et d'affiner la coordination visomotrice. Une pratique régulière garantit une stabilité de visée supérieure et un temps de contact maximal sur cible en situation de combat dynamique.`,
+  intro: {
+    title: 'Entraîneur de Tracking FPS et Fondements de la Poursuite Lisse',
+    paragraphs: [
+      'Le suivi de cible (tracking) dans les jeux de tir à la première personne mobilise l\'interaction entre le système oculomoteur de poursuite lisse (smooth pursuit) et le contrôle proprioceptif du membre supérieur (Rashbass, 1961 ; Krauzlis, 2004). Contrairement aux tirs balistiques ponctuels (flicks), le suivi continu impose d\'annuler en temps réel l\'erreur de vitesse rétinienne.',
+      'Lorsque la cible traverse l\'espace visuel, le cortex et l\'aire temporale médiane supérieure (MST) décodent son vecteur cinétique afin de guider les ordres cérébelleux vers les muscles du bras. L\'apparition de saccades parasites ou de tremblements traduit une co-contraction involontaire des muscles agonistes et antagonistes, forçant le système visuel à effectuer des micro-recalages saccadiques inefficaces.',
+      'Ce drill isole la cinétique de la poursuite fluide, permettant au joueur d\'atténuer la rigidité musculaire et d\'affiner la coordination visomotrice. Sur écran à haut rafraîchissement (Woods et al., 2015), une pratique régulière garantit une stabilité de visée supérieure et un temps de contact maximal sur cible en situation de combat dynamique (Green & Bavelier, 2003).',
+    ],
+  },
   sources: pickSources('krauzlis2004', 'rashbass1961', 'green2003', 'woods2015'),
   benchmarks: {
     title: 'Paliers de Performance en Précision du Tracking et Temps sur Cible',
@@ -243,6 +247,10 @@ Ce drill isole la cinétique de la poursuite fluide, permettant au joueur d'att�
       {
         title: 'Surcharge à Haute Vitesse (5 min)',
         description: 'Accélérez la cadence de la cible pour forcer l\'adaptation nerveuse et la réactivité du bras.',
+      },
+      {
+        title: 'Contrôle Fluide des Inversions de Direction (Strafe Reversals)',
+        description: 'Lors d\'un changement brutal de trajectoire, attendez la confirmation visuelle du virage et réorientez le curseur avec le bras sans à-coup réflexe de panique.',
       },
     ],
   },
@@ -290,6 +298,7 @@ export default function EnhancedPage() {
           currentHref="https://skilldrills.online/fr/drills/reaction-speed/fps-tracking-trainer"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

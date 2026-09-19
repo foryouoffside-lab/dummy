@@ -2,6 +2,7 @@ import DynamicGridEvasionClient from '@/app/drills/physical/coordination/dynamic
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — South Korea (KR / KO)
@@ -324,7 +325,10 @@ const gridGuide = {
     "웨이브가 시작되면 주황색 테두리로 점멸하는 위험 구역을 주변시로 포착합니다.",
     "카운트다운이 끝나기 전 주황색 불이 들어오지 않은 안전 셀로 신속히 플릭 이동합니다.",
     "연속 생존으로 3.0배 최대 콤보를 유지하며 45초 동안 최고 득점을 기록합니다."
-  ]
+  ],
+  audience: "FPS 및 MOBA 게이머(롤 스킬 피하기, 발로란트, 오버워치, 배그, 에이펙스 레전드), 구기 종목 및 무도 선수, 주변시 및 공간 회피 반응속도를 극대화하고자 하는 모든 사용자.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('posner1980', 'treisman1980', 'woodworth1899', 'fitts1954', 'woods2015'),
 };
 
 export default function DynamicGridEvasionPageKo() {

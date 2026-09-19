@@ -1,6 +1,7 @@
 import DragAndDropClient from '@/app/drills/motor/hand-eye-coordination/drag-and-drop/DragAndDropClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -320,6 +321,26 @@ const guideProps = {
   },
 };
 
+const copyJa = {
+  title: "ドラッグ・ドロップ練習 – マウス操作精度測定ツール",
+  subtitle: "空間ドラッグ＆ドロップ照準・15段階レベル進行",
+  startButtonText: "訓練開始",
+  playAgainText: "もう一度挑戦",
+  shareText: "スコアを共有",
+  exitText: "終了",
+  accuracyLabel: "精度",
+  targetDropsLabel: "ターゲット投入",
+  maxComboLabel: "最大コンボ",
+  peakLevelLabel: "到達レベル",
+  rulesTitle: "操作方法・スコア獲得ルール",
+  rulesItems: [
+    { num: "1", text: "ターゲット投入", highlight: "+100点 × コンボ", result: "ボールをドラッグして動く枠内にリリース" },
+    { num: "2", text: "連続コンボ", highlight: "最大3.0倍倍率", result: "連続投入成功でボーナス倍率獲得" },
+    { num: "3", text: "レベル難易度進行", highlight: "250点毎に+1レベル", result: "容器の縮小と移動速度の上昇" },
+    { num: "4", text: "ミス・時間切れ", highlight: "コンボリセット", result: "枠外へのドロップで倍率リセット" }
+  ],
+};
+
 export default function DragAndDropPage() {
   return (
     <>
@@ -347,11 +368,16 @@ export default function DragAndDropPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DragAndDropClient copy={{ title: "ドラッグ＆ドロップマウストレーナー" }} />
+      <DragAndDropClient copy={copyJa} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/ja/drills/motor/hand-eye-coordination/drag-and-drop" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/drag-and-drop"
+          locale="ja"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

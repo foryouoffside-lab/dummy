@@ -1,6 +1,7 @@
 import PrecisionFlickShotClient from './PrecisionFlickShotClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -329,6 +330,26 @@ const guideProps = {
   },
 };
 
+const copyEn = {
+  title: "Precision Flick Shot",
+  subtitle: "Target Decay & Bulls-Eye Micro-Flicks • Endless Level Progression",
+  startButtonText: "START DRILL",
+  playAgainText: "Play Again",
+  shareText: "Share Score",
+  exitText: "Exit",
+  accuracyLabel: "Accuracy",
+  targetHitsLabel: "Target Hits",
+  bullseyesLabel: "Bulls-eyes",
+  peakLevelLabel: "Peak Level",
+  rulesTitle: "Drill Instructions & Scoring System",
+  rulesItems: [
+    { num: "1", text: "Bullseye Hit", highlight: "+200 PTS / +0.6s", result: "Inner Core Shot Precision" },
+    { num: "2", text: "Standard Hit", highlight: "+100 PTS / +0.6s", result: "Rapid Peripheral Target Acquisition" },
+    { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Targets Shrink & Decay Faster" },
+    { num: "4", text: "Miss & Timeout", highlight: "Combo Reset", result: "Penalty Deducts -0.8s" }
+  ],
+};
+
 export default function PrecisionFlickShotPage() {
   return (
     <>
@@ -356,8 +377,9 @@ export default function PrecisionFlickShotPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <PrecisionFlickShotClient copy={{ title: "Mouse Accuracy Test" }} />
+      <PrecisionFlickShotClient copy={copyEn} />
       <DrillGuide {...guideProps} />
+      <DrillFooter />
     </>
   );
 }

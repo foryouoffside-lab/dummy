@@ -1,6 +1,8 @@
 import AimTrainerClient from '@/app/drills/motor/hand-eye-coordination/aim-trainer/AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
+import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -251,6 +253,38 @@ export default function AimTrainerGermanPage() {
           title: 'Aim Trainer Online',
           subtitle: 'Dynamische Zielerfassung & Präzises Klick-Timing • Endlose Level-Progression',
           caption: 'Erfasse und klicke sich bewegende Ziele so schnell und präzise wie möglich, bevor sie verschwinden. Basiert auf Fitts Gesetz.',
+          startButtonText: 'TRAINING STARTEN',
+          playAgainText: 'Erneut Spielen',
+          shareText: 'Ergebnis Teilen',
+          exitText: 'Beenden',
+          rulesTitle: 'Anleitung & Punktesystem',
+          aboutTitle: 'Über Aim Trainer Elite',
+          rulesItems: [
+            {
+              num: "1",
+              text: "Zielerfassung",
+              highlight: "+100 PKT / +0,6s",
+              result: "Dynamische Ziele vor Ablauf anklicken"
+            },
+            {
+              num: "2",
+              text: "Kontinuierliche Combo",
+              highlight: "Bis zu 3,0× Multiplikator",
+              result: "Serientreffer ohne Fehlschuss aneinanderreihen"
+            },
+            {
+              num: "3",
+              text: "Level-Progression",
+              highlight: "+1 Level / 1750 PKT",
+              result: "Ziele schrumpfen und beschleunigen stetig"
+            },
+            {
+              num: "4",
+              text: "Fehlschuss & Timeout",
+              highlight: "Combo-Reset",
+              result: "Bei aktiver Strafe -0,8s Zeitabzug"
+            }
+          ]
         }}
       />
 
@@ -351,6 +385,9 @@ export default function AimTrainerGermanPage() {
         </div>
 
         <h3>4 wissenschaftlich fundierte Trainingsregeln</h3>
+        <p>
+          Um die Zielerfassungslatenz systematisch zu komprimieren und die Präzision bei Mikroflicks zu maximieren, wenden Sie während des Trainings diese vier evidenzbasierten motorischen Protokolle an:
+        </p>
         <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
           <li>
             <strong>Mut zum zügigen Anfangsimpuls (Woodworth, 1899):</strong> Starte jeden Flick entschlossen und überbrücke den Großteil der Distanz in einem Zug ohne Zögern.
@@ -430,6 +467,14 @@ export default function AimTrainerGermanPage() {
           </div>
         </div>
       </DrillGuide>
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/aim-trainer"
+          locale="de"
+        />
+      </div>
+      <DrillFooter />
     </>
   );
 }

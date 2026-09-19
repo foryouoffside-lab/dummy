@@ -17,9 +17,7 @@ import { drillPenalty } from '@/lib/drillPenalty';
 import { drillTimeout } from '@/lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '@/lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '@/lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing, createHitRing, drawHitRings } from '@/lib/canvasFx';
-import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
-import DrillFooter from '@/components/drill/DrillFooter';
+import { createBackdropCache, getCanvasDpr, createHitRing, drawHitRings } from '@/lib/canvasFx';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
@@ -70,6 +68,16 @@ const getLevelConfig = (level, combo = 0) => {
     hitMargin: Math.max(3, ramp(12, 4, p))
   };
 };
+
+// ============================================================
+// ACCORDION DATA
+// ============================================================
+const RULES_ITEMS = [
+  { num: "1", text: "Ordered Node", highlight: "+150 PTS (+0.6s)", result: "×Combo Mult" },
+  { num: "2", text: "Chain Streak", highlight: "Up to 3.0× PTS", result: "Maintains Flow" },
+  { num: "3", text: "Level Up", highlight: "+1 / 1750 PTS", result: "Shrink & Speed" },
+  { num: "4", text: "Miss / Timeout", highlight: "Penalty", result: "Resets Combo (-0.8s)" }
+];
 
 export default function FingerSequencingClient({ copy } = {}) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
@@ -158,39 +166,18 @@ export default function FingerSequencingClient({ copy } = {}) {
     };
   }, []);
 
-  const [isPaused, setIsPaused] = useState(false);
-  const isPausedRef = useRef(false);
-
-  useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
-
-  const handleExitDrill = useCallback(async () => {
-    markIntentionalExit();
+  const handleExitDrill = useCallback(() => {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
     gameActiveRef.current = false;
-    setIsPaused(false);
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
     setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
     setGameState('start');
-  }, []);
-
-  const { markIntentionalExit } = useUnexpectedExitGuard({
-    active: gameState === 'playing' || gameState === 'countdown',
-    onUnexpectedExit: handleExitDrill,
-  });
-
-  const resumeDrill = useCallback(async () => {
-    setIsPaused(false);
-    setIsFullscreen(true);
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
   }, []);
 
   const spawnChain = useCallback((width, height, currentLevel) => {
@@ -251,7 +238,7 @@ export default function FingerSequencingClient({ copy } = {}) {
     e.maxSequenceTime = config.maxTime;
   }, []);
 
-  const spawnParticles = useCallback((x, y, color, count) => {
+  const spawnParticles = useCallback((x, y, color, count = 14) => {
     const e = engine.current;
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -260,16 +247,15 @@ export default function FingerSequencingClient({ copy } = {}) {
         x, y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        radius: Math.random() * 4 + 1.5,
+        radius: Math.random() * 3.5 + 1.5,
         color,
-        life: 0.35,
-        maxLife: 0.35
+        life: 0.45,
+        maxLife: 0.45
       });
     }
   }, []);
 
   const finishDrillSession = useCallback(() => {
-    markIntentionalExit();
     gameActiveRef.current = false;
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
@@ -316,7 +302,7 @@ export default function FingerSequencingClient({ copy } = {}) {
     setBestCombo(updatedData.bestCombo);
     setBestLevel(updatedData.bestLevel);
     setGameState('gameOver');
-  }, [markIntentionalExit]);
+  }, []);
 
   const triggerPenalty = useCallback((type) => {
     const e = engine.current;
@@ -384,8 +370,9 @@ export default function FingerSequencingClient({ copy } = {}) {
       eng.reactionTimes.push(rt);
       eng.activeIndex++;
 
-      spawnParticles(target.x, target.y, '#10b981', 10);
-      eng.hitRings.push(createHitRing(target.x, target.y, target.r, '#10b981'));
+      const hitColor = eng.combo >= 10 ? '#34d399' : '#10b981';
+      spawnParticles(target.x, target.y, hitColor, 14);
+      eng.hitRings.push(createHitRing(target.x, target.y, target.r, hitColor));
       drillAudio.playHit();
 
       if (eng.activeIndex >= eng.chain.length) {
@@ -397,7 +384,7 @@ export default function FingerSequencingClient({ copy } = {}) {
         const levelBonus = 1 + getDifficultyProgress(eng.level) * 0.5;
         eng.score += Math.round(150 * mult * levelBonus);
 
-        spawnParticles(target.x, target.y, '#34d399', 20);
+        spawnParticles(target.x, target.y, '#34d399', 14);
 
         // Continuous level progression
         const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
@@ -440,33 +427,30 @@ export default function FingerSequencingClient({ copy } = {}) {
       lastTime = now;
 
       const e = engine.current;
-      const isCurrentlyPaused = isPausedRef.current;
 
-      if (!isCurrentlyPaused) {
-        e.timeLeft -= dt;
+      e.timeLeft -= dt;
 
-        if (Math.abs(e.timeLeft - lastTimeRef.current) > 0.1) {
-          lastTimeRef.current = e.timeLeft;
-          setUiTimeLeft(Math.max(0, Math.ceil(e.timeLeft)));
-        }
+      if (Math.abs(e.timeLeft - lastTimeRef.current) > 0.1) {
+        lastTimeRef.current = e.timeLeft;
+        setUiTimeLeft(Math.max(0, Math.ceil(e.timeLeft)));
+      }
 
-        if (e.timeLeft <= 0) {
-          finishDrillSession();
-          return;
-        }
+      if (e.timeLeft <= 0) {
+        finishDrillSession();
+        return;
+      }
 
-        if (e.chain.length > 0 && e.activeIndex < e.chain.length) {
-          if (drillTimeout.isEnabled()) {
-            e.sequenceTimer -= dt;
-            if (e.sequenceTimer <= 0) {
-              triggerPenalty('timeout');
-            }
+      if (e.chain.length > 0 && e.activeIndex < e.chain.length) {
+        if (drillTimeout.isEnabled()) {
+          e.sequenceTimer -= dt;
+          if (e.sequenceTimer <= 0) {
+            triggerPenalty('timeout');
           }
         }
+      }
 
-        if (e.screenShake > 0) {
-          e.screenShake = Math.max(0, e.screenShake - dt * 35);
-        }
+      if (e.screenShake > 0) {
+        e.screenShake = Math.max(0, e.screenShake - dt * 35);
       }
 
       const dpr = getCanvasDpr(ctx);
@@ -505,9 +489,11 @@ export default function FingerSequencingClient({ copy } = {}) {
         ctx.translate(sx, sy);
       }
 
+      const activeColor = e.combo >= 10 ? '#34d399' : '#10b981';
+
       if (e.chain.length > 1) {
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(16,185,129,0.35)';
+        ctx.strokeStyle = e.combo >= 10 ? 'rgba(52, 211, 153, 0.35)' : 'rgba(16, 185, 129, 0.35)';
         ctx.lineWidth = 2;
         ctx.setLineDash([6, 6]);
         for (let i = 0; i < e.chain.length; i++) {
@@ -523,43 +509,58 @@ export default function FingerSequencingClient({ copy } = {}) {
         const isActive = i === e.activeIndex;
         const isCompleted = i < e.activeIndex;
 
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
-
         if (isCompleted) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(16,185,129,0.15)';
           ctx.strokeStyle = 'rgba(16,185,129,0.4)';
           ctx.lineWidth = 1;
+          ctx.fill();
+          ctx.stroke();
         } else if (isActive) {
           const glowGrad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, node.r * 1.8);
-          glowGrad.addColorStop(0, 'rgba(16,185,129,0.45)');
-          glowGrad.addColorStop(1, 'rgba(16,185,129,0)');
+          glowGrad.addColorStop(0, e.combo >= 10 ? 'rgba(52, 211, 153, 0.45)' : 'rgba(16, 185, 129, 0.45)');
+          glowGrad.addColorStop(1, 'rgba(16, 185, 129, 0)');
           ctx.fillStyle = glowGrad;
           ctx.fill();
 
           ctx.beginPath();
           ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
-          ctx.fillStyle = '#10b981';
+          ctx.fillStyle = activeColor;
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2.5;
+          ctx.fill();
+          ctx.stroke();
 
-          const progressRatio = Math.max(0, e.sequenceTimer / e.maxSequenceTime);
-          drawPulseRing(ctx, node.x, node.y, node.r + 6, progressRatio, '#10b981');
+          // Sequence number inside active node
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `bold ${Math.max(10, Math.round(node.r * 0.9))}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${i + 1}`, node.x, node.y);
         } else {
-          ctx.fillStyle = 'rgba(255,255,255,0.06)';
-          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
           ctx.lineWidth = 1.5;
-        }
+          ctx.fill();
+          ctx.stroke();
 
-        ctx.fill();
-        ctx.stroke();
+          // Sequence number in pending nodes
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.font = `600 ${Math.max(9, Math.round(node.r * 0.85))}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${i + 1}`, node.x, node.y);
+        }
       }
 
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        p.life -= dt;
+        p.life -= dt * 2.2;
         if (p.life <= 0) {
           e.particles.splice(i, 1);
           continue;
@@ -575,14 +576,14 @@ export default function FingerSequencingClient({ copy } = {}) {
       const cx = e.crosshair.x;
       const cy = e.crosshair.y;
 
-      // Professional FPS Gaming Reticle Cursor
+      // Tactical Pro White Crosshair Reticle
       ctx.save();
-      ctx.shadowColor = '#10b981';
-      ctx.shadowBlur = 6;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 3;
 
       const gap = 5;
       const len = 7;
-      ctx.strokeStyle = '#10b981';
+      ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
 
@@ -596,7 +597,7 @@ export default function FingerSequencingClient({ copy } = {}) {
 
       // Outer Accent Ring
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.lineWidth = 1;
       ctx.arc(cx, cy, 14, 0, Math.PI * 2);
       ctx.stroke();
@@ -618,7 +619,6 @@ export default function FingerSequencingClient({ copy } = {}) {
 
   const startActualDrill = useCallback(() => {
     setGameState('playing');
-    setIsPaused(false);
     gameActiveRef.current = true;
 
     const startLvl = getStartLevel();
@@ -718,8 +718,8 @@ export default function FingerSequencingClient({ copy } = {}) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && gameState === 'playing') {
-        setIsPaused(true);
+      if (e.key === 'Escape' && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
       }
     };
 
@@ -727,7 +727,13 @@ export default function FingerSequencingClient({ copy } = {}) {
       const isLocked = !!document.pointerLockElement;
       setPointerLocked(isLocked);
       if (!isLocked && gameActiveRef.current && !isTouchOnlyDevice) {
-        setIsPaused(true);
+        handleExitDrill();
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && (gameState === 'playing' || gameState === 'countdown')) {
+        handleExitDrill();
       }
     };
 
@@ -748,14 +754,16 @@ export default function FingerSequencingClient({ copy } = {}) {
 
     window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('pointerlockchange', handlePointerLockChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('mousemove', handleMouseMove);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('pointerlockchange', handlePointerLockChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [universalSens, gameState, isTouchOnlyDevice]);
+  }, [universalSens, gameState, isTouchOnlyDevice, handleExitDrill]);
 
   const shareScore = useCallback(async () => {
     const player = getPlayerName();
@@ -793,7 +801,7 @@ export default function FingerSequencingClient({ copy } = {}) {
               <span data-seo-kw="1">{copy?.title || "Sequence Aim Trainer"}</span>
             </h1>
             <p className="text-[13px] text-slate-400 leading-relaxed">
-              Sequential target switching means clicking a set of targets in a required order rather than whichever one is easiest to reach. An ordered sequence like that runs as a single pre-planned motor program instead of one fresh decision per target (Lashley, 1951; Keele, 1968), so the time is spent in the transitions between targets, not in the clicks. Each transition is itself a Fitts&apos;s Law movement, timed by the log of the gap between two targets divided by their width (Fitts, 1954).
+              {copy?.desc || "Sequential target switching means clicking a set of targets in a required order rather than whichever one is easiest to reach. An ordered sequence like that runs as a single pre-planned motor program instead of one fresh decision per target (Lashley, 1951; Keele, 1968), so the time is spent in the transitions between targets, not in the clicks. Each transition is itself a Fitts's Law movement, timed by the log of the gap between two targets divided by their width (Fitts, 1954)."}
             </p>
           </div>
         )}
@@ -802,10 +810,10 @@ export default function FingerSequencingClient({ copy } = {}) {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: "Score", val: uiScore },
-              { label: "Time Left", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
-              { label: "Accuracy", val: `${liveAccuracy}%`, color: "text-emerald-400" },
-              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+              { label: copy?.score || "Score", val: uiScore },
+              { label: copy?.timeLeft || "Time Left", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: copy?.accuracy || "Accuracy", val: `${liveAccuracy}%`, color: "text-emerald-400" },
+              { label: copy?.bestScore || "Best Score", val: bestScore, color: "text-amber-400" },
             ].map((s, i) => (
               <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
                 <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
@@ -836,12 +844,12 @@ export default function FingerSequencingClient({ copy } = {}) {
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.score || "Score"}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
                 </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{copy?.timeLeft || "Time"}</p>
                 <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
@@ -881,23 +889,6 @@ export default function FingerSequencingClient({ copy } = {}) {
             </div>
           )}
 
-          {/* PAUSE OVERLAY IF GAME IS PAUSED (ESC KEY) */}
-          {gameState === 'playing' && !isTouchOnlyDevice && isPaused && (
-            <div
-              className="absolute inset-0 z-40 bg-black/70 backdrop-blur-sm flex items-center justify-center cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                resumeDrill();
-              }}
-            >
-              <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
-              </div>
-            </div>
-          )}
-
           <canvas
             ref={canvasRef}
             onPointerDown={handlePointerDown}
@@ -909,8 +900,9 @@ export default function FingerSequencingClient({ copy } = {}) {
             <FpsStartCard
               icon={Target}
               accent="emerald"
-              title="Sequence Aim Trainer"
-              subtitle="Motor Precision & Sequential Pathing • Continuous Scaling"
+              title={copy?.title || "Sequence Aim Trainer"}
+              subtitle={copy?.startSubtitle || "Motor Precision & Sequential Pathing • Continuous Scaling"}
+              buttonText={copy?.startButtonText}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -918,7 +910,7 @@ export default function FingerSequencingClient({ copy } = {}) {
 
           {/* COUNTDOWN OVERLAY (3-2-1-GO) */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" />
+            <DrillCountdown value={countdownValue} subtitle={copy?.getReady || "GET READY"} />
           )}
 
           {/* UNIVERSAL RESULT CARD */}
@@ -929,11 +921,14 @@ export default function FingerSequencingClient({ copy } = {}) {
               score={uiScore}
               isNewBest={isNewBest}
               stats={[
-                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Chains Cleared', value: analytics.successfulHits },
-                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
-                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+                { label: copy?.accuracy || 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: copy?.chainsCleared || 'Chains Cleared', value: analytics.successfulHits },
+                { label: copy?.peakLevel || 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: copy?.maxCombo || 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
               ]}
+              playAgainText={copy?.playAgain}
+              shareText={copy?.shareTitle}
+              exitText={copy?.exitTitle}
               onPlayAgain={enterDrill}
               onShare={shareScore}
               onExit={handleExitDrill}
@@ -944,70 +939,21 @@ export default function FingerSequencingClient({ copy } = {}) {
 
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
-              title="Drill Instructions & Scoring System"
+              title={copy?.rulesTitle || "Drill Instructions & Scoring System"}
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Ordered Node Hits" highlight="(Green Nodes)" result="+150 PTS × Combo (+0.6s)" />
-                <RuleItem num="2" text="Combo Multiplier" highlight="Up to 3.0x" result="Boosts point earnings exponentially" />
-                <RuleItem num="3" text="Level Progression" highlight="Continuous PPL" result="Target sizes shrink continuously" />
-                <RuleItem num="4" text="Miss / Timeout" highlight="Resets Combo" result="Deducts 0.8s when enabled in settings" />
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="about"
-              title="About Sequence Aim Trainer"
-              isOpen={openAccordion === 'about'}
-              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
-            >
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Target className="w-4 h-4 text-emerald-400" /> Mastering Sequential Target Acquisition &amp; Finger Speed
-                  </h3>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    <strong>Sequence Aim Training</strong> isolates and exercises your motor cortex&apos;s ability to plan and execute ballistic crosshair trajectories across multiple ordered targets under strict temporal pressure. In competitive shooters like <strong>Valorant, CS2, and Apex Legends</strong>, clutch engagements frequently demand clearing an enemy on a primary angle before immediately micro-flicking to a secondary opponent.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By enforcing ordered node clicks from largest to smallest, the drill trains the transition from broad initial flicks to tight micro-corrections, eliminating hesitation and crosshair overshooting between target transfers according to the serial order motor programming principles established by Lashley (1951) and Keele (1968).
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS players looking to sharpen target switching, finger dexterity, micro-flick precision, and multi-kill clutch consistency.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Conditions smooth crosshair deceleration, reduces finger friction, and builds muscle memory for rapid multi-target transfers.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h4 className="text-xs font-bold text-white">Difficulty Scaling</h4>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Continuous exponential scaling smoothly tightens sequence timer windows, shrinks target node radii, and expands spatial node spreads.</p>
-                  </div>
-                </div>
+                {(copy?.rulesItems || RULES_ITEMS).map((item, idx) => (
+                  <RuleItem key={idx} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
+                ))}
               </div>
             </DrillAccordion>
           </div>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
 
       </main>
     </div>
@@ -1017,13 +963,15 @@ export default function FingerSequencingClient({ copy } = {}) {
 // === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
+    <div className="flex items-center gap-2.5 sm:gap-3 bg-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white text-xs sm:text-sm font-black shadow flex-shrink-0">
+        {num}
+      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <p className="text-xs sm:text-sm font-medium text-gray-200 font-sans truncate">
+          {text}{highlight && <span className="font-bold text-white"> {highlight}</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-[11px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner flex-shrink-0">
           {result}
         </div>
       </div>

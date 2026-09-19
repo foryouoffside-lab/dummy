@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "Zielpriorisierung FPS Training – Aim Trainer | SkillDrills",
@@ -324,6 +325,7 @@ export default function TargetPrioritizationDePage() {
         copy={{
           h1Keyword: "Zielpriorisierung FPS Training",
           h1Suffix: " – Bedrohungsauswahl & Schusshemmung",
+          subtitle: "Trainiere Bedrohungsanalyse, visuelle Reizfilterung und Reaktionshemmung mit Echtzeit-Feedback.",
           statScore: "Punkte",
           statTime: "Zeit",
           statAccuracy: "Präzision",
@@ -341,10 +343,10 @@ export default function TargetPrioritizationDePage() {
           stageCaption: "Eliminiere zuerst rote Primärbedrohungen und anschließend gelbe Sekundärziele. Schieße niemals auf grüne Verbündete!",
           rulesTitle: "Trainingsregeln & Punktesystem",
           rulesItems: [
-            { num: "1", text: "Primäre Bedrohung", highlight: "Rot (+100 PKT / +0,4s)", result: "Muss absolut vorrangig eliminiert werden" },
-            { num: "2", text: "Sekundäre Bedrohung", highlight: "Gelb (+50 PKT / +0,4s)", result: "Eskaliert nach Ablauf des Timers zu Rot" },
-            { num: "3", text: "Grüner Verbündeter", highlight: "Grün (NICHT SCHIESSEN)", result: "Beschuss, falsches Ziel oder Fehlschuss setzt Combo zurück" },
-            { num: "4", text: "Level-Progression", highlight: "Alle 1.400 PKT +1 Level", result: "Kontinuierlich steigende Zieldichte & Geschwindigkeit" }
+            { num: "1", text: "Hohe Bedrohung", highlight: "Rot (+100 PTS / +0,4s)", result: "Höchste Priorität" },
+            { num: "2", text: "Mittlere Bedrohung", highlight: "Gelb (+50 PTS / +0,4s)", result: "Eskaliert nach Timer zu Rot" },
+            { num: "3", text: "Eigene Einheiten", highlight: "Grün (NICHT SCHIESSEN)", result: "Fehlschuss/Friendly Fire setzt Combo zurück" },
+            { num: "4", text: "Levelaufstieg", highlight: "+1 / 1400 PTS", result: "Dynamische Dichte & Tempo" }
           ],
           aboutTitle: "Über Zielpriorisierung im FPS-Gaming",
           aboutHeading: "Was ist Zielpriorisierung (Target Prioritization)?",
@@ -359,6 +361,7 @@ export default function TargetPrioritizationDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

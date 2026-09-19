@@ -4,7 +4,7 @@
 // Recreates the EXACT in-game visuals and mechanics from TargetSwitchingSwarmClient.js:
 // 1. Swarm of drifting cyan targets (#06b6d4)
 // 2. High-speed target switching: crosshair snaps rapidly from Target 1 -> 2 -> 3
-// 3. Targets flash emerald (#00ff88) on hover/impact with hitmarkers and particle dispersal.
+// 3. Targets flash emerald (#10b981) on hover/impact with hitmarkers and particle dispersal.
 
 export default function TargetSwitchingSwarmPreview() {
   return (

@@ -2,6 +2,7 @@ import RapidTappingClient from '@/app/drills/motor/movement-speed/rapid-tapping/
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -330,6 +331,33 @@ const guideProps = {
   },
 };
 
+const koCopy = {
+  title: "CPS 측정",
+  desc: "초당 마우스 클릭 수(CPS)를 측정하는 온라인 테스트입니다. 일반적인 단일 손가락 연타는 초당 약 5~7회(할스테드 손가락 두드리기 규준, 50~55회/10초)를 기록하며, 온라인상의 10+ 고득점은 지터 클릭이나 버터플라이 클릭 같은 특수 테크닉을 활용합니다.",
+  score: "점수",
+  timeLeft: "남은 시간",
+  cpsRate: "현재 CPS",
+  bestScore: "최고 점수",
+  startButtonText: "훈련 시작",
+  startSubtitle: "CPS 마우스 클릭속도 훈련 • 하드웨어 1:1 원시 입력",
+  getReady: "준비",
+  playAgain: "다시 훈련",
+  shareTitle: "결과 공유",
+  exitTitle: "나가기",
+  avgCps: "평균 CPS",
+  totalClicks: "총 클릭 수",
+  maxDifficulty: "최대 난이도",
+  peakCps: "최고 CPS",
+  newBest: "신기록",
+  rulesTitle: "훈련 가이드 및 점수 규칙",
+  rulesItems: [
+    { num: "1", text: "신속한 타겟 타격", highlight: "에메랄드 타겟", result: "클릭 시 반경 확장 및 축소 방어" },
+    { num: "2", text: "점수 획득 기준", highlight: "10회 클릭당 +1점", result: "최종 세션 점수로 누적" },
+    { num: "3", text: "동적 수축 가속", highlight: "점수 비례 가속", result: "손가락 속도 및 근지구력 극한 시험" },
+    { num: "4", text: "광클 테크닉", highlight: "지터 / 버터플라이 / 단타", result: "순수 기계적 클릭 속도 극대화" }
+  ],
+};
+
 export default function KoreanRapidTappingPage() {
   return (
     <>
@@ -357,11 +385,12 @@ export default function KoreanRapidTappingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <RapidTappingClient />
+      <RapidTappingClient copy={koCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/rapid-tapping" />
+        <RelatedDrills currentCategory="motor" currentHref="/ko/drills/motor/movement-speed/rapid-tapping" />
       </div>
+      <DrillFooter />
     </>
   );
 }

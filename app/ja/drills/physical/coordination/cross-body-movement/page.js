@@ -2,6 +2,7 @@ import CrossBodyMovementClient from '@/app/drills/physical/coordination/cross-bo
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — Japan (JP / JA)
@@ -323,7 +324,10 @@ const crossBodyGuide = {
     "ラウンド開始後、画面端に出現する水色の開始ノードAにカーソルを重ねます。",
     "発光するコリドー許容ラインを維持しながら、対角の赤紫色ノードBへ向けて一気にスワイプします。",
     "ノードBを的確にヒットしてエフェクトを発生させ、脱線なしの連続接続で3.0倍コンボを維持します。"
-  ]
+  ],
+  audience: "FPS・MOBAゲーマー（VALORANT、Apex、CS2）、アスリート、精密動作を要するスポーツ競技者、および目と手の協応動作・両側性運動制御を高めたいすべての方。",
+  faqs: faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('ayres1972', 'carey1996', 'cernacek1961', 'fitts1954', 'woodworth1899', 'woods2015'),
 };
 
 export default function CrossBodyMovementPageJa() {

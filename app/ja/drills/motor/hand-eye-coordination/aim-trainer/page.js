@@ -1,6 +1,8 @@
 import AimTrainerClient from '@/app/drills/motor/hand-eye-coordination/aim-trainer/AimTrainerClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
+import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -253,6 +255,38 @@ export default function AimTrainerJapanesePage() {
           title: 'エイム練習 (Aim Trainer)',
           subtitle: '動くターゲットへの瞬時エイム・クリック精度測定・無制限レベル進行',
           caption: '小さくなりながら移動するターゲットを消滅前に素早く正確にクリック。フィッツの法則に基づく動的難易度調整。',
+          startButtonText: '訓練開始',
+          playAgainText: 'もう一度挑戦',
+          shareText: '結果を共有',
+          exitText: '終了する',
+          rulesTitle: '操作方法 & スコア獲得ルール',
+          aboutTitle: 'エイム練習(Aim Trainer Elite)について',
+          rulesItems: [
+            {
+              num: "1",
+              text: "ターゲット命中",
+              highlight: "+100 PTS / +0.6秒",
+              result: "動くターゲットを素早く捕捉してクリック"
+            },
+            {
+              num: "2",
+              text: "連続コンボ",
+              highlight: "最大3.0倍スコア",
+              result: "ミスなしの連続命中で倍率を最大化"
+            },
+            {
+              num: "3",
+              text: "レベル進行",
+              highlight: "1750点ごとに昇格",
+              result: "ターゲットが縮小・加速し猶予短縮"
+            },
+            {
+              num: "4",
+              text: "ミス & 消滅",
+              highlight: "コンボリセット",
+              result: "ペナルティ有効時は-0.8秒減算"
+            }
+          ]
         }}
       />
 
@@ -353,6 +387,9 @@ export default function AimTrainerJapanesePage() {
         </div>
 
         <h3>エイム練習を最大効率化する4つの科学的メソッド</h3>
+        <p>
+          標的捕捉の潜時を体系的に短縮し、マイクロフリックの精度を極限まで高めるために、毎日のトレーニングで以下の4つの神経運動プロトコルを意識して実践してください：
+        </p>
         <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
           <li>
             <strong>初期弾道インパルスの強化（Woodworth, 1899）：</strong> ターゲットまでの距離の大部分をためらわずに一撃で振り切る感覚を反復します。途中でマウスを迷わせず、一息の動作で目標の真近まで運ぶことが重要です。
@@ -432,6 +469,14 @@ export default function AimTrainerJapanesePage() {
           </div>
         </div>
       </DrillGuide>
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/aim-trainer"
+          locale="ja"
+        />
+      </div>
+      <DrillFooter />
     </>
   );
 }

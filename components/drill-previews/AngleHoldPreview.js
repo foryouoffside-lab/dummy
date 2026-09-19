@@ -4,7 +4,7 @@
 // Recreates the EXACT in-game visuals and mechanics from AngleHoldClient.js:
 // 1. Tactical defensive corner / doorway wall geometry
 // 2. Pre-aimed crosshair locked on the peek seam
-// 3. Peeking opponent target (#00ff88) appears from behind cover; sub-180ms reflex reaction click with hitmarker.
+// 3. Peeking opponent target (#10b981) appears from behind cover; sub-180ms reflex reaction click with hitmarker.
 
 export default function AngleHoldPreview() {
   return (

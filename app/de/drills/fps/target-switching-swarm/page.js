@@ -1,6 +1,7 @@
 import TargetSwitchingSwarmClient from '@/app/drills/fps/target-switching-swarm/TargetSwitchingSwarmClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -320,6 +321,7 @@ export default function TargetSwitchingSwarmDePage() {
         copy={{
           h1Keyword: "Target Switching Aim Trainer",
           h1Suffix: " – Zielwechsel & Spray Transfer",
+          subtitle: "Trainiere blitzschnelle Zielübergänge, Spray Transfers und visuelle Indexierung ohne Verzögerungspause.",
           statScore: "Punkte",
           statTime: "Zeit",
           statAccuracy: "Präzision",
@@ -329,18 +331,15 @@ export default function TargetSwitchingSwarmDePage() {
           statPeakLevel: "Höchstlevel",
           startTitle: "Target Switching Swarm",
           startSubtitle: "Hardware Raw Input • Endlose Levelprogression",
-          getReady: "BEREIT MACHEN",
-          pausedTitle: "PAUSIERT",
-          pausedSubtitle: "Klicken zum Fortsetzen — Mauszeiger wird wieder gesperrt.",
-          stageCaption: "Flicke rasant zwischen Zielen hin und her, bevor deren Lebensdauer abläuft. Vermeide Fehlschüsse für maximale Combo-Boni!",
+          stageCaption: "Flicke rasant zwischen Zielen hin und her, bevor deren Timer abläuft. Vermeide Fehlschüsse für maximale Combo-Boni!",
           rulesTitle: "Trainingsregeln & Punktesystem",
+          aboutTitle: "Über Target Switching im FPS-Gaming",
           rulesItems: [
-            { num: "1", text: "Zielzerstörung", highlight: "+100 PKT / +0,35s", result: "Verlängert die Rundenzeit" },
-            { num: "2", text: "Fehlschuss-Strafe", highlight: "Combo-Reset (-0,6s)", result: "Setzt Multiplikatoren zurück" },
-            { num: "3", text: "Level-Progression", highlight: "Alle 1.400 PKT +1 Level", result: "Steigende Dichte & Geschwindigkeit" },
-            { num: "4", text: "Zielwechsel-Fokus", highlight: "Kein Zögern nach Kills", result: "Maximiert die Ziele/Min-Rate" }
-          ],
-          aboutTitle: "Über Target Switching im FPS-Gaming"
+            { num: "1", text: "Zielzerstörung", highlight: "Cyan-Ziele (+100 PKT / +0,35s)", result: "+100 PKT / +0,35s" },
+            { num: "2", text: "Dynamischer Schwarm", highlight: "Sofortiger Respawn", result: "Dauerhafter Schwarm" },
+            { num: "3", text: "Fehlerstrafe", highlight: "Fehlschuss / Zeitablauf", result: "Combo-Reset" },
+            { num: "4", text: "Level-Progression", highlight: "+1 Level / 2.100 PKT", result: "Schneller & Kleiner" }
+          ]
         }}
       />
       <DrillGuide guide={targetSwitchingGuide} />
@@ -351,6 +350,7 @@ export default function TargetSwitchingSwarmDePage() {
           locale="de"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,7 @@ import JumpSequenceClient from '@/app/drills/physical/fitness/jump-sequence/Jump
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // RECHERCHE DE MOTS-CLÉS NATIFS (SERP FRANCE / FR-FR)
@@ -322,7 +323,10 @@ const jumpGuide = {
     "Évaluez la hauteur et la vitesse du projectile entrant et chargez l'impulsion requise.",
     "Guidez souplement la trajectoire en l'air pour percuter le centre de la sphère en cloche.",
     "Enchaînez l'atterrissage avec le saut suivant sans marquer d'arrêt pour garder le combo 3.0x."
-  ]
+  ],
+  audience: "Athlètes (volley-ball, basket-ball, football, athlétisme) cherchant à perfectionner le timing de détente et le sens de la trajectoire, ainsi que joueurs de FPS pour le tir en suspension et le tracking aérien.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  sources: pickSources('komi2000', 'kawato1999', 'lee1976', 'woodworth1899', 'fitts1954', 'woods2015')
 };
 
 export default function JumpSequencePageFr() {

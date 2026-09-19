@@ -3,6 +3,7 @@ import DrillGuide from '@/components/drill/DrillGuide';
 import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 
 export const metadata = {
   title: "フリック エイム 練習 – スナップショット初弾精度 | SkillDrills",
@@ -214,7 +215,7 @@ export default function FlickShotJaPage() {
         "@type": "HowToStep",
         "position": 3,
         "name": "弾道フリックの実行とワンタップ射撃",
-        "text": "鋭い単一の加速曲線でターゲット中心へマウスを弾き飛ばし、縮小リングが消える前に瞬時にクリックします。"
+        "text": "鋭い単一の加速曲線でターゲット中心へマウスを弾き飛ばし、ターゲットが消える前に素早くクリックして着弾させます。"
       },
       {
         "@type": "HowToStep",
@@ -319,6 +320,7 @@ export default function FlickShotJaPage() {
         copy={{
           h1Keyword: "フリック エイム 練習",
           h1Suffix: " - スナップエイム・初弾精度トレーナー",
+          subtitle: "スナップエイム、弾道運動記憶、ターゲット捕捉、終末制動力をリアルタイムフィードバックで鍛えます。",
           statScore: "スコア",
           statTime: "残り時間",
           statAccuracy: "命中率",
@@ -333,13 +335,13 @@ export default function FlickShotJaPage() {
           toggleSound: "効果音切替",
           pausedTitle: "一時停止中",
           pausedSubtitle: "クリックして再開 — カーソルロックが再適用されます",
-          stageCaption: "画面上に出現するターゲットへ素早くエイムを飛ばし、タイマーリングが消える前に撃ち抜いてください。",
-          rulesTitle: "ドリル手順 & スコアリングシステム",
+          stageCaption: "画面上に出現するターゲットへ素早くエイムを飛ばし、制限時間が尽きる前に正確に撃ち抜いてください。",
+          rulesTitle: "ルール & スコアリングシステム",
           rulesItems: [
-            { num: "1", text: "ターゲット命中", highlight: "+100点 / +0.4秒", result: "素早いフリックほど高得点" },
-            { num: "2", text: "時間ボーナス", highlight: "+0.4秒加算", result: "連続命中でタイマーを維持" },
-            { num: "3", text: "タイムアウト / 枠外ミス", highlight: "ミス減点", result: "コンボがリセットされます" },
-            { num: "4", text: "レベル進行", highlight: "1,400点ごとに+1レベル", result: "ターゲット縮小と表示時間の短縮" }
+            { num: "1", text: "ターゲット命中", highlight: "+100点 (+0.6秒)", result: "コンボ倍率適用" },
+            { num: "2", text: "コンボストリーク", highlight: "最大3.0倍", result: "高速ターゲット" },
+            { num: "3", text: "レベル上昇", highlight: "+1 / 1800点", result: "適応型スケーリング" },
+            { num: "4", text: "ミス / タイムアウト", highlight: "ペナルティ", result: "コンボリセット (-0.8秒)" }
           ],
           aboutTitle: "Pro フリック トレーナーについて",
           aboutHeading: "フリックエイム（Flick Aim）とは？",
@@ -354,6 +356,7 @@ export default function FlickShotJaPage() {
           locale="ja"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

@@ -2,6 +2,7 @@ import FingerSequencingClient from '@/app/drills/motor/movement-speed/finger-seq
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
@@ -300,6 +301,31 @@ const guideProps = {
   },
 };
 
+const koCopy = {
+  title: "시퀀스 에임 연습",
+  desc: "시퀀스 타깃 스위칭은 가장 가까운 목표 대신 정해진 순서대로 노드를 정밀 타격하는 고급 에임 제어 훈련입니다. Lashley(1951) 및 Keele(1968)의 직렬 순서 운동 프로그램 이론에 기반하여 연속적인 궤적 계획과 미세 플릭 제어력을 극대화합니다.",
+  score: "점수",
+  timeLeft: "남은 시간",
+  accuracy: "정확도",
+  bestScore: "최고 점수",
+  startButtonText: "훈련 시작",
+  startSubtitle: "소근육 제어 및 순차 궤적 훈련 • 1:1 하드웨어 원시 입력",
+  getReady: "준비하세요",
+  rulesTitle: "훈련 방법 및 점수 시스템",
+  rulesItems: [
+    { num: "1", text: "순차 노드 타격", highlight: "에메랄드 시퀀스", result: "+150점 × 콤보 (+0.6초)" },
+    { num: "2", text: "콤보 배수", highlight: "최대 3.0배", result: "연속 성공 시 점수 대폭 증가" },
+    { num: "3", text: "레벨 진행", highlight: "점진적 난이도 상승", result: "타깃 크기 축소 및 분산 확대" },
+    { num: "4", text: "미스 / 타임아웃", highlight: "콤보 초기화", result: "설정 시 페널티 -0.8초 감점" }
+  ],
+  chainsCleared: "완료한 체인",
+  peakLevel: "최고 레벨",
+  maxCombo: "최대 콤보",
+  playAgain: "다시 훈련하기",
+  shareTitle: "점수 공유",
+  exitTitle: "나가기"
+};
+
 export default function KoreanFingerSequencingPage() {
   return (
     <>
@@ -327,11 +353,12 @@ export default function KoreanFingerSequencingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <FingerSequencingClient copy={{ title: '시퀀스 에임 연습' }} />
+      <FingerSequencingClient copy={koCopy} />
       <DrillGuide {...guideProps} />
       <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/movement-speed/finger-sequencing" />
+        <RelatedDrills currentCategory="motor" currentHref="/ko/drills/motor/movement-speed/finger-sequencing" />
       </div>
+      <DrillFooter />
     </>
   );
 }

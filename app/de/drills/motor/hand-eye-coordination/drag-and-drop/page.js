@@ -1,6 +1,7 @@
 import DragAndDropClient from '@/app/drills/motor/hand-eye-coordination/drag-and-drop/DragAndDropClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import RelatedDrills from '@/components/drill/RelatedDrills';
 import { pickSources } from '@/lib/drillSources';
 
@@ -320,6 +321,26 @@ const guideProps = {
   },
 };
 
+const copyDe = {
+  title: "Drag and Drop Test – Maus Präzision Training",
+  subtitle: "Räumliches Ziehen & Ablegen • 15 Stufen Progression",
+  startButtonText: "DRILL STARTEN",
+  playAgainText: "Nochmal spielen",
+  shareText: "Ergebnis teilen",
+  exitText: "Beenden",
+  accuracyLabel: "Genauigkeit",
+  targetDropsLabel: "Ziel-Treffer",
+  maxComboLabel: "Max Combo",
+  peakLevelLabel: "Höchste Stufe",
+  rulesTitle: "Drill-Anleitung & Punktesystem",
+  rulesItems: [
+    { num: "1", text: "Ziel-Treffer", highlight: "+100 PKT × Combo", result: "Ball in den beweglichen Behälter ziehen" },
+    { num: "2", text: "Kontinuierliche Combo", highlight: "Bis zu 3,0× Multiplikator", result: "Aufeinanderfolgende Treffer verketten" },
+    { num: "3", text: "Stufenaufstieg", highlight: "+1 Stufe / 250 PKT", result: "Behälter schrumpfen & beschleunigen" },
+    { num: "4", text: "Fehlschuss & Zeitablauf", highlight: "Combo-Reset", result: "Ablegen außerhalb setzt Multiplikator zurück" }
+  ],
+};
+
 export default function DragAndDropPage() {
   return (
     <>
@@ -347,11 +368,16 @@ export default function DragAndDropPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <DragAndDropClient copy={{ title: "Drag and Drop Maus-Trainer" }} />
+      <DragAndDropClient copy={copyDe} />
       <DrillGuide {...guideProps} />
-      <div className="max-w-6xl mx-auto px-4 pb-12">
-        <RelatedDrills currentCategory="motor" currentHref="https://skilldrills.online/de/drills/motor/hand-eye-coordination/drag-and-drop" />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills
+          currentCategory="motor"
+          currentHref="/drills/motor/hand-eye-coordination/drag-and-drop"
+          locale="de"
+        />
       </div>
+      <DrillFooter />
     </>
   );
 }

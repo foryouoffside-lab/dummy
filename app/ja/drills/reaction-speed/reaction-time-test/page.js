@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from '@/app/drills/reaction-speed/reaction-time-test/ReactionTimeTestWrapperLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -253,6 +254,38 @@ const faqSchema = {
         text: 'はい。スマートフォンやタブレットのタッチスクリーンにも完全最適化されており、縦画面・横画面のどちらでもインストール不要・完全無料で即座に測定可能です。',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'この反応速度テストは完全無料ですか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'はい。SkillDrillsのすべての反応速度テストおよび認知トレーニングツールは、会員登録やアプリのダウンロード、課金、邪魔なポップアップ広告なしで、ブラウザ上で100%完全無料でお使いいただけます。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '一般のスポーツ選手やアスリートにも効果はありますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'はい。F1ドライバー、プロボクサー、陸上短距離選手、卓球・バドミントン選手なども視覚反応トレーニングを取り入れており、速筋線維の神経動員速度や初動反応のキレを高めるために極めて有効です。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '画面の中心を凝視すべきですか、それとも周辺視野を使うべきですか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '目を細めて一点を凝視するよりも、ややリラックスした「ソフトフォーカス（周辺視野を広く保つ）」が推奨されます。網膜の周辺部に多い桿体細胞（光や動きの変化に極めて敏感）がシグナルを最速で捉え、指先への運動出力がスムーズになります。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '反応速度の測定やトレーニングはどれくらいの頻度で行うべきですか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '1日1回、5〜10分程度のセッションが最も効果的です。日々の神経的な覚醒状態や体調を客観的に把握するベンチマークとなり、ゲームのランクマッチ前のウォーミングアップとしても最適です。',
+      },
+    },
   ],
 };
 
@@ -348,6 +381,7 @@ export default function JapaneseReactionTimeTestPage() {
       />
       <ReactionTimeTestWrapper copy={{ title: '反射神経テスト・反応速度テスト' }} />
       <DrillGuide guide={reactionGuide} />
+      <DrillFooter />
     </>
   );
 }

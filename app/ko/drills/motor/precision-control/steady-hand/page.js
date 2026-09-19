@@ -2,6 +2,7 @@ import SteadyHandClient from '@/app/drills/motor/precision-control/steady-hand/S
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -336,7 +337,13 @@ const koCopy = {
   shareTitle: '점수 공유',
   exitTitle: '종료 및 복귀',
   rulesTitle: '조작 방법 및 스코어 판정',
-  rule1Text: '발광하는 청색',
+  rulesItems: [
+    { num: '1', text: '발광하는 에메랄드', highlight: '미로 통로를 정확히 추종', result: '골인 도달 시 45초로 시간 리셋' },
+    { num: '2', text: '랩 클리어', highlight: '무한 난이도 상승', result: '통로 폭 축소 및 급커브 증가' },
+    { num: '3', text: '벽 접촉 시', highlight: '시작 지점 즉시 리셋', result: '랩 무효화 및 에러 카운트 증가' },
+    { num: '4', text: '정밀 마우스 조작', highlight: 'PC 환경 권장', result: '1:1 원본 마우스 입력 반영' },
+  ],
+  rule1Text: '발광하는 에메랄드',
   rule1Highlight: '미로 통로를 정확히 추종',
   rule1Result: '골인 도달 시 45초로 시간 리셋',
   rule2Text: '랩 클리어',
@@ -403,6 +410,7 @@ export default function KoreanSteadyHandPage() {
       <div className="max-w-6xl w-full mx-auto px-4 pb-12">
         <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" locale="ko" />
       </div>
+      <DrillFooter />
     </>
   );
 }

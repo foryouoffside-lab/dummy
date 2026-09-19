@@ -1,6 +1,8 @@
 import SteadyHandClient from './SteadyHandClientLoader';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
@@ -319,6 +321,29 @@ const guideProps = {
   },
 };
 
+const copyEn = {
+  title: "Steady Hand Circuit",
+  subtitle: "Motor Precision & Line Tracking • 45s Timer",
+  startButtonText: "Start Drill",
+  trainAgain: "Train Again",
+  shareTitle: "Share Score",
+  exitTitle: "Exit & Return",
+  statLaps: "Laps Cleared",
+  statTime: "Time Left",
+  statStreak: "Current Streak",
+  statBest: "Best Laps",
+  errorsLabel: "Off-Path Errors",
+  maxStreakLabel: "Max Streak",
+  difficultyLabel: "Difficulty Level",
+  rulesTitle: "Drill Instructions & Scoring System",
+  rulesItems: [
+    { num: "1", text: "Trace Corridor", highlight: "Tactical Emerald Path", result: "Goal Clear resets timer to 45s" },
+    { num: "2", text: "Reaching Goal", highlight: "Endless Scaling", result: "Corridor narrows & tightens" },
+    { num: "3", text: "Off-Path Reset", highlight: "Wall Collision", result: "Resets position to start" },
+    { num: "4", text: "Strict Tracking", highlight: "Desktop Exclusive", result: "1:1 Raw Mouse Input" }
+  ],
+};
+
 export default function SteadyHandPage() {
   return (
     <>
@@ -346,8 +371,12 @@ export default function SteadyHandPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <SteadyHandClient />
+      <SteadyHandClient copy={copyEn} />
       <DrillGuide {...guideProps} />
+      <div className="max-w-6xl w-full mx-auto px-4 pb-12">
+        <RelatedDrills currentCategory="motor" currentHref="/drills/motor/precision-control/steady-hand" />
+      </div>
+      <DrillFooter />
     </>
   );
 }

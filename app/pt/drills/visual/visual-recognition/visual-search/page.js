@@ -229,18 +229,37 @@ export default function VisualSearchLocalePage() {
         title="A Ciência da Busca Visual, Integração de Recursos & Atenção Seletiva"
         sources={sources}
       >
-        <p dangerouslySetInnerHTML={{ __html: `A habilidade de localizar rapidamente um objeto desejado em um ambiente visual caótico e sobrecarregado de estímulos é uma das funções cognitivas mais vitais do cérebro. Seja na análise de imagens radiológicas na medicina, no controle de tráfego aéreo, na segurança pública ou na detecção de adversários em esports, a busca visual eficiente exige coordenação impecável entre receptores retinianos, córtex visual e áreas frontoparietais de atenção (Treisman & Gelade, 1980; Wolfe, 1994).` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Em ambientes visuais naturais, os alvos raramente se apresentam de forma isolada. Seja inspecionando uma tela de radar em controle aéreo, revisando documentos densos ou identificando a silhueta de um oponente protegido por cobertura em jogos táticos, o sistema visual humano precisa discriminar velozmente sinais críticos imersos em ruído visual complexo. Na psicofísica visual, essa capacidade é avaliada por meio de <strong>paradigmas de busca visual</strong>, que mensuram a interação da atenção espacial com mapas corticais de características ao longo do tempo (Treisman &amp; Gelade, 1980; Wolfe, 1994).` }} />
 
-        <h3>Teoria da Integração de Recursos: Pop-Out Paralelo vs. Busca Serial</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Anne Treisman e Garry Gelade (1980) formularam a clássica Teoria da Integração de Recursos (FIT). Quando o alvo difere dos distratores por uma característica elementar única (como cor ou forma isolada), a detecção ocorre de forma <strong>paralela e pré-atencional</strong> por todo o campo visual, produzindo um 'pop-out' imediato que independe da quantidade de itens na tela. Contudo, quando o alvo é definido por uma <strong>conjunção de características</strong> ou quando os distratores estão rotacionados aleatoriamente, o pop-out é neutralizado. O cérebro é obrigado a direcionar a atenção focal de item a item em uma <strong>busca serial</strong>, fazendo com que o tempo de reação aumente linearmente conforme o número de distratores cresce (Treisman & Gelade, 1980; Duncan & Humphreys, 1989).` }} />
+        <h3>Teoria da Integração de Recursos: Pop-Out Paralelo vs. Busca Conjuntiva</h3>
+        <p dangerouslySetInnerHTML={{ __html: `A psicofísica visual clássica divide os regimes de busca em duas categorias fundamentais, dependendo da saliência e da composição de recursos do alvo:` }} />
+        <ul className="list-disc pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Busca de Característica (Pop-Out Paralelo):</strong> Quando o alvo difere dos distratores por uma única dimensão contínua (como um círculo vermelho entre quadrados azuis), neurônios da área visual primária (V1) registram a discrepância simultaneamente em todo o campo visual. O tempo de reação permanece plano, independentemente da quantidade de itens na tela (Treisman &amp; Gelade, 1980; Wolfe, 1994).
+          </li>
+          <li>
+            <strong>Busca Conjuntiva (Vinculação Serial &amp; Guiada):</strong> Quando o alvo é definido por uma conjunção de atributos que se sobrepõem parcialmente aos distratores vizinhos (como localizar uma letra 'C' entre caracteres rotacionados 'O', 'Q' e 'G'), mecanismos pré-atencionais paralelos não conseguem resolver o alvo isoladamente. O córtex visual precisa alocar a atenção focal sequencialmente de célula em célula, elevando a latência de resposta de forma diretamente proporcional ao tamanho do conjunto (Treisman &amp; Gelade, 1980; Duncan &amp; Humphreys, 1989).
+          </li>
+        </ul>
+        <p dangerouslySetInnerHTML={{ __html: `Esse fenômeno ilustra o que neurocientistas cognitivos definem como o <em>problema da vinculação visual (binding problem)</em>: enquanto áreas visuais primárias processam orientação, curvatura e fechamento em mapas de características modulares e separados, sintetizar essas dimensões em um percepto unificado exige a alocação ativa de atenção espacial mediada pelo córtex parietal posterior e pelos campos oculares frontais (Treisman &amp; Gelade, 1980; Wolfe, 1994).` }} />
 
-        <h3>Modelo de Busca Guiada & Leis de Similaridade (Wolfe, 1994; Duncan & Humphreys, 1989)</h3>
-        <p dangerouslySetInnerHTML={{ __html: `Jeremy Wolfe aperfeiçoou esse entendimento com o modelo Guided Search (Wolfe, 1994), demonstrando que o cérebro não busca de forma cega, mas gera um 'mapa de prioridades' no córtex a partir do processamento sensorial pré-atencional. Duncan e Humphreys (1989) comprovaram que a eficiência desse rastreio é regida por dois pilares: a <em>similaridade entre alvo e distratores</em> e a <em>homogeneidade entre os próprios distratores</em>. Quando os distratores estão rotacionados em múltiplos ângulos, a agrupação perceptiva do fundo colapsa, exigindo inspeção foveal individual.` }} />
+        <h3>Homogeneidade de Distratores &amp; Eficiência de Varredura (Duncan &amp; Humphreys, 1989)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Em investigações fundamentais sobre eficiência de busca visual, Duncan e Humphreys (1989) demonstraram que o desempenho perceptual depende de duas relações cruciais:` }} />
+        <ol className="list-decimal pl-5 space-y-2 my-3 text-slate-300">
+          <li>
+            <strong>Similaridade Alvo-Distrator:</strong> Conforme a semelhança visual entre o alvo e os distratores aumenta, os limiares de discriminação se elevam, exigindo maior tempo de fixação foveal sobre cada célula.
+          </li>
+          <li>
+            <strong>Homogeneidade entre Distratores:</strong> Quando os distratores compartilham forma e orientação uniformes, o sistema visual os agrupa em uma textura de fundo contínua pelas leis da Gestalt. No entanto, quando os distratores estão rotacionados aleatoriamente — como nesta grade de 96 células —, esse agrupamento colapsa, exigindo inspeção serial detalhada.
+          </li>
+        </ol>
 
-        <h3>Lente de Zoom Atencional & Carga Perceptiva (Lavie, 1995; Eriksen & St. James, 1986)</h3>
-        <p dangerouslySetInnerHTML={{ __html: `De acordo com o modelo de lente de zoom espacial (Eriksen & St. James, 1986), a atenção visual funciona como um holofote de diâmetro variável: expandir o foco reduz a resolução analítica, enquanto estreitá-lo em uma única célula maximiza a acuidade. Já a Teoria da Carga Perceptiva de Nilli Lavie (1995) demonstra que a suscetibilidade à distração depende do consumo de capacidade sensorial. Em condições de alta carga — como nossa matriz de 96 caracteres sob pressão de 45 segundos —, a capacidade perceptiva é saturada por completo, bloqueando devaneios cognitivos e induzindo foco seletivo pleno (Lavie, 1995; Bacon & Egeth, 1994).` }} />
+        <h3>Lente de Zoom Atencional &amp; Carga Perceptiva (Lavie, 1995; Eriksen &amp; St. James, 1986)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `Conforme o modelo de lente de zoom espacial (Eriksen &amp; St. James, 1986), a atenção visual opera como um foco de abertura variável. Ao expandir o foco sobre a matriz de 96 células, a resolução de processamento diminui; ao restringi-lo a uma única célula, a acuidade atinge seu ápice em detrimento da cobertura periférica.` }} />
+        <p dangerouslySetInnerHTML={{ __html: `Adicionalmente, a Teoria da Carga Perceptiva de Nilli Lavie (1995) comprova que a vulnerabilidade à distração decorre do consumo de largura de banda sensorial. Em tarefas de baixa carga, a capacidade excedente extravasa involuntariamente para estímulos irrelevantes. Já em condições de alta carga perceptiva — como nossa matriz 12x8 sob pressão de 45 segundos —, a capacidade é plenamente saturada, impondo foco seletivo rigoroso e inibindo distrações cognitivas (Lavie, 1995; Bacon &amp; Egeth, 1994).` }} />
 
         <h3>Parâmetros de Desempenho em Busca Visual (Grade de 96 Células)</h3>
+        <p dangerouslySetInnerHTML={{ __html: `As faixas a seguir fornecem uma referência editorial para contextualizar o seu desempenho individual nesta matriz de 96 células (12x8) sob o protocolo padronizado de 45 segundos:` }} />
         <div className="overflow-x-auto my-6">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>

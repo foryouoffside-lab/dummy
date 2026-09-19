@@ -1,6 +1,7 @@
 import TargetPrioritizationClient from '@/app/drills/fps/target-prioritization/TargetPrioritizationClientLoader';
 import DrillGuide from '@/components/drill/DrillGuide';
 import RelatedDrills from '@/components/drill/RelatedDrills';
+import DrillFooter from '@/components/drill/DrillFooter';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import { pickSources } from '@/lib/drillSources';
 
@@ -293,6 +294,7 @@ export default function TargetPrioritizationFrPage() {
   const copyFr = {
     h1Keyword: "Priorisation des Cibles FPS",
     h1Suffix: " – Prise de Décision",
+    subtitle: "Entraînez l'évaluation des menaces, le filtrage cognitif et l'inhibition du tir avec analyse en temps réel.",
     statScore: "Score",
     statTime: "Temps",
     statAccuracy: "Précision",
@@ -310,10 +312,10 @@ export default function TargetPrioritizationFrPage() {
     stageCaption: "Neutralisez d'abord les cibles rouges prioritaires puis les jaunes. Retenez votre tir sur les alliés verts !",
     rulesTitle: "Consignes de l'Exercice et Barème",
     rulesItems: [
-      { num: "1", text: "Menace Principale", highlight: "Rouge (+100 PTS / +0,4s)", result: "Doit être neutralisée avec une priorité absolue" },
-      { num: "2", text: "Menace Secondaire", highlight: "Jaune (+50 PTS / +0,4s)", result: "Devient rouge si elle n'est pas traitée à temps" },
-      { num: "3", text: "Allié Protégé", highlight: "Vert (NE PAS TIRER)", result: "Tir ami, mauvaise cible ou échec remet le combo à zéro" },
-      { num: "4", text: "Montée de Niveau", highlight: "Tous les 1400 PTS +1 Niveau", result: "Accélération progressive et densité accrue de cibles" }
+      { num: "1", text: "Cible Haute Menace", highlight: "Rouge (+100 PTS / +0,4s)", result: "Priorité Absolue" },
+      { num: "2", text: "Menace Moyenne", highlight: "Jaune (+50 PTS / +0,4s)", result: "Devient Rouge après expiration" },
+      { num: "3", text: "Unité Alliée", highlight: "Vert (NE PAS TIRER)", result: "Tir allié ou manqué réinitialise combo" },
+      { num: "4", text: "Niveau Supérieur", highlight: "+1 / 1400 PTS", result: "Progression Dynamique Continue" }
     ],
     aboutTitle: "À Propos de la Priorisation de Cibles FPS",
     aboutHeading: "Qu'est-ce que la Priorisation des Cibles ?",
@@ -355,6 +357,7 @@ export default function TargetPrioritizationFrPage() {
           locale="fr"
         />
       </div>
+      <DrillFooter />
     </>
   );
 }

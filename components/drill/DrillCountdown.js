@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { drillAudio } from '@/lib/drillAudio';
 
-export default function DrillCountdown({ value, subtitle = '', accent = '#00ff88' }) {
+export default function DrillCountdown({ value, subtitle = '', accent = '#10b981' }) {
   useEffect(() => {
     if (value === 'GO' || value === 'START' || value === '0' || value === 0) {
       drillAudio.playGo();
