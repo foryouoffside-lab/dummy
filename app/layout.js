@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import SiteHeader from '@/components/SiteHeader';
 import ZoomGuard from '@/components/ZoomGuard';
 import AutoLanguageDetector from '@/components/AutoLanguageDetector';
+import SiteSchemas from '@/components/SiteSchemas';
 import { DRILLS } from '@/lib/drillsRegistry';
 
 const totalDrillsCount = DRILLS.length;
@@ -148,89 +149,7 @@ export default function RootLayout({ children }) {
         <Analytics />
         <SpeedInsights />
         
-        {/* Organization Schema */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "SkillDrills",
-              "url": "https://skilldrills.online",
-              "logo": "https://skilldrills.online/icons/icon-512x512.png",
-              "description": `Free online platform with ${totalDrillsCount} training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.`,
-              "email": "support@skilldrills.online",
-              "foundingDate": "2026",
-              // Points the entity at a page that actually says who runs this and
-              // how the measurements work. `sameAs` is deliberately absent: this
-              // project controls no social profiles, and inventing one would be
-              // a fabricated trust signal.
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "email": "support@skilldrills.online",
-                "contactType": "customer support",
-                "availableLanguage": ["English"]
-              },
-              "subjectOf": {
-                "@type": "AboutPage",
-                "url": "https://skilldrills.online/about"
-              },
-              "slogan": "Master Your Mind & Mechanics",
-              "areaServed": { "@type": "World", "name": "Worldwide" },
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": {
-                  "@type": "EntryPoint",
-                  "urlTemplate": "https://skilldrills.online/search?q={search_term_string}"
-                },
-                "query-input": "required name=search_term_string"
-              }
-            })
-          }}
-        />
-
-        {/* WebSite Schema */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "SkillDrills",
-              "url": "https://skilldrills.online",
-              "inLanguage": "en",
-              "isAccessibleForFree": true,
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://skilldrills.online/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            })
-          }}
-        />
-
-        {/* SiteNavigationElement Schema */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "SiteNavigationElement",
-              "name": "SkillDrills Main Navigation",
-              "url": "https://skilldrills.online",
-              "hasPart": [
-                { "@type": "SiteNavigationElement", "position": 1, "name": "FPS Training", "url": "https://skilldrills.online/drills/fps" },
-                { "@type": "SiteNavigationElement", "position": 2, "name": "Cognitive Training", "url": "https://skilldrills.online/drills/cognitive" },
-                { "@type": "SiteNavigationElement", "position": 3, "name": "Memory Games", "url": "https://skilldrills.online/drills/memory" },
-                { "@type": "SiteNavigationElement", "position": 4, "name": "Visual Training", "url": "https://skilldrills.online/drills/visual" },
-                { "@type": "SiteNavigationElement", "position": 5, "name": "Visual Tracking", "url": "https://skilldrills.online/drills/visual-tracking" },
-                { "@type": "SiteNavigationElement", "position": 6, "name": "Motor Skills", "url": "https://skilldrills.online/drills/motor" },
-                { "@type": "SiteNavigationElement", "position": 7, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" },
-                { "@type": "SiteNavigationElement", "position": 8, "name": "Reaction Speed", "url": "https://skilldrills.online/drills/reaction-speed" }
-              ]
-            })
-          }}
-        />
+        <SiteSchemas totalDrillsCount={totalDrillsCount} />
       </body>
     </html>
   );
